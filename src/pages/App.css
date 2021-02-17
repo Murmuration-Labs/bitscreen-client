@@ -1,0 +1,24 @@
+html, body, #root {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.container-fluid {
+    height: 100%;
+    overflow-y: hidden;
+}
+
+.fill-height {
+    min-height: 100%;
+    height: auto !important; /* cross-browser */
+    height: 100%; /* cross-browser */
+}
+
+.left-bar {
+    background-color: #f2f2f2;
+    height: 100%;
+}
+
+.stage {
+    padding-top: 10px;
+}
