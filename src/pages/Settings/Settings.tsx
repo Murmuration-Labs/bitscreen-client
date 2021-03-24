@@ -20,10 +20,12 @@ type SettingsProps = {};
 export default class Settings extends React.Component<SettingsProps, any> {
   state = {
     loaded: false,
-    bitscreen: false,
-    share: false,
-    advanced: false,
-    filter: Filters.Unknown,
+    config: {
+      bitscreen: false,
+      share: false,
+      advanced: false,
+      filter: Filters.Unknown,
+    },
   };
 
   async componentDidMount() {
@@ -35,7 +37,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     this.setState(
       {
         loaded: true,
-        ...config,
+        config,
       },
       () => this.forceUpdate()
     );
@@ -44,7 +46,9 @@ export default class Settings extends React.Component<SettingsProps, any> {
   async toggleBitScreen() {
     this.setState(
       {
-        bitscreen: !this.state.bitscreen,
+        config: {
+          bitscreen: !this.state.config.bitscreen,
+        },
       },
       () => {
         void this.putConfig();
@@ -55,7 +59,9 @@ export default class Settings extends React.Component<SettingsProps, any> {
   async toggleShare() {
     this.setState(
       {
-        share: !this.state.share,
+        config: {
+          share: !this.state.config.share,
+        },
       },
       () => {
         void this.putConfig();
@@ -66,7 +72,9 @@ export default class Settings extends React.Component<SettingsProps, any> {
   async toggleAdvanced() {
     this.setState(
       {
-        advanced: !this.state.advanced,
+        config: {
+          advanced: !this.state.config.advanced,
+        },
       },
       () => {
         void this.putConfig();
@@ -87,10 +95,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
   }
 
   async putConfig() {
-    const config = { ...this.state };
-
-    // @ts-ignore
-    delete config.loaded;
+    const config = { ...this.state.config };
 
     console.log("putting config", config);
 
@@ -118,7 +123,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                   type="switch"
                   id="bitscreen-switch"
                   label="Filter content using BitScreen"
-                  checked={this.state.bitscreen}
+                  checked={this.state.config.bitscreen}
                   onChange={() => this.toggleBitScreen()}
                 />
                 <p className="text-dim">
@@ -128,7 +133,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
               </Col>
             </Row>
 
-            {this.state.bitscreen ? (
+            {this.state.config.bitscreen ? (
               <>
                 <Row className={"settings-block"}>
                   <Col>
@@ -136,7 +141,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       vertical
                       name={"select-filter"}
                       type="radio"
-                      value={this.state.filter}
+                      value={this.state.config.filter}
                       onChange={(evt: SyntheticEvent) => this.setFilter(evt)}
                     >
                       <ToggleButton value={Filters.Internal}>
@@ -155,7 +160,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       type="switch"
                       id="share-lists"
                       label="Share contents of my filter lists with other nodes"
-                      checked={this.state.share}
+                      checked={this.state.config.share}
                       onChange={() => this.toggleShare()}
                     />
                     <p className="text-dim">
@@ -170,7 +175,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       type="switch"
                       id="enhanced-filtering"
                       label="Use enhanced filtering"
-                      checked={this.state.advanced}
+                      checked={this.state.config.advanced}
                       onChange={() => this.toggleAdvanced()}
                     />
                     <p className="text-dim">
@@ -178,7 +183,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       databases
                     </p>
 
-                    {this.state.advanced ? (
+                    {this.state.config.advanced ? (
                       <>
                         <FormCheck
                           type="checkbox"
