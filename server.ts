@@ -1,7 +1,7 @@
 import { Request, Response, Application } from "express";
 import ErrnoException = NodeJS.ErrnoException;
+import { mkdirSync, writeFile, openSync } from "fs";
 
-const fs = require("fs");
 const path = require("path");
 const bodyParser = require("body-parser");
 
@@ -12,6 +12,19 @@ const app: Application = express();
 const basePath = path.join(process.env.HOME || "", ".murmuration");
 const configPath = path.join(basePath, "config");
 const filterPath = path.join(basePath, "bitscreen");
+
+try {mkdirSync(basePath);} catch(e) {}
+
+try {
+    const f = openSync(configPath, "r");
+} catch(e) {
+  writeFile(
+      configPath,
+      JSON.stringify({ bitscreen: false, share: false, advanced: false, filter: "" }),
+      (err: ErrnoException | null) => {
+        if (err) return console.error(err);
+      });
+}
 
 console.log(configPath);
 console.log(filterPath);
@@ -27,7 +40,7 @@ app.get("/ping", (req: Request, res: Response) => {
 });
 
 app.get("/", (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.get("/config", (req: Request, res: Response) => {
@@ -35,7 +48,7 @@ app.get("/config", (req: Request, res: Response) => {
 });
 
 app.put("/config", (req: Request, res: Response) => {
-  fs.writeFile(
+  writeFile(
     configPath,
     JSON.stringify(req.body),
     (err: ErrnoException | null) => {
@@ -56,7 +69,7 @@ app.get("/filters", (req: Request, res: Response) => {
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  fs.writeFile(filterPath, req.body, (err: ErrnoException | null) => {
+  writeFile(filterPath, req.body, (err: ErrnoException | null) => {
     // If an error occurred, show it and return
     if (err) return console.error(err);
     // Successfully wrote binary contents to the file!
