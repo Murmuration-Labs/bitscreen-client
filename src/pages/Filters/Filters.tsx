@@ -11,6 +11,8 @@ enum Visibility {
   ThirdParty,
 }
 
+const VisibilityString: string[] = ["", "Private", "Shared", "ThirdParty"]
+
 interface FilterList {
   name: string;
   cidHashes: string[];
@@ -18,23 +20,30 @@ interface FilterList {
 }
 
 interface ModalProps {
-
+  name: string;
+  cids: string[];
+  show: boolean;
+  handleClose: () => void;
+  modalEntered: () => void;
+  title: string;
+  changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  changeVisibility: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  visibility: string;
+  cidsChanged: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  save: () => void
 }
 
-class MyModalComponent extends Component {
-  name: string = "";
-  cids: string[];
+class CustomFilterModal extends Component<ModalProps, any> {
 
-  constructor(props: any, context: any) {
-    super(props, context);
-    this.name = this.props.name;
-    this.cids = [];
+  constructor(props: any) {
+    super(props);
   }
 
   render() {
     return (
         <div>
           <Modal show={this.props.show} onHide={this.props.handleClose} centered={true} size="lg"
+                 onEntered={this.props.modalEntered}
                  onShow={() => {}} >
             <Modal.Header closeButton>
               <Modal.Title>{this.props.title}</Modal.Title>
@@ -44,17 +53,19 @@ class MyModalComponent extends Component {
                 <Form.Row>
                   <Col>
                     <Form.Control
-                        // onChange={props.changeName}
+                        onChange={this.props.changeName}
                         type="text"
                         placeholder="List Name"
-                        value={this.name}
+                        value={this.props.name}
                     />
                   </Col>
                 </Form.Row>
                 <Form.Row>
                   <Col xs={"auto"}>
                     <Form.Group controlId="visibility">
-                      <Form.Control as="select" onChange={this.props.changeVisibility} value={this.props.visibility}>
+                      <Form.Control as="select" onChange={this.props.changeVisibility}
+                                    value={this.props.visibility}
+                      >
                         <option>Shared</option>
                         <option>Private</option>
                       </Form.Control>
@@ -73,7 +84,7 @@ class MyModalComponent extends Component {
                         onChange={this.props.cidsChanged}
                         as="textarea"
                         rows={10}
-                        value={this.cids.join("\n")}
+                        value={this.props.cids.join("\n")}
                     />
                     <Form.Label className={"text-dim"}>
                       One CID per line. (Optional: use CID, URL to link to
@@ -101,14 +112,19 @@ class MyModalComponent extends Component {
 function Filters({ match }: RouterProps) {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
 
-  const [ visibility, setVisibility ] = useState<Visibility>(Visibility.Private);
+  const [ visibility, setVisibility ] = useState<string>(VisibilityString[Visibility.Private]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [showAdd, setShowAdd] = useState<boolean>(false);
   const [showEdit, setShowEdit] = useState<boolean>(false);
 
   const handleCloseEdit = () => setShowEdit(false);
   const handleCloseAdd = () => setShowAdd(false);
-  const handleShowAdd = () => setShowAdd(true);
+  const handleShowAdd = () => {
+    setName("");
+    setVisibility(VisibilityString[Visibility.Private]);
+    setCids([]);
+    setShowAdd(true);
+  }
 
   const [showImport, setShowImport] = useState(false);
   const handleCloseImport = () => setShowImport(false);
@@ -116,6 +132,7 @@ function Filters({ match }: RouterProps) {
 
   const [name, setName] = useState<string>("");
   const [cidHashes, setCidHashes] = useState<string[]>([]);
+  const [cids, setCids] = useState<string[]>([]);
 
   const CIDFilter = (props: FilterList) => {
     return (
@@ -186,9 +203,8 @@ function Filters({ match }: RouterProps) {
 
   const showEditModal = (filterList: FilterList) => {
     setName(filterList.name);
-    setVisibility(filterList.visibility);
-    // setCidHashes(filterList.cidHashes);
-    // tempCIDs = filterList.cidHashes;
+    setVisibility(VisibilityString[filterList.visibility]);
+    setCids(filterList.cidHashes);
     setShowEdit(true);
   }
 
@@ -198,7 +214,7 @@ function Filters({ match }: RouterProps) {
     const filterList: FilterList = {
       name,
       cidHashes,
-      visibility: visibility,
+      visibility: mapVisibilityString(visibility),
     };
 
     // be kind rewind
@@ -214,12 +230,13 @@ function Filters({ match }: RouterProps) {
     const filterList: FilterList = {
       name,
       cidHashes,
-      visibility: Visibility.Private,
+      visibility: mapVisibilityString(visibility),
     };
 
     // be kind rewind
     setName("");
     setCidHashes([]);
+    setCids([])
 
     setFilterLists([...filterLists, filterList]);
     console.log("filter added");
@@ -233,6 +250,9 @@ function Filters({ match }: RouterProps) {
     console.log("filter imported");
   };
 
+  const modalEntered = () => {
+
+  }
   const changeName = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     setName(event.target.value);
@@ -240,19 +260,16 @@ function Filters({ match }: RouterProps) {
 
   const changeVisibility = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-    setName(event.target.value);
+    setVisibility(event.target.value);
   }
+
   const cidsChanged = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
-    const cids = event.target.value.split("\n").filter(function(value){return value});
+    const cids = event.target.value.split("\n");
+    setCids(cids)
     console.log(cids);
-    console.log(cidHashes);
-    // if (cids.join(",") == cidHashes.join(",")) {
-    //   setCidHashes(cids);
-    //   return
-    // }
-
-    const _cidHashes: string[] = cids.map((cid) => {
+    // console.log(cidHashes);
+    const _cidHashes: string[] = cids.filter(function(value){return value}).map((cid) => {
           return keccak256(Buffer.from(cid)).toString("hex");
         }
     );
@@ -261,22 +278,16 @@ function Filters({ match }: RouterProps) {
     console.log(_cidHashes);
   };
 
+  const mapVisibilityString = (visibilityStr: string): Visibility => {
+    if (visibilityStr === "Private") return Visibility.Private
+    if (visibilityStr === "Shared") return Visibility.Shared
+    if (visibilityStr === "ThirdParty") return Visibility.ThirdParty
+
+    return Visibility.None
+  }
+
   const translateVisibility = (visibility: Visibility): string => {
-    let result = "";
-
-    switch (visibility) {
-      case Visibility.Private:
-        result = "Private";
-        break;
-      case Visibility.Shared:
-        result = "Shared";
-        break;
-      case Visibility.ThirdParty:
-        result = "3rd Party";
-        break;
-    }
-
-    return result;
+    return VisibilityString[visibility]
   };
 
   return (
@@ -318,68 +329,21 @@ function Filters({ match }: RouterProps) {
             </Row>
           </Container>
 
-          <MyModalComponent {...{
-            show: showEdit, visibility,
+          <CustomFilterModal {...{
+            show: showEdit, visibility, cids: cids,
             handleClose: handleCloseEdit, name,
             changeName, save: saveFilter,
-            title: "Edit filter", changeVisibility
+            title: "Edit filter", changeVisibility, cidsChanged,
+            modalEntered
           }}/>
 
-          <Modal show={showAdd} onHide={handleCloseAdd} centered={true}>
-            <Modal.Header closeButton>
-              <Modal.Title>New Custom Filter</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Row>
-                  <Col>
-                    <Form.Control
-                        onChange={changeName}
-                        type="text"
-                        placeholder="List Name"
-                    />
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col xs={"auto"}>
-                    <Form.Group controlId="visibility">
-                      <Form.Control as="select" onChange={changeVisibility}>
-                        <option>Shared</option>
-                        <option>Private</option>
-                      </Form.Control>
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Label className={"text-dim"}>
-                      Filtered CIDs on shared lists will be accessible to other
-                      nodes.
-                    </Form.Label>
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col>
-                    <Form.Control
-                        onChange={cidsChanged}
-                        as="textarea"
-                        rows={5}
-                    />
-                    <Form.Label className={"text-dim"}>
-                      One CID per line. (Optional: use CID, URL to link to
-                      public record of complaint)
-                    </Form.Label>
-                  </Col>
-                </Form.Row>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseAdd}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={addFilter}>
-                Save
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <CustomFilterModal {...{
+            show: showAdd, visibility, cids,
+            handleClose: handleCloseAdd, name,
+            changeName, save: addFilter,
+            title: "New custom filter", changeVisibility, cidsChanged,
+            modalEntered
+          }}/>
 
           <Modal show={showImport} onHide={handleCloseImport} centered={true}>
             <Modal.Header closeButton>
