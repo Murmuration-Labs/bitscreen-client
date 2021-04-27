@@ -30,7 +30,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
 
   async componentDidMount() {
     const config = await fetch(
-      "http://localhost:8080/config"
+      "http://localhost:3030/config"
     ).then((response) => response.json());
     console.log("config", config);
 
@@ -99,7 +99,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
 
     console.log("putting config", config);
 
-    await fetch("http://localhost:8080/config", {
+    await fetch("http://localhost:3030/config", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

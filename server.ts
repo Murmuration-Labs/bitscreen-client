@@ -18,6 +18,7 @@ try {mkdirSync(basePath);} catch(e) {}
 try {
     const f = openSync(configPath, "r");
 } catch(e) {
+  console.log("writing default config file.");
   writeFile(
       configPath,
       JSON.stringify({ bitscreen: false, share: false, advanced: false, filter: "" }),
@@ -44,6 +45,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/config", (req: Request, res: Response) => {
+  console.log("config requested");
   res.sendFile(configPath);
 });
 
@@ -76,4 +78,4 @@ app.put("/filters", (req: Request, res: Response) => {
   });
 });
 
-app.listen(process.env.PORT || 8080);
+app.listen(process.env.PORT || 3030);

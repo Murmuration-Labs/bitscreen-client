@@ -148,7 +148,7 @@ function Filters({ match }: RouterProps) {
 
   const getFilters = async () => {
     const filters = await fetch(
-      "http://localhost:8080/filters"
+      "http://localhost:3030/filters"
     ).then((response) => response.text());
 
     const lists = filters.split("\n\n");
@@ -190,7 +190,7 @@ function Filters({ match }: RouterProps) {
 
     console.log("putting filters", filterLists, `"${filtersString}"`);
 
-    await fetch("http://localhost:8080/filters", {
+    await fetch("http://localhost:3030/filters", {
       method: "PUT",
       headers: {
         "Content-Type": "text/plain",
