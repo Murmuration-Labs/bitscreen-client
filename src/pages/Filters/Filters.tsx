@@ -3,6 +3,7 @@ import { RouterProps } from "../App";
 import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 import "./Filters.css";
 import keccak256 from "keccak256";
+import { serverUri } from "../../config";
 
 enum Visibility {
   None,
@@ -148,7 +149,7 @@ function Filters({ match }: RouterProps) {
 
   const getFilters = async () => {
     const filters = await fetch(
-      "http://localhost:3030/filters"
+        `${serverUri()}/filters`
     ).then((response) => response.text());
 
     const lists = filters.split("\n\n");
@@ -190,7 +191,7 @@ function Filters({ match }: RouterProps) {
 
     console.log("putting filters", filterLists, `"${filtersString}"`);
 
-    await fetch("http://localhost:3030/filters", {
+    await fetch(`${serverUri()}/filters`, {
       method: "PUT",
       headers: {
         "Content-Type": "text/plain",
