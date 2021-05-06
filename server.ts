@@ -88,9 +88,11 @@ app.get("/filters", (req: Request, res: Response) => {
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  const actionPromise = new Promise((resolve, reject) => {
+    const file = JSON.parse(readFileSync(filterPath).toString('utf8'));
 
-    writeFile(filterPath, req.body, (err: ErrnoException | null) => {
+    const actionPromise = new Promise((resolve, reject) => {
+
+    writeFile(filterPath, JSON.stringify({...file, ...req.body}), (err: ErrnoException | null) => {
       // If an error occurred, show it and return
       if (err) {
         reject(err);
