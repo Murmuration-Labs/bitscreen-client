@@ -1,6 +1,6 @@
 import { Request, Response, Application } from "express";
 import ErrnoException = NodeJS.ErrnoException;
-import {mkdirSync, writeFile, openSync, readFile, readFileSync} from "fs";
+import {mkdirSync, writeFile, openSync, readFileSync} from "fs";
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -50,7 +50,7 @@ app.get("/config", (req: Request, res: Response) => {
 });
 
 app.put("/config", (req: Request, res: Response) => {
-  let file = JSON.parse(readFileSync(configPath).toString('utf8'));
+  const file = JSON.parse(readFileSync(configPath).toString('utf8'));
 
   writeFile(
     configPath,
