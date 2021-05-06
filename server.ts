@@ -2,6 +2,8 @@ import { Request, Response, Application } from "express";
 import ErrnoException = NodeJS.ErrnoException;
 import {mkdirSync, writeFile, openSync, readFileSync} from "fs";
 
+import * as db from './db';
+
 const path = require("path");
 const bodyParser = require("body-parser");
 
@@ -79,12 +81,17 @@ app.put("/config", (req: Request, res: Response) => {
 });
 
 app.get("/filters", (req: Request, res: Response) => {
-  const options = {
-    header: {
-      "Content-Type": "text/plain",
-    },
-  };
-  res.sendFile(filterPath, options);
+  // const options = {
+  //   header: {
+  //     "Content-Type": "text/plain",
+  //   },
+  // };
+  // res.sendFile(filterPath, options);
+
+    db.findAll('bitscreen')
+        .then(data => res.send(data))
+        .catch(err => res.send([]))
+    ;
 });
 
 app.put("/filters", (req: Request, res: Response) => {
@@ -114,3 +121,5 @@ app.put("/filters", (req: Request, res: Response) => {
 });
 
 app.listen(process.env.PORT || 3030);
+
+
