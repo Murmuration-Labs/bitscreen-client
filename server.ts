@@ -52,15 +52,30 @@ app.get("/config", (req: Request, res: Response) => {
 app.put("/config", (req: Request, res: Response) => {
   const file = JSON.parse(readFileSync(configPath).toString('utf8'));
 
-  writeFile(
-    configPath,
-    JSON.stringify({...file, ...req.body}),
-    (err: ErrnoException | null) => {
-      // If an error occurred, show it and return
-      if (err) return console.error(err);
-      // Successfully wrote binary contents to the file!
-    }
-  );
+  const actionPromise = new Promise((resolve, reject) => {
+    writeFile(
+        configPath,
+        JSON.stringify({...file, ...req.body}),
+        (err: ErrnoException | null) => {
+          // If an error occurred, show it and return
+          if (err) {
+            reject(err);
+          } else {
+            resolve([]);
+          }
+          // Successfully wrote binary contents to the file!
+        }
+    );
+  });
+
+  actionPromise
+      .then(() => res.send({
+        success: true,
+      }))
+      .catch((err) => res.send({
+        success: false,
+      }))
+  ;
 });
 
 app.get("/filters", (req: Request, res: Response) => {
@@ -73,11 +88,27 @@ app.get("/filters", (req: Request, res: Response) => {
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  writeFile(filterPath, req.body, (err: ErrnoException | null) => {
-    // If an error occurred, show it and return
-    if (err) return console.error(err);
-    // Successfully wrote binary contents to the file!
+  const actionPromise = new Promise((resolve, reject) => {
+
+    writeFile(filterPath, req.body, (err: ErrnoException | null) => {
+      // If an error occurred, show it and return
+      if (err) {
+        reject(err);
+      } else {
+        resolve([]);
+      }
+      // Successfully wrote binary contents to the file!
+    });
   });
+
+  actionPromise
+      .then(() => res.send({
+        success: true,
+      }))
+      .catch((err) => res.send({
+        success: false,
+      }))
+  ;
 });
 
 app.listen(process.env.PORT || 3030);
