@@ -64,14 +64,15 @@ app.put("/config", (req: Request, res: Response) => {
 app.get("/filters", (req: Request, res: Response) => {
   const options = {
     header: {
-      "Content-Type": "text/plain",
+      "Content-Type": "application/json",
     },
   };
   res.sendFile(filterPath, options);
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  writeFile(filterPath, req.body, (err: ErrnoException | null) => {
+  console.log("saving filters: " + JSON.stringify({...req.body}));
+  writeFile(filterPath, JSON.stringify({...req.body}), (err: ErrnoException | null) => {
     // If an error occurred, show it and return
     if (err) return console.error(err);
     // Successfully wrote binary contents to the file!

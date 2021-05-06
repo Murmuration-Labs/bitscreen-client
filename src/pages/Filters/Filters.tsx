@@ -1,117 +1,14 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RouterProps } from "../App";
 import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 import "./Filters.css";
-import keccak256 from "keccak256";
 import { serverUri } from "../../config";
-
-enum Visibility {
-  None,
-  Private,
-  Shared,
-  ThirdParty,
-}
-
-const VisibilityString: string[] = ["", "Private", "Shared", "ThirdParty"]
-
-interface FilterList {
-  name: string;
-  cidHashes: string[];
-  visibility: Visibility;
-}
-
-interface ModalProps {
-  name: string;
-  cids: string[];
-  show: boolean;
-  handleClose: () => void;
-  modalEntered: () => void;
-  title: string;
-  changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  changeVisibility: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  visibility: string;
-  cidsChanged: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  save: () => void
-}
-
-class CustomFilterModal extends Component<ModalProps, any> {
-
-  constructor(props: any) {
-    super(props);
-  }
-
-  render() {
-    return (
-        <div>
-          <Modal show={this.props.show} onHide={this.props.handleClose} centered={true} size="lg"
-                 onEntered={this.props.modalEntered}
-                 onShow={() => {}} >
-            <Modal.Header closeButton>
-              <Modal.Title>{this.props.title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Row>
-                  <Col>
-                    <Form.Control
-                        onChange={this.props.changeName}
-                        type="text"
-                        placeholder="List Name"
-                        value={this.props.name}
-                    />
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col xs={"auto"}>
-                    <Form.Group controlId="visibility">
-                      <Form.Control as="select" onChange={this.props.changeVisibility}
-                                    value={this.props.visibility}
-                      >
-                        <option>Shared</option>
-                        <option>Private</option>
-                      </Form.Control>
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Label className={"text-dim"}>
-                      Filtered CIDs on shared lists will be accessible to other
-                      nodes.
-                    </Form.Label>
-                  </Col>
-                </Form.Row>
-                <Form.Row>
-                  <Col>
-                    <Form.Control
-                        onChange={this.props.cidsChanged}
-                        as="textarea"
-                        rows={10}
-                        value={this.props.cids.join("\n")}
-                    />
-                    <Form.Label className={"text-dim"}>
-                      One CID per line. (Optional: use CID, URL to link to
-                      public record of complaint)
-                    </Form.Label>
-                  </Col>
-                </Form.Row>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={this.props.handleClose}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={this.props.save}>
-                Save
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
-        </div>
-    )
-  }
-}
+import CustomFilterModal from "./Filter";
+import {VisibilityString, Visibility, FilterList, CidItem} from "./Interfaces";
 
 function Filters({ match }: RouterProps) {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
+  const [filtersCache, setFiltersCache] = useState<string>("");
 
   const [ visibility, setVisibility ] = useState<string>(VisibilityString[Visibility.Private]);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -132,16 +29,15 @@ function Filters({ match }: RouterProps) {
   const handleShowImport = () => setShowImport(true);
 
   const [name, setName] = useState<string>("");
-  const [cidHashes, setCidHashes] = useState<string[]>([]);
   const [cids, setCids] = useState<string[]>([]);
 
   const CIDFilter = (props: FilterList) => {
     return (
         <div>
-          <a href={"#"} onClick={(e) => {showEditModal(props)}}>{props.name}</a>
+          <a onClick={(e) => {showEditModal(props)}}>{props.name}</a>
           <span className={"ml-1 text-dim"}>
           [{translateVisibility(props.visibility)}:
-            {props.cidHashes.length} items]
+            {props.cids.length} items]
         </span>
         </div>
     );
@@ -152,24 +48,23 @@ function Filters({ match }: RouterProps) {
         `${serverUri()}/filters`
     ).then((response) => response.text());
 
-    const lists = filters.split("\n\n");
-
+    const lists = filters === "" ? "[]": JSON.parse(filters);
     const filterLists: FilterList[] = [];
 
-    for (const list of lists) {
-      const entries = list.split("\n");
-
-      const title = entries.splice(0, 1)[0];
-      if (!title.startsWith("#")) continue;
-      const name = title.replace("#", "");
-      filterLists.push({
-        name,
-        cidHashes: entries,
-        visibility: Visibility.None,
-      });
+    for (const fl of lists) {
+      if (fl.name != null) {
+        filterLists.push({
+          name: fl.name,
+          cids: fl.cids,
+          visibility: mapVisibilityString(fl.visibility),
+          enabled: fl.enabled
+        });
+      }
     }
 
     setFilterLists(filterLists);
+    setFiltersCache(JSON.stringify(filterLists))
+    console.log("filters loaded", JSON.stringify(filterLists));
     setLoaded(true);
   };
 
@@ -184,29 +79,35 @@ function Filters({ match }: RouterProps) {
 
   const putFilters = async () => {
     if (filterLists.length === 0) return;
+    if (JSON.stringify(filterLists) === filtersCache) return;
 
-    const filtersString: string = filterLists
-      .map((fl) => [`#${fl.name}`, ...fl.cidHashes].join("\n"))
-      .join("\n\n");
+    const filters: {}[]  = filterLists
+        .filter((fl) => fl.name !== null)
+        .map((fl) => {
+        return {name: fl.name, cids: fl.cids, visibility: fl.visibility}
+      })
 
+    const filtersString = JSON.stringify(filters)
     console.log("putting filters", filterLists, `"${filtersString}"`);
 
     await fetch(`${serverUri()}/filters`, {
       method: "PUT",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
       body: filtersString,
     });
-
+    setFiltersCache(JSON.stringify(filterLists))
     console.log("filters set", filtersString);
   };
 
   const showEditModal = (filterList: FilterList) => {
     setName(filterList.name);
     setVisibility(VisibilityString[filterList.visibility]);
-    setCids(filterList.cidHashes);
+    setCids(filterList.cids);
     setShowEdit(true);
+    console.log("showEditModal " + name + cids + filterList.name + filterList.cids);
+
   }
 
   const saveFilter = () => {
@@ -214,33 +115,34 @@ function Filters({ match }: RouterProps) {
 
     const filterList: FilterList = {
       name,
-      cidHashes,
+      cids,
       visibility: mapVisibilityString(visibility),
+      enabled: true
     };
 
     // be kind rewind
     setName("");
-    setCidHashes([]);
+    setCids([]);
 
     setFilterLists([...filterLists, filterList]);
-    console.log("filter saved");
+    console.log("filter saved " + name + cids);
   }
   const addFilter = () => {
     handleCloseAdd();
 
     const filterList: FilterList = {
       name,
-      cidHashes,
+      cids,
       visibility: mapVisibilityString(visibility),
+      enabled: true
     };
 
     // be kind rewind
     setName("");
-    setCidHashes([]);
-    setCids([])
+    setCids([]);
 
     setFilterLists([...filterLists, filterList]);
-    console.log("filter added");
+    console.log("filter added " + name + cids);
   };
 
   const importFilter = () => {
@@ -269,19 +171,11 @@ function Filters({ match }: RouterProps) {
     const cids = event.target.value.split("\n");
     setCids(cids)
     console.log(cids);
-    // console.log(cidHashes);
-    const _cidHashes: string[] = cids.filter(function(value){return value}).map((cid) => {
-          return keccak256(Buffer.from(cid)).toString("hex");
-        }
-    );
-
-    setCidHashes(_cidHashes);
-    console.log(_cidHashes);
   };
 
   const mapVisibilityString = (visibilityStr: string): Visibility => {
     if (visibilityStr === "Private") return Visibility.Private
-    if (visibilityStr === "Shared") return Visibility.Shared
+    if (visibilityStr === "Public") return Visibility.Public
     if (visibilityStr === "ThirdParty") return Visibility.ThirdParty
 
     return Visibility.None
@@ -305,7 +199,7 @@ function Filters({ match }: RouterProps) {
                     <Form.Control as="select">
                       <option>CID</option>
                     </Form.Control>
-                    <Button>Submit</Button>
+                    <Button>Search</Button>
                   </Form.Group>
                 </Form>
               </Col>
@@ -331,7 +225,7 @@ function Filters({ match }: RouterProps) {
           </Container>
 
           <CustomFilterModal {...{
-            show: showEdit, visibility, cids: cids,
+            show: showEdit, visibility, cids,
             handleClose: handleCloseEdit, name,
             changeName, save: saveFilter,
             title: "Edit filter", changeVisibility, cidsChanged,
