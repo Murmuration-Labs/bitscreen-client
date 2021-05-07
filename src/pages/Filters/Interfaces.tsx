@@ -36,6 +36,7 @@ export interface ModalProps {
 }
 
 export interface FilterList {
+    _id?: number;
     name: string;
     cids: string[];
     visibility: Visibility;

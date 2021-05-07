@@ -39,7 +39,7 @@ function Filters({ match }: RouterProps) {
           <a onClick={(e) => {showEditModal(props)}}>{props.name}</a>
           <span className={"ml-1 text-dim"}>
           [{translateVisibility(props.visibility)}:
-            {props.cids.length} items]
+            {props.cids ? props.cids.length : 0} items]
         </span>
         </div>
     );
@@ -89,7 +89,7 @@ function Filters({ match }: RouterProps) {
   const postFilters = async () => {
     const newFilterList: FilterList = {
       name,
-      cidHashes,
+      cids,
       visibility: mapVisibilityString(visibility),
       enabled
     };
@@ -102,7 +102,7 @@ function Filters({ match }: RouterProps) {
       body: JSON.stringify(newFilterList),
     });
     setFiltersCache(JSON.stringify(filterLists))
-    console.log("filters set", filtersString);
+    // console.log("filters set", filtersString);
   };
 
   const showEditModal = (filterList: FilterList) => {
