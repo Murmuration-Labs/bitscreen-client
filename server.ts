@@ -1,6 +1,8 @@
 import { Request, Response, Application } from "express";
 import ErrnoException = NodeJS.ErrnoException;
-import { mkdirSync, writeFile, openSync } from "fs";
+import {mkdirSync, writeFile, openSync, readFileSync} from "fs";
+
+import * as db from './db';
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -50,33 +52,65 @@ app.get("/config", (req: Request, res: Response) => {
 });
 
 app.put("/config", (req: Request, res: Response) => {
-  writeFile(
-    configPath,
-    JSON.stringify(req.body),
-    (err: ErrnoException | null) => {
-      // If an error occurred, show it and return
-      if (err) return console.error(err);
-      // Successfully wrote binary contents to the file!
-    }
-  );
+  const file = JSON.parse(readFileSync(configPath).toString('utf8'));
+
+  const actionPromise = new Promise((resolve, reject) => {
+    writeFile(
+        configPath,
+        JSON.stringify({...file, ...req.body}),
+        (err: ErrnoException | null) => {
+          // If an error occurred, show it and return
+          if (err) {
+            reject(err);
+          } else {
+            resolve([]);
+          }
+          // Successfully wrote binary contents to the file!
+        }
+    );
+  });
+
+  actionPromise
+      .then(() => res.send({
+        success: true,
+      }))
+      .catch((err) => res.send({
+        success: false,
+      }))
+  ;
 });
 
 app.get("/filters", (req: Request, res: Response) => {
-  const options = {
-    header: {
-      "Content-Type": "application/json",
-    },
-  };
-  res.sendFile(filterPath, options);
+    db.findAll('bitscreen')
+        .then(data => res.send(data))
+        .catch(err => res.send([]))
+    ;
+});
+
+app.post("/filters", (req: Request, res: Response) => {
+    db.insert('bitscreen', req.body)
+        .then(data => res.send({
+            success: true,
+            _id: data,
+        }))
+        .catch(err => res.send({
+            success: false,
+        }))
+    ;
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  console.log("saving filters: " + JSON.stringify({...req.body}));
-  writeFile(filterPath, JSON.stringify({...req.body}), (err: ErrnoException | null) => {
-    // If an error occurred, show it and return
-    if (err) return console.error(err);
-    // Successfully wrote binary contents to the file!
-  });
+    db.update('bitscreen', req.body._id, req.body)
+        .then(data => res.send({
+            success: true,
+            _id: data,
+        }))
+        .catch(err => res.send({
+            success: false,
+        }))
+    ;
 });
 
 app.listen(process.env.PORT || 3030);
+
+

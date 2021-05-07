@@ -49,6 +49,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     this.setState(
       {
         config: {
+          ...this.state.config,
           bitscreen: !this.state.config.bitscreen,
         },
       },
@@ -62,6 +63,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     this.setState(
       {
         config: {
+          ...this.state.config,
           share: !this.state.config.share,
         },
       },
@@ -75,6 +77,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     this.setState(
       {
         config: {
+          ...this.state.config,
           advanced: !this.state.config.advanced,
         },
       },
@@ -150,7 +153,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                         Filter CIDs blocked by any node
                       </ToggleButton>
                       <ToggleButton value={Filters.External}>
-                        Only filter CIDs on my lists
+                        Filter CIDs on my custom lists
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </Col>
