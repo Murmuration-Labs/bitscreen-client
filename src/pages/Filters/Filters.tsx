@@ -323,7 +323,7 @@ function Filters({ match }: RouterProps) {
                     <Form.Control as="select">
                       <option>CID</option>
                     </Form.Control>
-                    <Button>Submit</Button>
+                    <Button>Search</Button>
                   </Form.Group>
                 </Form>
               </Col>
