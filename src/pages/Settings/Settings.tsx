@@ -153,7 +153,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                         Filter CIDs blocked by any node
                       </ToggleButton>
                       <ToggleButton value={Filters.External}>
-                        Only filter CIDs on my lists
+                        Filter CIDs on my custom lists
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </Col>
