@@ -81,43 +81,34 @@ app.put("/config", (req: Request, res: Response) => {
 });
 
 app.get("/filters", (req: Request, res: Response) => {
-  // const options = {
-  //   header: {
-  //     "Content-Type": "text/plain",
-  //   },
-  // };
-  // res.sendFile(filterPath, options);
-
     db.findAll('bitscreen')
         .then(data => res.send(data))
         .catch(err => res.send([]))
     ;
 });
 
+app.post("/filters", (req: Request, res: Response) => {
+    db.insert('bitscreen', req.body)
+        .then(data => res.send({
+            success: true,
+            _id: data,
+        }))
+        .catch(err => res.send({
+            success: false,
+        }))
+    ;
+});
+
 app.put("/filters", (req: Request, res: Response) => {
-    const file = JSON.parse(readFileSync(filterPath).toString('utf8'));
-
-    const actionPromise = new Promise((resolve, reject) => {
-
-    writeFile(filterPath, JSON.stringify({...file, ...req.body}), (err: ErrnoException | null) => {
-      // If an error occurred, show it and return
-      if (err) {
-        reject(err);
-      } else {
-        resolve([]);
-      }
-      // Successfully wrote binary contents to the file!
-    });
-  });
-
-  actionPromise
-      .then(() => res.send({
-        success: true,
-      }))
-      .catch((err) => res.send({
-        success: false,
-      }))
-  ;
+    db.update('bitscreen', req.body._id, req.body)
+        .then(data => res.send({
+            success: true,
+            _id: data,
+        }))
+        .catch(err => res.send({
+            success: false,
+        }))
+    ;
 });
 
 app.listen(process.env.PORT || 3030);

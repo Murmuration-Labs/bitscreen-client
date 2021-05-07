@@ -15,6 +15,7 @@ enum Visibility {
 const VisibilityString: string[] = ["", "Private", "Shared", "ThirdParty"]
 
 interface FilterList {
+  _id?: number,
   name: string;
   cidHashes: string[];
   visibility: Visibility;
@@ -131,6 +132,7 @@ function Filters({ match }: RouterProps) {
   const handleCloseImport = () => setShowImport(false);
   const handleShowImport = () => setShowImport(true);
 
+  const [id, setId] = useState<number>(0);
   const [name, setName] = useState<string>("");
   const [cidHashes, setCidHashes] = useState<string[]>([]);
   const [cids, setCids] = useState<string[]>([]);
@@ -148,26 +150,9 @@ function Filters({ match }: RouterProps) {
   }
 
   const getFilters = async () => {
-    const filters = await fetch(
-        `${serverUri()}/filters`
-    ).then((response) => response.text());
+    const filters = await fetch(`${serverUri()}/filters`);
 
-    const lists = filters.split("\n\n");
-
-    const filterLists: FilterList[] = [];
-
-    for (const list of lists) {
-      const entries = list.split("\n");
-
-      const title = entries.splice(0, 1)[0];
-      if (!title.startsWith("#")) continue;
-      const name = title.replace("#", "");
-      filterLists.push({
-        name,
-        cidHashes: entries,
-        visibility: Visibility.None,
-      });
-    }
+    const filterLists: FilterList[] = await filters.json();
 
     setFilterLists(filterLists);
     setLoaded(true);
@@ -177,32 +162,44 @@ function Filters({ match }: RouterProps) {
     void getFilters();
   }, []);
 
-  useEffect(() => {
-    console.log("putting filters change");
-    void putFilters();
-  }, [filterLists]);
-
   const putFilters = async () => {
-    if (filterLists.length === 0) return;
+    const filterList: FilterList = {
+      _id: id,
+      name,
+      cidHashes: cidHashes,
+      visibility: mapVisibilityString(visibility),
+    }
 
-    const filtersString: string = filterLists
-      .map((fl) => [`#${fl.name}`, ...fl.cidHashes].join("\n"))
-      .join("\n\n");
-
-    console.log("putting filters", filterLists, `"${filtersString}"`);
-
-    await fetch(`${serverUri()}/filters`, {
+    const existing = await fetch(`${serverUri()}/filters`, {
       method: "PUT",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
-      body: filtersString,
+      body: JSON.stringify(filterList),
     });
+  };
 
-    console.log("filters set", filtersString);
+  const postFilters = async () => {
+    const newFilterList: FilterList = {
+      name,
+      cidHashes,
+      visibility: mapVisibilityString(visibility),
+    };
+
+    const newId = await fetch(`${serverUri()}/filters`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newFilterList),
+    });
   };
 
   const showEditModal = (filterList: FilterList) => {
+    if (filterList._id) {
+      setId(filterList._id);
+    }
+
     setName(filterList.name);
     setVisibility(VisibilityString[filterList.visibility]);
     setCids(filterList.cidHashes);
@@ -212,35 +209,28 @@ function Filters({ match }: RouterProps) {
   const saveFilter = () => {
     handleCloseEdit();
 
-    const filterList: FilterList = {
-      name,
-      cidHashes,
-      visibility: mapVisibilityString(visibility),
-    };
+    putFilters().then(async () => {
+      await getFilters();
 
-    // be kind rewind
-    setName("");
-    setCidHashes([]);
-
-    setFilterLists([...filterLists, filterList]);
-    console.log("filter saved");
+      // be kind rewind
+      setId(0);
+      setName("");
+      setCidHashes([]);
+      setCids([])
+    });
   }
   const addFilter = () => {
     handleCloseAdd();
 
-    const filterList: FilterList = {
-      name,
-      cidHashes,
-      visibility: mapVisibilityString(visibility),
-    };
+    postFilters().then(async () => {
+      await getFilters();
 
-    // be kind rewind
-    setName("");
-    setCidHashes([]);
-    setCids([])
-
-    setFilterLists([...filterLists, filterList]);
-    console.log("filter added");
+      // be kind rewind
+      setId(0);
+      setName("");
+      setCidHashes([]);
+      setCids([])
+    });
   };
 
   const importFilter = () => {
@@ -268,7 +258,6 @@ function Filters({ match }: RouterProps) {
     event.preventDefault();
     const cids = event.target.value.split("\n");
     setCids(cids)
-    console.log(cids);
     // console.log(cidHashes);
     const _cidHashes: string[] = cids.filter(function(value){return value}).map((cid) => {
           return keccak256(Buffer.from(cid)).toString("hex");
@@ -276,7 +265,6 @@ function Filters({ match }: RouterProps) {
     );
 
     setCidHashes(_cidHashes);
-    console.log(_cidHashes);
   };
 
   const mapVisibilityString = (visibilityStr: string): Visibility => {

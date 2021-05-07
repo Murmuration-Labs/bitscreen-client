@@ -44,7 +44,7 @@ function forceExistingTable(table : string) {
 }
 
 function forceExistingEntry(table : string, _id : number) {
-    if (!dbFileData[table].hasOwnProperty(_id)) {
+    if (!dbFileData[table].data.hasOwnProperty(_id)) {
         throw new Error(`Attempting to interact with unexisting entry ${_id} from table ${table}`);
     }
 }
