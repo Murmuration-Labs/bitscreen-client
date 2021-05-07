@@ -1,6 +1,6 @@
 import React, { Component, useEffect, useState } from "react";
 import { RouterProps } from "../App";
-import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
+import {Button, Col, Container, Form, FormCheck, Modal, Row} from "react-bootstrap";
 import "./Filters.css";
 import keccak256 from "keccak256";
 import { serverUri } from "../../config";
@@ -19,17 +19,20 @@ interface FilterList {
   name: string;
   cidHashes: string[];
   visibility: Visibility;
+  enabled: boolean;
 }
 
 interface ModalProps {
   name: string;
   cids: string[];
   show: boolean;
+  enabled: boolean;
   handleClose: () => void;
   modalEntered: () => void;
   title: string;
   changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
   changeVisibility: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  changeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => void;
   visibility: string;
   cidsChanged: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   save: () => void
@@ -78,6 +81,19 @@ class CustomFilterModal extends Component<ModalProps, any> {
                       Filtered CIDs on shared lists will be accessible to other
                       nodes.
                     </Form.Label>
+                  </Col>
+                </Form.Row>
+                <Form.Row>
+                  <Col xs={'auto'}>
+                    <Form.Group controlId={"enabled"}>
+                      <FormCheck
+                          type="switch"
+                          id="enabled"
+                          label="Is this filter enabled?"
+                          checked={this.props.enabled}
+                          onChange={this.props.changeEnabled}
+                      />
+                    </Form.Group>
                   </Col>
                 </Form.Row>
                 <Form.Row>
@@ -136,6 +152,7 @@ function Filters({ match }: RouterProps) {
   const [name, setName] = useState<string>("");
   const [cidHashes, setCidHashes] = useState<string[]>([]);
   const [cids, setCids] = useState<string[]>([]);
+  const [enabled, setEnabled] = useState<boolean>(true);
 
   const CIDFilter = (props: FilterList) => {
     return (
@@ -168,7 +185,10 @@ function Filters({ match }: RouterProps) {
       name,
       cidHashes: cidHashes,
       visibility: mapVisibilityString(visibility),
+      enabled: enabled
     }
+
+    console.log(filterList)
 
     const existing = await fetch(`${serverUri()}/filters`, {
       method: "PUT",
@@ -184,6 +204,7 @@ function Filters({ match }: RouterProps) {
       name,
       cidHashes,
       visibility: mapVisibilityString(visibility),
+      enabled
     };
 
     const newId = await fetch(`${serverUri()}/filters`, {
@@ -204,6 +225,7 @@ function Filters({ match }: RouterProps) {
     setVisibility(VisibilityString[filterList.visibility]);
     setCids(filterList.cidHashes);
     setShowEdit(true);
+    setEnabled(filterList.enabled);
   }
 
   const saveFilter = () => {
@@ -217,6 +239,7 @@ function Filters({ match }: RouterProps) {
       setName("");
       setCidHashes([]);
       setCids([])
+      setEnabled(true)
     });
   }
   const addFilter = () => {
@@ -230,6 +253,7 @@ function Filters({ match }: RouterProps) {
       setName("");
       setCidHashes([]);
       setCids([])
+      setEnabled(true)
     });
   };
 
@@ -247,6 +271,10 @@ function Filters({ match }: RouterProps) {
   const changeName = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     setName(event.target.value);
+  };
+
+  const changeEnabled = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEnabled(!enabled);
   };
 
   const changeVisibility = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -319,19 +347,19 @@ function Filters({ match }: RouterProps) {
           </Container>
 
           <CustomFilterModal {...{
-            show: showEdit, visibility, cids: cids,
+            show: showEdit, visibility, cids: cids, enabled: enabled,
             handleClose: handleCloseEdit, name,
             changeName, save: saveFilter,
             title: "Edit filter", changeVisibility, cidsChanged,
-            modalEntered
+            modalEntered, changeEnabled
           }}/>
 
           <CustomFilterModal {...{
-            show: showAdd, visibility, cids,
+            show: showAdd, visibility, cids, enabled,
             handleClose: handleCloseAdd, name,
             changeName, save: addFilter,
             title: "New custom filter", changeVisibility, cidsChanged,
-            modalEntered
+            modalEntered, changeEnabled
           }}/>
 
           <Modal show={showImport} onHide={handleCloseImport} centered={true}>
