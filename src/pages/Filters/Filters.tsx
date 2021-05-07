@@ -221,6 +221,8 @@ function Filters({ match }: RouterProps) {
       setId(filterList._id);
     }
 
+    setCidHashes(filterList.cidHashes);
+
     setName(filterList.name);
     setVisibility(VisibilityString[filterList.visibility]);
     setCids(filterList.cidHashes);
