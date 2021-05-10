@@ -10,16 +10,15 @@ import {
 } from "react-bootstrap";
 import "./Settings.css";
 import { serverUri } from "../../config";
+import { SettingsState } from "../Filters/Interfaces";
 
-enum Filters {
+export enum Filters {
   Unknown,
   Internal,
   External,
 }
 
-type SettingsProps = {};
-
-export default class Settings extends React.Component<SettingsProps, any> {
+export default class Settings extends React.Component<never, SettingsState> {
   state = {
     loaded: false,
     config: {
@@ -28,12 +27,13 @@ export default class Settings extends React.Component<SettingsProps, any> {
       advanced: false,
       filter: Filters.Unknown,
     },
+    filters: [],
   };
 
-  async componentDidMount() {
-    const config = await fetch(
-      `${serverUri()}/config`
-    ).then((response) => response.json());
+  async componentDidMount(): Promise<void> {
+    const config = await fetch(`${serverUri()}/config`).then((response) =>
+      response.json()
+    );
     console.log("config", config);
 
     this.setState(
@@ -45,7 +45,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleBitScreen() {
+  async toggleBitScreen(): Promise<void> {
     this.setState(
       {
         config: {
@@ -59,7 +59,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleShare() {
+  async toggleShare(): Promise<void> {
     this.setState(
       {
         config: {
@@ -73,7 +73,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleAdvanced() {
+  async toggleAdvanced(): Promise<void> {
     this.setState(
       {
         config: {
@@ -87,7 +87,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async setFilter(event: SyntheticEvent) {
+  async setFilter(event: SyntheticEvent): Promise<void> {
     console.log(event);
     this.setState(
       {
@@ -99,7 +99,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async putConfig() {
+  async putConfig(): Promise<void> {
     const config = { ...this.state.config };
 
     console.log("putting config", config);
@@ -115,7 +115,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     console.log("config set", config);
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <Container>
         {this.state.loaded ? (
