@@ -1,52 +1,93 @@
 import React, {Component} from "react";
 import {Button, Col, Form, Modal} from "react-bootstrap";
-import {CidItem, ModalProps} from "./Interfaces";
+import {CidItem, ModalProps, Visibility, VisibilityString} from "./Interfaces";
 import CidList from "./CidList";
 
-const newEditState = false;
+const newEditState = true;
 
 export default class CustomFilterModal extends Component<ModalProps, any> {
 
     constructor(props: ModalProps) {
         super(props);
-        console.info("customFilterModal: " + props.cids.length)
-        const cids = this.props.cids.map((cid: string) => {
+        console.info("customFilterModal: " + props.filterList.cids.length)
+        const cids = this.props.filterList.cids.map((cid: string) => {
             return {cid, edit: false}
         })
         this.state = {
-            data: cids.length === 0 ? [{cid: "", edit: newEditState}] : cids
+            data: cids.length === 0 ? [{cid: "", edit: newEditState}] : cids,
+            filterList: {...this.props.filterList}
         };
     }
 
     componentDidMount(){
-        console.info("customFilterModal: " + this.props.cids.length)
+        console.info("customFilterModal: " + this.props.filterList.cids.length)
         this.setState({
-            data: this.props.cids.map((cid: string) => {
+            data: this.props.filterList.cids.map((cid: string) => {
                 return {cid, edit: false}
-            })
+            }),
+            filterList: {...this.props.filterList}
         });
+    }
+
+    mapVisibilityString = (visibilityStr: string): Visibility => {
+        if (visibilityStr === "Private") return Visibility.Private
+        if (visibilityStr === "Public") return Visibility.Public
+        if (visibilityStr === "ThirdParty") return Visibility.ThirdParty
+
+        return Visibility.None
     }
 
     saveData = (editItem: CidItem) => {
         this.setState({
             data: this.state.data.map((e: CidItem) => {
                 return e.cid === editItem.cid ? {...editItem, edit: false} : e
-            })
-        });
+            }),
+        })
+        this.setState({
+            filterList: {...this.props.filterList, cids: this.state.data.map((e: CidItem) => e.cid)}
+        })
+        this.props.dataChanged(this.state.filterList)
+    }
 
+    changeName = (event: React.ChangeEvent<HTMLInputElement>) => {
+        event.preventDefault();
+        this.setState({
+                filterList: {...this.props.filterList, name: event.target.value}
+        })
+        this.props.dataChanged(this.state.filterList)
+    };
+
+    changeVisibility = (event: React.ChangeEvent<HTMLInputElement>) => {
+        event.preventDefault();
+        this.setState({
+            filterList: {
+                ...this.props.filterList,
+                visibility: this.mapVisibilityString(event.target.value)
+            }
+        })
+        this.props.dataChanged(this.state.filterList)
     }
 
     deleteItem  = (editItem: CidItem) => {
         this.setState({
             data: this.state.data.filter((e: CidItem) => e.cid !== editItem.cid)
         });
+        this.setState({
+            filterList: {...this.props.filterList, cids: this.state.data.map((e: CidItem) => e.cid)}
+        })
+        this.props.dataChanged(this.state.filterList)
     }
 
     onNewCid = () => {
-        this.state.data.push({cid: "", edit: newEditState});
+        let d = this.state.data
+        d.push({cid: "", edit: newEditState})
         this.setState({
-            data: this.state.data
+            data: d
         });
+        this.setState({
+            filterList: {...this.props.filterList, cids: this.state.data.map((e: CidItem) => e.cid)}
+        })
+        this.props.dataChanged(this.state.filterList)
     }
 
     // cidItem = (props: any) => <CidItemRenderer {...props} saveItem={this.saveData} deleteItem={this.deleteItem} />
@@ -65,18 +106,18 @@ export default class CustomFilterModal extends Component<ModalProps, any> {
                             <Form.Row>
                                 <Col>
                                     <Form.Control
-                                        onChange={this.props.changeName}
+                                        onChange={this.changeName}
                                         type="text"
                                         placeholder="List Name"
-                                        value={this.props.name}
+                                        value={this.props.filterList.name}
                                     />
                                 </Col>
                             </Form.Row>
                             <Form.Row>
                                 <Col xs={"auto"}>
                                     <Form.Group controlId="visibility">
-                                        <Form.Control as="select" onChange={this.props.changeVisibility}
-                                                      value={this.props.visibility}
+                                        <Form.Control as="select" onChange={this.changeVisibility}
+                                                      value={VisibilityString[this.props.filterList.visibility]}
                                         >
                                             <option>Public</option>
                                             <option>Private</option>
@@ -118,4 +159,3 @@ export default class CustomFilterModal extends Component<ModalProps, any> {
         )
     }
 }
-

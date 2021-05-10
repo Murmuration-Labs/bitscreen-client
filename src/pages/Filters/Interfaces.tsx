@@ -22,16 +22,12 @@ export interface CidItemProps {
 }
 
 export interface ModalProps {
-    name: string;
-    cids: string[];
+    filterList: FilterList;
     show: boolean;
+    title: string;
     handleClose: () => void;
     modalEntered: () => void;
-    title: string;
-    changeName: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    changeVisibility: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    visibility: string;
-    cidsChanged: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    dataChanged: (FileList) => void;
     save: () => void
 }
 

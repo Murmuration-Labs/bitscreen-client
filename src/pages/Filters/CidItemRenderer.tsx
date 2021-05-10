@@ -1,7 +1,7 @@
 import * as React from 'react';
 // import GridLayout from "react-grid-layout";
 import {CidItem, CidItemProps} from "./Interfaces";
-import {Card, ListGroup} from "react-bootstrap";
+import {Button, Card, ListGroup} from "react-bootstrap";
 import {ChangeEvent} from "react";
 
 // function validateCid(cid: string): boolean{
@@ -28,6 +28,7 @@ export default class CidItemRender extends React.Component<CidItemProps, {item: 
         return item;
     }
     enterEdit = () => {
+        console.info("endterEdit")
         if (this.state.item != null) {
             console.info("endterEdit" + this.state.item.edit.toString())
             this.setState({item: {...this.state.item, edit: true}});
@@ -37,16 +38,19 @@ export default class CidItemRender extends React.Component<CidItemProps, {item: 
         this.setState({ item: { ...this.state.item, edit: false } });
     }
     handleChange = (e: ChangeEvent<HTMLInputElement>, field: string) => {
+        e.preventDefault();
         let updatedItem: CidItem = { ...this.state.item };
         updatedItem = this.updateItemField(field, e.target.value, updatedItem);
         console.info("updatedItem: " + updatedItem.cid + " " + e.target.value)
         this.setState({ item: updatedItem });
     }
     handleSave = () => {
-        this.props.saveItem(this.state.item);
+        console.info("handleSave")
         this.setState({ item: { ...this.state.item, edit: false } });
+        this.props.saveItem(this.state.item);
     }
     handleDelete = () => {
+        console.info("handleDelete")
         this.props.deleteItem(this.state.item);
     }
     render() {
@@ -77,8 +81,8 @@ export default class CidItemRender extends React.Component<CidItemProps, {item: 
                                         </Card.Text>
                                     </div>
                                     <div style={{ width: '15%', padding: '5 0' }}>
-                                        <button className='k-button k-primary' style={{ marginRight: 5 }} onClick={this.enterEdit}>Edit</button>
-                                        <button className='k-button' onClick={this.handleDelete}>Delete</button>
+                                        <Button variant="primary" className='k-button ' style={{ marginRight: 5 }} onClick={this.enterEdit}>Edit</Button>
+                                        <Button variant="secondary" className='k-button' onClick={this.handleDelete}>Delete</Button>
                                     </div>
                                 </div>
                             </Card.Body>}

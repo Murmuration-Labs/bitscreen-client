@@ -1,37 +1,47 @@
-import React, { useEffect, useState } from "react";
-import { RouterProps } from "../App";
-import {Button, Col, Container, Form, FormCheck, Modal, Row} from "react-bootstrap";
+import React, {useEffect, useState} from "react";
+import {RouterProps} from "../App";
+import {Button, Col, Container, Form, Modal, Row} from "react-bootstrap";
 import "./Filters.css";
-import { serverUri } from "../../config";
+import {serverUri} from "../../config";
 import CustomFilterModal from "./Filter";
-import {VisibilityString, Visibility, FilterList, CidItem} from "./Interfaces";
+import {FilterList, Visibility, VisibilityString} from "./Interfaces";
 
 function Filters({ match }: RouterProps) {
+
+  const emptyFilterList = () => {
+    return {
+      _id: 0,
+      name: "",
+      cids: [],
+      visibility: Visibility.Private,
+      enabled: true
+    }
+  }
+
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
   const [filtersCache, setFiltersCache] = useState<string>("");
 
-  const [ visibility, setVisibility ] = useState<string>(VisibilityString[Visibility.Private]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [showAdd, setShowAdd] = useState<boolean>(false);
   const [showEdit, setShowEdit] = useState<boolean>(false);
-
-  const handleCloseEdit = () => setShowEdit(false);
-  const handleCloseAdd = () => setShowAdd(false);
-  const handleShowAdd = () => {
-    setName("");
-    setVisibility(VisibilityString[Visibility.Private]);
-    setCids([]);
-    setShowAdd(true);
-  }
-
   const [showImport, setShowImport] = useState(false);
-  const handleCloseImport = () => setShowImport(false);
-  const handleShowImport = () => setShowImport(true);
 
+  const [currentFilterList, setCurrentFilterList] = useState<FilterList>(emptyFilterList());
   const [id, setId] = useState<number>(0);
   const [name, setName] = useState<string>("");
   const [cids, setCids] = useState<string[]>([]);
   const [enabled, setEnabled] = useState<boolean>(true);
+  const [ visibility, setVisibility ] = useState<string>(VisibilityString[Visibility.Private]);
+
+  const handleShowImport = () => setShowImport(true);
+  const handleCloseImport = () => setShowImport(false);
+  const handleCloseEdit = () => setShowEdit(false);
+  const handleCloseAdd = () => setShowAdd(false);
+
+  const handleShowAdd = () => {
+    setCurrentFilterList(emptyFilterList())
+    setShowAdd(true);
+  }
 
   const CIDFilter = (props: FilterList) => {
     return (
@@ -47,9 +57,7 @@ function Filters({ match }: RouterProps) {
 
   const getFilters = async () => {
     const filters = await fetch(`${serverUri()}/filters`);
-
     const filterLists: FilterList[] = await filters.json();
-
     setFilterLists(filterLists);
     setFiltersCache(JSON.stringify(filterLists))
     console.log("filters loaded", JSON.stringify(filterLists));
@@ -64,58 +72,37 @@ function Filters({ match }: RouterProps) {
     if (filterLists.length === 0) return;
     if (JSON.stringify(filterLists) === filtersCache) return;
 
-    const filterList: FilterList = {
-      _id: id,
-      name,
-      cids: cids,
-      visibility: mapVisibilityString(visibility),
-      enabled: enabled
-    }
-
-    console.log(filterList)
-
     const existing = await fetch(`${serverUri()}/filters`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(filterList),
+      body: JSON.stringify(currentFilterList),
     });
     setFiltersCache(JSON.stringify(filterLists))
-    console.log("filterList updated", JSON.stringify(filterList));
-
+    console.log("filterList updated", JSON.stringify(currentFilterList));
   };
 
   const postFilters = async () => {
-    const newFilterList: FilterList = {
-      name,
-      cids,
-      visibility: mapVisibilityString(visibility),
-      enabled
-    };
-
     const newId = await fetch(`${serverUri()}/filters`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newFilterList),
+      body: JSON.stringify(currentFilterList),
     });
+    setCurrentFilterList(emptyFilterList())
     setFiltersCache(JSON.stringify(filterLists))
-    // console.log("filters set", filtersString);
+    console.log("filters set", JSON.stringify(filterLists));
   };
 
   const showEditModal = (filterList: FilterList) => {
     if (filterList._id) {
       setId(filterList._id);
     }
-    setName(filterList.name);
-    setVisibility(VisibilityString[filterList.visibility]);
-    setCids(filterList.cids);
+    setCurrentFilterList(filterList)
     setShowEdit(true);
-    setEnabled(filterList.enabled);
     console.log("showEditModal " + name + cids + filterList.name + filterList.cids);
-
   }
 
   const saveFilter = () => {
@@ -125,13 +112,11 @@ function Filters({ match }: RouterProps) {
       await getFilters()
 
       // be kind rewind
-      setId(0)
-      setName("")
-      setCids([])
-      setEnabled(true)
+      setCurrentFilterList(emptyFilterList())
       console.log("filter saved " + name + cids)
     });
   }
+
   const addFilter = () => {
     handleCloseAdd();
 
@@ -139,10 +124,7 @@ function Filters({ match }: RouterProps) {
       await getFilters();
 
       // be kind rewind
-      setId(0);
-      setName("")
-      setCids([])
-      setEnabled(true)
+      setCurrentFilterList(emptyFilterList())
       console.log("filter added " + name + cids)
     });
   };
@@ -158,34 +140,22 @@ function Filters({ match }: RouterProps) {
   const modalEntered = () => {
 
   }
-  const changeName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setName(event.target.value);
-  };
 
-  const changeEnabled = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleEnabled = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentFilterList(
+        {...currentFilterList, enabled: !currentFilterList.enabled}
+    )
     setEnabled(!enabled);
   };
 
-  const changeVisibility = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setVisibility(event.target.value);
-  }
-
-  const cidsChanged = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    const cids = event.target.value.split("\n");
-    setCids(cids)
-    console.log(cids);
+  // const cidsChanged = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   event.preventDefault();
+  const updateCurrentFileList = (filterList: FilterList) => {
+    setCurrentFilterList(
+        {...currentFilterList, ...filterList}
+    )
+    console.log("current cids updated to: " + cids);
   };
-
-  const mapVisibilityString = (visibilityStr: string): Visibility => {
-    if (visibilityStr === "Private") return Visibility.Private
-    if (visibilityStr === "Public") return Visibility.Public
-    if (visibilityStr === "ThirdParty") return Visibility.ThirdParty
-
-    return Visibility.None
-  }
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility]
@@ -231,19 +201,17 @@ function Filters({ match }: RouterProps) {
           </Container>
 
           <CustomFilterModal {...{
-            show: showEdit, visibility, cids: cids, enabled: enabled,
-            handleClose: handleCloseEdit, name,
-            changeName, save: saveFilter,
-            title: "Edit filter", changeVisibility, cidsChanged,
-            modalEntered, changeEnabled
+            show: showEdit, title: "Edit filter",
+            handleClose: handleCloseEdit, save: saveFilter,
+            modalEntered, dataChanged: updateCurrentFileList,
+            filterList: currentFilterList
           }}/>
 
           <CustomFilterModal {...{
-            show: showAdd, visibility, cids, enabled,
-            handleClose: handleCloseAdd, name,
-            changeName, save: addFilter,
-            title: "New custom filter", changeVisibility, cidsChanged,
-            modalEntered, changeEnabled
+            show: showAdd, title: "New custom filter",
+            handleClose: handleCloseAdd, save: addFilter,
+            modalEntered, dataChanged: updateCurrentFileList,
+            filterList: currentFilterList
           }}/>
 
           <Modal show={showImport} onHide={handleCloseImport} centered={true}>

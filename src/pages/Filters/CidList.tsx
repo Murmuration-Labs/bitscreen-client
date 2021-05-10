@@ -7,8 +7,8 @@ export default class CidList extends React.Component<any, any> {
     render() {
         return (
             <ListGroup style={{ width: "100%", height: 500 }}>
-                {this.props.cids.map((cidItem: CidItem, index: bigint) => (
-                    <CidItemRender cidItem={cidItem} saveItem={this.props.saveItem} deleteItem={this.props.deleteItem}
+                {this.props.cids.map((cidItem: CidItem, index: number) => (
+                    <CidItemRender key={index.toString()} cidItem={cidItem} saveItem={this.props.saveItem} deleteItem={this.props.deleteItem}
                     />
                 ))}
             </ListGroup>
