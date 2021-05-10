@@ -49,14 +49,10 @@ export interface FilterList {
   enabled: boolean;
 }
 
-export interface VoidFunction {
-  (): void;
-}
-
 export interface CidListProps {
-  cids: [];
-  saveItem: VoidFunction;
-  deleteItem: VoidFunction;
+  cids: CidItem[];
+  saveItem: (i: CidItem) => void;
+  deleteItem: (i: CidItem) => void;
 }
 
 export interface DataProps {

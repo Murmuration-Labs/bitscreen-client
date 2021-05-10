@@ -5,7 +5,7 @@ import { serverUri } from "../../config";
 import CustomFilterModal from "./Filter";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 
-function Filters(): FilterList {
+function Filters(): JSX.Element {
   const emptyFilterList = () => {
     return {
       _id: 0,

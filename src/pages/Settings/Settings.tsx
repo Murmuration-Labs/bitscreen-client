@@ -18,7 +18,7 @@ export enum Filters {
   External,
 }
 
-export default class Settings extends React.Component<never, SettingsState> {
+export default class Settings extends React.Component<any, SettingsState> {
   state = {
     loaded: false,
     config: {
@@ -27,7 +27,7 @@ export default class Settings extends React.Component<never, SettingsState> {
       advanced: false,
       filter: Filters.Unknown,
     },
-    filters: [],
+    filter: Filters.Unknown,
   };
 
   async componentDidMount(): Promise<void> {
