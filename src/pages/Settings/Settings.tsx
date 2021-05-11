@@ -98,12 +98,12 @@ export default class Settings extends React.Component<
     );
   }
 
-  async setFilter(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
+  async setFilter(event: number): Promise<void> {
     console.log(event);
     this.setState(
       {
         ...this.state,
-        filter: Filters[event.target.value],
+        filter: event,
       },
       () => {
         void this.putConfig();
@@ -159,9 +159,7 @@ export default class Settings extends React.Component<
                       name={"select-filter"}
                       type="radio"
                       value={this.state.filter}
-                      onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-                        this.setFilter(evt)
-                      }
+                      onChange={(evt: number) => this.setFilter(evt)}
                     >
                       <ToggleButton value={Filters.Internal}>
                         Filter CIDs blocked by any node
