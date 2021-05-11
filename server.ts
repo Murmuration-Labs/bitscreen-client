@@ -1,8 +1,7 @@
 import { Request, Response, Application } from "express";
-import ErrnoException = NodeJS.ErrnoException;
-import {mkdirSync, writeFile, openSync, readFileSync} from "fs";
+import { mkdirSync, writeFile, openSync, readFileSync } from "fs";
 
-import * as db from './db';
+import * as db from "./db";
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -15,18 +14,29 @@ const basePath = path.join(process.env.HOME || "", ".murmuration");
 const configPath = path.join(basePath, "config");
 const filterPath = path.join(basePath, "bitscreen");
 
-try {mkdirSync(basePath);} catch(e) {}
+try {
+  mkdirSync(basePath);
+} catch (e) {
+  console.log(e);
+}
 
 try {
-    const f = openSync(configPath, "r");
-} catch(e) {
+  openSync(configPath, "r");
+} catch (e) {
   console.log("writing default config file.");
   writeFile(
-      configPath,
-      JSON.stringify({ bitscreen: false, share: false, advanced: false, filter: "" }),
-      (err: ErrnoException | null) => {
-        if (err) return console.error(err);
-      });
+    configPath,
+    JSON.stringify({
+      bitscreen: false,
+      share: false,
+      advanced: false,
+      filter: "",
+    }),
+    // eslint-disable-next-line no-undef
+    (err: NodeJS.ErrnoException | null) => {
+      if (err) return console.error(err);
+    }
+  );
 }
 
 console.log(configPath);
@@ -52,65 +62,75 @@ app.get("/config", (req: Request, res: Response) => {
 });
 
 app.put("/config", (req: Request, res: Response) => {
-  const file = JSON.parse(readFileSync(configPath).toString('utf8'));
+  const file = JSON.parse(readFileSync(configPath).toString("utf8"));
 
   const actionPromise = new Promise((resolve, reject) => {
     writeFile(
-        configPath,
-        JSON.stringify({...file, ...req.body}),
-        (err: ErrnoException | null) => {
-          // If an error occurred, show it and return
-          if (err) {
-            reject(err);
-          } else {
-            resolve([]);
-          }
-          // Successfully wrote binary contents to the file!
+      configPath,
+      JSON.stringify({ ...file, ...req.body }),
+      // eslint-disable-next-line no-undef
+      (err: NodeJS.ErrnoException | null) => {
+        // If an error occurred, show it and return
+        if (err) {
+          reject(err);
+        } else {
+          resolve([]);
         }
+        // Successfully wrote binary contents to the file!
+      }
     );
   });
 
   actionPromise
-      .then(() => res.send({
+    .then(() =>
+      res.send({
         success: true,
-      }))
-      .catch((err) => res.send({
+      })
+    )
+    .catch((err) => {
+      res.send({
         success: false,
-      }))
-  ;
+        error: err,
+      });
+    });
 });
 
 app.get("/filters", (req: Request, res: Response) => {
-    db.findAll('bitscreen')
-        .then(data => res.send(data))
-        .catch(err => res.send([]))
-    ;
+  db.findAll("bitscreen")
+    .then((data) => res.send(data))
+    .catch((err) => res.send({ error: err }));
 });
 
 app.post("/filters", (req: Request, res: Response) => {
-    db.insert('bitscreen', req.body)
-        .then(data => res.send({
-            success: true,
-            _id: data,
-        }))
-        .catch(err => res.send({
-            success: false,
-        }))
-    ;
+  db.insert("bitscreen", req.body)
+    .then((data) =>
+      res.send({
+        success: true,
+        _id: data,
+      })
+    )
+    .catch((err) =>
+      res.send({
+        success: false,
+        error: err,
+      })
+    );
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-    db.update('bitscreen', req.body._id, req.body)
-        .then(data => res.send({
-            success: true,
-            _id: data,
-        }))
-        .catch(err => res.send({
-            success: false,
-        }))
-    ;
+  db.update("bitscreen", req.body._id, req.body)
+    .then((data) =>
+      res.send({
+        success: true,
+        _id: data,
+      })
+    )
+    .catch((err) => {
+      console.log(err);
+      res.send({
+        success: false,
+      });
+    });
 });
 
 app.listen(process.env.PORT || 3030);
-
-

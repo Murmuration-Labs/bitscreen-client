@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from "react";
+import React, { ComponentType } from "react";
 
 import {
   Col,
@@ -10,34 +10,42 @@ import {
 } from "react-bootstrap";
 import "./Settings.css";
 import { serverUri } from "../../config";
+import { SettingsProps, SettingsState } from "../Filters/Interfaces";
 
-enum Filters {
+export enum Filters {
   Unknown,
   Internal,
   External,
 }
 
-type SettingsProps = {};
+export default class Settings extends React.Component<
+  ComponentType<SettingsProps>,
+  SettingsState
+> {
+  constructor(props: ComponentType<SettingsProps>) {
+    super(props);
 
-export default class Settings extends React.Component<SettingsProps, any> {
-  state = {
-    loaded: false,
-    config: {
-      bitscreen: false,
-      share: false,
-      advanced: false,
+    this.state = {
+      loaded: false,
+      config: {
+        bitscreen: false,
+        share: false,
+        advanced: false,
+        // filter: Filters.Unknown,
+      },
       filter: Filters.Unknown,
-    },
-  };
+    };
+  }
 
-  async componentDidMount() {
-    const config = await fetch(
-      `${serverUri()}/config`
-    ).then((response) => response.json());
+  async componentDidMount(): Promise<void> {
+    const config = await fetch(`${serverUri()}/config`).then((response) =>
+      response.json()
+    );
     console.log("config", config);
 
     this.setState(
       {
+        ...this.state,
         loaded: true,
         config,
       },
@@ -45,9 +53,10 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleBitScreen() {
+  async toggleBitScreen(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           bitscreen: !this.state.config.bitscreen,
@@ -59,9 +68,10 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleShare() {
+  async toggleShare(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           share: !this.state.config.share,
@@ -73,9 +83,10 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleAdvanced() {
+  async toggleAdvanced(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           advanced: !this.state.config.advanced,
@@ -87,10 +98,11 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async setFilter(event: SyntheticEvent) {
+  async setFilter(event: number): Promise<void> {
     console.log(event);
     this.setState(
       {
+        ...this.state,
         filter: event,
       },
       () => {
@@ -99,7 +111,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async putConfig() {
+  async putConfig(): Promise<void> {
     const config = { ...this.state.config };
 
     console.log("putting config", config);
@@ -115,7 +127,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     console.log("config set", config);
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <Container>
         {this.state.loaded ? (
@@ -146,8 +158,8 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       vertical
                       name={"select-filter"}
                       type="radio"
-                      value={this.state.config.filter}
-                      onChange={(evt: SyntheticEvent) => this.setFilter(evt)}
+                      value={this.state.filter}
+                      onChange={(evt: number) => this.setFilter(evt)}
                     >
                       <ToggleButton value={Filters.Internal}>
                         Filter CIDs blocked by any node
