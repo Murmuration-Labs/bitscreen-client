@@ -1,5 +1,3 @@
-import { Filters } from "../Settings/Settings";
-
 export const VisibilityString: string[] = [
   "",
   "Private",
@@ -32,6 +30,7 @@ export interface CidItemProps {
   cidItem: CidItem;
   saveItem: (i: CidItem) => void;
   deleteItem: (i: CidItem) => void;
+  index: number;
 }
 
 export interface SettingsProps {
@@ -74,12 +73,16 @@ export interface DataProps {
 export interface SettingsState {
   loaded: boolean;
   config: Config;
-  filter: Filters;
+}
+
+export interface Filters {
+  internal: boolean;
+  external: boolean;
 }
 
 export interface Config {
   bitscreen: boolean;
   share: boolean;
   advanced: boolean;
-  // filter: Filters;
+  filters: Filters;
 }

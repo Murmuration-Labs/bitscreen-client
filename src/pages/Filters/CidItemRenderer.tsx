@@ -44,6 +44,7 @@ export default class CidItemRender extends React.Component<
     e.preventDefault();
     let updatedItem: CidItem = { ...this.state.item };
     updatedItem = this.updateItemField(field, e.target.value, updatedItem);
+    console.log(updatedItem);
     console.info("updatedItem: " + updatedItem.cid + " " + e.target.value);
     this.setState({ item: updatedItem });
   };
@@ -67,6 +68,7 @@ export default class CidItemRender extends React.Component<
                   <div style={{ width: "65%", padding: "5 0" }}>
                     <label style={{ display: "block" }}>CID:</label>
                     <input
+                      key={"cid_value_" + this.props.index}
                       value={this.state.item.cid}
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         this.handleChange(e, "cid")

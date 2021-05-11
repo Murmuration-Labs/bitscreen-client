@@ -30,7 +30,10 @@ try {
       bitscreen: false,
       share: false,
       advanced: false,
-      filter: "",
+      filters: {
+        internal: false,
+        external: false,
+      },
     }),
     // eslint-disable-next-line no-undef
     (err: NodeJS.ErrnoException | null) => {

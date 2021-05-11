@@ -1,22 +1,9 @@
-import React, { ComponentType } from "react";
+import React, { ComponentType, FormEvent } from "react";
 
-import {
-  Col,
-  Container,
-  FormCheck,
-  Row,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-bootstrap";
+import { Col, Container, FormCheck, FormGroup, Row } from "react-bootstrap";
 import "./Settings.css";
 import { serverUri } from "../../config";
 import { SettingsProps, SettingsState } from "../Filters/Interfaces";
-
-export enum Filters {
-  Unknown,
-  Internal,
-  External,
-}
 
 export default class Settings extends React.Component<
   ComponentType<SettingsProps>,
@@ -31,9 +18,11 @@ export default class Settings extends React.Component<
         bitscreen: false,
         share: false,
         advanced: false,
-        // filter: Filters.Unknown,
+        filters: {
+          external: false,
+          internal: false,
+        },
       },
-      filter: Filters.Unknown,
     };
   }
 
@@ -98,12 +87,17 @@ export default class Settings extends React.Component<
     );
   }
 
-  async setFilter(event: number): Promise<void> {
-    console.log(event);
+  async setFilter(
+    event: FormEvent<HTMLDivElement>,
+    filterName: string
+  ): Promise<void> {
+    event.persist();
+    const config = this.state.config;
+    config.filters[filterName] = !config.filters[filterName];
+
     this.setState(
       {
-        ...this.state,
-        filter: event,
+        config: { ...config },
       },
       () => {
         void this.putConfig();
@@ -154,20 +148,35 @@ export default class Settings extends React.Component<
               <>
                 <Row className={"settings-block"}>
                   <Col>
-                    <ToggleButtonGroup
-                      vertical
-                      name={"select-filter"}
-                      type="radio"
-                      value={this.state.filter}
-                      onChange={(evt: number) => this.setFilter(evt)}
-                    >
-                      <ToggleButton value={Filters.Internal}>
-                        Filter CIDs blocked by any node
-                      </ToggleButton>
-                      <ToggleButton value={Filters.External}>
-                        Filter CIDs on my custom lists
-                      </ToggleButton>
-                    </ToggleButtonGroup>
+                    <h4>Filter CIDs</h4>
+                    <FormGroup controlId={"external"}>
+                      <FormCheck
+                        checked={
+                          this.state.config.filters
+                            ? this.state.config.filters.external
+                            : false
+                        }
+                        onChange={(evt: FormEvent<HTMLDivElement>) =>
+                          this.setFilter(evt, "external")
+                        }
+                        type="checkbox"
+                        label="blocked by any node"
+                      />
+                    </FormGroup>
+                    <FormGroup controlId={"internal"}>
+                      <FormCheck
+                        checked={
+                          this.state.config.filters
+                            ? this.state.config.filters.internal
+                            : false
+                        }
+                        onChange={(evt: FormEvent<HTMLDivElement>) =>
+                          this.setFilter(evt, "internal")
+                        }
+                        type="checkbox"
+                        label="on my custom lists"
+                      />
+                    </FormGroup>
                   </Col>
                 </Row>
 
