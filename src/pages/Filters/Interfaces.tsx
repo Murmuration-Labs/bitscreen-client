@@ -1,4 +1,3 @@
-import { SyntheticEvent } from "react";
 import { Filters } from "../Settings/Settings";
 
 export const VisibilityString: string[] = [
@@ -24,6 +23,10 @@ export interface CidItemProps {
   cidItem: CidItem;
   saveItem: (i: CidItem) => void;
   deleteItem: (i: CidItem) => void;
+}
+
+export interface SettingsProps {
+  enabled?: boolean;
 }
 
 export interface ModalProps {
@@ -62,12 +65,12 @@ export interface DataProps {
 export interface SettingsState {
   loaded: boolean;
   config: Config;
-  filter: SyntheticEvent;
+  filter: Filters;
 }
 
 export interface Config {
   bitscreen: boolean;
   share: boolean;
   advanced: boolean;
-  filter: Filters;
+  // filter: Filters;
 }

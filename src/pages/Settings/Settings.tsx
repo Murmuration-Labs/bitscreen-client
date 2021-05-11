@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from "react";
+import React, { ComponentType } from "react";
 
 import {
   Col,
@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import "./Settings.css";
 import { serverUri } from "../../config";
-import { SettingsState } from "../Filters/Interfaces";
+import { SettingsProps, SettingsState } from "../Filters/Interfaces";
 
 export enum Filters {
   Unknown,
@@ -18,17 +18,24 @@ export enum Filters {
   External,
 }
 
-export default class Settings extends React.Component<any, SettingsState> {
-  state = {
-    loaded: false,
-    config: {
-      bitscreen: false,
-      share: false,
-      advanced: false,
+export default class Settings extends React.Component<
+  ComponentType<SettingsProps>,
+  SettingsState
+> {
+  constructor(props: ComponentType<SettingsProps>) {
+    super(props);
+
+    this.state = {
+      loaded: false,
+      config: {
+        bitscreen: false,
+        share: false,
+        advanced: false,
+        // filter: Filters.Unknown,
+      },
       filter: Filters.Unknown,
-    },
-    filter: Filters.Unknown,
-  };
+    };
+  }
 
   async componentDidMount(): Promise<void> {
     const config = await fetch(`${serverUri()}/config`).then((response) =>
@@ -38,6 +45,7 @@ export default class Settings extends React.Component<any, SettingsState> {
 
     this.setState(
       {
+        ...this.state,
         loaded: true,
         config,
       },
@@ -48,6 +56,7 @@ export default class Settings extends React.Component<any, SettingsState> {
   async toggleBitScreen(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           bitscreen: !this.state.config.bitscreen,
@@ -62,6 +71,7 @@ export default class Settings extends React.Component<any, SettingsState> {
   async toggleShare(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           share: !this.state.config.share,
@@ -76,6 +86,7 @@ export default class Settings extends React.Component<any, SettingsState> {
   async toggleAdvanced(): Promise<void> {
     this.setState(
       {
+        ...this.state,
         config: {
           ...this.state.config,
           advanced: !this.state.config.advanced,
@@ -87,11 +98,12 @@ export default class Settings extends React.Component<any, SettingsState> {
     );
   }
 
-  async setFilter(event: SyntheticEvent): Promise<void> {
+  async setFilter(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
     console.log(event);
     this.setState(
       {
-        filter: event,
+        ...this.state,
+        filter: Filters[event.target.value],
       },
       () => {
         void this.putConfig();
@@ -146,8 +158,10 @@ export default class Settings extends React.Component<any, SettingsState> {
                       vertical
                       name={"select-filter"}
                       type="radio"
-                      value={this.state.config.filter}
-                      onChange={(evt: SyntheticEvent) => this.setFilter(evt)}
+                      value={this.state.filter}
+                      onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+                        this.setFilter(evt)
+                      }
                     >
                       <ToggleButton value={Filters.Internal}>
                         Filter CIDs blocked by any node
