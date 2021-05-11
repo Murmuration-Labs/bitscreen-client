@@ -29,7 +29,10 @@ try {
     JSON.stringify({
       bitscreen: false,
       share: false,
-      advanced: false,
+      advanced: {
+        enabled: false,
+        list: [],
+      },
       filters: {
         internal: false,
         external: false,

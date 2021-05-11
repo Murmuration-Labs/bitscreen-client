@@ -17,7 +17,10 @@ export default class Settings extends React.Component<
       config: {
         bitscreen: false,
         share: false,
-        advanced: false,
+        advanced: {
+          enabled: false,
+          list: [],
+        },
         filters: {
           external: false,
           internal: false,
@@ -34,7 +37,6 @@ export default class Settings extends React.Component<
 
     this.setState(
       {
-        ...this.state,
         loaded: true,
         config,
       },
@@ -45,7 +47,6 @@ export default class Settings extends React.Component<
   async toggleBitScreen(): Promise<void> {
     this.setState(
       {
-        ...this.state,
         config: {
           ...this.state.config,
           bitscreen: !this.state.config.bitscreen,
@@ -60,7 +61,6 @@ export default class Settings extends React.Component<
   async toggleShare(): Promise<void> {
     this.setState(
       {
-        ...this.state,
         config: {
           ...this.state.config,
           share: !this.state.config.share,
@@ -75,10 +75,38 @@ export default class Settings extends React.Component<
   async toggleAdvanced(): Promise<void> {
     this.setState(
       {
-        ...this.state,
         config: {
           ...this.state.config,
-          advanced: !this.state.config.advanced,
+          advanced: {
+            ...this.state.config.advanced,
+            enabled: !this.state.config.advanced.enabled,
+          },
+        },
+      },
+      () => {
+        void this.putConfig();
+      }
+    );
+  }
+
+  async toggleAdvancedFilter(filterName: string): Promise<void> {
+    console.log(filterName);
+    let list = this.state.config.advanced.list;
+
+    if (list.includes(filterName)) {
+      list = list.filter((e) => e !== filterName);
+    } else {
+      list.push(filterName);
+    }
+
+    this.setState(
+      {
+        config: {
+          ...this.state.config,
+          advanced: {
+            ...this.state.config.advanced,
+            list: list,
+          },
         },
       },
       () => {
@@ -201,7 +229,7 @@ export default class Settings extends React.Component<
                       type="switch"
                       id="enhanced-filtering"
                       label="Use enhanced filtering"
-                      checked={this.state.config.advanced}
+                      checked={this.state.config.advanced.enabled}
                       onChange={() => this.toggleAdvanced()}
                     />
                     <p className="text-dim">
@@ -209,18 +237,35 @@ export default class Settings extends React.Component<
                       databases
                     </p>
 
-                    {this.state.config.advanced ? (
+                    {this.state.config.advanced.enabled ? (
                       <>
                         <FormCheck
                           type="checkbox"
                           label="Audible Magic (Copyrighted Music)"
+                          checked={this.state.config.advanced.list.includes(
+                            "audibleMagic"
+                          )}
+                          onChange={() =>
+                            this.toggleAdvancedFilter("audibleMagic")
+                          }
                         />
 
-                        <FormCheck type="checkbox" label="PhotoDNA (CSAM)" />
+                        <FormCheck
+                          type="checkbox"
+                          label="PhotoDNA (CSAM)"
+                          checked={this.state.config.advanced.list.includes(
+                            "photoDNA"
+                          )}
+                          onChange={() => this.toggleAdvancedFilter("photoDNA")}
+                        />
 
                         <FormCheck
                           type="checkbox"
                           label="GIFCT (Terrorist Content)"
+                          checked={this.state.config.advanced.list.includes(
+                            "GIFCT"
+                          )}
+                          onChange={() => this.toggleAdvancedFilter("GIFCT")}
                         />
                       </>
                     ) : null}

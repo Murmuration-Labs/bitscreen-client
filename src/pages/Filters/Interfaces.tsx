@@ -80,9 +80,14 @@ export interface Filters {
   external: boolean;
 }
 
+export interface AdvancedFilters {
+  enabled: boolean;
+  list: string[];
+}
+
 export interface Config {
   bitscreen: boolean;
   share: boolean;
-  advanced: boolean;
+  advanced: AdvancedFilters;
   filters: Filters;
 }
