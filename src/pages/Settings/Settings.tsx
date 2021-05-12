@@ -1,39 +1,38 @@
-import React, { SyntheticEvent } from "react";
+import React, { ComponentType, FormEvent } from "react";
 
-import {
-  Col,
-  Container,
-  FormCheck,
-  Row,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-bootstrap";
+import { Col, Container, FormCheck, FormGroup, Row } from "react-bootstrap";
 import "./Settings.css";
 import { serverUri } from "../../config";
+import { SettingsProps, SettingsState } from "../Filters/Interfaces";
 
-enum Filters {
-  Unknown,
-  Internal,
-  External,
-}
+export default class Settings extends React.Component<
+  ComponentType<SettingsProps>,
+  SettingsState
+> {
+  constructor(props: ComponentType<SettingsProps>) {
+    super(props);
 
-type SettingsProps = {};
+    this.state = {
+      loaded: false,
+      config: {
+        bitscreen: false,
+        share: false,
+        advanced: {
+          enabled: false,
+          list: [],
+        },
+        filters: {
+          external: false,
+          internal: false,
+        },
+      },
+    };
+  }
 
-export default class Settings extends React.Component<SettingsProps, any> {
-  state = {
-    loaded: false,
-    config: {
-      bitscreen: false,
-      share: false,
-      advanced: false,
-      filter: Filters.Unknown,
-    },
-  };
-
-  async componentDidMount() {
-    const config = await fetch(
-      `${serverUri()}/config`
-    ).then((response) => response.json());
+  async componentDidMount(): Promise<void> {
+    const config = await fetch(`${serverUri()}/config`).then((response) =>
+      response.json()
+    );
     console.log("config", config);
 
     this.setState(
@@ -45,7 +44,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleBitScreen() {
+  async toggleBitScreen(): Promise<void> {
     this.setState(
       {
         config: {
@@ -59,7 +58,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleShare() {
+  async toggleShare(): Promise<void> {
     this.setState(
       {
         config: {
@@ -73,12 +72,15 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async toggleAdvanced() {
+  async toggleAdvanced(): Promise<void> {
     this.setState(
       {
         config: {
           ...this.state.config,
-          advanced: !this.state.config.advanced,
+          advanced: {
+            ...this.state.config.advanced,
+            enabled: !this.state.config.advanced.enabled,
+          },
         },
       },
       () => {
@@ -87,11 +89,25 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async setFilter(event: SyntheticEvent) {
-    console.log(event);
+  async toggleAdvancedFilter(filterName: string): Promise<void> {
+    console.log(filterName);
+    let list = this.state.config.advanced.list;
+
+    if (list.includes(filterName)) {
+      list = list.filter((e) => e !== filterName);
+    } else {
+      list.push(filterName);
+    }
+
     this.setState(
       {
-        filter: event,
+        config: {
+          ...this.state.config,
+          advanced: {
+            ...this.state.config.advanced,
+            list: list,
+          },
+        },
       },
       () => {
         void this.putConfig();
@@ -99,7 +115,25 @@ export default class Settings extends React.Component<SettingsProps, any> {
     );
   }
 
-  async putConfig() {
+  async setFilter(
+    event: FormEvent<HTMLDivElement>,
+    filterName: string
+  ): Promise<void> {
+    event.persist();
+    const config = this.state.config;
+    config.filters[filterName] = !config.filters[filterName];
+
+    this.setState(
+      {
+        config: { ...config },
+      },
+      () => {
+        void this.putConfig();
+      }
+    );
+  }
+
+  async putConfig(): Promise<void> {
     const config = { ...this.state.config };
 
     console.log("putting config", config);
@@ -115,7 +149,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
     console.log("config set", config);
   }
 
-  render() {
+  render(): JSX.Element {
     return (
       <Container>
         {this.state.loaded ? (
@@ -142,20 +176,35 @@ export default class Settings extends React.Component<SettingsProps, any> {
               <>
                 <Row className={"settings-block"}>
                   <Col>
-                    <ToggleButtonGroup
-                      vertical
-                      name={"select-filter"}
-                      type="radio"
-                      value={this.state.config.filter}
-                      onChange={(evt: SyntheticEvent) => this.setFilter(evt)}
-                    >
-                      <ToggleButton value={Filters.Internal}>
-                        Filter CIDs blocked by any node
-                      </ToggleButton>
-                      <ToggleButton value={Filters.External}>
-                        Filter CIDs on my custom lists
-                      </ToggleButton>
-                    </ToggleButtonGroup>
+                    <h4>Filter CIDs</h4>
+                    <FormGroup controlId={"external"}>
+                      <FormCheck
+                        checked={
+                          this.state.config.filters
+                            ? this.state.config.filters.external
+                            : false
+                        }
+                        onChange={(evt: FormEvent<HTMLDivElement>) =>
+                          this.setFilter(evt, "external")
+                        }
+                        type="checkbox"
+                        label="blocked by any node"
+                      />
+                    </FormGroup>
+                    <FormGroup controlId={"internal"}>
+                      <FormCheck
+                        checked={
+                          this.state.config.filters
+                            ? this.state.config.filters.internal
+                            : false
+                        }
+                        onChange={(evt: FormEvent<HTMLDivElement>) =>
+                          this.setFilter(evt, "internal")
+                        }
+                        type="checkbox"
+                        label="on my custom lists"
+                      />
+                    </FormGroup>
                   </Col>
                 </Row>
 
@@ -180,7 +229,7 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       type="switch"
                       id="enhanced-filtering"
                       label="Use enhanced filtering"
-                      checked={this.state.config.advanced}
+                      checked={this.state.config.advanced.enabled}
                       onChange={() => this.toggleAdvanced()}
                     />
                     <p className="text-dim">
@@ -188,18 +237,35 @@ export default class Settings extends React.Component<SettingsProps, any> {
                       databases
                     </p>
 
-                    {this.state.config.advanced ? (
+                    {this.state.config.advanced.enabled ? (
                       <>
                         <FormCheck
                           type="checkbox"
                           label="Audible Magic (Copyrighted Music)"
+                          checked={this.state.config.advanced.list.includes(
+                            "audibleMagic"
+                          )}
+                          onChange={() =>
+                            this.toggleAdvancedFilter("audibleMagic")
+                          }
                         />
 
-                        <FormCheck type="checkbox" label="PhotoDNA (CSAM)" />
+                        <FormCheck
+                          type="checkbox"
+                          label="PhotoDNA (CSAM)"
+                          checked={this.state.config.advanced.list.includes(
+                            "photoDNA"
+                          )}
+                          onChange={() => this.toggleAdvancedFilter("photoDNA")}
+                        />
 
                         <FormCheck
                           type="checkbox"
                           label="GIFCT (Terrorist Content)"
+                          checked={this.state.config.advanced.list.includes(
+                            "GIFCT"
+                          )}
+                          onChange={() => this.toggleAdvancedFilter("GIFCT")}
                         />
                       </>
                     ) : null}
