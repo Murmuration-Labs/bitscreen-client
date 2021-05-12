@@ -166,8 +166,9 @@ function FilterPage(props) {
                         + new CID
                       </Button>
                       <ListGroup style={{ width: "100%", height: 500 }}>
-                        {cidItems.map((item: CidItem) => (
+                        {cidItems.map((item: CidItem, index: number) => (
                           <CidItemRender
+                            index={index}
                             key={item.id.toString()}
                             cidItem={item}
                             saveItem={saveItem}
