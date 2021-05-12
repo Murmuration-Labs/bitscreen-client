@@ -1,5 +1,5 @@
 import { Request, Response, Application } from "express";
-import { mkdirSync, writeFile, openSync, readFileSync } from "fs";
+import { mkdirSync, writeFile, openSync, readFileSync, existsSync } from "fs";
 
 import * as db from "./db";
 
@@ -14,10 +14,8 @@ const basePath = path.join(process.env.HOME || "", ".murmuration");
 const configPath = path.join(basePath, "config");
 const filterPath = path.join(basePath, "bitscreen");
 
-try {
+if (!existsSync(basePath)) {
   mkdirSync(basePath);
-} catch (e) {
-  console.log(e);
 }
 
 try {
