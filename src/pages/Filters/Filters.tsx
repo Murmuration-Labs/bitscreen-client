@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  FormCheck,
+  Row,
+  Table,
+} from "react-bootstrap";
 import "./Filters.css";
 import { serverUri } from "../../config";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/fontawesome-free-solid";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faAtom } from "@fortawesome/free-solid-svg-icons";
 
 function Filters(): JSX.Element {
   const emptyFilterList = (): FilterList => {
@@ -37,6 +49,74 @@ function Filters(): JSX.Element {
           [{translateVisibility(props.visibility)}:
           {props.cids ? props.cids.length : 0} items]
         </span>
+      </div>
+    );
+  };
+
+  const CIDFilterRevamped = (): JSX.Element => {
+    return (
+      <div className={"card"}>
+        <div className={"card-container"}>
+          <Table>
+            <thead>
+              <tr>
+                <th>Filter name</th>
+                <th>Scope</th>
+                <th>Shared?</th>
+                <th># of CIDs</th>
+                <th>Enabled?</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Test filter 1</td>
+                <td style={{ textAlign: "center" }}>
+                  <FontAwesomeIcon icon={faEye as IconProp} color={"green"} />
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  <FontAwesomeIcon icon={faAtom as IconProp} />
+                </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    color: "blue",
+                    fontWeight: "bold",
+                  }}
+                >
+                  5
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  <FormCheck type="switch" checked={true} />
+                </td>
+                <td>other actions</td>
+              </tr>
+              <tr>
+                <td>Test filter 2</td>
+                <td style={{ textAlign: "center" }}>
+                  <FontAwesomeIcon
+                    icon={faEyeSlash as IconProp}
+                    color={"red"}
+                  />
+                </td>
+                <td style={{ textAlign: "center" }}> </td>
+                <td
+                  style={{
+                    textAlign: "center",
+                    color: "blue",
+                    fontWeight: "bold",
+                  }}
+                >
+                  3
+                </td>
+                <td style={{ textAlign: "center" }}>
+                  <FormCheck type="switch" checked={false} />
+                </td>
+                <td>other actions</td>
+              </tr>
+            </tbody>
+          </Table>
+        </div>
       </div>
     );
   };
@@ -134,6 +214,12 @@ function Filters(): JSX.Element {
                     <CIDFilter {...fl} />
                   </div>
                 ))}
+              </Col>
+            </Row>
+
+            <Row>
+              <Col>
+                <CIDFilterRevamped />
               </Col>
             </Row>
           </Container>
