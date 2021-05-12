@@ -29,8 +29,14 @@ try {
     JSON.stringify({
       bitscreen: false,
       share: false,
-      advanced: false,
-      filter: "",
+      advanced: {
+        enabled: false,
+        list: [],
+      },
+      filters: {
+        internal: false,
+        external: false,
+      },
     }),
     // eslint-disable-next-line no-undef
     (err: NodeJS.ErrnoException | null) => {
