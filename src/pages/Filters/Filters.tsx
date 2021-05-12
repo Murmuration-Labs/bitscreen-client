@@ -6,7 +6,7 @@ import { serverUri } from "../../config";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 
 function Filters(): JSX.Element {
-  const emptyFilterList = () => {
+  const emptyFilterList = (): FilterList => {
     return {
       _id: 0,
       name: "",
@@ -82,6 +82,20 @@ function Filters(): JSX.Element {
     console.log("filters set", JSON.stringify(filterLists));
   };
 
+  const newFilterId = () => {
+    const l = [emptyFilterList()].concat(filterLists);
+    const ids = l.map((fl: FilterList) => fl._id);
+    console.log("newfilterId: ids=" + ids);
+    let id = 0;
+    for (const i of ids) {
+      if (i != null && i > id) {
+        id = i;
+      }
+    }
+    console.log("new filter id: " + (id + 1));
+    return (id + 1).toString();
+  };
+
   return (
     <>
       {loaded ? (
@@ -101,7 +115,10 @@ function Filters(): JSX.Element {
                 </Form>
               </Col>
               <Col className="text-right">
-                <Link className="btn-light" to={`/filters/add/`}>
+                <Link
+                  className="btn-light"
+                  to={(location) => `${location.pathname}/add/${newFilterId()}`}
+                >
                   + new Filter
                 </Link>
                 <Link className="btn-light" to={`/filters/add/`}>

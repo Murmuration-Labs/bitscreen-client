@@ -23,30 +23,6 @@ function FilterPage(props) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [filterList, setFilterList] = useState<FilterList>(emptyFilterList);
 
-  const initFilter = (id: number): void => {
-    fetch(`${serverUri()}/filters`)
-      .then((filters) => filters.json())
-      .then((filterLists: FilterList[]) => {
-        console.log("filters loaded ", id, JSON.stringify(filterLists));
-        filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
-        if (filterLists.length === 0) {
-          filterLists.push({ ...filterList, _id: id });
-        }
-        console.log("editing filter ", JSON.stringify(filterLists));
-        setFilterList(filterLists[0]);
-        setCidItems(
-          filterLists[0].cids.map((cid: string, index: number) => {
-            return { cid, id: index, edit: false };
-          })
-        );
-        setLoaded(true);
-      });
-  };
-
-  useEffect(() => {
-    void initFilter(props.match.params.id);
-  }, []);
-
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
     if (!fl) {
       fl = filterList;
@@ -63,6 +39,47 @@ function FilterPage(props) {
     console.log("filterList updated", JSON.stringify(fl));
     return fl;
   };
+
+  const createNewFilter = async (fl: FilterList) => {
+    fetch(`${serverUri()}/filters`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(fl),
+    }).then(() => {
+      console.log("new filterList saved: ", JSON.stringify(fl));
+    });
+  };
+
+  const initFilter = (id: number): void => {
+    fetch(`${serverUri()}/filters`)
+      .then((filters) => filters.json())
+      .then((filterLists: FilterList[]) => {
+        console.log("filters loaded ", id, JSON.stringify(filterLists));
+        filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
+        if (filterLists.length === 0) {
+          filterLists.push({
+            ...filterList,
+            _id: id,
+            name: `New filter (${id})`,
+          });
+          createNewFilter(filterLists[0]);
+        }
+        console.log("editing filter ", JSON.stringify(filterLists));
+        setFilterList(filterLists[0]);
+        setCidItems(
+          filterLists[0].cids.map((cid: string, index: number) => {
+            return { cid, id: index, edit: false };
+          })
+        );
+        setLoaded(true);
+      });
+  };
+
+  useEffect(() => {
+    void initFilter(props.match.params.id);
+  }, []);
 
   const saveFilter = (fl?: FilterList) => {
     if (!fl) {
