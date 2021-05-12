@@ -11,6 +11,7 @@ import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
 import { Col, Container, Row } from "react-bootstrap";
 import "./App.css";
+import FilterPage from "./Filters/FilterPage";
 
 interface MatchParams {
   id: string;
@@ -30,6 +31,9 @@ function App(): JSX.Element {
           <Col md={10} sm={9} className={"stage"}>
             <Route path="/settings" exact component={Settings} />
             <Route path="/filters" exact component={Filters} />
+            <Route path="/filters/add/:id" exact component={FilterPage} />
+            <Route path="/filters/edit/:id" exact component={FilterPage} />
+            {/*<Route path="/filters/import" exact component={FilterPage} />*/}
             <Route exact path="/">
               <Redirect to="/settings" />
             </Route>

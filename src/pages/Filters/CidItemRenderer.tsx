@@ -31,14 +31,14 @@ export default class CidItemRender extends React.Component<
     return item;
   }
   enterEdit = (): void => {
-    console.info("endterEdit");
+    console.info("enterEdit");
     if (this.state.item != null) {
-      console.info("endterEdit" + this.state.item.edit.toString());
+      console.info("enterEdit" + this.state.item.edit.toString());
       this.setState({ item: { ...this.state.item, edit: true } });
     }
   };
   cancelEdit = (): void => {
-    this.setState({ item: { ...this.state.item, edit: false } });
+    this.setState({ item: { ...this.props.cidItem, edit: false } });
   };
   handleChange = (e: ChangeEvent<HTMLInputElement>, field: string): void => {
     e.preventDefault();

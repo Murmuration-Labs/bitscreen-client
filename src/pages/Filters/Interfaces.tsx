@@ -14,7 +14,16 @@ export enum Visibility {
   ThirdParty,
 }
 
+export function mapVisibilityString(visibilityStr: string): Visibility {
+  if (visibilityStr === "Private") return Visibility.Private;
+  if (visibilityStr === "Public") return Visibility.Public;
+  if (visibilityStr === "ThirdParty") return Visibility.ThirdParty;
+
+  return Visibility.None;
+}
+
 export interface CidItem {
+  id: number;
   cid: string;
   edit: boolean;
 }

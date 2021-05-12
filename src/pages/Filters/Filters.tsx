@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import "./Filters.css";
 import { serverUri } from "../../config";
-import CustomFilterModal from "./Filter";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 
 function Filters(): JSX.Element {
@@ -20,45 +20,10 @@ function Filters(): JSX.Element {
   const [filtersCache, setFiltersCache] = useState<string>("");
 
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [showAdd, setShowAdd] = useState<boolean>(false);
-  const [showEdit, setShowEdit] = useState<boolean>(false);
-  const [showImport, setShowImport] = useState(false);
-
   const [currentFilterList, setCurrentFilterList] = useState<FilterList>(
     emptyFilterList()
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [id, setId] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [name, setName] = useState<string>("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [cids, setCids] = useState<string[]>([]);
-  const [enabled, setEnabled] = useState<boolean>(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [visibility, setVisibility] = useState<string>(
-    VisibilityString[Visibility.Private]
-  );
-
-  const handleShowImport = () => setShowImport(true);
-  const handleCloseImport = () => setShowImport(false);
-  const handleCloseEdit = () => setShowEdit(false);
-  const handleCloseAdd = () => setShowAdd(false);
-
-  const handleShowAdd = () => {
-    setCurrentFilterList(emptyFilterList());
-    setShowAdd(true);
-  };
-
-  const showEditModal = (filterList: FilterList) => {
-    if (filterList._id) {
-      setId(filterList._id);
-    }
-    setCurrentFilterList(filterList);
-    setShowEdit(true);
-    console.log(
-      "showEditModal " + name + cids + filterList.name + filterList.cids
-    );
-  };
+  // const [enabled, setEnabled] = useState<boolean>(true);
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
@@ -67,13 +32,7 @@ function Filters(): JSX.Element {
   const CIDFilter = (props: FilterList) => {
     return (
       <div>
-        <a
-          onClick={() => {
-            showEditModal(props);
-          }}
-        >
-          {props.name}
-        </a>
+        <Link to={`/filters/edit/${props._id}`}>{props.name}</Link>
         <span className={"ml-1 text-dim"}>
           [{translateVisibility(props.visibility)}:
           {props.cids ? props.cids.length : 0} items]
@@ -123,58 +82,6 @@ function Filters(): JSX.Element {
     console.log("filters set", JSON.stringify(filterLists));
   };
 
-  const saveFilter = () => {
-    handleCloseEdit();
-
-    putFilters().then(async () => {
-      await getFilters();
-
-      // be kind rewind
-      setCurrentFilterList(emptyFilterList());
-      console.log("filter saved " + name + cids);
-    });
-  };
-
-  const addFilter = () => {
-    handleCloseAdd();
-
-    postFilters().then(async () => {
-      await getFilters();
-
-      // be kind rewind
-      setCurrentFilterList(emptyFilterList());
-      console.log("filter added " + name + cids);
-    });
-  };
-
-  const importFilter = () => {
-    handleCloseImport();
-
-    // todo: implement
-
-    console.log("filter imported");
-  };
-
-  const modalEntered = (): void => {
-    return;
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const toggleEnabled = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentFilterList({
-      ...currentFilterList,
-      enabled: !currentFilterList.enabled,
-    });
-    setEnabled(!enabled);
-  };
-
-  // const cidsChanged = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   event.preventDefault();
-  const updateCurrentFileList = (filterList: FilterList) => {
-    setCurrentFilterList({ ...currentFilterList, ...filterList });
-    console.log("current cids updated to: " + cids);
-  };
-
   return (
     <>
       {loaded ? (
@@ -194,12 +101,12 @@ function Filters(): JSX.Element {
                 </Form>
               </Col>
               <Col className="text-right">
-                <Button className="btn-light" onClick={handleShowAdd}>
+                <Link className="btn-light" to={`/filters/add/`}>
                   + new Filter
-                </Button>
-                <Button className="btn-light" onClick={handleShowImport}>
+                </Link>
+                <Link className="btn-light" to={`/filters/add/`}>
                   Import Filter
-                </Button>
+                </Link>
               </Col>
             </Row>
 
@@ -213,56 +120,6 @@ function Filters(): JSX.Element {
               </Col>
             </Row>
           </Container>
-
-          <CustomFilterModal
-            {...{
-              show: showEdit,
-              title: "Edit filter",
-              handleClose: handleCloseEdit,
-              save: saveFilter,
-              modalEntered,
-              dataChanged: updateCurrentFileList,
-              filterList: currentFilterList,
-            }}
-          />
-
-          <CustomFilterModal
-            {...{
-              show: showAdd,
-              title: "New custom filter",
-              handleClose: handleCloseAdd,
-              save: addFilter,
-              modalEntered,
-              dataChanged: updateCurrentFileList,
-              filterList: currentFilterList,
-            }}
-          />
-
-          <Modal show={showImport} onHide={handleCloseImport} centered={true}>
-            <Modal.Header closeButton>
-              <Modal.Title>Import Filter</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Row>
-                  <Col>
-                    <Form.Control type="text" placeholder="Share Link URL" />
-                    <Form.Label className={"text-dim"}>
-                      Input a URL to run a filter made by a 3rd party.
-                    </Form.Label>
-                  </Col>
-                </Form.Row>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseImport}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={importFilter}>
-                Import
-              </Button>
-            </Modal.Footer>
-          </Modal>
         </>
       ) : null}
     </>
