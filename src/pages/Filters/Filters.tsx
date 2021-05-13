@@ -8,14 +8,18 @@ import {
   FormCheck,
   Row,
   Table,
+  OverlayTrigger,
+  TooltipProps,
+  Tooltip,
 } from "react-bootstrap";
 import "./Filters.css";
-import { serverUri } from "../../config";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/fontawesome-free-solid";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faAtom } from "@fortawesome/free-solid-svg-icons";
+import ApiService from "../../services/ApiService";
+import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 
 function Filters(): JSX.Element {
   const emptyFilterList = (): FilterList => {
@@ -53,6 +57,28 @@ function Filters(): JSX.Element {
     );
   };
 
+  const adHocRandomBit = (): number => (Math.random() < 0.5 ? 0 : 1);
+
+  const CIDFilterShared = (): JSX.Element => {
+    if (adHocRandomBit()) {
+      return <FontAwesomeIcon icon={faAtom as IconProp} />;
+    }
+
+    return <></>;
+  };
+
+  const CIDFilterScope = (): JSX.Element => {
+    // in the future we will receive the scope flag in the function header
+    // and use that instead of random
+    // omitting param right now to pass linter
+
+    if (adHocRandomBit()) {
+      return <FontAwesomeIcon icon={faEye as IconProp} color={"green"} />;
+    }
+
+    return <FontAwesomeIcon icon={faEye as IconProp} color={"red"} />;
+  };
+
   const CIDFilterRevamped = (): JSX.Element => {
     return (
       <div className={"card"}>
@@ -69,51 +95,49 @@ function Filters(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Test filter 1</td>
-                <td style={{ textAlign: "center" }}>
-                  <FontAwesomeIcon icon={faEye as IconProp} color={"green"} />
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <FontAwesomeIcon icon={faAtom as IconProp} />
-                </td>
-                <td
-                  style={{
-                    textAlign: "center",
-                    color: "blue",
-                    fontWeight: "bold",
-                  }}
-                >
-                  5
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <FormCheck type="switch" checked={true} />
-                </td>
-                <td>other actions</td>
-              </tr>
-              <tr>
-                <td>Test filter 2</td>
-                <td style={{ textAlign: "center" }}>
-                  <FontAwesomeIcon
-                    icon={faEyeSlash as IconProp}
-                    color={"red"}
-                  />
-                </td>
-                <td style={{ textAlign: "center" }}> </td>
-                <td
-                  style={{
-                    textAlign: "center",
-                    color: "blue",
-                    fontWeight: "bold",
-                  }}
-                >
-                  3
-                </td>
-                <td style={{ textAlign: "center" }}>
-                  <FormCheck type="switch" checked={false} />
-                </td>
-                <td>other actions</td>
-              </tr>
+              {filterLists.map((filterList) => (
+                <tr key={`filterList-${filterList._id}`}>
+                  <td>{filterList.name}</td>
+                  <td style={{ textAlign: "center" }}>
+                    <CIDFilterScope />
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <CIDFilterShared />
+                  </td>
+                  <td>
+                    <OverlayTrigger
+                      placement="right"
+                      delay={{ show: 150, hide: 500 }}
+                      transition={false}
+                      overlay={(props: OverlayInjectedProps): JSX.Element => (
+                        <Tooltip id="button-tooltip" {...props}>
+                          {filterList.cids.map((cid, index) => (
+                            <p key={`cid-${filterList._id}-${index}`}>{cid}</p>
+                          ))}
+                        </Tooltip>
+                      )}
+                    >
+                      <span
+                        style={{
+                          textAlign: "center",
+                          color: "blue",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {filterList.cids ? filterList.cids.length : 0}
+                      </span>
+                    </OverlayTrigger>
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    <FormCheck
+                      type="switch"
+                      readOnly
+                      checked={filterList.enabled}
+                    />
+                  </td>
+                  <td>other actions</td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </div>
@@ -122,11 +146,11 @@ function Filters(): JSX.Element {
   };
 
   const getFilters = async () => {
-    const filters = await fetch(`${serverUri()}/filters`);
-    const filterLists: FilterList[] = await filters.json();
+    const filterLists: FilterList[] = await ApiService.getFilters();
+
     setFilterLists(filterLists);
     setFiltersCache(JSON.stringify(filterLists));
-    console.log("filters loaded", JSON.stringify(filterLists));
+
     setLoaded(true);
   };
 
@@ -138,28 +162,16 @@ function Filters(): JSX.Element {
     if (filterLists.length === 0) return;
     if (JSON.stringify(filterLists) === filtersCache) return;
 
-    await fetch(`${serverUri()}/filters`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(currentFilterList),
-    });
+    await ApiService.updateFilter(currentFilterList);
+
     setFiltersCache(JSON.stringify(filterLists));
-    console.log("filterList updated", JSON.stringify(currentFilterList));
   };
 
   const postFilters = async () => {
-    await fetch(`${serverUri()}/filters`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(currentFilterList),
-    });
+    await ApiService.addFilter(currentFilterList);
+
     setCurrentFilterList(emptyFilterList());
     setFiltersCache(JSON.stringify(filterLists));
-    console.log("filters set", JSON.stringify(filterLists));
   };
 
   const newFilterId = () => {
@@ -207,15 +219,15 @@ function Filters(): JSX.Element {
               </Col>
             </Row>
 
-            <Row>
-              <Col>
-                {filterLists.map((fl, i) => (
-                  <div className={"mt-1"} key={`${fl.name}-${i}`}>
-                    <CIDFilter {...fl} />
-                  </div>
-                ))}
-              </Col>
-            </Row>
+            {/*<Row>*/}
+            {/*  <Col>*/}
+            {/*    {filterLists.map((fl) => (*/}
+            {/*      <div className={"mt-1"} key={`filters-${fl._id}`}>*/}
+            {/*        <CIDFilter {...fl} />*/}
+            {/*      </div>*/}
+            {/*    ))}*/}
+            {/*  </Col>*/}
+            {/*</Row>*/}
 
             <Row>
               <Col>
