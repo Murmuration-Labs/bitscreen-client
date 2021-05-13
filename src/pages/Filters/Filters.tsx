@@ -9,7 +9,6 @@ import {
   Row,
   Table,
   OverlayTrigger,
-  TooltipProps,
   Tooltip,
 } from "react-bootstrap";
 import "./Filters.css";
@@ -55,6 +54,22 @@ function Filters(): JSX.Element {
         </span>
       </div>
     );
+  };
+
+  const getFilters = async () => {
+    const filterLists: FilterList[] = await ApiService.getFilters();
+
+    setFilterLists(filterLists);
+    setFiltersCache(JSON.stringify(filterLists));
+
+    setLoaded(true);
+  };
+
+  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
+    console.log("in toggle");
+    filterList.enabled = !filterList.enabled;
+    await ApiService.updateFilter(filterList);
+    await getFilters();
   };
 
   const adHocRandomBit = (): number => (Math.random() < 0.5 ? 0 : 1);
@@ -129,11 +144,13 @@ function Filters(): JSX.Element {
                     </OverlayTrigger>
                   </td>
                   <td style={{ textAlign: "center" }}>
-                    <FormCheck
-                      type="switch"
-                      readOnly
-                      checked={filterList.enabled}
-                    />
+                    <div onClick={() => toggleFilterEnabled(filterList)}>
+                      <FormCheck
+                        readOnly
+                        type="switch"
+                        checked={filterList.enabled}
+                      />
+                    </div>
                   </td>
                   <td>other actions</td>
                 </tr>
@@ -143,15 +160,6 @@ function Filters(): JSX.Element {
         </div>
       </div>
     );
-  };
-
-  const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters();
-
-    setFilterLists(filterLists);
-    setFiltersCache(JSON.stringify(filterLists));
-
-    setLoaded(true);
   };
 
   useEffect(() => {
