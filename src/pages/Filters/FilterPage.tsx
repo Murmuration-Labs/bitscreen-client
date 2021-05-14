@@ -179,7 +179,11 @@ function FilterPage(props) {
                   </Form.Row>
                   <Form.Row>
                     <Col>
-                      <Button className="btn-light" onClick={onNewCid}>
+                      <Button
+                        className="btn-light"
+                        style={{ marginBottom: 5 }}
+                        onClick={onNewCid}
+                      >
                         + new CID
                       </Button>
                       <ListGroup style={{ width: "100%", height: 500 }}>
