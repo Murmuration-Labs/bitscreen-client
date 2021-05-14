@@ -1,6 +1,7 @@
 import * as React from "react";
 import { CidItem, CidItemProps } from "./Interfaces";
 import { Button, Col, Form, ListGroup, Container, Row } from "react-bootstrap";
+import { RefObject } from "react";
 
 // function validateCid(cid: string): boolean{
 //     // :TODO: check length, check allowed characters
@@ -9,7 +10,7 @@ import { Button, Col, Form, ListGroup, Container, Row } from "react-bootstrap";
 
 export default class CidItemRender extends React.Component<
   CidItemProps,
-  { item: CidItem; cidInputRef: any }
+  { item: CidItem; cidInputRef: RefObject<any> }
 > {
   constructor(props: CidItemProps) {
     super(props);
