@@ -10,13 +10,13 @@ import { RefObject } from "react";
 
 export default class CidItemRender extends React.Component<
   CidItemProps,
-  { item: CidItem; cidInputRef: RefObject<any> }
+  { item: CidItem; cidInputRef: RefObject<HTMLInputElement> }
 > {
   constructor(props: CidItemProps) {
     super(props);
     this.state = {
       item: this.props.cidItem,
-      cidInputRef: React.createRef(),
+      cidInputRef: React.createRef<HTMLInputElement>(),
     };
 
     console.info("cidItemRenderer" + this.props.cidItem.cid);
@@ -40,15 +40,15 @@ export default class CidItemRender extends React.Component<
   };
   handleSave = (e: any): void => {
     e.preventDefault();
-    console.info("handleSave: ", this.state.cidInputRef.current.value);
+    const ref = this.state.cidInputRef.current;
+    const value = ref !== null ? ref.value : null;
+    console.info("handleSave: input value is ", value);
     let updatedItem: CidItem = { ...this.state.item };
-    updatedItem = CidItemRender.updateItemField(
-      "cid",
-      this.state.cidInputRef.current.value,
-      updatedItem
-    );
-    this.setState({ item: { ...updatedItem, edit: false } });
-    this.props.saveItem(updatedItem);
+    if (value !== null) {
+      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
+      this.setState({ item: { ...updatedItem, edit: false } });
+      this.props.saveItem(updatedItem);
+    }
   };
   handleDelete = (): void => {
     console.info("handleDelete");
