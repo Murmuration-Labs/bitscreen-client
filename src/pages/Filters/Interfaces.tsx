@@ -1,5 +1,5 @@
 export const VisibilityString: string[] = [
-  "",
+  "None",
   "Private",
   "Public",
   "ThirdParty",

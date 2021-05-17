@@ -89,6 +89,14 @@ export const update = async (table: string, _id: number, data: any) => {
   return await syncToDisk(data._id);
 };
 
+export const remove = async (table: string, _id: number) => {
+  forceExistingTable(table);
+  forceExistingEntry(table, _id);
+
+  delete dbFileData[table].data[_id];
+  return await syncToDisk(null);
+};
+
 export const find = async (table: string, _id: number) => {
   forceExistingTable(table);
   forceExistingEntry(table, _id);

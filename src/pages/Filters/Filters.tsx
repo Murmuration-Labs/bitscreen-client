@@ -10,15 +10,17 @@ import {
   Table,
   OverlayTrigger,
   Tooltip,
+  Badge,
 } from "react-bootstrap";
 import "./Filters.css";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/fontawesome-free-solid";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faAtom } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
 
 function Filters(): JSX.Element {
   const emptyFilterList = (): FilterList => {
@@ -44,17 +46,17 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  const CIDFilter = (props: FilterList) => {
-    return (
-      <div>
-        <Link to={`/filters/edit/${props._id}`}>{props.name}</Link>
-        <span className={"ml-1 text-dim"}>
-          [{translateVisibility(props.visibility)}:
-          {props.cids ? props.cids.length : 0} items]
-        </span>
-      </div>
-    );
-  };
+  // const CIDFilter = (props: FilterList) => {
+  //   return (
+  //     <div>
+  //       <Link to={`/filters/edit/${props._id}`}>{props.name}</Link>
+  //       <span className={"ml-1 text-dim"}>
+  //         [{translateVisibility(props.visibility)}:
+  //         {props.cids ? props.cids.length : 0} items]
+  //       </span>
+  //     </div>
+  //   );
+  // };
 
   const getFilters = async () => {
     const filterLists: FilterList[] = await ApiService.getFilters();
@@ -65,14 +67,43 @@ function Filters(): JSX.Element {
     setLoaded(true);
   };
 
+  const deleteFilter = async (id: number) => {
+    await ApiService.deleteFilter(id);
+
+    await getFilters();
+  };
+
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    console.log("in toggle");
     filterList.enabled = !filterList.enabled;
     await ApiService.updateFilter(filterList);
     await getFilters();
   };
 
-  const adHocRandomBit = (): number => (Math.random() < 0.5 ? 0 : 1);
+  const [show, setShow] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>("");
+  const [message, setMessage] = useState<string>("false");
+  const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
+    emptyFilterList()
+  );
+  const [confirmDeleteCallback, setConfirmDeleteCallback] = useState<
+    (result: boolean) => void
+  >((result = false) => {
+    console.log(typeof result);
+  });
+
+  const confirmDelete = (filterList: FilterList): void => {
+    setShow(true);
+    setDeletedFilterList(filterList);
+  };
+
+  useEffect(() => {
+    setTitle(`Delete filter ${deletedFilterList._id}`);
+    setMessage(
+      `Are you sure you want to delete filter "${deletedFilterList.name}?"`
+    );
+  }, [show, deletedFilterList]);
+
+  const adHocRandomBit = (): number => 0;
 
   const CIDFilterShared = (): JSX.Element => {
     if (adHocRandomBit()) {
@@ -82,16 +113,19 @@ function Filters(): JSX.Element {
     return <></>;
   };
 
-  const CIDFilterScope = (): JSX.Element => {
-    // in the future we will receive the scope flag in the function header
-    // and use that instead of random
-    // omitting param right now to pass linter
+  const CIDFilterScope = (props: FilterList): JSX.Element => {
+    const variantMapper = {
+      [Visibility.None]: "secondary",
+      [Visibility.Private]: "danger",
+      [Visibility.Public]: "success",
+      [Visibility.ThirdParty]: "warning",
+    };
 
-    if (adHocRandomBit()) {
-      return <FontAwesomeIcon icon={faEye as IconProp} color={"green"} />;
-    }
-
-    return <FontAwesomeIcon icon={faEye as IconProp} color={"red"} />;
+    return (
+      <Badge variant={variantMapper[props.visibility]}>
+        {translateVisibility(props.visibility)}
+      </Badge>
+    );
   };
 
   const CIDFilterRevamped = (): JSX.Element => {
@@ -113,10 +147,10 @@ function Filters(): JSX.Element {
               {filterLists.map((filterList) => (
                 <tr key={`filterList-${filterList._id}`}>
                   <td>{filterList.name}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <CIDFilterScope />
+                  <td>
+                    <CIDFilterScope {...filterList} />
                   </td>
-                  <td style={{ textAlign: "center" }}>
+                  <td>
                     <CIDFilterShared />
                   </td>
                   <td>
@@ -143,7 +177,7 @@ function Filters(): JSX.Element {
                       </span>
                     </OverlayTrigger>
                   </td>
-                  <td style={{ textAlign: "center" }}>
+                  <td>
                     <div onClick={() => toggleFilterEnabled(filterList)}>
                       <FormCheck
                         readOnly
@@ -152,7 +186,12 @@ function Filters(): JSX.Element {
                       />
                     </div>
                   </td>
-                  <td>other actions</td>
+                  <td>
+                    <FontAwesomeIcon
+                      icon={faTrash as IconProp}
+                      onClick={() => confirmDelete(filterList)}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -227,21 +266,24 @@ function Filters(): JSX.Element {
               </Col>
             </Row>
 
-            {/*<Row>*/}
-            {/*  <Col>*/}
-            {/*    {filterLists.map((fl) => (*/}
-            {/*      <div className={"mt-1"} key={`filters-${fl._id}`}>*/}
-            {/*        <CIDFilter {...fl} />*/}
-            {/*      </div>*/}
-            {/*    ))}*/}
-            {/*  </Col>*/}
-            {/*</Row>*/}
-
             <Row>
               <Col>
                 <CIDFilterRevamped />
               </Col>
             </Row>
+
+            <ConfirmModal
+              show={show}
+              title={title}
+              message={message}
+              callback={() => {
+                deleteFilter(deletedFilterList._id ? deletedFilterList._id : 0);
+              }}
+              closeCallback={() => {
+                setDeletedFilterList(emptyFilterList());
+                setShow(false);
+              }}
+            />
           </Container>
         </>
       ) : null}

@@ -1,9 +1,5 @@
 import axios from "axios";
-import {
-  FilterList,
-  Visibility,
-  VisibilityString,
-} from "../pages/Filters/Interfaces";
+import { FilterList } from "../pages/Filters/Interfaces";
 import { serverUri } from "../config";
 
 // For authentication purposes we will use axios.createInstance
@@ -22,6 +18,10 @@ const ApiService = {
   updateFilter: async (filterList: FilterList): Promise<FilterList[]> => {
     const response = await axios.put(`${serverUri()}/filters`, filterList);
     return response.data;
+  },
+
+  deleteFilter: async (id: number): Promise<void> => {
+    await axios.delete(`${serverUri()}/filters/${id}`);
   },
 };
 
