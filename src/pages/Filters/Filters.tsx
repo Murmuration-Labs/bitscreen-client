@@ -16,7 +16,7 @@ import "./Filters.css";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { faAtom } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
@@ -174,11 +174,13 @@ function Filters(): JSX.Element {
                       />
                     </div>
                   </td>
-                  <td>
-                    <FontAwesomeIcon
-                      icon={faTrash as IconProp}
-                      onClick={() => confirmDelete(filterList)}
-                    />
+                  <td style={{ textAlign: "justify" }}>
+                    <Link to="#" onClick={() => confirmDelete(filterList)}>
+                      <FontAwesomeIcon icon={faTrash as IconProp} />
+                    </Link>
+                    <Link to={`/filters/edit/${filterList._id}`}>
+                      <FontAwesomeIcon icon={faEdit as IconProp} />
+                    </Link>
                   </td>
                 </tr>
               ))}
