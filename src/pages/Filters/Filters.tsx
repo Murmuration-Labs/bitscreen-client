@@ -46,18 +46,6 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  // const CIDFilter = (props: FilterList) => {
-  //   return (
-  //     <div>
-  //       <Link to={`/filters/edit/${props._id}`}>{props.name}</Link>
-  //       <span className={"ml-1 text-dim"}>
-  //         [{translateVisibility(props.visibility)}:
-  //         {props.cids ? props.cids.length : 0} items]
-  //       </span>
-  //     </div>
-  //   );
-  // };
-
   const getFilters = async () => {
     const filterLists: FilterList[] = await ApiService.getFilters();
 
@@ -128,7 +116,7 @@ function Filters(): JSX.Element {
     );
   };
 
-  const CIDFilterRevamped = (): JSX.Element => {
+  const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card"}>
         <div className={"card-container"}>
@@ -268,7 +256,7 @@ function Filters(): JSX.Element {
 
             <Row>
               <Col>
-                <CIDFilterRevamped />
+                <CIDFilter />
               </Col>
             </Row>
 
