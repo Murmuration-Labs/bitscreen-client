@@ -105,6 +105,13 @@ app.get("/filters", (req: Request, res: Response) => {
     .catch((err) => res.send({ error: err }));
 });
 
+app.get("/search-filters", (req: Request, res: Response) => {
+  const searchTerm = req.query.search ? req.query.search.toString() : undefined;
+  db.searchFilter("bitscreen", searchTerm)
+    .then((data) => res.send(data))
+    .catch((err) => res.send({ error: err }));
+});
+
 app.post("/filters", (req: Request, res: Response) => {
   db.insert("bitscreen", req.body)
     .then((data) =>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Button,
   Col,
   Container,
   Form,
@@ -21,6 +20,7 @@ import { faAtom } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
+import debounce from "lodash.debounce";
 
 function Filters(): JSX.Element {
   const emptyFilterList = (): FilterList => {
@@ -46,8 +46,8 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters();
+  const getFilters = async (searchTerm?: string) => {
+    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
     setFiltersCache(JSON.stringify(filterLists));
@@ -82,6 +82,14 @@ function Filters(): JSX.Element {
   const confirmDelete = (filterList: FilterList): void => {
     setShow(true);
     setDeletedFilterList(filterList);
+  };
+
+  const debounceSearchFilters = debounce((searchTerm): void => {
+    getFilters(searchTerm);
+  }, 300);
+
+  const searchFilters = (event): void => {
+    debounceSearchFilters(event.target.value);
   };
 
   useEffect(() => {
@@ -235,11 +243,11 @@ function Filters(): JSX.Element {
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
-                    <Form.Control type="text" placeholder="Search CID" />
-                    <Form.Control as="select">
-                      <option>CID</option>
-                    </Form.Control>
-                    <Button>Search</Button>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search CID"
+                      onChange={searchFilters}
+                    />
                   </Form.Group>
                 </Form>
               </Col>
