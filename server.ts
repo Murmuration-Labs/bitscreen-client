@@ -122,7 +122,7 @@ app.post("/filters", (req: Request, res: Response) => {
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  db.update("bitscreen", req.body._id, req.body)
+  db.update("bitscreen", req.body)
     .then((data) =>
       res.send({
         success: true,
