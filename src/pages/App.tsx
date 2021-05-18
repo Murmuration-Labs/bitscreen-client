@@ -11,6 +11,8 @@ import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
 import { Col, Container, Row } from "react-bootstrap";
 import "./App.css";
+import "react-bootstrap-typeahead/css/Typeahead.css";
+
 import FilterPage from "./Filters/FilterPage";
 
 interface MatchParams {

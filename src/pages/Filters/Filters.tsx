@@ -21,24 +21,15 @@ import { faAtom } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
+import FilterService from "../../services/FilterService";
 
 function Filters(): JSX.Element {
-  const emptyFilterList = (): FilterList => {
-    return {
-      _id: 0,
-      name: "",
-      cids: [],
-      visibility: Visibility.Private,
-      enabled: true,
-    };
-  };
-
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
   const [filtersCache, setFiltersCache] = useState<string>("");
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [currentFilterList, setCurrentFilterList] = useState<FilterList>(
-    emptyFilterList()
+    FilterService.emptyFilterList()
   );
   // const [enabled, setEnabled] = useState<boolean>(true);
 
@@ -71,13 +62,8 @@ function Filters(): JSX.Element {
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("false");
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
-    emptyFilterList()
+    FilterService.emptyFilterList()
   );
-  const [confirmDeleteCallback, setConfirmDeleteCallback] = useState<
-    (result: boolean) => void
-  >((result = false) => {
-    console.log(typeof result);
-  });
 
   const confirmDelete = (filterList: FilterList): void => {
     setShow(true);
@@ -207,12 +193,12 @@ function Filters(): JSX.Element {
   const postFilters = async () => {
     await ApiService.addFilter(currentFilterList);
 
-    setCurrentFilterList(emptyFilterList());
+    setCurrentFilterList(FilterService.emptyFilterList());
     setFiltersCache(JSON.stringify(filterLists));
   };
 
   const newFilterId = () => {
-    const l = [emptyFilterList()].concat(filterLists);
+    const l = [FilterService.emptyFilterList()].concat(filterLists);
     const ids = l.map((fl: FilterList) => fl._id);
     console.log("newfilterId: ids=" + ids);
     let id = 0;
@@ -270,7 +256,7 @@ function Filters(): JSX.Element {
                 deleteFilter(deletedFilterList._id ? deletedFilterList._id : 0);
               }}
               closeCallback={() => {
-                setDeletedFilterList(emptyFilterList());
+                setDeletedFilterList(FilterService.emptyFilterList());
                 setShow(false);
               }}
             />

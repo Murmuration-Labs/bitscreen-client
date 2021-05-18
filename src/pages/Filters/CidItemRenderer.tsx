@@ -54,6 +54,9 @@ export default class CidItemRender extends React.Component<
     console.info("handleDelete");
     this.props.deleteItem(this.state.item);
   };
+  handleMovePress = (): void => {
+    this.props.beginMoveToDifferentFilter(this.state.item);
+  };
   render(): JSX.Element {
     return (
       <div key={this.state.item.cid}>
@@ -114,6 +117,15 @@ export default class CidItemRender extends React.Component<
                     onClick={this.handleDelete}
                   >
                     Delete
+                  </Button>
+                </Col>
+                <Col sm={2} md={2} lg={{ span: 1, offset: 20 }}>
+                  <Button
+                    variant="warning"
+                    className="k-button"
+                    onClick={this.handleMovePress}
+                  >
+                    Move
                   </Button>
                 </Col>
               </Row>
