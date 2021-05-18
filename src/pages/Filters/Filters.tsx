@@ -1,9 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  FormCheck,
+  Row,
+  Table,
+  OverlayTrigger,
+  Tooltip,
+  Badge,
+} from "react-bootstrap";
 import "./Filters.css";
-import { serverUri } from "../../config";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faAtom } from "@fortawesome/free-solid-svg-icons";
+import ApiService from "../../services/ApiService";
+import { OverlayInjectedProps } from "react-bootstrap/Overlay";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
 
 function Filters(): JSX.Element {
   const emptyFilterList = (): FilterList => {
@@ -29,25 +46,149 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  const CIDFilter = (props: FilterList) => {
+  const getFilters = async () => {
+    const filterLists: FilterList[] = await ApiService.getFilters();
+
+    setFilterLists(filterLists);
+    setFiltersCache(JSON.stringify(filterLists));
+
+    setLoaded(true);
+  };
+
+  const deleteFilter = async (id: number) => {
+    await ApiService.deleteFilter(id);
+
+    await getFilters();
+  };
+
+  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
+    filterList.enabled = !filterList.enabled;
+    await ApiService.updateFilter(filterList);
+    await getFilters();
+  };
+
+  const [show, setShow] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>("");
+  const [message, setMessage] = useState<string>("false");
+  const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
+    emptyFilterList()
+  );
+  const [confirmDeleteCallback, setConfirmDeleteCallback] = useState<
+    (result: boolean) => void
+  >((result = false) => {
+    console.log(typeof result);
+  });
+
+  const confirmDelete = (filterList: FilterList): void => {
+    setShow(true);
+    setDeletedFilterList(filterList);
+  };
+
+  useEffect(() => {
+    setTitle(`Delete filter ${deletedFilterList._id}`);
+    setMessage(
+      `Are you sure you want to delete filter "${deletedFilterList.name}?"`
+    );
+  }, [show, deletedFilterList]);
+
+  const adHocRandomBit = (): number => 0;
+
+  const CIDFilterShared = (): JSX.Element => {
+    if (adHocRandomBit()) {
+      return <FontAwesomeIcon icon={faAtom as IconProp} />;
+    }
+
+    return <></>;
+  };
+
+  const CIDFilterScope = (props: FilterList): JSX.Element => {
+    const variantMapper = {
+      [Visibility.None]: "secondary",
+      [Visibility.Private]: "danger",
+      [Visibility.Public]: "success",
+      [Visibility.ThirdParty]: "warning",
+    };
+
     return (
-      <div>
-        <Link to={`/filters/edit/${props._id}`}>{props.name}</Link>
-        <span className={"ml-1 text-dim"}>
-          [{translateVisibility(props.visibility)}:
-          {props.cids ? props.cids.length : 0} items]
-        </span>
-      </div>
+      <Badge variant={variantMapper[props.visibility]}>
+        {translateVisibility(props.visibility)}
+      </Badge>
     );
   };
 
-  const getFilters = async () => {
-    const filters = await fetch(`${serverUri()}/filters`);
-    const filterLists: FilterList[] = await filters.json();
-    setFilterLists(filterLists);
-    setFiltersCache(JSON.stringify(filterLists));
-    console.log("filters loaded", JSON.stringify(filterLists));
-    setLoaded(true);
+  const CIDFilter = (): JSX.Element => {
+    return (
+      <div className={"card"}>
+        <div className={"card-container"}>
+          <Table>
+            <thead>
+              <tr>
+                <th>Filter name</th>
+                <th>Scope</th>
+                <th>Shared?</th>
+                <th># of CIDs</th>
+                <th>Enabled?</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filterLists.map((filterList) => (
+                <tr key={`filterList-${filterList._id}`}>
+                  <td>{filterList.name}</td>
+                  <td>
+                    <CIDFilterScope {...filterList} />
+                  </td>
+                  <td>
+                    <CIDFilterShared />
+                  </td>
+                  <td>
+                    <OverlayTrigger
+                      placement="right"
+                      delay={{ show: 150, hide: 500 }}
+                      transition={false}
+                      overlay={(props: OverlayInjectedProps): JSX.Element => (
+                        <Tooltip id="button-tooltip" {...props}>
+                          {filterList.cids.map((cid, index) => (
+                            <p key={`cid-${filterList._id}-${index}`}>{cid}</p>
+                          ))}
+                        </Tooltip>
+                      )}
+                    >
+                      <span
+                        style={{
+                          textAlign: "center",
+                          color: "blue",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {filterList.cids ? filterList.cids.length : 0}
+                      </span>
+                    </OverlayTrigger>
+                  </td>
+                  <td>
+                    <div onClick={() => toggleFilterEnabled(filterList)}>
+                      <FormCheck
+                        readOnly
+                        type="switch"
+                        checked={filterList.enabled}
+                      />
+                    </div>
+                  </td>
+                  <td style={{ textAlign: "justify" }}>
+                    <Link to="#" onClick={() => confirmDelete(filterList)}>
+                      <FontAwesomeIcon icon={faTrash as IconProp} />
+                    </Link>
+                    <Link to={`/filters/edit/${filterList._id}`}>
+                      <FontAwesomeIcon icon={faEdit as IconProp} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -58,28 +199,16 @@ function Filters(): JSX.Element {
     if (filterLists.length === 0) return;
     if (JSON.stringify(filterLists) === filtersCache) return;
 
-    await fetch(`${serverUri()}/filters`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(currentFilterList),
-    });
+    await ApiService.updateFilter(currentFilterList);
+
     setFiltersCache(JSON.stringify(filterLists));
-    console.log("filterList updated", JSON.stringify(currentFilterList));
   };
 
   const postFilters = async () => {
-    await fetch(`${serverUri()}/filters`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(currentFilterList),
-    });
+    await ApiService.addFilter(currentFilterList);
+
     setCurrentFilterList(emptyFilterList());
     setFiltersCache(JSON.stringify(filterLists));
-    console.log("filters set", JSON.stringify(filterLists));
   };
 
   const newFilterId = () => {
@@ -129,13 +258,22 @@ function Filters(): JSX.Element {
 
             <Row>
               <Col>
-                {filterLists.map((fl, i) => (
-                  <div className={"mt-1"} key={`${fl.name}-${i}`}>
-                    <CIDFilter {...fl} />
-                  </div>
-                ))}
+                <CIDFilter />
               </Col>
             </Row>
+
+            <ConfirmModal
+              show={show}
+              title={title}
+              message={message}
+              callback={() => {
+                deleteFilter(deletedFilterList._id ? deletedFilterList._id : 0);
+              }}
+              closeCallback={() => {
+                setDeletedFilterList(emptyFilterList());
+                setShow(false);
+              }}
+            />
           </Container>
         </>
       ) : null}

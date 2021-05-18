@@ -137,4 +137,19 @@ app.put("/filters", (req: Request, res: Response) => {
     });
 });
 
+app.delete("/filters/:id", (req: Request, res: Response) => {
+  db.remove("bitscreen", parseInt(req.params.id))
+    .then(() => {
+      res.send({
+        success: true,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send({
+        success: false,
+      });
+    });
+});
+
 app.listen(process.env.PORT || 3030);
