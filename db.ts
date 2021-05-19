@@ -77,14 +77,20 @@ export const insert = async (table: string, data: any) => {
   return await syncToDisk(data._id);
 };
 
-export const update = async (table: string, _id: number, data: any) => {
-  forceExistingTable(table);
-  forceExistingEntry(table, _id);
+export const update = async (table: string, data: any) => {
+  if (!Array.isArray(data)) {
+    data = [data];
+  }
 
-  dbFileData[table].data[data._id] = {
-    ...dbFileData[table].data[data._id], // keep old values
-    ...data, // overwrite new
-  };
+  for (let i = 0; i < data.length; i++) {
+    forceExistingTable(table);
+    forceExistingEntry(table, data[i]._id);
+
+    dbFileData[table].data[data[i]._id] = {
+      ...dbFileData[table].data[data[i]._id], // keep old values
+      ...data[i], // overwrite new
+    };
+  }
 
   return await syncToDisk(data._id);
 };

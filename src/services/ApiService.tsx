@@ -18,7 +18,9 @@ const ApiService = {
     await axios.post(`${serverUri()}/filters`, filterList);
   },
 
-  updateFilter: async (filterList: FilterList): Promise<FilterList[]> => {
+  updateFilter: async (
+    filterList: FilterList | FilterList[]
+  ): Promise<FilterList[]> => {
     const response = await axios.put(`${serverUri()}/filters`, filterList);
     return response.data;
   },

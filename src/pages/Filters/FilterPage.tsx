@@ -3,78 +3,64 @@ import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import {
   CidItem,
   FilterList,
-  Visibility,
   VisibilityString,
   mapVisibilityString,
 } from "./Interfaces";
 import "./Filters.css";
-import { serverUri } from "../../config";
 import CidItemRender from "./CidItemRenderer";
+import MoveCIDModal from "./MoveCIDModal";
+import ApiService from "../../services/ApiService";
+import FilterService from "../../services/FilterService";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
-  const emptyFilterList: FilterList = {
-    cids: [],
-    _id: 0,
-    name: "",
-    enabled: true,
-    visibility: Visibility.Private,
+
+  const emptyCidItem: CidItem = {
+    id: 0,
+    cid: "",
+    edit: false,
   };
+
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [filterList, setFilterList] = useState<FilterList>(emptyFilterList);
+  const [filterList, setFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
 
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
     if (!fl) {
       fl = filterList;
     }
+
     if (!fl) return fl;
-    console.log("putFilters: " + fl.cids + JSON.stringify(fl));
-    await fetch(`${serverUri()}/filters`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(fl),
-    });
-    console.log("filterList updated", JSON.stringify(fl));
+
+    await ApiService.updateFilter(fl);
+
     return fl;
   };
 
   const createNewFilter = async (fl: FilterList) => {
-    fetch(`${serverUri()}/filters`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(fl),
-    }).then(() => {
-      console.log("new filterList saved: ", JSON.stringify(fl));
-    });
+    await ApiService.addFilter(fl);
   };
 
   const initFilter = (id: number): void => {
-    fetch(`${serverUri()}/filters`)
-      .then((filters) => filters.json())
-      .then((filterLists: FilterList[]) => {
-        console.log("filters loaded ", id, JSON.stringify(filterLists));
-        filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
-        if (filterLists.length === 0) {
-          filterLists.push({
-            ...filterList,
-            _id: id,
-            name: `New filter (${id})`,
-          });
-          createNewFilter(filterLists[0]);
-        }
-        console.log("editing filter ", JSON.stringify(filterLists));
-        setFilterList(filterLists[0]);
-        setCidItems(
-          filterLists[0].cids.map((cid: string, index: number) => {
-            return { cid, id: index, edit: false };
-          })
-        );
-        setLoaded(true);
-      });
+    ApiService.getFilters().then((filterLists: FilterList[]) => {
+      filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
+      if (filterLists.length === 0) {
+        filterLists.push({
+          ...filterList,
+          _id: id,
+          name: `New filter (${id})`,
+        });
+        createNewFilter(filterLists[0]);
+      }
+      setFilterList(filterLists[0]);
+      setCidItems(
+        filterLists[0].cids.map((cid: string, index: number) => {
+          return { cid, id: index, edit: false };
+        })
+      );
+      setLoaded(true);
+    });
   };
 
   useEffect(() => {
@@ -85,10 +71,9 @@ function FilterPage(props) {
     if (!fl) {
       fl = filterList;
     }
-    putFilters(fl).then(async (_fl: FilterList) => {
-      console.log("filter saved " + _fl.name + _fl.cids);
-    });
+
     setFilterList(fl);
+    putFilters(fl);
   };
 
   const changeName = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -123,7 +108,6 @@ function FilterPage(props) {
       ...filterList,
       cids: items.map((i: CidItem) => i.cid),
     };
-    console.log("saveItem: " + editItem.cid + JSON.stringify(filterList));
     saveFilter(fl);
     setCidItems(items);
   };
@@ -136,6 +120,35 @@ function FilterPage(props) {
     };
     saveFilter(fl);
     setCidItems(items);
+  };
+
+  const [showMoveModal, setShowMoveModal] = useState<boolean>(false);
+  const [moveCidItem, setMoveCidItem] = useState<CidItem>(emptyCidItem);
+  const [moveOptionFilters, setMoveOptionFilters] = useState<FilterList[]>([]);
+
+  const beginMoveToDifferentFilter = async (
+    moveItem: CidItem
+  ): Promise<void> => {
+    const filterLists: FilterList[] = await ApiService.getFilters();
+
+    setMoveCidItem(moveItem);
+    setMoveOptionFilters(filterLists.filter((x) => x._id !== filterList._id));
+    setShowMoveModal(true);
+  };
+
+  const closeModalCallback = () => {
+    setShowMoveModal(false);
+  };
+
+  const move = async (
+    cidItem: CidItem,
+    selectedFilter: FilterList
+  ): Promise<void> => {
+    selectedFilter.cids.push(cidItem.cid);
+    filterList.cids = filterList.cids.filter((x) => x !== cidItem.cid);
+
+    await ApiService.updateFilter([selectedFilter, filterList]);
+    initFilter(props.match.params.id);
   };
 
   return (
@@ -190,10 +203,13 @@ function FilterPage(props) {
                         {cidItems.map((item: CidItem, index: number) => (
                           <CidItemRender
                             index={index}
-                            key={item.id.toString()}
+                            key={item.id.toString() + " " + item.cid}
                             cidItem={item}
                             saveItem={saveItem}
                             deleteItem={deleteItem}
+                            beginMoveToDifferentFilter={
+                              beginMoveToDifferentFilter
+                            }
                           />
                         ))}
                       </ListGroup>
@@ -202,6 +218,14 @@ function FilterPage(props) {
                 </Form>
               </Col>
             </Row>
+
+            <MoveCIDModal
+              cidItem={moveCidItem}
+              optionFilters={moveOptionFilters}
+              move={move}
+              closeCallback={closeModalCallback}
+              show={showMoveModal}
+            />
           </Container>
         </>
       ) : null}

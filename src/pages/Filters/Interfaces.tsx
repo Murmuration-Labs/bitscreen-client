@@ -30,7 +30,16 @@ export interface CidItemProps {
   cidItem: CidItem;
   saveItem: (i: CidItem) => void;
   deleteItem: (i: CidItem) => void;
+  beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
   index: number;
+}
+
+export interface MoveCIDModalProps {
+  cidItem: CidItem;
+  optionFilters: FilterList[];
+  move: (i: CidItem, fl: FilterList) => Promise<void>;
+  closeCallback: () => void;
+  show: boolean;
 }
 
 export interface SettingsProps {
