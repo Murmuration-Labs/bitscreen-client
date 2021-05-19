@@ -117,3 +117,20 @@ export const findAll = async (table: string) => {
 
   return Object.values(dbFileData[table].data);
 };
+
+export const searchFilter = async (table: string, searchTerm?: string) => {
+  forceExistingTable(table);
+  
+  return !searchTerm
+    ? Object.values(dbFileData[table].data)
+    : Object.values(dbFileData[table].data).filter((element: any) => {
+        if (element.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return true;
+        }
+        const util = element.cids.map((cid) => cid.toLowerCase());
+        if (-1 != util.indexOf(searchTerm.toLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+};

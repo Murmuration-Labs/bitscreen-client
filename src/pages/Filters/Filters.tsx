@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Button,
   Col,
   Container,
   Form,
@@ -22,6 +21,7 @@ import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import FilterService from "../../services/FilterService";
+import debounce from "lodash.debounce";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -37,8 +37,8 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters();
+  const getFilters = async (searchTerm?: string) => {
+    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
     setFiltersCache(JSON.stringify(filterLists));
@@ -68,6 +68,14 @@ function Filters(): JSX.Element {
   const confirmDelete = (filterList: FilterList): void => {
     setShow(true);
     setDeletedFilterList(filterList);
+  };
+
+  const debounceSearchFilters = debounce((searchTerm): void => {
+    getFilters(searchTerm);
+  }, 300);
+
+  const searchFilters = (event): void => {
+    debounceSearchFilters(event.target.value);
   };
 
   useEffect(() => {
@@ -221,11 +229,11 @@ function Filters(): JSX.Element {
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
-                    <Form.Control type="text" placeholder="Search CID" />
-                    <Form.Control as="select">
-                      <option>CID</option>
-                    </Form.Control>
-                    <Button>Search</Button>
+                    <Form.Control
+                      type="text"
+                      placeholder="Search CID"
+                      onChange={searchFilters}
+                    />
                   </Form.Group>
                 </Form>
               </Col>

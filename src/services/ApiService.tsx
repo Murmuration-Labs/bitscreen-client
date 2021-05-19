@@ -6,8 +6,11 @@ import { serverUri } from "../config";
 // Right now we use straight-forward axios
 
 const ApiService = {
-  getFilters: async (): Promise<FilterList[]> => {
-    const response = await axios.get(`${serverUri()}/filters`);
+  getFilters: async (searchTerm?: string): Promise<FilterList[]> => {
+    const query = searchTerm
+      ? `search-filters?search=${searchTerm}`
+      : `search-filters`;
+    const response = await axios.get(`${serverUri()}/${query}`);
     return response.data;
   },
 
