@@ -1,5 +1,7 @@
 export const serverUri = (): string => {
-  switch (process.env.NODE_ENV) {
+  const environment = process.env.REACT_APP_ENV || process.env.NODE_ENV;
+
+  switch (environment) {
     case "development":
       return "http://localhost:3030";
     case "production":
