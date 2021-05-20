@@ -11,6 +11,9 @@ import CidItemRender from "./CidItemRenderer";
 import MoveCIDModal from "./MoveCIDModal";
 import ApiService from "../../services/ApiService";
 import FilterService from "../../services/FilterService";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -132,7 +135,9 @@ function FilterPage(props) {
     const filterLists: FilterList[] = await ApiService.getFilters();
 
     setMoveCidItem(moveItem);
-    setMoveOptionFilters(filterLists.filter((x) => x._id !== filterList._id));
+    setMoveOptionFilters(
+      filterLists.filter((x) => x._id !== filterList._id && !x.origin)
+    );
     setShowMoveModal(true);
   };
 
@@ -151,12 +156,45 @@ function FilterPage(props) {
     initFilter(props.match.params.id);
   };
 
+  const renderTitle = (): JSX.Element => {
+    if (filterList.origin) {
+      return <h2>View filter list</h2>;
+    }
+
+    if (filterList.name) {
+      return <h2>Edit filter list</h2>;
+    }
+
+    return <h2>New filter list</h2>;
+  };
+
+  const renderOrigin = (): JSX.Element => {
+    if (!filterList.origin) {
+      return <></>;
+    }
+
+    return (
+      <Form.Row>
+        <Col>
+          <h4>Origin</h4>
+          <a href={filterList.origin} className="origin-link" target="_blank">
+            {filterList.origin}
+            <FontAwesomeIcon
+              icon={faExternalLinkAlt as IconProp}
+              className="space-left"
+            />
+          </a>
+        </Col>
+      </Form.Row>
+    );
+  };
+
   return (
     <>
       {loaded ? (
         <>
           <Container>
-            <h2>{filterList.name ? "Edit filter list" : "New filter list"}</h2>
+            {renderTitle()}
             <Row>
               <Col>
                 <Form>
@@ -167,6 +205,7 @@ function FilterPage(props) {
                         type="text"
                         placeholder="List Name"
                         value={filterList.name}
+                        disabled={!!filterList.origin}
                       />
                     </Col>
                   </Form.Row>
@@ -175,6 +214,7 @@ function FilterPage(props) {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
+                          disabled={!!filterList.origin}
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
@@ -190,16 +230,18 @@ function FilterPage(props) {
                       </Form.Label>
                     </Col>
                   </Form.Row>
+                  {renderOrigin()}
                   <Form.Row>
                     <Col>
                       <Button
-                        className="btn-light"
+                        variant="primary"
                         style={{ marginBottom: 5 }}
                         onClick={onNewCid}
+                        disabled={!!filterList.origin}
                       >
                         + new CID
                       </Button>
-                      <ListGroup style={{ width: "100%", height: 500 }}>
+                      <ListGroup style={{ width: "100%" }}>
                         {cidItems.map((item: CidItem, index: number) => (
                           <CidItemRender
                             index={index}
@@ -210,6 +252,7 @@ function FilterPage(props) {
                             beginMoveToDifferentFilter={
                               beginMoveToDifferentFilter
                             }
+                            isHashedCid={!!filterList.origin}
                           />
                         ))}
                       </ListGroup>

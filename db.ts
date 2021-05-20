@@ -1,5 +1,6 @@
 import { mkdirSync, writeFile, openSync, readFileSync } from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 
 const basePath = path.join(process.env.HOME || "", ".murmuration");
 const dbPath = path.join(basePath, "local_database");
@@ -66,10 +67,44 @@ const syncToDisk = (resolveValue: any) =>
     );
   });
 
+export const generateRandomHex = async (length = 2) =>
+  new Promise<string>((resolve, reject) => {
+    crypto.randomBytes(length, (err: Error | null, buffer: Buffer) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      resolve(buffer.toString("hex"));
+    });
+  });
+
+export const generateRandomToken = async (bits = 4) => {
+  const pieces: string[] = [];
+
+  for (let i = 0; i < bits; i++) {
+    const piece = await generateRandomHex();
+    pieces.push(piece);
+  }
+
+  return pieces.join("-");
+};
+
 export const insert = async (table: string, data: any) => {
   forceExistingTable(table);
 
   data._id = dbFileData[table].nextInsertId;
+
+  let token, existing;
+
+  do {
+    token = await generateRandomToken();
+    existing = !!Object.keys(dbFileData[table].data)
+      .map((x) => dbFileData[table].data[x])
+      .find((x) => x._cryptId && x._cryptId === token);
+  } while (existing);
+
+  data._cryptId = token;
 
   dbFileData[table].data[data._id] = data;
   dbFileData[table].nextInsertId++;
@@ -110,6 +145,32 @@ export const find = async (table: string, _id: number) => {
   return dbFileData[table].data[_id];
 };
 
+export interface StringFilteringCriteria {
+  field: string;
+  value: string;
+}
+
+export const findBy = async (
+  table: string,
+  criteria: StringFilteringCriteria[]
+) => {
+  forceExistingTable(table);
+
+  return Object.keys(dbFileData[table].data)
+    .filter((x) => {
+      for (let i = 0; i < criteria.length; i++) {
+        if (
+          dbFileData[table].data[x][criteria[i].field] !== criteria[i].value
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .map((x) => dbFileData[table].data[x]);
+};
+
 // THIS can also be improved with pagination
 // BUT we don't worry about this right now
 export const findAll = async (table: string) => {
@@ -120,7 +181,7 @@ export const findAll = async (table: string) => {
 
 export const searchFilter = async (table: string, searchTerm?: string) => {
   forceExistingTable(table);
-  
+
   return !searchTerm
     ? Object.values(dbFileData[table].data)
     : Object.values(dbFileData[table].data).filter((element: any) => {
