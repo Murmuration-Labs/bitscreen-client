@@ -177,15 +177,11 @@ function FilterPage(props) {
       <Form.Row>
         <Col>
           <h4>Origin</h4>
-          <a
-            href={filterList.origin}
-            style={{ fontSize: 16, color: "blue" }}
-            target="_blank"
-          >
+          <a href={filterList.origin} className="origin-link" target="_blank">
             {filterList.origin}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
-              style={{ marginLeft: 4 }}
+              className="space-left"
             />
           </a>
         </Col>

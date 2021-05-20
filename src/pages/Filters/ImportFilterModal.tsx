@@ -10,6 +10,8 @@ import {
 } from "react-bootstrap";
 import { css } from "@emotion/core";
 
+import "./Filters.css";
+
 import PuffLoader from "react-spinners/PuffLoader";
 import { FilterList, ImportFilterModalProps } from "./Interfaces";
 import ApiService from "../../services/ApiService";
@@ -42,7 +44,7 @@ export default function ImportFilterModal(
   const renderFilterError = (): JSX.Element => {
     if (remoteFilterError) {
       return (
-        <span style={{ color: "red", marginLeft: 8 }}>
+        <span className="double-space-left text-danger">
           Invalid remote filter URI
         </span>
       );
@@ -144,18 +146,12 @@ export default function ImportFilterModal(
     return (
       <>
         <Button variant="danger" onClick={discardFilter}>
-          <FontAwesomeIcon
-            icon={faTrash as IconProp}
-            style={{ marginRight: 4 }}
-          />
-          Discard filter
+          <FontAwesomeIcon icon={faTrash as IconProp} />
+          <span className="space-left">Discard filter</span>
         </Button>
         <Button variant="success" onClick={importFilter}>
-          <FontAwesomeIcon
-            icon={faGlobe as IconProp}
-            style={{ marginRight: 4 }}
-          />
-          Import filter
+          <FontAwesomeIcon icon={faGlobe as IconProp} />
+          <span className="space-left">Import filter</span>
         </Button>
       </>
     );
@@ -201,7 +197,7 @@ export default function ImportFilterModal(
         </Row>
 
         <Row>
-          <Col style={{ textAlign: "center" }}>{renderReviewFilterList()}</Col>
+          <Col className="text-center">{renderReviewFilterList()}</Col>
         </Row>
 
         <Row>

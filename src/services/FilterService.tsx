@@ -14,14 +14,14 @@ const FilterService = {
   renderHashedCid: (hashedCid: string, short = true): JSX.Element => {
     if (short) {
       return (
-        <span style={{ fontFamily: "Courier New" }}>
+        <span className="mono-hashes">
           {hashedCid.substr(0, 16)}...
           {hashedCid.substr(hashedCid.length - 10, 10)}
         </span>
       );
     }
 
-    return <span style={{ fontFamily: "Courier New" }}>{hashedCid}</span>;
+    return <span className="mono-hashes">{hashedCid}</span>;
   },
 };
 

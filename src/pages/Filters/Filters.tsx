@@ -181,7 +181,7 @@ function Filters(): JSX.Element {
                     </Link>
                     <Link
                       to={`/filters/edit/${filterList._id}`}
-                      style={{ marginLeft: 8 }}
+                      className="double-space-left"
                     >
                       <FontAwesomeIcon icon={faEdit as IconProp} />
                     </Link>
@@ -250,7 +250,7 @@ function Filters(): JSX.Element {
                   onClick={() => {
                     setShowImportFilter(true);
                   }}
-                  style={{ marginLeft: 8 }}
+                  className="double-space-left"
                 >
                   Import Filter
                 </Button>
