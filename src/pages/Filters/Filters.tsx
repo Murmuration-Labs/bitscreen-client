@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import {
   Col,
   Container,
@@ -10,27 +10,30 @@ import {
   OverlayTrigger,
   Tooltip,
   Badge,
+  Button,
 } from "react-bootstrap";
 import "./Filters.css";
 import { FilterList, Visibility, VisibilityString } from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
-import { faAtom } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faEdit,
+  faExternalLinkAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import FilterService from "../../services/FilterService";
 import debounce from "lodash.debounce";
+import ImportFilterModal from "./ImportFilterModal";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
-  const [filtersCache, setFiltersCache] = useState<string>("");
+  // const [filtersCache, setFiltersCache] = useState<string>("");
 
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [currentFilterList, setCurrentFilterList] = useState<FilterList>(
-    FilterService.emptyFilterList()
-  );
   // const [enabled, setEnabled] = useState<boolean>(true);
 
   const translateVisibility = (visibility: Visibility): string => {
@@ -41,7 +44,7 @@ function Filters(): JSX.Element {
     const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
-    setFiltersCache(JSON.stringify(filterLists));
+    // setFiltersCache(JSON.stringify(filterLists));
 
     setLoaded(true);
   };
@@ -53,12 +56,13 @@ function Filters(): JSX.Element {
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
+    if (filterList.origin) return;
     filterList.enabled = !filterList.enabled;
     await ApiService.updateFilter(filterList);
     await getFilters();
   };
 
-  const [show, setShow] = useState<boolean>(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("false");
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
@@ -66,7 +70,7 @@ function Filters(): JSX.Element {
   );
 
   const confirmDelete = (filterList: FilterList): void => {
-    setShow(true);
+    setShowConfirmDelete(true);
     setDeletedFilterList(filterList);
   };
 
@@ -83,13 +87,11 @@ function Filters(): JSX.Element {
     setMessage(
       `Are you sure you want to delete filter "${deletedFilterList.name}?"`
     );
-  }, [show, deletedFilterList]);
+  }, [showConfirmDelete, deletedFilterList]);
 
-  const adHocRandomBit = (): number => 0;
-
-  const CIDFilterShared = (): JSX.Element => {
-    if (adHocRandomBit()) {
-      return <FontAwesomeIcon icon={faAtom as IconProp} />;
+  const CIDFilterShared = (props: FilterList): JSX.Element => {
+    if (props.origin) {
+      return <FontAwesomeIcon icon={faGlobe as IconProp} />;
     }
 
     return <></>;
@@ -133,7 +135,7 @@ function Filters(): JSX.Element {
                     <CIDFilterScope {...filterList} />
                   </td>
                   <td>
-                    <CIDFilterShared />
+                    <CIDFilterShared {...filterList} />
                   </td>
                   <td>
                     <OverlayTrigger
@@ -143,7 +145,11 @@ function Filters(): JSX.Element {
                       overlay={(props: OverlayInjectedProps): JSX.Element => (
                         <Tooltip id="button-tooltip" {...props}>
                           {filterList.cids.map((cid, index) => (
-                            <p key={`cid-${filterList._id}-${index}`}>{cid}</p>
+                            <p key={`cid-${filterList._id}-${index}`}>
+                              {filterList.origin
+                                ? FilterService.renderHashedCid(cid)
+                                : cid}
+                            </p>
                           ))}
                         </Tooltip>
                       )}
@@ -165,6 +171,7 @@ function Filters(): JSX.Element {
                         readOnly
                         type="switch"
                         checked={filterList.enabled}
+                        disabled={!!filterList.origin}
                       />
                     </div>
                   </td>
@@ -172,7 +179,10 @@ function Filters(): JSX.Element {
                     <Link to="#" onClick={() => confirmDelete(filterList)}>
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    <Link to={`/filters/edit/${filterList._id}`}>
+                    <Link
+                      to={`/filters/edit/${filterList._id}`}
+                      style={{ marginLeft: 8 }}
+                    >
                       <FontAwesomeIcon icon={faEdit as IconProp} />
                     </Link>
                   </td>
@@ -189,22 +199,6 @@ function Filters(): JSX.Element {
     void getFilters();
   }, []);
 
-  const putFilters = async () => {
-    if (filterLists.length === 0) return;
-    if (JSON.stringify(filterLists) === filtersCache) return;
-
-    await ApiService.updateFilter(currentFilterList);
-
-    setFiltersCache(JSON.stringify(filterLists));
-  };
-
-  const postFilters = async () => {
-    await ApiService.addFilter(currentFilterList);
-
-    setCurrentFilterList(FilterService.emptyFilterList());
-    setFiltersCache(JSON.stringify(filterLists));
-  };
-
   const newFilterId = () => {
     const l = [FilterService.emptyFilterList()].concat(filterLists);
     const ids = l.map((fl: FilterList) => fl._id);
@@ -219,13 +213,17 @@ function Filters(): JSX.Element {
     return (id + 1).toString();
   };
 
+  const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
+
+  const history = useHistory();
+
   return (
-    <>
+    <div>
       {loaded ? (
-        <>
+        <div>
           <Container>
             <h2>Filters</h2>
-            <Row>
+            <Row style={{ marginBottom: 12 }}>
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
@@ -238,15 +236,24 @@ function Filters(): JSX.Element {
                 </Form>
               </Col>
               <Col className="text-right">
-                <Link
-                  className="btn-light"
-                  to={(location) => `${location.pathname}/add/${newFilterId()}`}
+                <Button
+                  variant="primary"
+                  onClick={() =>
+                    history.push(`${location.pathname}/add/${newFilterId()}`)
+                  }
                 >
                   + new Filter
-                </Link>
-                <Link className="btn-light" to={`/filters/add/`}>
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowImportFilter(true);
+                  }}
+                  style={{ marginLeft: 8 }}
+                >
                   Import Filter
-                </Link>
+                </Button>
               </Col>
             </Row>
 
@@ -257,7 +264,7 @@ function Filters(): JSX.Element {
             </Row>
 
             <ConfirmModal
-              show={show}
+              show={showConfirmDelete}
               title={title}
               message={message}
               callback={() => {
@@ -265,13 +272,23 @@ function Filters(): JSX.Element {
               }}
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());
-                setShow(false);
+                setShowConfirmDelete(false);
               }}
             />
+
+            <ImportFilterModal
+              closeCallback={async (refreshParent = false): Promise<void> => {
+                setShowImportFilter(false);
+                if (refreshParent) {
+                  await getFilters();
+                }
+              }}
+              show={showImportFilter}
+            />
           </Container>
-        </>
+        </div>
       ) : null}
-    </>
+    </div>
   );
 }
 

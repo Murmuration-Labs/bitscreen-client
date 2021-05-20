@@ -32,6 +32,7 @@ export interface CidItemProps {
   deleteItem: (i: CidItem) => void;
   beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
   index: number;
+  isHashedCid: boolean;
 }
 
 export interface MoveCIDModalProps {
@@ -39,6 +40,11 @@ export interface MoveCIDModalProps {
   optionFilters: FilterList[];
   move: (i: CidItem, fl: FilterList) => Promise<void>;
   closeCallback: () => void;
+  show: boolean;
+}
+
+export interface ImportFilterModalProps {
+  closeCallback: (refreshParent: boolean) => Promise<void>;
   show: boolean;
 }
 
@@ -67,6 +73,7 @@ export interface FilterList {
   cids: string[];
   visibility: Visibility;
   enabled: boolean;
+  origin?: string;
 }
 
 export interface CidListProps {

@@ -8,6 +8,7 @@ const bodyParser = require("body-parser");
 
 const express = require("express");
 const cors = require("cors");
+const keccak256 = require("keccak256");
 
 const app: Application = express();
 const basePath = path.join(process.env.HOME || "", ".murmuration");
@@ -156,6 +157,31 @@ app.delete("/filters/:id", (req: Request, res: Response) => {
       res.send({
         success: false,
       });
+    });
+});
+
+app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
+  db.findBy("bitscreen", [
+    {
+      field: "_cryptId",
+      value: req.params._cryptId,
+    },
+  ])
+    .then((data) => {
+      if (data.length === 0) {
+        res.status(404).send([]);
+      }
+
+      res.send(
+        data.map((x) => {
+          x.cids = x.cids.map((y) => `0x${keccak256(y).toString("hex")}`);
+
+          return x;
+        })[0]
+      );
+    })
+    .catch(() => {
+      res.status(500).send([]);
     });
 });
 

@@ -28,6 +28,11 @@ const ApiService = {
   deleteFilter: async (id: number): Promise<void> => {
     await axios.delete(`${serverUri()}/filters/${id}`);
   },
+
+  fetchRemoteFilter: async (filterUri: string): Promise<FilterList> => {
+    const response = await axios.get(filterUri);
+    return response.data as FilterList;
+  },
 };
 
 export default ApiService;

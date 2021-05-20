@@ -1,5 +1,5 @@
 import { ConfirmModalProps } from "./Interfaces";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Modal, Button } from "react-bootstrap";
 
 export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
