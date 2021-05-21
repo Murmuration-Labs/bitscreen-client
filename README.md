@@ -14,8 +14,10 @@ To also fix the errors (that are automatically fixable), you can call ```yarn li
 ### Starting the server (from local)
 Call in the root of the project: ```yarn server```
 Server will be available, by default, at [```http://localhost:3030```](http://localhost:3030)
+
 ### Starting the server (from Dockerhub image)
 Call in the root of the project ```docker-compose up```
+
 ### Building a new Docker image
 1. navigate to root of project
 2. Build with: ```docker build -t keykoio/bitscreen-client:<tag> .```
@@ -23,13 +25,21 @@ Call in the root of the project ```docker-compose up```
  
 ### Endpoints
 ```GET /config``` - returns the configuration of the bitscreen client
+
 ```PUT /config``` - updates the configuration. The payload is not required to contain all configs, it allow partial updates
+
 ```GET /filters``` - returns all existing filter lists
+
 ```POST /filters``` - creates a new filters list
+
 ```PUT /filters``` - updates one or more filters lists
+
 ```GET /search-filters?search=:search_term``` - returns all filters lists that have either a partial match between ```search_term``` and the filter list name, or an exact match between ```search_term``` and one of the CIDs on the filter list
+
 ```GET /filters/:id``` - returns the filter with the matching ```:id```
+
 ``` GET /filters/shared/:_cryptId``` - returns the filter with the matching ```_cryptId```, but all CIDs will be hashed for security reasons
+
 ### Config structure
 ```
 {
@@ -45,6 +55,7 @@ Call in the root of the project ```docker-compose up```
   }
 }
 ```
+
 ### Filter structure
 ```
 {
@@ -56,6 +67,7 @@ Call in the root of the project ```docker-compose up```
   "visibility": integer
 }
 ```
+
 ## Web app
 Call in the root of your project ```yarn start```
 The app will be available, by default, at [```http://localhost:3000```](http://localhost:3000) or on your local network at ```http://your_ip:3000```
