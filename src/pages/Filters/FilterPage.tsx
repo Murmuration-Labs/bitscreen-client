@@ -17,6 +17,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
+  const [notice, setNotice] = useState<string>("");
 
   const emptyCidItem: CidItem = {
     id: 0,
@@ -82,6 +83,7 @@ function FilterPage(props) {
   const changeName = (event: React.ChangeEvent<HTMLInputElement>): void => {
     event.preventDefault();
     saveFilter({ ...filterList, name: event.target.value });
+    setNotice("Name successfully saved.");
   };
 
   const changeVisibility = (
@@ -93,9 +95,11 @@ function FilterPage(props) {
       visibility: mapVisibilityString(event.target.value),
     };
     saveFilter(fl);
+    setNotice("Visibility successfully saved.");
   };
 
   const onNewCid = (): void => {
+    setNotice("");
     const items = cidItems;
     items.push({ cid: "", edit: true, id: items.length });
     const cids = filterList.cids;
@@ -113,6 +117,7 @@ function FilterPage(props) {
     };
     saveFilter(fl);
     setCidItems(items);
+    setNotice("CIDs successfully saved.");
   };
 
   const deleteItem = (deleteItem: CidItem) => {
@@ -123,6 +128,7 @@ function FilterPage(props) {
     };
     saveFilter(fl);
     setCidItems(items);
+    setNotice("CIDs successfully saved.");
   };
 
   const [showMoveModal, setShowMoveModal] = useState<boolean>(false);
@@ -189,12 +195,23 @@ function FilterPage(props) {
     );
   };
 
+  const SaveNotice = (props: { notice: string }): JSX.Element => {
+    return (
+      <div className={"fading"}>
+        <p>{props.notice}</p>
+      </div>
+    );
+  };
+
   return (
     <>
       {loaded ? (
         <>
           <Container>
-            {renderTitle()}
+            <Row>
+              {renderTitle()}
+              <SaveNotice notice={notice} />
+            </Row>
             <Row>
               <Col>
                 <Form>

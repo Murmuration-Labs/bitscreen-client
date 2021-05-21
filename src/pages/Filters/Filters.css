@@ -35,3 +35,17 @@
 .mono-hashes {
     font-family: "Courier New", sans-serif;
 }
+
+.fading {
+    animation: fadeOut 2s forwards;
+    animation-delay: 1s;
+    display:flex;
+    align-items: center;
+    margin-left: 10px;
+    color: #1c7430;
+}
+
+@keyframes fadeOut {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
