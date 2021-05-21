@@ -235,7 +235,6 @@ function Filters(): JSX.Element {
           <Container>
             <h2>Filters</h2>
             <Row style={{ marginBottom: 12 }}>
-              <p>ceva</p>
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
