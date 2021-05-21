@@ -8,6 +8,7 @@ The bitscreen client helps node operators manage and share lists of blocked CIDs
  
 ### Linting
 To check for any linting errors, you can call the ```yarn lint``` command.
+
 To also fix the errors (that are automatically fixable), you can call ```yarn lint-fix```
  
 ## Server
@@ -70,6 +71,7 @@ Call in the root of the project ```docker-compose up```
 
 ## Web app
 Call in the root of your project ```yarn start```
+
 The app will be available, by default, at [```http://localhost:3000```](http://localhost:3000) or on your local network at ```http://your_ip:3000```
  
 ## Remote server
