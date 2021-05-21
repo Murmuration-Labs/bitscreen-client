@@ -3,7 +3,9 @@ The bitscreen client helps node operators manage and share lists of blocked CIDs
  
 ## Development
 ### Setup
-1. Clone the project locally
+1. Clone the project locally 
+  - with ssh: ```git clone git@github.com:Murmuration-Labs/bitscreen-client.git```
+  - with https: ```git clone https://github.com/Murmuration-Labs/bitscreen-client.git```
 2. ```yarn install```
  
 ### Linting
