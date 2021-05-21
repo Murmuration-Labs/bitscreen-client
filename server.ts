@@ -8,7 +8,7 @@ const bodyParser = require("body-parser");
 
 const express = require("express");
 const cors = require("cors");
-const keccak256 = require("keccak256");
+const { getAddressHash } = require("./crypto_lib");
 
 const app: Application = express();
 const basePath = path.join(process.env.HOME || "", ".murmuration");
@@ -100,6 +100,7 @@ app.put("/config", (req: Request, res: Response) => {
     });
 });
 
+
 app.get("/filters", (req: Request, res: Response) => {
   db.findAll("bitscreen")
     .then((data) => res.send(data))
@@ -174,7 +175,7 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
 
       res.send(
         data.map((x) => {
-          x.cids = x.cids.map((y) => `0x${keccak256(y).toString("hex")}`);
+          x.cids = x.cids.map(getAddressHash);
 
           return x;
         })[0]

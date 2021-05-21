@@ -1,6 +1,7 @@
 import { mkdirSync, writeFile, openSync, readFileSync } from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import { getAddressHash } from "./crypto_lib";
 
 const basePath = path.join(process.env.HOME || "", ".murmuration");
 const dbPath = path.join(basePath, "local_database");
@@ -192,6 +193,12 @@ export const searchFilter = async (table: string, searchTerm?: string) => {
         if (-1 != util.indexOf(searchTerm.toLowerCase())) {
           return true;
         }
+
+        const hashedUtil = util.map(getAddressHash);
+        if (-1 != hashedUtil.indexOf(searchTerm.toLowerCase())) {
+          return true;
+        }
+
         return false;
       });
 };
