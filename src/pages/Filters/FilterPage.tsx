@@ -195,13 +195,13 @@ function FilterPage(props) {
     );
   };
 
-  const SaveNotice = React.memo((props: { notice: string }): JSX.Element => {
+  const SaveNotice = (props: { notice: string }): JSX.Element => {
     return (
       <div className={"fading"}>
         <p>{props.notice}</p>
       </div>
     );
-  });
+  };
 
   return (
     <>
