@@ -130,7 +130,14 @@ function Filters(): JSX.Element {
             <tbody>
               {filterLists.map((filterList) => (
                 <tr key={`filterList-${filterList._id}`}>
-                  <td>{filterList.name}</td>
+                  <td>
+                    <Link
+                      to={`/filters/edit/${filterList._id}`}
+                      className="double-space-left"
+                    >
+                      {filterList.name}
+                    </Link>
+                  </td>
                   <td>
                     <CIDFilterScope {...filterList} />
                   </td>
@@ -176,14 +183,18 @@ function Filters(): JSX.Element {
                     </div>
                   </td>
                   <td style={{ textAlign: "justify" }}>
-                    <Link to="#" onClick={() => confirmDelete(filterList)}>
-                      <FontAwesomeIcon icon={faTrash as IconProp} />
-                    </Link>
                     <Link
                       to={`/filters/edit/${filterList._id}`}
                       className="double-space-left"
                     >
                       <FontAwesomeIcon icon={faEdit as IconProp} />
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={() => confirmDelete(filterList)}
+                      className="double-space-left"
+                    >
+                      <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
                   </td>
                 </tr>
@@ -224,6 +235,7 @@ function Filters(): JSX.Element {
           <Container>
             <h2>Filters</h2>
             <Row style={{ marginBottom: 12 }}>
+              <p>ceva</p>
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
