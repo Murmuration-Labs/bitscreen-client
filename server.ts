@@ -7,6 +7,9 @@ const path = require("path");
 const bodyParser = require("body-parser");
 
 const express = require("express");
+const cron = require("node-cron");
+const axios = require("axios");
+
 const cors = require("cors");
 const { getAddressHash } = require("./crypto_lib");
 
@@ -173,17 +176,80 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
         res.status(404).send([]);
       }
 
-      res.send(
-        data.map((x) => {
-          x.cids = x.cids.map(getAddressHash);
+      // don't rehash cids fetched from another origin
+      if (data[0].origin) {
+          res.send(data[0]);
+      } else {
+          res.send(
+              data.map((x) => {
+                  x.cids = x.cids.map(getAddressHash);
 
-          return x;
-        })[0]
-      );
+                  return x;
+              })[0]
+          );
+      }
     })
     .catch(() => {
       res.status(500).send([]);
     });
 });
+
+app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
+    db.findBy("bitscreen", [{
+        field: '_cryptId',
+        value: req.params._cryptId,
+    }])
+        .then((data) => {
+            if (data.length > 0) {
+                res.send({
+                    _cryptId: data[0]._cryptId,
+                    _lastUpdatedAt: data[0]._lastUpdatedAt,
+                });
+            } else {
+                res.status(404).send({});
+            }
+        })
+        .catch((err) => {
+            console.log("Version error log", err);
+            res.status(404).send({});
+        })
+});
+
+interface Filter {
+    _id?: number;
+    cids: string[];
+    visibility: number;
+    enabled: boolean;
+    origin?: string;
+    _cryptId?: string;
+    _lastUpdatedAt?: number;
+}
+
+cron.schedule("* * * * *", () => {
+    db.findAll("bitscreen")
+        .then((data) => {
+            const external = (data as Filter[]).filter((x: Filter) => {
+                return !!x.origin;
+            });
+
+            const promises = external.map((importFilter: Filter) => new Promise(async (resolve, reject) => {
+                const version = (await axios.get(`${importFilter.origin}/version`)).data;
+
+                if (!version._lastUpdatedAt || (importFilter._lastUpdatedAt && version._lastUpdatedAt > importFilter._lastUpdatedAt)) {
+                    const updatedImportFilter = (await axios.get(importFilter.origin)).data;
+
+                    updatedImportFilter._id = importFilter._id;
+
+                    return await db.update("bitscreen", updatedImportFilter);
+                } else {
+                    return importFilter._id;
+                }
+            }));
+
+            Promise.all(promises).then((updated) => {
+                console.log('Updated items:', promises.length);
+            });
+        });
+}, true);
 
 app.listen(process.env.PORT || 3030);

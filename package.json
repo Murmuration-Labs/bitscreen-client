@@ -21,6 +21,8 @@
     "enzyme": "^3.11.0",
     "express": "^4.17.1",
     "keccak256": "^1.0.2",
+    "moment": "^2.29.1",
+    "node-cron": "^3.0.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.5.0",
     "react-bootstrap-table": "^4.3.1",

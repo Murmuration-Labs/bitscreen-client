@@ -1,6 +1,8 @@
 import { mkdirSync, writeFile, openSync, readFileSync } from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import moment from "moment";
+
 import { getAddressHash } from "./crypto_lib";
 
 const basePath = path.join(process.env.HOME || "", ".murmuration");
@@ -106,6 +108,7 @@ export const insert = async (table: string, data: any) => {
   } while (existing);
 
   data._cryptId = token;
+  data._lastUpdatedAt = moment().unix();
 
   dbFileData[table].data[data._id] = data;
   dbFileData[table].nextInsertId++;
@@ -126,6 +129,8 @@ export const update = async (table: string, data: any) => {
       ...dbFileData[table].data[data[i]._id], // keep old values
       ...data[i], // overwrite new
     };
+
+    dbFileData[table].data[data[i]._id]._lastUpdatedAt = moment().unix();
   }
 
   return await syncToDisk(data._id);
