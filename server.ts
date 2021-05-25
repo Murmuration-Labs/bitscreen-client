@@ -186,4 +186,70 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
     });
 });
 
+app.get("/complaints", (req: Request, res: Response) => {
+  db.findAll("complaints")
+    .then((data) => res.send(data))
+    .catch((err) => res.send({ error: err }));
+});
+
+app.get("/complaints/:_id", (req: Request, res: Response) => {
+  db.findById("complaints", parseInt(req.params._id))
+    .then((data) => {
+      if(data){
+        res.send(data)
+      }
+      else{
+        res.status(404).send();
+      }
+    })
+    .catch((err) => res.send({ error: err }));
+});
+
+app.post("/complaints", (req: Request, res: Response) => {
+  db.insert("complaints", req.body)
+    .then((data) =>
+      res.send({
+        success: true,
+        _id: data,
+      })
+    )
+    .catch((err) =>
+      res.send({
+        success: false,
+        error: err,
+      })
+    );
+});
+
+app.put("/complaints", (req: Request, res: Response) => {
+  db.update("complaints", req.body)
+    .then((data) =>
+      res.send({
+        success: true,
+        _id: data,
+      })
+    )
+    .catch((err) => {
+      console.log(err);
+      res.send({
+        success: false,
+      });
+    });
+});
+
+app.delete("/complaints/:id", (req: Request, res: Response) => {
+  db.remove("complaints", parseInt(req.params.id))
+    .then(() => {
+      res.send({
+        success: true,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send({
+        success: false,
+      });
+    });
+});
+
 app.listen(process.env.PORT || 3030);

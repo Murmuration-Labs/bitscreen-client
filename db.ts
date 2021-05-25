@@ -35,6 +35,11 @@ try {
       data: {},
       nextInsertId: 1,
     },
+    complaints: {
+      name: "complaints",
+      data: {},
+      nextInsertId: 1,
+    },
   };
 }
 
@@ -201,4 +206,12 @@ export const searchFilter = async (table: string, searchTerm?: string) => {
 
         return false;
       });
+};
+
+export const findById = async (table: string, _id: number) => {
+  forceExistingTable(table);
+  const result = Object.values(dbFileData[table].data).find((element: any) => {
+    return element._id == _id;
+  });
+  return result?result:false
 };
