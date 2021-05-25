@@ -225,7 +225,7 @@ interface Filter {
     _lastUpdatedAt?: number;
 }
 
-cron.schedule("* * * * *", () => {
+cron.schedule("0 */4 * * *", () => {
     db.findAll("bitscreen")
         .then((data) => {
             const external = (data as Filter[]).filter((x: Filter) => {
