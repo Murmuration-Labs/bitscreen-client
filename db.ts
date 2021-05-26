@@ -3,65 +3,73 @@ import * as path from "path";
 import * as crypto from "crypto";
 import { getAddressHash } from "./crypto_lib";
 
-const basePath = path.join(process.env.HOME || "", ".murmuration");
-const dbPath = path.join(basePath, "local_database");
+const basePath = path.join(process.env.HOME || "", ".murmuration2");
+const databases = {
+  local_database : { 
+    name: "local_database", 
+    basePath: basePath,
+    dbPath: path.join(basePath, "local_database"),
+    tables: ["config", "bitscreen"],
+  },
+  complaints: { 
+    name: "complaints", 
+    basePath: basePath,
+    dbPath: path.join(basePath, "complaints_database"),
+    tables: ["complaints"],
+  },
+};
 
-let dbFileData: any;
+let dbFileData: any = {};
 
-try {
-  openSync(basePath, "r");
-} catch (e) {
+Object.keys(databases).forEach(database =>{
   try {
-    console.log("Folder for database missing, attempting to create...");
-    mkdirSync(basePath);
-  } catch (e2) {
-    console.log("Could not create local folder for the database", e2);
+    openSync(databases[database].basePath, "r");
+  } catch (e) {
+    try {
+      console.log("Folder for database missing, attempting to create...");
+      mkdirSync(databases[database].basePath);
+    } catch (e2) {
+      console.log("Could not create local folder for the database", e2);
+    }
   }
-}
 
-try {
-  openSync(dbPath, "r");
+  try {
+    openSync(databases[database].dbPath, "r");
+  
+    dbFileData[databases[database].name] = JSON.parse(readFileSync(databases[database].dbPath).toString("utf8"));
+  } catch (e) {
+    databases[database].tables.forEach(table => {
+      dbFileData[databases[database].name] = {};
+      dbFileData[databases[database].name][table] = {
+        name: table,
+        data: {}, // object in order to index better
+        nextInsertId: 1,
+      };
+    })
+  }
+})
 
-  dbFileData = JSON.parse(readFileSync(dbPath).toString("utf8"));
-} catch (e) {
-  dbFileData = {
-    config: {
-      name: "config",
-      data: {}, // object in order to index better
-      nextInsertId: 1,
-    },
-    bitscreen: {
-      name: "bitscreen",
-      data: {},
-      nextInsertId: 1,
-    },
-    complaints: {
-      name: "complaints",
-      data: {},
-      nextInsertId: 1,
-    },
-  };
-}
 
-function forceExistingTable(table: string) {
-  if (!Object.prototype.hasOwnProperty.call(dbFileData, table)) {
+
+function forceExistingTable(databaseName: string, table: string) {
+  if (!Object.prototype.hasOwnProperty.call(dbFileData[databaseName], table)) {
     throw new Error(`Attempting to interact with unexisting table ${table}`);
   }
 }
 
-function forceExistingEntry(table: string, _id: number) {
-  if (!Object.prototype.hasOwnProperty.call(dbFileData[table].data, _id)) {
+function forceExistingEntry(databaseName:string, table: string, _id: number) {
+  if (!Object.prototype.hasOwnProperty.call(dbFileData[databaseName][table].data, _id)) {
     throw new Error(
       `Attempting to interact with unexisting entry ${_id} from table ${table}`
     );
   }
 }
 
-const syncToDisk = (resolveValue: any) =>
+const syncToDisk = (databaseName: string, resolveValue: any) =>
   new Promise((resolve, reject) => {
     writeFile(
-      dbPath,
-      JSON.stringify(dbFileData),
+      databases[databaseName].dbPath,
+      JSON.stringify(dbFileData[databaseName]),
       // eslint-disable-next-line no-undef
       (err: NodeJS.ErrnoException | null) => {
         if (err) {
@@ -96,59 +104,59 @@ export const generateRandomToken = async (bits = 4) => {
   return pieces.join("-");
 };
 
-export const insert = async (table: string, data: any) => {
-  forceExistingTable(table);
+export const insert = async (databaseName: string, table: string, data: any) => {
+  forceExistingTable(databaseName, table);
 
-  data._id = dbFileData[table].nextInsertId;
+  data._id = dbFileData[databaseName][table].nextInsertId;
 
   let token, existing;
 
   do {
     token = await generateRandomToken();
-    existing = !!Object.keys(dbFileData[table].data)
-      .map((x) => dbFileData[table].data[x])
+    existing = !!Object.keys(dbFileData[databaseName][table].data)
+      .map((x) => dbFileData[databaseName][table].data[x])
       .find((x) => x._cryptId && x._cryptId === token);
   } while (existing);
 
   data._cryptId = token;
 
-  dbFileData[table].data[data._id] = data;
-  dbFileData[table].nextInsertId++;
+  dbFileData[databaseName][table].data[data._id] = data;
+  dbFileData[databaseName][table].nextInsertId++;
 
-  return await syncToDisk(data._id);
+  return await syncToDisk(databaseName, data._id);
 };
 
-export const update = async (table: string, data: any) => {
+export const update = async (databaseName: string, table: string, data: any) => {
   if (!Array.isArray(data)) {
     data = [data];
   }
 
   for (let i = 0; i < data.length; i++) {
-    forceExistingTable(table);
-    forceExistingEntry(table, data[i]._id);
+    forceExistingTable(databaseName, table);
+    forceExistingEntry(databaseName, table, data[i]._id);
 
-    dbFileData[table].data[data[i]._id] = {
-      ...dbFileData[table].data[data[i]._id], // keep old values
+    dbFileData[databaseName][table].data[data[i]._id] = {
+      ...dbFileData[databaseName][table].data[data[i]._id], // keep old values
       ...data[i], // overwrite new
     };
   }
 
-  return await syncToDisk(data._id);
+  return await syncToDisk(databaseName, data._id);
 };
 
-export const remove = async (table: string, _id: number) => {
-  forceExistingTable(table);
-  forceExistingEntry(table, _id);
+export const remove = async (databaseName: string, table: string, _id: number) => {
+  forceExistingTable(databaseName, table);
+  forceExistingEntry(databaseName, table, _id);
 
-  delete dbFileData[table].data[_id];
-  return await syncToDisk(null);
+  delete dbFileData[databaseName][table].data[_id];
+  return await syncToDisk(databaseName, null);
 };
 
-export const find = async (table: string, _id: number) => {
-  forceExistingTable(table);
-  forceExistingEntry(table, _id);
+export const find = async (databaseName: string, table: string, _id: number) => {
+  forceExistingTable(databaseName, table);
+  forceExistingEntry(databaseName, table, _id);
 
-  return dbFileData[table].data[_id];
+  return dbFileData[databaseName][table].data[_id];
 };
 
 export interface StringFilteringCriteria {
@@ -157,40 +165,38 @@ export interface StringFilteringCriteria {
 }
 
 export const findBy = async (
+  databaseName: string, 
   table: string,
   criteria: StringFilteringCriteria[]
 ) => {
-  forceExistingTable(table);
-
-  return Object.keys(dbFileData[table].data)
-    .filter((x) => {
-      for (let i = 0; i < criteria.length; i++) {
-        if (
-          dbFileData[table].data[x][criteria[i].field] !== criteria[i].value
-        ) {
-          return false;
-        }
+  forceExistingTable(databaseName, table);
+  return Object.keys(dbFileData[databaseName][table].data)
+  .filter((x) => {
+    for (let i = 0; i < criteria.length; i++) {
+      if (
+        dbFileData[databaseName][table].data[x][criteria[i].field] !== criteria[i].value
+      ) {
+        return false;
       }
-
-      return true;
-    })
-    .map((x) => dbFileData[table].data[x]);
+    }
+    return true;
+  }).map((x) => dbFileData[databaseName][table].data[x]); ; 
 };
 
 // THIS can also be improved with pagination
 // BUT we don't worry about this right now
-export const findAll = async (table: string) => {
-  forceExistingTable(table);
+export const findAll = async (databaseName: string, table: string) => {
+  forceExistingTable(databaseName, table);
 
-  return Object.values(dbFileData[table].data);
+  return Object.values(dbFileData[databaseName][table].data);
 };
 
-export const searchFilter = async (table: string, searchTerm?: string) => {
-  forceExistingTable(table);
+export const searchFilter = async (databaseName: string, table: string, searchTerm?: string) => {
+  forceExistingTable(databaseName, table);
 
   return !searchTerm
-    ? Object.values(dbFileData[table].data)
-    : Object.values(dbFileData[table].data).filter((element: any) => {
+    ? Object.values(dbFileData[databaseName][table].data)
+    : Object.values(dbFileData[databaseName][table].data).filter((element: any) => {
         if (element.name.toLowerCase().includes(searchTerm.toLowerCase())) {
           return true;
         }
@@ -208,9 +214,9 @@ export const searchFilter = async (table: string, searchTerm?: string) => {
       });
 };
 
-export const findById = async (table: string, _id: number) => {
-  forceExistingTable(table);
-  const result = Object.values(dbFileData[table].data).find((element: any) => {
+export const findById = async (databaseName: string, table: string, _id: number) => {
+  forceExistingTable(databaseName, table);
+  const result = Object.values(dbFileData[databaseName][table].data).find((element: any) => {
     return element._id == _id;
   });
   return result?result:false
