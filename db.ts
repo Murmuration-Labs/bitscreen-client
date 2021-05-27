@@ -5,14 +5,14 @@ import { getAddressHash } from "./crypto_lib";
 
 const basePath = path.join(process.env.HOME || "", ".murmuration2");
 const databases = {
-  local_database : { 
-    name: "local_database", 
+  local_database : {
+    name: "local_database",
     basePath: basePath,
     dbPath: path.join(basePath, "local_database"),
     tables: ["config", "bitscreen"],
   },
-  complaints: { 
-    name: "complaints", 
+  complaints: {
+    name: "complaints",
     basePath: basePath,
     dbPath: path.join(basePath, "complaints_database"),
     tables: ["complaints"],
@@ -35,7 +35,7 @@ Object.keys(databases).forEach(database =>{
 
   try {
     openSync(databases[database].dbPath, "r");
-  
+
     dbFileData[databases[database].name] = JSON.parse(readFileSync(databases[database].dbPath).toString("utf8"));
   } catch (e) {
     databases[database].tables.forEach(table => {
@@ -165,7 +165,7 @@ export interface StringFilteringCriteria {
 }
 
 export const findBy = async (
-  databaseName: string, 
+  databaseName: string,
   table: string,
   criteria: StringFilteringCriteria[]
 ) => {
@@ -180,7 +180,7 @@ export const findBy = async (
       }
     }
     return true;
-  }).map((x) => dbFileData[databaseName][table].data[x]); ; 
+  }).map((x) => dbFileData[databaseName][table].data[x]); ;
 };
 
 // THIS can also be improved with pagination
@@ -189,6 +189,32 @@ export const findAll = async (databaseName: string, table: string) => {
   forceExistingTable(databaseName, table);
 
   return Object.values(dbFileData[databaseName][table].data);
+};
+
+export const searchInColumns = async (databaseName: string, table: string, searchTerm: string = "", searchInColumns: string[] = []) => {
+  forceExistingTable(databaseName, table);
+
+  return Object.values(dbFileData[databaseName][table].data).filter((item: any) => {
+    if (!searchTerm) {
+      return true;
+    }
+
+    let found = false;
+
+    for (let i = 0; i < Object.keys(item).length; i++) {
+      const itemKey = Object.keys(item)[i];
+
+      if (
+          (searchInColumns.length === 0 || searchInColumns.indexOf(itemKey) > -1)
+          && item[itemKey].toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        found = true;
+        break;
+      }
+    }
+
+    return found;
+  });
 };
 
 export const searchFilter = async (databaseName: string, table: string, searchTerm?: string) => {
