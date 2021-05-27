@@ -2,6 +2,7 @@ import { Request, Response, Application } from "express";
 import { mkdirSync, writeFile, openSync, readFileSync, existsSync } from "fs";
 
 import * as db from "./db";
+import complaintsRoutes from './endpoints/complaints';
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -17,6 +18,7 @@ const app: Application = express();
 const basePath = path.join(process.env.HOME || "", ".murmuration");
 const configPath = path.join(basePath, "config");
 const filterPath = path.join(basePath, "bitscreen");
+const databaseName = "local_database";
 
 if (!existsSync(basePath)) {
   mkdirSync(basePath);
@@ -55,6 +57,7 @@ app.use(express.static(path.join(__dirname, "build")));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
+app.use(complaintsRoutes);
 
 app.get("/ping", (req: Request, res: Response) => {
   return res.send("pong");
@@ -105,20 +108,20 @@ app.put("/config", (req: Request, res: Response) => {
 
 
 app.get("/filters", (req: Request, res: Response) => {
-  db.findAll("bitscreen")
+  db.findAll(databaseName, "bitscreen")
     .then((data) => res.send(data))
     .catch((err) => res.send({ error: err }));
 });
 
 app.get("/search-filters", (req: Request, res: Response) => {
   const searchTerm = req.query.search ? req.query.search.toString() : undefined;
-  db.searchFilter("bitscreen", searchTerm)
+  db.searchFilter(databaseName, "bitscreen", searchTerm)
     .then((data) => res.send(data))
     .catch((err) => res.send({ error: err }));
 });
 
 app.post("/filters", (req: Request, res: Response) => {
-  db.insert("bitscreen", req.body)
+  db.insert(databaseName, "bitscreen", req.body)
     .then((data) =>
       res.send({
         success: true,
@@ -134,7 +137,7 @@ app.post("/filters", (req: Request, res: Response) => {
 });
 
 app.put("/filters", (req: Request, res: Response) => {
-  db.update("bitscreen", req.body)
+  db.update(databaseName, "bitscreen", req.body)
     .then((data) =>
       res.send({
         success: true,
@@ -150,7 +153,7 @@ app.put("/filters", (req: Request, res: Response) => {
 });
 
 app.delete("/filters/:id", (req: Request, res: Response) => {
-  db.remove("bitscreen", parseInt(req.params.id))
+  db.remove(databaseName, "bitscreen", parseInt(req.params.id))
     .then(() => {
       res.send({
         success: true,
@@ -165,7 +168,7 @@ app.delete("/filters/:id", (req: Request, res: Response) => {
 });
 
 app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
-  db.findBy("bitscreen", [
+  db.findBy(databaseName, "bitscreen", [
     {
       field: "_cryptId",
       value: req.params._cryptId,
