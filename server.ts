@@ -198,7 +198,7 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
 });
 
 app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
-    db.findBy("bitscreen", [{
+    db.findBy(databaseName, "bitscreen", [{
         field: '_cryptId',
         value: req.params._cryptId,
     }])
@@ -229,7 +229,7 @@ interface Filter {
 }
 
 cron.schedule("0 */4 * * *", () => {
-    db.findAll("bitscreen")
+    db.findAll(databaseName, "bitscreen")
         .then((data) => {
             const external = (data as Filter[]).filter((x: Filter) => {
                 return !!x.origin;
@@ -243,7 +243,7 @@ cron.schedule("0 */4 * * *", () => {
 
                     updatedImportFilter._id = importFilter._id;
 
-                    return await db.update("bitscreen", updatedImportFilter);
+                    return await db.update(databaseName, "bitscreen", updatedImportFilter);
                 } else {
                     return importFilter._id;
                 }
