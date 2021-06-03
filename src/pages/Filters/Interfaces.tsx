@@ -48,6 +48,11 @@ export interface ImportFilterModalProps {
   show: boolean;
 }
 
+export interface AddCidBatchModalProps {
+  closeCallback: (cidsAddedBatch: Array<string>) => Promise<void>;
+  show: boolean;
+}
+
 export interface SettingsProps {
   enabled?: boolean;
 }

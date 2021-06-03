@@ -13,6 +13,7 @@ import ApiService from "../../services/ApiService";
 import FilterService from "../../services/FilterService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
+import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 function FilterPage(props) {
@@ -26,6 +27,8 @@ function FilterPage(props) {
   };
 
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
+
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
@@ -118,6 +121,34 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     setNotice("CIDs successfully saved.");
+  };
+
+  const saveBatchItemCids = () => {
+    const itemsId: string[] = [];
+    cidItems.forEach((item: CidItem) => {
+      if (false == item.edit) {
+        itemsId.push(item.cid);
+      }
+    });
+
+    const fl = {
+      ...filterList,
+      cids: itemsId ? itemsId : [],
+    };
+    saveFilter(fl);
+    setNotice("CIDs successfully saved.");
+  };
+
+  const onNewCidsBatch = (cidsBatch): void => {
+    setNotice("");
+    cidsBatch.forEach((element: string) => {
+      const item = { cid: element, edit: false, id: cidItems.length };
+      cidItems.push(item);
+    });
+    saveBatchItemCids();
+    const cids = filterList.cids;
+    cids.push("");
+    setFilterList({ ...filterList, cids });
   };
 
   const deleteItem = (deleteItem: CidItem) => {
@@ -259,6 +290,16 @@ function FilterPage(props) {
                       >
                         + new CID
                       </Button>
+                      <Button
+                        variant="primary"
+                        style={{ marginBottom: 5, marginLeft: 5 }}
+                        onClick={() => {
+                          setAddCidBatchModal(true);
+                        }}
+                        disabled={!!filterList.origin}
+                      >
+                        + Add CIDs batch
+                      </Button>
                       <ListGroup style={{ width: "100%" }}>
                         {cidItems.map((item: CidItem, index: number) => (
                           <CidItemRender
@@ -286,6 +327,15 @@ function FilterPage(props) {
               move={move}
               closeCallback={closeModalCallback}
               show={showMoveModal}
+            />
+            <AddCidBatchModal
+              closeCallback={async (cidsBatch = []): Promise<void> => {
+                if (0 != cidsBatch.length) {
+                  onNewCidsBatch(cidsBatch);
+                }
+                setAddCidBatchModal(false);
+              }}
+              show={addCidBatchModal}
             />
           </Container>
         </>
