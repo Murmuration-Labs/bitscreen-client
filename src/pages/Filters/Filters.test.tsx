@@ -38,7 +38,7 @@ describe("Filters module", () => {
 
         container = document.createElement("div");
         document.body.appendChild(container);
-    })
+    });
 
     afterAll(() => {
         jest.useRealTimers();
@@ -46,7 +46,7 @@ describe("Filters module", () => {
         unmountComponentAtNode(container);
         container.remove();
         container = null;
-    })
+    });
 
     test("Create random Filter", async () => {
         await initNavigateToFilters();
@@ -73,9 +73,11 @@ describe("Filters module", () => {
 
         (ApiService.updateFilter as jest.Mock).mockResolvedValue([{_id: 1}]);
 
-        await act(async () => await userEvent.type(screen.getByRole('name'), `Name-unittest-${testNumber}`));
+        const newFilterName = `Name-unittest-${testNumber}`;
 
-        expect(await ApiService.updateFilter).toHaveBeenCalledTimes((`Name-unittest-${testNumber}`).split("").length);
+        await act(async () => await userEvent.type(screen.getByRole('name'), newFilterName));
+
+        expect(await ApiService.updateFilter).toHaveBeenCalledTimes(newFilterName.split("").length);
         expect(await screen.findByText("Name successfully saved.")).toBeInTheDocument();
     });
 
