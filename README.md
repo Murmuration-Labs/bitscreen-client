@@ -1,5 +1,5 @@
 # BitScreen Client
-The bitscreen client helps node operators manage and share lists of blocked CIDs amongs themselves in order to filter the content they store for the Filecoin network.
+The bitscreen client helps node operators manage and share lists of blocked CIDs among themselves in order to filter the content they store for the Filecoin network.
  
 ## Development
 ### Setup
