@@ -306,6 +306,7 @@ function FilterPage(props) {
                             index={index}
                             key={item.id.toString() + " " + item.cid}
                             cidItem={item}
+                            isOverrideFilter={filterList.override}
                             saveItem={saveItem}
                             deleteItem={deleteItem}
                             beginMoveToDifferentFilter={
