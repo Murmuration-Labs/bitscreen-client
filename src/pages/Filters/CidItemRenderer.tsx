@@ -1,8 +1,22 @@
 import * as React from "react";
 import { CidItem, CidItemProps } from "./Interfaces";
-import { Button, Col, Form, ListGroup, Container, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Form,
+  ListGroup,
+  Container,
+  Row,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import { RefObject } from "react";
 import FilterService from "../../services/FilterService";
+import PuffLoader from "react-spinners/PuffLoader";
+import ApiService from "../../services/ApiService";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 // function validateCid(cid: string): boolean{
 //     // :TODO: check length, check allowed characters
@@ -11,16 +25,29 @@ import FilterService from "../../services/FilterService";
 
 export default class CidItemRender extends React.Component<
   CidItemProps,
-  { item: CidItem; cidInputRef: RefObject<HTMLInputElement> }
+  {
+    item: CidItem;
+    cidInputRef: RefObject<HTMLInputElement>;
+    loaded: boolean;
+    isOverrideFilter: boolean;
+    overrideCid: boolean;
+  }
 > {
   constructor(props: CidItemProps) {
     super(props);
     this.state = {
       item: this.props.cidItem,
       cidInputRef: React.createRef<HTMLInputElement>(),
+      loaded: this.props.isOverrideFilter ? !this.props.isOverrideFilter : true,
+      isOverrideFilter: this.props.isOverrideFilter
+        ? this.props.isOverrideFilter
+        : true,
+      overrideCid: false,
     };
 
-    console.info("cidItemRenderer" + this.props.cidItem.cid);
+    if (this.props.isOverrideFilter) {
+      this.checkIfIsOverrideExists();
+    }
   }
 
   static updateItemField(field: string, value: string, item: CidItem): CidItem {
@@ -60,6 +87,59 @@ export default class CidItemRender extends React.Component<
     this.props.beginMoveToDifferentFilter(this.state.item);
   };
 
+  checkIfIsOverrideExists = (): void => {
+    ApiService.getCidOverride(this.props.cidItem.cid)
+      .then((res) => {
+        if (res) {
+          this.setState({ overrideCid: true });
+        } else {
+          this.setState({ overrideCid: false });
+        }
+        this.setState({ loaded: true });
+      })
+      .catch((err) => {
+        this.setState({ loaded: true });
+      });
+  };
+
+  renderOverride(): JSX.Element {
+    if (!this.props.isOverrideFilter) {
+      // filter is not overrideing
+      return <></>;
+    }
+    if (this.state.loaded) {
+      if (this.state.overrideCid) {
+        // override
+        return (
+          <>
+            <OverlayTrigger
+              placement="right"
+              delay={{ show: 150, hide: 300 }}
+              overlay={
+                <Tooltip id="button-tooltip">
+                  This Cid override another Cid from an imported filter
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCheck as IconProp} color="#28a745" />
+            </OverlayTrigger>
+          </>
+        );
+      }
+      // dosen't override
+      return <></>;
+    }
+    // loader
+    return (
+      <>
+        <PuffLoader
+          color={"#28a745"}
+          size={20}
+        />
+      </>
+    );
+  }
+
   renderCidActions(): JSX.Element {
     if (this.props.isHashedCid) {
       return <></>;
@@ -67,34 +147,38 @@ export default class CidItemRender extends React.Component<
 
     return (
       <>
-        <Col sm={2} md={2} lg={{ span: 1, offset: 12 }}>
-          <Button
-            variant="primary"
-            className="k-button"
-            style={{ marginRight: 5 }}
-            onClick={this.enterEdit}
-          >
-            Edit
-          </Button>
-        </Col>
-        <Col sm={2} md={2} lg={{ span: 1, offset: 16 }}>
-          <Button
-            variant="secondary"
-            className="k-button"
-            onClick={this.handleDelete}
-          >
-            Delete
-          </Button>
-        </Col>
-        <Col sm={2} md={2} lg={{ span: 1, offset: 20 }}>
-          <Button
-            variant="warning"
-            className="k-button"
-            onClick={this.handleMovePress}
-          >
-            Move
-          </Button>
-        </Col>
+        <Row>
+          <Col sm={{ span: 3, offset: 0 }} md={3} lg={{ span: 3, offset: 3 }}>
+            <Button
+              variant="primary"
+              className="k-button"
+              style={{ minWidth: 74 }}
+              onClick={this.enterEdit}
+            >
+              Edit
+            </Button>
+          </Col>
+          <Col sm={3} md={3} lg={3}>
+            <Button
+              variant="secondary"
+              className="k-button"
+              style={{ minWidth: 74 }}
+              onClick={this.handleDelete}
+            >
+              Delete
+            </Button>
+          </Col>
+          <Col sm={3} md={3} lg={3}>
+            <Button
+              variant="warning"
+              className="k-button"
+              style={{ minWidth: 74 }}
+              onClick={this.handleMovePress}
+            >
+              Move
+            </Button>
+          </Col>
+        </Row>
       </>
     );
   }
@@ -129,19 +213,32 @@ export default class CidItemRender extends React.Component<
             </Form>
           ) : (
             <Container>
-              <Row sm={8} md={12} lg={16}>
-                <Col sm={5} md={8} lg={14}>
+              <Row>
+                <Col sm={2} md={2} lg={1}>
+                  <div
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {this.renderOverride()}
+                  </div>
+                </Col>
+                <Col sm={10} md={10} lg={5}>
                   <Form.Label
                     style={{
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: "bold",
-                      marginRight: 5,
                     }}
                   >
                     {FilterService.renderHashedCid(this.state.item.cid, false)}
                   </Form.Label>
                 </Col>
-                {this.renderCidActions()}
+                <Col sm={12} md={12} lg={6}>
+                  {this.renderCidActions()}
+                </Col>
               </Row>
             </Container>
           )}
