@@ -11,7 +11,7 @@ const databases = {
     name: "local_database",
     basePath: basePath,
     dbPath: path.join(basePath, "local_database"),
-    tables: ["config", "bitscreen"],
+    tables: ["config", "bitscreen", "provider_info"],
   },
   complaints: {
     name: "complaints",
@@ -48,10 +48,18 @@ Object.keys(databases).forEach(database =>{
         nextInsertId: 1,
       };
     })
+  } finally {
+    databases[database].tables.forEach(table => {
+      if (!dbFileData[databases[database].name].hasOwnProperty(table)) {
+        dbFileData[databases[database].name][table] = {
+          name: table,
+          data: {},
+          nextInsertId: 1,
+        };
+      }
+    });
   }
 })
-
-
 
 function forceExistingTable(databaseName: string, table: string) {
   if (!Object.prototype.hasOwnProperty.call(dbFileData[databaseName], table)) {

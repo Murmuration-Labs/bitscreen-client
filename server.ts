@@ -218,6 +218,69 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
         })
 });
 
+app.get("/provider_info", (req: Request, res: Response) => {
+    db.findAll(databaseName, "provider_info")
+        .then(results => {
+            if (results.length > 0) {
+                res.send(results[0]);
+            } else {
+                res.send({
+                    fileCoinAddress: "",
+                    businessName: "",
+                    website: "",
+                    email: "",
+                    contactPerson: "",
+                    address: "",
+                    country: "",
+                });
+            }
+        })
+        .catch(err => {
+            console.log("GET provider_info err is", err);
+            res.status(503).send({});
+        })
+    ;
+});
+
+app.put("/provider_info", (req: Request, res: Response) => {
+    db.findAll(databaseName, "provider_info")
+        .then(results => {
+            if (results.length > 0) {
+                const existing: any = results[0];
+
+                const saveObject = {
+                    ...existing,
+                    ...req.body,
+                    _id: existing._id, // prevent frontend from injecting _id
+                    _cryptId: existing._cryptId, // prevent frontend from injecting _cryptId
+                };
+
+                db.update(databaseName, "provider_info", saveObject)
+                    .then(() => {
+                        res.send({});
+                    })
+                    .catch(() => {
+                        res.status(503).send({});
+                    })
+                ;
+            } else {
+                db.insert(databaseName, "provider_info", req.body)
+                    .then(() => {
+                        res.send({});
+                    })
+                    .catch(() => {
+                        res.status(503).send({});
+                    })
+                ;
+            }
+        })
+        .catch(err => {
+            console.log("POST provider_info err is", err);
+            res.status(503).send({});
+        })
+    ;
+});
+
 interface Filter {
     _id?: number;
     cids: string[];
