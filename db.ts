@@ -142,8 +142,7 @@ export const update = async (databaseName: string, table: string, data: any) => 
       ...dbFileData[databaseName][table].data[data[i]._id], // keep old values
       ...data[i], // overwrite new
     };
-
-    dbFileData[table].data[data[i]._id]._lastUpdatedAt = moment().unix();
+    dbFileData[databaseName][table].data[data[i]._id]._lastUpdatedAt = moment().unix();
   }
 
   return await syncToDisk(databaseName, data._id);
