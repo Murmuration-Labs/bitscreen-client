@@ -302,24 +302,17 @@ export const checkOverriddenCid = async (
   cid: string
 ) => {
   forceExistingTable(databaseName, table);
-  let found = false;
-  const hashedUtil = getAddressHash(cid);
-  Object.values(dbFileData[databaseName][table].data).forEach(
+  const hashedCid = getAddressHash(cid);
+  return Object.values(dbFileData[databaseName][table].data).find(
     (element: any) => {
       if (
-        !found &&
         element.override !== undefined &&
         element.override === false &&
         element.origin !== undefined &&
         element.origin !== null
       ) {
-        element.cids.forEach((elem: string) => {
-          if (elem === hashedUtil) {
-            found = true;
-          }
-        });
+        return element.cids.indexOf(hashedCid) === -1 ? false : true;
       }
     }
   );
-  return found;
 };
