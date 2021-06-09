@@ -1,5 +1,5 @@
 # BitScreen Client
-The bitscreen client helps node operators manage and share lists of blocked CIDs amongs themselves in order to filter the content they store for the Filecoin network.
+The bitscreen client helps node operators manage and share lists of blocked CIDs among themselves in order to filter the content they store for the Filecoin network.
  
 ## Development
 ### Setup
@@ -75,6 +75,8 @@ Call in the root of the project ```docker-compose up```
 Call in the root of your project ```yarn start```
 
 The app will be available, by default, at [```http://localhost:3000```](http://localhost:3000) or on your local network at ```http://your_ip:3000```
+
+The app is also deployed at https://green-frost-6805.on.fleek.co/ and updates on `master` branch changes.
  
 ## Remote server
 Remote server is available at [https://bxn.keyko.rocks/](https://bxn.keyko.rocks/)
