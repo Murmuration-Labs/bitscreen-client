@@ -132,10 +132,7 @@ export default class CidItemRender extends React.Component<
     // loader
     return (
       <>
-        <PuffLoader
-          color={"#28a745"}
-          size={20}
-        />
+        <PuffLoader color={"#28a745"} size={20} />
       </>
     );
   }

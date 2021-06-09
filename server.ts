@@ -190,9 +190,9 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
       } else {
           res.send(
               data.map((x) => {
-                  x.cids = x.cids.map(getAddressHash);
-
-                  return x;
+                  let y = JSON.parse(JSON.stringify(x));
+                  y.cids = x.cids.map(getAddressHash);
+                  return y;
               })[0]
           );
       }

@@ -303,16 +303,18 @@ export const checkOverriddenCid = async (
 ) => {
   forceExistingTable(databaseName, table);
   let found = false;
+  const hashedUtil = getAddressHash(cid);
   Object.values(dbFileData[databaseName][table].data).forEach(
     (element: any) => {
       if (
         !found &&
         element.override !== undefined &&
         element.override === false &&
+        element.origin !== undefined &&
         element.origin !== null
       ) {
         element.cids.forEach((elem: string) => {
-          if (elem === cid) {
+          if (elem === hashedUtil) {
             found = true;
           }
         });
