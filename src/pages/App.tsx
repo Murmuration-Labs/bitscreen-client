@@ -14,6 +14,7 @@ import "./App.css";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 
 import FilterPage from "./Filters/FilterPage";
+import AccountContactPage from "./Contact/AccountContactPage";
 
 interface MatchParams {
   id: string;
@@ -35,6 +36,7 @@ function App(): JSX.Element {
             <Route path="/filters" exact component={Filters} />
             <Route path="/filters/add/:id" exact component={FilterPage} />
             <Route path="/filters/edit/:id" exact component={FilterPage} />
+            <Route path="/account" exact component={AccountContactPage} />
             {/*<Route path="/filters/import" exact component={FilterPage} />*/}
             <Route exact path="/">
               <Redirect to="/settings" />

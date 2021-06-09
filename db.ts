@@ -51,7 +51,7 @@ Object.keys(databases).forEach((database) => {
       };
     });
   } finally {
-    databases[database].tables.forEach(table => {
+    databases[database].tables.forEach((table) => {
       if (!dbFileData[databases[database].name].hasOwnProperty(table)) {
         dbFileData[databases[database].name][table] = {
           name: table,
@@ -61,7 +61,7 @@ Object.keys(databases).forEach((database) => {
       }
     });
   }
-})
+});
 
 function forceExistingTable(databaseName: string, table: string) {
   if (!Object.prototype.hasOwnProperty.call(dbFileData[databaseName], table)) {
@@ -314,15 +314,15 @@ export const checkOverriddenCid = async (
   forceExistingTable(databaseName, table);
   const hashedCid = getAddressHash(cid);
   return Object.values(dbFileData[databaseName][table].data).find(
-    (element: any) => {
-      if (
-        element.override !== undefined &&
-        element.override === false &&
-        element.origin !== undefined &&
-        element.origin !== null
-      ) {
-        return element.cids.indexOf(hashedCid) === -1 ? false : true;
+      (element: any) => {
+        if (
+            element.override !== undefined &&
+            element.override === false &&
+            element.origin !== undefined &&
+            element.origin !== null
+        ) {
+          return element.cids.indexOf(hashedCid) === -1 ? false : true;
+        }
       }
-    }
   );
 };
