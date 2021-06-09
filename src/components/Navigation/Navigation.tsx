@@ -15,6 +15,9 @@ function Navigation(): JSX.Element {
       <NavLink className="nav-link" activeClassName={"is-active"} to="/filters">
         Filters
       </NavLink>
+      <NavLink className="nav-link" activeClassName={"is-active"} to="/account">
+        Account
+      </NavLink>
     </nav>
   );
 }
