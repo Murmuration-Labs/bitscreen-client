@@ -218,6 +218,7 @@ function FilterPage(props) {
                   <Form.Row>
                     <Col>
                       <Form.Control
+                        role="name"
                         onChange={changeName}
                         type="text"
                         placeholder="List Name"
