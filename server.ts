@@ -122,12 +122,23 @@ app.get("/search-filters", (req: Request, res: Response) => {
 
 app.post("/filters", (req: Request, res: Response) => {
   db.insert(databaseName, "bitscreen", req.body)
-    .then((data) =>
-      res.send({
-        success: true,
-        _id: data,
-      })
-    )
+    .then(async (data) => {
+
+        if (!req.body.name) {
+            const updateObj = {
+                _id: data,
+                name: `New filter (${data})`,
+                cids: [],
+            };
+
+            await db.update(databaseName, "bitscreen", updateObj);
+        }
+
+        res.send({
+            success: true,
+            _id: data,
+        })
+    })
     .catch((err) =>
       res.send({
         success: false,
