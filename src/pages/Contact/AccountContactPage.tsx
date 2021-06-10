@@ -137,18 +137,6 @@ export default function AccountContactPage(): JSX.Element {
             }
           />
         </Form.Group>
-        {/*<Form.Group>*/}
-        {/*  <Form.Label>Country</Form.Label>*/}
-        {/*  <Form.Control*/}
-        {/*    type="text"*/}
-        {/*    placeholder="Country"*/}
-        {/*    value={account.country}*/}
-        {/*    onChange={(ev: ChangeEvent<HTMLInputElement>) =>*/}
-        {/*      handleFieldChange("country", ev)*/}
-        {/*    }*/}
-        {/*  />*/}
-        {/*</Form.Group>*/}
-
         <Form.Group>
           <Form.Label>Country</Form.Label>
           <Typeahead
