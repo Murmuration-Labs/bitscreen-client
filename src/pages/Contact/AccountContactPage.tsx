@@ -4,11 +4,28 @@ import PuffLoader from "react-spinners/PuffLoader";
 import { Account } from "./Interfaces";
 import ContactService from "../../services/ContactService";
 import ApiService from "../../services/ApiService";
+import { Typeahead } from "react-bootstrap-typeahead";
+import { countries } from "countries-list";
+import validator from "validator";
+
+const API_MESSAGES_TIME = 1500;
 
 export default function AccountContactPage(): JSX.Element {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [canSubmit, setCanSubmit] = useState<boolean>(true);
   const [displaySuccess, setDisplaySuccess] = useState<boolean>(false);
+  const [displayError, setDisplayError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    setDisplayError(true);
+
+    setTimeout(() => {
+      setErrorMessage("");
+      setDisplayError(false);
+    }, API_MESSAGES_TIME);
+  };
 
   const [account, setAccount] = useState<Account>(
     ContactService.emptyAccount()
@@ -35,6 +52,8 @@ export default function AccountContactPage(): JSX.Element {
       ...account,
     });
   };
+
+  const countryNames = Object.values(countries);
 
   const renderFormOrLoader = (): JSX.Element => {
     if (!loaded) {
@@ -118,17 +137,42 @@ export default function AccountContactPage(): JSX.Element {
             }
           />
         </Form.Group>
+        {/*<Form.Group>*/}
+        {/*  <Form.Label>Country</Form.Label>*/}
+        {/*  <Form.Control*/}
+        {/*    type="text"*/}
+        {/*    placeholder="Country"*/}
+        {/*    value={account.country}*/}
+        {/*    onChange={(ev: ChangeEvent<HTMLInputElement>) =>*/}
+        {/*      handleFieldChange("country", ev)*/}
+        {/*    }*/}
+        {/*  />*/}
+        {/*</Form.Group>*/}
+
         <Form.Group>
           <Form.Label>Country</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Country"
-            value={account.country}
-            onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-              handleFieldChange("country", ev)
+          <Typeahead
+            id="typeahead-autocomplete"
+            labelKey="name"
+            defaultSelected={
+              account.country
+                ? countryNames.filter((x) => x.name === account.country)
+                : []
             }
+            options={countryNames}
+            onChange={(selected) => {
+              if (selected.length === 0) {
+                account.country = "";
+              } else {
+                account.country = selected[0].name;
+              }
+
+              setAccount({ ...account });
+            }}
+            clearButton
           />
         </Form.Group>
+
         <Button
           variant="primary"
           type="button"
@@ -137,6 +181,15 @@ export default function AccountContactPage(): JSX.Element {
             ev.preventDefault();
 
             // validations here
+            if (account.email !== "" && !validator.isEmail(account.email)) {
+              showError("Email is not valid");
+              return;
+            }
+
+            if (account.website !== "" && !validator.isURL(account.website)) {
+              showError("Website is not a valid URL");
+              return;
+            }
 
             setCanSubmit(false);
             ApiService.updateProviderInfo(account).then(() => {
@@ -145,7 +198,7 @@ export default function AccountContactPage(): JSX.Element {
 
               setTimeout(() => {
                 setDisplaySuccess(false);
-              }, 1500);
+              }, API_MESSAGES_TIME);
             });
           }}
         >
@@ -155,6 +208,9 @@ export default function AccountContactPage(): JSX.Element {
           <span style={{ color: "green", marginLeft: 8 }}>
             Successfully updated contact info
           </span>
+        )}
+        {displayError && (
+          <span style={{ color: "red", marginLeft: 8 }}>{errorMessage}</span>
         )}
       </Form>
     );
