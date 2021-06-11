@@ -62,6 +62,15 @@ function Filters(): JSX.Element {
     await getFilters();
   };
 
+  const toggleFilterOverride = async (
+    filterList: FilterList
+  ): Promise<void> => {
+    if (filterList.origin) return;
+    filterList.override = !filterList.override;
+    await ApiService.updateFilter(filterList);
+    await getFilters();
+  };
+
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("false");
@@ -124,6 +133,7 @@ function Filters(): JSX.Element {
                 <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
+                <th>Override?</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -179,6 +189,17 @@ function Filters(): JSX.Element {
                         type="switch"
                         checked={filterList.enabled}
                         disabled={!!filterList.origin}
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <div onClick={() => toggleFilterOverride(filterList)}>
+                      <FormCheck
+                        readOnly
+                        type="switch"
+                        checked={
+                          filterList.override ? filterList.override : false
+                        }
                       />
                     </div>
                   </td>

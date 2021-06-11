@@ -9,6 +9,7 @@ const FilterService = {
       cids: [],
       visibility: Visibility.Private,
       enabled: true,
+      override: false,
     };
   },
   renderHashedCid: (hashedCid: string, short = true): JSX.Element => {

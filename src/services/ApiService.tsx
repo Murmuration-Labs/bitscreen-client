@@ -33,6 +33,11 @@ const ApiService = {
     const response = await axios.get(filterUri);
     return response.data as FilterList;
   },
+
+  getCidOverride: async (cid: string): Promise<FilterList> => {
+    const response = await axios.get(`${serverUri()}/cid/is-override/${cid}`);
+    return response.data as FilterList;
+  },
 };
 
 export default ApiService;

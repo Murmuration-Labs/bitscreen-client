@@ -2,111 +2,134 @@ import React from "react";
 
 import { unmountComponentAtNode, render } from "react-dom";
 
-import '@testing-library/jest-dom/extend-expect';
-import {act, screen} from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import "@testing-library/jest-dom/extend-expect";
+import { act, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ApiService from "../../services/ApiService";
 
 import Filters from "./Filters";
-import {Visibility} from "./Interfaces";
+import { Visibility } from "./Interfaces";
 import App from "../App";
 
-jest.mock('../../services/ApiService');
+jest.mock("../../services/ApiService");
 
-let testNumber = Math.floor(Math.random() * 100000000);
+const testNumber = Math.floor(Math.random() * 100000000);
 
 let container = null;
 
 const initNavigateToFilters = async (initialFilters = []) => {
-    act(() => {
-        render(<App />, container);
-    });
+  act(() => {
+    render(<App />, container);
+  });
 
-    (ApiService.getFilters as jest.Mock).mockResolvedValueOnce(initialFilters);
+  (ApiService.getFilters as jest.Mock).mockResolvedValueOnce(initialFilters);
 
-    expect(await screen.findByText("Filters")).toBeInTheDocument();
+  expect(await screen.findByText("Filters")).toBeInTheDocument();
 
-    await act(async () => await userEvent.click(screen.getByText('Filters')));
+  await act(async () => await userEvent.click(screen.getByText("Filters")));
 
-    expect(await ApiService.getFilters).toHaveBeenCalledTimes(1);
-    expect(await screen.findByText("+ new Filter")).toBeInTheDocument();
+  expect(await ApiService.getFilters).toHaveBeenCalledTimes(1);
+  expect(await screen.findByText("+ new Filter")).toBeInTheDocument();
 };
 
 describe("Filters module", () => {
-    beforeAll(() => {
-        jest.useFakeTimers();
+  beforeAll(() => {
+    jest.useFakeTimers();
 
-        container = document.createElement("div");
-        document.body.appendChild(container);
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+
+    unmountComponentAtNode(container);
+    container.remove();
+    container = null;
+  });
+
+  test("Create random Filter", async () => {
+    await initNavigateToFilters();
+
+    (ApiService.addFilter as jest.Mock).mockImplementationOnce((): void => {
+      console.log("addFilter called");
     });
 
-    afterAll(() => {
-        jest.useRealTimers();
+    (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([]);
 
-        unmountComponentAtNode(container);
-        container.remove();
-        container = null;
-    });
+    await act(
+      async () => await userEvent.click(screen.getByText("+ new Filter"))
+    );
+    await act(async () => await jest.advanceTimersByTime(2000));
 
-    test("Create random Filter", async () => {
-        await initNavigateToFilters();
+    expect(await ApiService.getFilters).toHaveBeenCalledTimes(2);
+    expect(await ApiService.addFilter).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("Edit filter list")).toBeInTheDocument();
 
-        (ApiService.addFilter as jest.Mock).mockImplementationOnce((): void => {
-            console.log('addFilter called');
-        });
+    (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([
+      {
+        _id: 1,
+        name: "New filter (1)",
+        visibility: Visibility.Public,
+        cids: [],
+      },
+    ]);
 
-        (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([]);
+    (ApiService.updateFilter as jest.Mock).mockResolvedValue([{ _id: 1 }]);
 
-        await act(async () => await userEvent.click(screen.getByText('+ new Filter')));
-        await act(async () => await jest.advanceTimersByTime(2000));
+    const newFilterName = `Name-unittest-${testNumber}`;
 
-        expect(await ApiService.getFilters).toHaveBeenCalledTimes(2);
-        expect(await ApiService.addFilter).toHaveBeenCalledTimes(1);
-        expect(await screen.findByText("Edit filter list")).toBeInTheDocument();
+    await act(
+      async () => await userEvent.type(screen.getByRole("name"), newFilterName)
+    );
 
-        (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([{
-            _id: 1,
-            name: 'New filter (1)',
-            visibility: Visibility.Public,
-            cids: [],
-        }]);
+    expect(await ApiService.updateFilter).toHaveBeenCalledTimes(
+      newFilterName.split("").length
+    );
+    expect(
+      await screen.findByText("Name successfully saved.")
+    ).toBeInTheDocument();
+  });
 
-        (ApiService.updateFilter as jest.Mock).mockResolvedValue([{_id: 1}]);
+  test("Edit existing filter", async () => {
+    await initNavigateToFilters([
+      {
+        _id: 1,
+        name: "New filter (1)",
+        visibility: Visibility.Public,
+        cids: [],
+      },
+    ]);
 
-        const newFilterName = `Name-unittest-${testNumber}`;
+    const nameSuffix = ` - ${testNumber}`;
 
-        await act(async () => await userEvent.type(screen.getByRole('name'), newFilterName));
+    (ApiService.updateFilter as jest.Mock).mockResolvedValue([{ _id: 1 }]);
 
-        expect(await ApiService.updateFilter).toHaveBeenCalledTimes(newFilterName.split("").length);
-        expect(await screen.findByText("Name successfully saved.")).toBeInTheDocument();
-    });
+    (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([
+      {
+        _id: 1,
+        name: "New filter (1)",
+        visibility: Visibility.Public,
+        cids: [],
+      },
+    ]);
 
-    test("Edit existing filter", async () => {
-        await initNavigateToFilters([{
-            _id: 1,
-            name: 'New filter (1)',
-            visibility: Visibility.Public,
-            cids: [],
-        }]);
+    await act(
+      async () =>
+        await userEvent.click(screen.getByText("New filter (1)").closest("a"))
+    );
 
-        const nameSuffix = ` - ${testNumber}`;
+    expect(await screen.findByText("Edit filter list")).toBeInTheDocument();
 
-        (ApiService.updateFilter as jest.Mock).mockResolvedValue([{_id: 1}]);
+    await act(
+      async () => await userEvent.type(screen.getByRole("name"), nameSuffix)
+    );
 
-        (ApiService.getFilters as jest.Mock).mockResolvedValueOnce([{
-            _id: 1,
-            name: 'New filter (1)',
-            visibility: Visibility.Public,
-            cids: [],
-        }]);
-
-        await act(async () => await userEvent.click(screen.getByText("New filter (1)").closest("a")));
-
-        expect(await screen.findByText("Edit filter list")).toBeInTheDocument();
-
-        await act(async () => await userEvent.type(screen.getByRole('name'), nameSuffix));
-
-        expect(await ApiService.updateFilter).toHaveBeenCalledTimes(nameSuffix.split("").length);
-        expect(await screen.findByText("Name successfully saved.")).toBeInTheDocument();
-    });
+    expect(await ApiService.updateFilter).toHaveBeenCalledTimes(
+      nameSuffix.split("").length
+    );
+    expect(
+      await screen.findByText("Name successfully saved.")
+    ).toBeInTheDocument();
+  });
 });
