@@ -3,8 +3,9 @@ import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import {
   CidItem,
   FilterList,
-  VisibilityString,
   mapVisibilityString,
+  Visibility,
+  VisibilityString,
 } from "./Interfaces";
 import "./Filters.css";
 import CidItemRender from "./CidItemRenderer";
@@ -15,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useHistory } from "react-router-dom";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -29,9 +31,12 @@ function FilterPage(props) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
 
+  const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+
+  const history = useHistory();
 
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
     if (!fl) {
@@ -45,33 +50,28 @@ function FilterPage(props) {
     return fl;
   };
 
-  const createNewFilter = async (fl: FilterList) => {
-    await ApiService.addFilter(fl);
-  };
-
   const initFilter = (id: number): void => {
     ApiService.getFilters().then((filterLists: FilterList[]) => {
       filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
       if (filterLists.length === 0) {
-        filterLists.push({
-          ...filterList,
-          _id: id,
-          name: `New filter (${id})`,
-        });
-        createNewFilter(filterLists[0]);
+        setInvalidFilterId(true);
+        return;
       }
+
       setFilterList(filterLists[0]);
       setCidItems(
-        filterLists[0].cids.map((cid: string, index: number) => {
-          return { cid, id: index, edit: false };
-        })
+        filterLists[0].cids
+          ? filterLists[0].cids.map((cid: string, index: number) => {
+              return { cid, id: index, edit: false };
+            })
+          : []
       );
       setLoaded(true);
     });
   };
 
   useEffect(() => {
-    void initFilter(props.match.params.id);
+    void initFilter(props.match.params.id as number);
   }, []);
 
   const saveFilter = (fl?: FilterList) => {
@@ -233,6 +233,16 @@ function FilterPage(props) {
       </div>
     );
   };
+
+  if (invalidFilterId) {
+    return (
+      <Container>
+        <Row>
+          <h2>Invalid Filter ID</h2>
+        </Row>
+      </Container>
+    );
+  }
 
   return (
     <>

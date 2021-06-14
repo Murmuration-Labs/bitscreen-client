@@ -231,20 +231,6 @@ function Filters(): JSX.Element {
     void getFilters();
   }, []);
 
-  const newFilterId = () => {
-    const l = [FilterService.emptyFilterList()].concat(filterLists);
-    const ids = l.map((fl: FilterList) => fl._id);
-    console.log("newfilterId: ids=" + ids);
-    let id = 0;
-    for (const i of ids) {
-      if (i != null && i > id) {
-        id = i;
-      }
-    }
-    console.log("new filter id: " + (id + 1));
-    return (id + 1).toString();
-  };
-
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
 
   const history = useHistory();
@@ -270,9 +256,7 @@ function Filters(): JSX.Element {
               <Col className="text-right">
                 <Button
                   variant="primary"
-                  onClick={() =>
-                    history.push(`${location.pathname}/add/${newFilterId()}`)
-                  }
+                  onClick={() => history.push(`/filters/add`)}
                 >
                   + new Filter
                 </Button>
