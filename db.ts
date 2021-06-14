@@ -11,7 +11,7 @@ const databases = {
     name: "local_database",
     basePath: basePath,
     dbPath: path.join(basePath, "local_database"),
-    tables: ["config", "bitscreen"],
+    tables: ["config", "bitscreen", "provider_info"],
   },
   complaints: {
     name: "complaints",
@@ -49,6 +49,16 @@ Object.keys(databases).forEach((database) => {
         data: {}, // object in order to index better
         nextInsertId: 1,
       };
+    });
+  } finally {
+    databases[database].tables.forEach((table) => {
+      if (!dbFileData[databases[database].name].hasOwnProperty(table)) {
+        dbFileData[databases[database].name][table] = {
+          name: table,
+          data: {},
+          nextInsertId: 1,
+        };
+      }
     });
   }
 });
@@ -304,15 +314,15 @@ export const checkOverriddenCid = async (
   forceExistingTable(databaseName, table);
   const hashedCid = getAddressHash(cid);
   return Object.values(dbFileData[databaseName][table].data).find(
-    (element: any) => {
-      if (
-        element.override !== undefined &&
-        element.override === false &&
-        element.origin !== undefined &&
-        element.origin !== null
-      ) {
-        return element.cids.indexOf(hashedCid) === -1 ? false : true;
+      (element: any) => {
+        if (
+            element.override !== undefined &&
+            element.override === false &&
+            element.origin !== undefined &&
+            element.origin !== null
+        ) {
+          return element.cids.indexOf(hashedCid) === -1 ? false : true;
+        }
       }
-    }
   );
 };
