@@ -32,6 +32,7 @@ export interface CidItemProps {
   deleteItem: (i: CidItem) => void;
   beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
   index: number;
+  isOverrideFilter: boolean;
   isHashedCid: boolean;
 }
 
@@ -78,6 +79,7 @@ export interface FilterList {
   cids: string[];
   visibility: Visibility;
   enabled: boolean;
+  override: boolean;
   origin?: string;
 }
 

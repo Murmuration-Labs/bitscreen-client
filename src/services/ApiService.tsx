@@ -36,6 +36,11 @@ const ApiService = {
     return response.data as FilterList;
   },
 
+  getCidOverride: async (cid: string): Promise<FilterList> => {
+    const response = await axios.get(`${serverUri()}/cid/is-override/${cid}`);
+    return response.data as FilterList;
+  },
+
   getProviderInfo: async (): Promise<Account> => {
     const response = await axios.get(`${serverUri()}/provider_info`);
     return response.data as Account;

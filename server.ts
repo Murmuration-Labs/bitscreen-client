@@ -186,8 +186,13 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
     },
   ])
     .then((data) => {
+      data = data.filter((element) => {
+        return !element.override
+      })
+
       if (data.length === 0) {
-        res.status(404).send([]);
+         res.status(404).send([]);
+         return;
       }
 
       // don't rehash cids fetched from another origin
@@ -196,9 +201,9 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
       } else {
           res.send(
               data.map((x) => {
-                  x.cids = x.cids.map(getAddressHash);
-
-                  return x;
+                  let y = JSON.parse(JSON.stringify(x));
+                  y.cids = x.cids.map(getAddressHash);
+                  return y;
               })[0]
           );
       }
@@ -222,6 +227,17 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
             } else {
                 res.status(404).send({});
             }
+        })
+        .catch((err) => {
+            console.log("Version error log", err);
+            res.status(404).send({});
+        })
+});
+
+app.get("/cid/is-override/:cid", (req: Request, res: Response) => {
+    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid)
+        .then((data) => {
+            res.status(200).send(data);
         })
         .catch((err) => {
             console.log("Version error log", err);
@@ -297,6 +313,7 @@ interface Filter {
     cids: string[];
     visibility: number;
     enabled: boolean;
+    override: boolean;
     origin?: string;
     _cryptId?: string;
     _lastUpdatedAt?: number;
