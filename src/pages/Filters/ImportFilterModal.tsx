@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import {
   Modal,
   Button,
@@ -208,6 +208,29 @@ export default function ImportFilterModal(
               css={overrideLoaderCss}
               size={150}
             />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <Form>
+              <Form.Row>
+                <Col>
+                  <Form.Control
+                    role="notes"
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) => {
+                      setFetchedFilterList({
+                        ...fetchedFilterList,
+                        notes: ev.target.value,
+                      });
+                    }}
+                    as="textarea"
+                    placeholder="List Notes"
+                    value={fetchedFilterList.notes}
+                  />
+                </Col>
+              </Form.Row>
+            </Form>
           </Col>
         </Row>
       </Modal.Body>

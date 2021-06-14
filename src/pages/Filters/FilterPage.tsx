@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
 import {
   CidItem,
@@ -226,6 +226,21 @@ function FilterPage(props) {
     );
   };
 
+  const renderNotes = (): JSX.Element => {
+    if (!filterList.origin) {
+      return <></>;
+    }
+
+    return (
+      <Form.Row>
+        <Col>
+          <h4>Notes</h4>
+          <p>{filterList.notes}</p>
+        </Col>
+      </Form.Row>
+    );
+  };
+
   const SaveNotice = (props: { notice: string }): JSX.Element => {
     return (
       <div className={"fading"}>
@@ -268,6 +283,29 @@ function FilterPage(props) {
                       />
                     </Col>
                   </Form.Row>
+
+                  <Form.Row>
+                    <Col>
+                      <Form.Control
+                        role="description"
+                        onChange={(ev: ChangeEvent<HTMLInputElement>) => {
+                          ev.preventDefault();
+
+                          saveFilter({
+                            ...filterList,
+                            description: ev.target.value,
+                          });
+
+                          setNotice("Description successfully saved");
+                        }}
+                        as="textarea"
+                        placeholder="List Description"
+                        value={filterList.description}
+                        disabled={!!filterList.origin}
+                      />
+                    </Col>
+                  </Form.Row>
+
                   <Form.Row>
                     <Col xs={"auto"}>
                       <Form.Group controlId="visibility">
@@ -290,6 +328,7 @@ function FilterPage(props) {
                     </Col>
                   </Form.Row>
                   {renderOrigin()}
+                  {renderNotes()}
                   <Form.Row>
                     <Col>
                       <Button

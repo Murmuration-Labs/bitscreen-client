@@ -81,6 +81,8 @@ export interface FilterList {
   enabled: boolean;
   override: boolean;
   origin?: string;
+  description?: string;
+  notes?: string;
 }
 
 export interface CidListProps {
