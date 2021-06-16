@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import {
+  Badge,
+  Button,
   Col,
   Container,
   Form,
   FormCheck,
+  OverlayTrigger,
   Row,
   Table,
-  OverlayTrigger,
   Tooltip,
-  Badge,
-  Button,
+  Dropdown,
 } from "react-bootstrap";
 import "./Filters.css";
-import { FilterList, Visibility, VisibilityString } from "./Interfaces";
+import {
+  BulkSelectedType,
+  FilterList,
+  Visibility,
+  VisibilityString,
+} from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faTrash,
-  faEdit,
-  faExternalLinkAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import { faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
@@ -128,6 +129,7 @@ function Filters(): JSX.Element {
           <Table>
             <thead>
               <tr>
+                <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
                 <th>Shared?</th>
@@ -140,6 +142,16 @@ function Filters(): JSX.Element {
             <tbody>
               {filterLists.map((filterList) => (
                 <tr key={`filterList-${filterList._id}`}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={filterList.isBulkSelected}
+                      onChange={() => {
+                        filterList.isBulkSelected = !filterList.isBulkSelected;
+                        setFilterLists([...filterLists]);
+                      }}
+                    />
+                  </td>
                   <td>
                     <Link
                       to={`/filters/edit/${filterList._id}`}
@@ -235,6 +247,42 @@ function Filters(): JSX.Element {
 
   const history = useHistory();
 
+  const isAllLoaded = filterLists.reduce(
+    (acc: boolean, filterList: FilterList) =>
+      acc && !!filterList.isBulkSelected,
+    true
+  ) as boolean;
+
+  const bulkModifySelectedFilters = (
+    only = BulkSelectedType.All,
+    futureValue = true
+  ): void => {
+    let conditional = (x: FilterList) => true;
+
+    switch (only) {
+      case BulkSelectedType.Private:
+        conditional = (x: FilterList) => x.visibility === Visibility.Private;
+        break;
+
+      case BulkSelectedType.Public:
+        conditional = (x: FilterList) => x.visibility === Visibility.Public;
+        break;
+
+      default:
+        break;
+    }
+
+    for (let i = 0; i < filterLists.length; i++) {
+      if (conditional(filterLists[i])) {
+        filterLists[i].isBulkSelected = futureValue;
+      } else {
+        filterLists[i].isBulkSelected = !futureValue;
+      }
+    }
+
+    setFilterLists([...filterLists]);
+  };
+
   return (
     <div>
       {loaded ? (
@@ -242,6 +290,56 @@ function Filters(): JSX.Element {
           <Container>
             <h2>Filters</h2>
             <Row style={{ marginBottom: 12 }}>
+              <Col>
+                <Row>
+                  <Dropdown>
+                    <Dropdown.Toggle
+                      id="dropdown-select-all"
+                      variant="secondary"
+                    >
+                      <Form>
+                        <Form.Group controlId="selectAll">
+                          <Form.Check
+                            type="checkbox"
+                            defaultChecked={isAllLoaded}
+                            onChange={() => {
+                              bulkModifySelectedFilters(
+                                BulkSelectedType.All,
+                                !isAllLoaded
+                              );
+                            }}
+                          />
+                        </Form.Group>
+                      </Form>
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                      <Dropdown.Item href="#/action-2">
+                        Another action
+                      </Dropdown.Item>
+                      <Dropdown.Item href="#/action-3">
+                        Something else
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Row>
+
+                <Button
+                  onClick={() =>
+                    bulkModifySelectedFilters(BulkSelectedType.Private)
+                  }
+                >
+                  Private only
+                </Button>
+
+                <Button
+                  onClick={() =>
+                    bulkModifySelectedFilters(BulkSelectedType.Public)
+                  }
+                >
+                  Public only
+                </Button>
+              </Col>
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
