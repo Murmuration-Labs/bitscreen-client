@@ -292,36 +292,50 @@ function Filters(): JSX.Element {
             <Row style={{ marginBottom: 12 }}>
               <Col>
                 <Row>
-                  <Dropdown>
-                    <Dropdown.Toggle
-                      id="dropdown-select-all"
-                      variant="secondary"
+                  <Col className="d-flex flex-row align-items-center">
+                    <Form.Group
+                      controlId="selectAll"
+                      className="d-flex align-items-center"
+                      style={{
+                        height: "100%",
+                        paddingLeft: "28px",
+                        marginBottom: 0,
+                      }}
                     >
-                      <Form>
-                        <Form.Group controlId="selectAll">
-                          <Form.Check
-                            type="checkbox"
-                            defaultChecked={isAllLoaded}
-                            onChange={() => {
-                              bulkModifySelectedFilters(
-                                BulkSelectedType.All,
-                                !isAllLoaded
-                              );
-                            }}
-                          />
-                        </Form.Group>
-                      </Form>
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                      <Dropdown.Item href="#/action-2">
-                        Another action
-                      </Dropdown.Item>
-                      <Dropdown.Item href="#/action-3">
-                        Something else
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
+                      <Form.Check
+                        type="checkbox"
+                        defaultChecked={isAllLoaded}
+                        onChange={() => {
+                          bulkModifySelectedFilters(
+                            BulkSelectedType.All,
+                            !isAllLoaded
+                          );
+                        }}
+                      />
+                    </Form.Group>
+                    <Dropdown>
+                      <Dropdown.Toggle
+                        style={{
+                          display: "flex",
+                          height: "20px",
+                          alignItems: "center",
+                          borderRadius: "0.5",
+                        }}
+                        id="dropdown-select-all"
+                        className="custom-dropdown-filters"
+                        variant="secondary"
+                      />
+                      <Dropdown.Menu>
+                        <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                        <Dropdown.Item href="#/action-2">
+                          Another action
+                        </Dropdown.Item>
+                        <Dropdown.Item href="#/action-3">
+                          Something else
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </Col>
                 </Row>
 
                 <Button
