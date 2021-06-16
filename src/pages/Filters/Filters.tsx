@@ -5,13 +5,13 @@ import {
   Button,
   Col,
   Container,
+  Dropdown,
   Form,
   FormCheck,
   OverlayTrigger,
   Row,
   Table,
   Tooltip,
-  Dropdown,
 } from "react-bootstrap";
 import "./Filters.css";
 import {
@@ -78,6 +78,16 @@ function Filters(): JSX.Element {
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+
+  const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
+    useState<boolean>(false);
+  const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
+    useState<string>("");
+
+  const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
+    useState<boolean>(false);
+  const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
+    useState<string>("");
 
   const confirmDelete = (filterList: FilterList): void => {
     setShowConfirmDelete(true);
@@ -253,6 +263,48 @@ function Filters(): JSX.Element {
     true
   ) as boolean;
 
+  const beginBulkSetEnabled = (enabled: boolean): void => {
+    const selected = filterLists
+      .filter((x) => x.isBulkSelected)
+      .map((x) => ({
+        _id: x._id,
+        enabled,
+      }));
+
+    if (enabled) {
+      setShowConfirmEnableBulkAction(true);
+      setConfirmEnableBulkActionMessage(
+        `Are you sure you want to enable ${selected.length} items?`
+      );
+    } else {
+      setShowConfirmDisableBulkAction(true);
+      setConfirmDisableBulkActionMessage(
+        `Are you sure you want to disable ${selected.length} items?`
+      );
+    }
+  };
+
+  const bulkSetEnabled = async (enabled: boolean): Promise<void> => {
+    const selected = filterLists
+      .filter((x) => x.isBulkSelected)
+      .map((x) => ({
+        _id: x._id,
+        enabled,
+      }));
+
+    await ApiService.updateFilter(selected as FilterList[]);
+
+    // update in front as well
+    for (let i = 0; i < filterLists.length; i++) {
+      if (filterLists[i].isBulkSelected) {
+        filterLists[i].isBulkSelected = false;
+        filterLists[i].enabled = enabled;
+      }
+    }
+
+    setFilterLists([...filterLists]);
+  };
+
   const bulkModifySelectedFilters = (
     only = BulkSelectedType.All,
     futureValue = true
@@ -282,6 +334,14 @@ function Filters(): JSX.Element {
 
     setFilterLists([...filterLists]);
   };
+
+  let isOneSelected = false;
+  for (let i = 0; i < filterLists.length; i++) {
+    if (filterLists[i].isBulkSelected) {
+      isOneSelected = true;
+      break;
+    }
+  }
 
   return (
     <div>
@@ -326,33 +386,50 @@ function Filters(): JSX.Element {
                         variant="secondary"
                       />
                       <Dropdown.Menu>
-                        <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                        <Dropdown.Item href="#/action-2">
-                          Another action
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters();
+                          }}
+                        >
+                          All
                         </Dropdown.Item>
-                        <Dropdown.Item href="#/action-3">
-                          Something else
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(BulkSelectedType.Public);
+                          }}
+                        >
+                          Public
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(BulkSelectedType.Private);
+                          }}
+                        >
+                          Private
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
                   </Col>
+                  <Col>
+                    <Button
+                      disabled={!isOneSelected}
+                      onClick={() => beginBulkSetEnabled(true)}
+                    >
+                      Enable
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      disabled={!isOneSelected}
+                      onClick={() => beginBulkSetEnabled(false)}
+                    >
+                      Disable
+                    </Button>
+                  </Col>
                 </Row>
-
-                <Button
-                  onClick={() =>
-                    bulkModifySelectedFilters(BulkSelectedType.Private)
-                  }
-                >
-                  Private only
-                </Button>
-
-                <Button
-                  onClick={() =>
-                    bulkModifySelectedFilters(BulkSelectedType.Public)
-                  }
-                >
-                  Public only
-                </Button>
               </Col>
               <Col>
                 <Form inline>
@@ -412,6 +489,27 @@ function Filters(): JSX.Element {
                 }
               }}
               show={showImportFilter}
+            />
+
+            <ConfirmModal
+              show={showConfirmEnableBulkAction}
+              title={"Confirm bulk enable filters"}
+              message={confirmEnableBulkActionMessage}
+              callback={() => bulkSetEnabled(true)}
+              closeCallback={() => {
+                setShowConfirmEnableBulkAction(false);
+                setConfirmEnableBulkActionMessage("");
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmDisableBulkAction}
+              title={"Confirm bulk disable filters"}
+              message={confirmDisableBulkActionMessage}
+              callback={() => bulkSetEnabled(false)}
+              closeCallback={() => {
+                setShowConfirmDisableBulkAction(false);
+                setConfirmDisableBulkActionMessage("");
+              }}
             />
           </Container>
         </div>
