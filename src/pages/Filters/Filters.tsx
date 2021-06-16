@@ -257,11 +257,17 @@ function Filters(): JSX.Element {
 
   const history = useHistory();
 
-  const isAllLoaded = filterLists.reduce(
-    (acc: boolean, filterList: FilterList) =>
-      acc && !!filterList.isBulkSelected,
-    true
-  ) as boolean;
+  const [isAllLoaded, setIsAllLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    const isAllLoadedNow = filterLists.reduce(
+      (acc: boolean, filterList: FilterList) =>
+        acc && !!filterList.isBulkSelected,
+      true
+    ) as boolean;
+
+    setIsAllLoaded(isAllLoadedNow);
+  }, [filterLists]);
 
   const beginBulkSetEnabled = (enabled: boolean): void => {
     const selected = filterLists
@@ -364,7 +370,7 @@ function Filters(): JSX.Element {
                     >
                       <Form.Check
                         type="checkbox"
-                        defaultChecked={isAllLoaded}
+                        checked={isAllLoaded}
                         onChange={() => {
                           bulkModifySelectedFilters(
                             BulkSelectedType.All,
