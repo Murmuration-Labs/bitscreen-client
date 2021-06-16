@@ -235,7 +235,20 @@ function FilterPage(props) {
       <Form.Row>
         <Col>
           <h4>Notes</h4>
-          <p>{filterList.notes}</p>
+          <Form.Control
+            role="notes"
+            onChange={(ev: ChangeEvent<HTMLInputElement>) => {
+              saveFilter({
+                ...filterList,
+                notes: ev.target.value,
+              });
+
+              setNotice("Notes successfully saved");
+            }}
+            as="textarea"
+            placeholder="Notes"
+            value={filterList.notes}
+          />
         </Col>
       </Form.Row>
     );
