@@ -89,6 +89,8 @@ export interface FilterList {
   override: boolean;
   origin?: string;
   isBulkSelected?: boolean;
+  description?: string;
+  notes?: string;
 }
 
 export interface CidListProps {
