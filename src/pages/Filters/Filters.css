@@ -49,3 +49,24 @@
     from {opacity: 1;}
     to {opacity: 0;}
 }
+
+.bigger-checkbox {
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+}
+
+.bigger-checkbox>input {
+    padding-top: 0.46rem;
+}
+
+.custom-dropdown-filters.button, .custom-dropdown-filters.btn {
+    padding: 0
+}
+
+.custom-dropdown-filters.btn-secondary {
+    background-color: initial;
+    border-color: white;
+    color: #000;
+}

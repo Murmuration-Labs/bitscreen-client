@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import {
-  Col,
-  Container,
-  Form,
-  FormCheck,
-  Row,
-  Table,
-  OverlayTrigger,
-  Tooltip,
   Badge,
   Button,
+  Col,
+  Container,
+  Dropdown,
+  Form,
+  FormCheck,
+  OverlayTrigger,
+  Row,
+  Table,
+  Tooltip,
 } from "react-bootstrap";
 import "./Filters.css";
-import { FilterList, Visibility, VisibilityString } from "./Interfaces";
+import {
+  BulkSelectedType,
+  FilterList,
+  Visibility,
+  VisibilityString,
+} from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faTrash,
-  faEdit,
-  faExternalLinkAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import { faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
@@ -56,7 +57,6 @@ function Filters(): JSX.Element {
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    if (filterList.origin) return;
     filterList.enabled = !filterList.enabled;
     await ApiService.updateFilter(filterList);
     await getFilters();
@@ -77,6 +77,16 @@ function Filters(): JSX.Element {
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+
+  const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
+    useState<boolean>(false);
+  const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
+    useState<string>("");
+
+  const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
+    useState<boolean>(false);
+  const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
+    useState<string>("");
 
   const confirmDelete = (filterList: FilterList): void => {
     setShowConfirmDelete(true);
@@ -128,6 +138,7 @@ function Filters(): JSX.Element {
           <Table>
             <thead>
               <tr>
+                <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
                 <th>Shared?</th>
@@ -140,6 +151,16 @@ function Filters(): JSX.Element {
             <tbody>
               {filterLists.map((filterList) => (
                 <tr key={`filterList-${filterList._id}`}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={filterList.isBulkSelected}
+                      onChange={() => {
+                        filterList.isBulkSelected = !filterList.isBulkSelected;
+                        setFilterLists([...filterLists]);
+                      }}
+                    />
+                  </td>
                   <td>
                     <Link
                       to={`/filters/edit/${filterList._id}`}
@@ -188,7 +209,6 @@ function Filters(): JSX.Element {
                         readOnly
                         type="switch"
                         checked={filterList.enabled}
-                        disabled={!!filterList.origin}
                       />
                     </div>
                   </td>
@@ -235,6 +255,102 @@ function Filters(): JSX.Element {
 
   const history = useHistory();
 
+  const [isAllLoaded, setIsAllLoaded] = useState<boolean>(false);
+
+  useEffect(() => {
+    const isAllLoadedNow = filterLists.reduce(
+      (acc: boolean, filterList: FilterList) =>
+        acc && !!filterList.isBulkSelected,
+      true
+    ) as boolean;
+
+    setIsAllLoaded(isAllLoadedNow);
+  }, [filterLists]);
+
+  const beginBulkSetEnabled = (enabled: boolean): void => {
+    const selected = filterLists
+      .filter((x) => x.isBulkSelected)
+      .map((x) => ({
+        _id: x._id,
+        enabled,
+      }));
+
+    if (enabled) {
+      setShowConfirmEnableBulkAction(true);
+      setConfirmEnableBulkActionMessage(
+        `Are you sure you want to enable ${selected.length} items?`
+      );
+    } else {
+      setShowConfirmDisableBulkAction(true);
+      setConfirmDisableBulkActionMessage(
+        `Are you sure you want to disable ${selected.length} items?`
+      );
+    }
+  };
+
+  const bulkSetEnabled = async (enabled: boolean): Promise<void> => {
+    const selected = filterLists
+      .filter((x) => x.isBulkSelected)
+      .map((x) => ({
+        _id: x._id,
+        enabled,
+      }));
+
+    await ApiService.updateFilter(selected as FilterList[]);
+
+    // update in front as well
+    for (let i = 0; i < filterLists.length; i++) {
+      if (filterLists[i].isBulkSelected) {
+        filterLists[i].isBulkSelected = false;
+        filterLists[i].enabled = enabled;
+      }
+    }
+
+    setFilterLists([...filterLists]);
+  };
+
+  const bulkModifySelectedFilters = (
+    only = BulkSelectedType.All,
+    futureValue = true
+  ): void => {
+    let conditional = (x: FilterList) => true;
+
+    switch (only) {
+      case BulkSelectedType.Private:
+        conditional = (x: FilterList) => x.visibility === Visibility.Private;
+        break;
+
+      case BulkSelectedType.Public:
+        conditional = (x: FilterList) => x.visibility === Visibility.Public;
+        break;
+
+      case BulkSelectedType.Imported:
+        conditional = (x: FilterList) => !!x.origin;
+        break;
+
+      default:
+        break;
+    }
+
+    for (let i = 0; i < filterLists.length; i++) {
+      if (conditional(filterLists[i])) {
+        filterLists[i].isBulkSelected = futureValue;
+      } else {
+        filterLists[i].isBulkSelected = !futureValue;
+      }
+    }
+
+    setFilterLists([...filterLists]);
+  };
+
+  let isOneSelected = false;
+  for (let i = 0; i < filterLists.length; i++) {
+    if (filterLists[i].isBulkSelected) {
+      isOneSelected = true;
+      break;
+    }
+  }
+
   return (
     <div>
       {loaded ? (
@@ -242,6 +358,97 @@ function Filters(): JSX.Element {
           <Container>
             <h2>Filters</h2>
             <Row style={{ marginBottom: 12 }}>
+              <Col>
+                <Row>
+                  <Col className="d-flex flex-row align-items-center">
+                    <Form.Group
+                      controlId="selectAll"
+                      className="d-flex align-items-center"
+                      style={{
+                        height: "100%",
+                        paddingLeft: "28px",
+                        marginBottom: 0,
+                      }}
+                    >
+                      <Form.Check
+                        type="checkbox"
+                        checked={isAllLoaded}
+                        onChange={() => {
+                          bulkModifySelectedFilters(
+                            BulkSelectedType.All,
+                            !isAllLoaded
+                          );
+                        }}
+                      />
+                    </Form.Group>
+                    <Dropdown>
+                      <Dropdown.Toggle
+                        style={{
+                          display: "flex",
+                          height: "20px",
+                          alignItems: "center",
+                          borderRadius: "0.5",
+                        }}
+                        id="dropdown-select-all"
+                        className="custom-dropdown-filters"
+                        variant="secondary"
+                      />
+                      <Dropdown.Menu>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters();
+                          }}
+                        >
+                          All
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(BulkSelectedType.Public);
+                          }}
+                        >
+                          Public
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(BulkSelectedType.Private);
+                          }}
+                        >
+                          Private
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(
+                              BulkSelectedType.Imported
+                            );
+                          }}
+                        >
+                          Imported
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </Col>
+                  <Col>
+                    <Button
+                      disabled={!isOneSelected}
+                      onClick={() => beginBulkSetEnabled(true)}
+                    >
+                      Enable
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      disabled={!isOneSelected}
+                      onClick={() => beginBulkSetEnabled(false)}
+                    >
+                      Disable
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
               <Col>
                 <Form inline>
                   <Form.Group controlId="search">
@@ -300,6 +507,27 @@ function Filters(): JSX.Element {
                 }
               }}
               show={showImportFilter}
+            />
+
+            <ConfirmModal
+              show={showConfirmEnableBulkAction}
+              title={"Confirm bulk enable filters"}
+              message={confirmEnableBulkActionMessage}
+              callback={() => bulkSetEnabled(true)}
+              closeCallback={() => {
+                setShowConfirmEnableBulkAction(false);
+                setConfirmEnableBulkActionMessage("");
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmDisableBulkAction}
+              title={"Confirm bulk disable filters"}
+              message={confirmDisableBulkActionMessage}
+              callback={() => bulkSetEnabled(false)}
+              closeCallback={() => {
+                setShowConfirmDisableBulkAction(false);
+                setConfirmDisableBulkActionMessage("");
+              }}
             />
           </Container>
         </div>

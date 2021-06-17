@@ -12,6 +12,13 @@ export enum Visibility {
   ThirdParty,
 }
 
+export enum BulkSelectedType {
+  All,
+  Public,
+  Private,
+  Imported,
+}
+
 export function mapVisibilityString(visibilityStr: string): Visibility {
   if (visibilityStr === "Private") return Visibility.Private;
   if (visibilityStr === "Public") return Visibility.Public;
@@ -81,6 +88,7 @@ export interface FilterList {
   enabled: boolean;
   override: boolean;
   origin?: string;
+  isBulkSelected?: boolean;
   description?: string;
   notes?: string;
 }
