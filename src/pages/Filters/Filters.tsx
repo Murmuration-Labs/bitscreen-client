@@ -57,7 +57,6 @@ function Filters(): JSX.Element {
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    if (filterList.origin) return;
     filterList.enabled = !filterList.enabled;
     await ApiService.updateFilter(filterList);
     await getFilters();
@@ -210,7 +209,6 @@ function Filters(): JSX.Element {
                         readOnly
                         type="switch"
                         checked={filterList.enabled}
-                        disabled={!!filterList.origin}
                       />
                     </div>
                   </td>
@@ -326,6 +324,10 @@ function Filters(): JSX.Element {
         conditional = (x: FilterList) => x.visibility === Visibility.Public;
         break;
 
+      case BulkSelectedType.Imported:
+        conditional = (x: FilterList) => !!x.origin;
+        break;
+
       default:
         break;
     }
@@ -415,6 +417,16 @@ function Filters(): JSX.Element {
                           }}
                         >
                           Private
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          href="#"
+                          onClick={() => {
+                            bulkModifySelectedFilters(
+                              BulkSelectedType.Imported
+                            );
+                          }}
+                        >
+                          Imported
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>

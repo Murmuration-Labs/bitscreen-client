@@ -16,6 +16,7 @@ export enum BulkSelectedType {
   All,
   Public,
   Private,
+  Imported,
 }
 
 export function mapVisibilityString(visibilityStr: string): Visibility {
