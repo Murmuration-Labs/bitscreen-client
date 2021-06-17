@@ -10,6 +10,7 @@
     "@progress/kendo-react-inputs": "^4.5.0",
     "@progress/kendo-react-layout": "^4.5.0",
     "@progress/kendo-react-listview": "^4.5.0",
+    "@sendgrid/mail": "^7.4.5",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
