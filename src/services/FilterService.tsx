@@ -10,6 +10,7 @@ const FilterService = {
       visibility: Visibility.Private,
       enabled: true,
       override: false,
+      description: "",
     };
   },
   renderHashedCid: (hashedCid: string, short = true): JSX.Element => {
