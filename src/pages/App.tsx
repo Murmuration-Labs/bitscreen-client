@@ -37,6 +37,7 @@ function App(): JSX.Element {
             <Route path="/filters" exact component={Filters} />
             <Route path="/filters/add" exact component={AddFilterPage} />
             <Route path="/filters/edit/:id?" exact component={FilterPage} />
+            <Route path="/filters/new" exact component={FilterPage} />
             <Route path="/account" exact component={AccountContactPage} />
             <Route exact path="/">
               <Redirect to="/settings" />

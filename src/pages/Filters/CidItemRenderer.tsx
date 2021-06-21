@@ -63,9 +63,6 @@ export default class CidItemRender extends React.Component<
       this.setState({ item: { ...this.state.item, edit: true } });
     }
   };
-  cancelEdit = (): void => {
-    this.setState({ item: { ...this.props.cidItem, edit: false } });
-  };
   handleSave = (e: any): void => {
     // e.preventDefault();
     const ref = this.state.cidInputRef.current;
@@ -78,6 +75,19 @@ export default class CidItemRender extends React.Component<
       this.props.saveItem(updatedItem);
     }
   };
+
+  hangleChangeCidValue = (e: any): void => {
+    console.log(1);
+    const ref = this.state.cidInputRef.current;
+    const value = ref !== null ? ref.value : null;
+    let updatedItem: CidItem = { ...this.state.item };
+    if (value !== null) {
+      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
+      // this.setState({ item: { ...updatedItem, edit: false } });
+      this.props.changeCidValue(updatedItem);
+    }
+  };
+
   handleDelete = (): void => {
     console.info("handleDelete");
     this.props.deleteItem(this.state.item);
@@ -193,17 +203,12 @@ export default class CidItemRender extends React.Component<
                   type="text"
                   placeholder=""
                   defaultValue={this.state.item.cid}
+                  onChange={this.hangleChangeCidValue}
                 />
                 <Button
                   className="k-button"
-                  style={{ marginRight: 5 }}
-                  variant="primary"
-                  type="submit"
-                  onClick={this.handleSave}
+                  onClick={() => this.props.cancelEdit()}
                 >
-                  Save
-                </Button>
-                <Button className="k-button" onClick={this.cancelEdit}>
                   Cancel
                 </Button>
               </Form.Group>

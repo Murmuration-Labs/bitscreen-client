@@ -463,7 +463,7 @@ function Filters(): JSX.Element {
               <Col className="text-right">
                 <Button
                   variant="primary"
-                  onClick={() => history.push(`/filters/add`)}
+                  onClick={() => history.push(`/filters/new`)}
                 >
                   + new Filter
                 </Button>

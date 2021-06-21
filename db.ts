@@ -318,15 +318,15 @@ export const checkOverriddenCid = async (
   forceExistingTable(databaseName, table);
   const hashedCid = getAddressHash(cid);
   return Object.values(dbFileData[databaseName][table].data).find(
-      (element: any) => {
-        if (
-            element.override !== undefined &&
-            element.override === false &&
-            element.origin !== undefined &&
-            element.origin !== null
-        ) {
-          return element.cids.indexOf(hashedCid) === -1 ? false : true;
-        }
+    (element: any) => {
+      if (
+        element.override !== undefined &&
+        element.override === false &&
+        element.origin !== undefined &&
+        element.origin !== null
+      ) {
+        return element.cids.indexOf(hashedCid) === -1 ? false : true;
       }
+    }
   );
 };
