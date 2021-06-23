@@ -18,6 +18,7 @@ import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useHistory } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
+import { toast } from "react-toastify";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -198,6 +199,7 @@ function FilterPage(props) {
 
   const deleteCurrentFilter = async (): Promise<void> => {
     ApiService.deleteFilter(filterList._id as number).then(() => {
+      toast.success("Filter list deleted successfully");
       history.push("/filters");
     });
   };
