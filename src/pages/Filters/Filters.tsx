@@ -22,13 +22,20 @@ import {
 } from "./Interfaces";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faEdit, faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faGlobe,
+  faTrash,
+  faShare,
+} from "@fortawesome/free-solid-svg-icons";
 import ApiService from "../../services/ApiService";
 import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import FilterService from "../../services/FilterService";
 import debounce from "lodash.debounce";
 import ImportFilterModal from "./ImportFilterModal";
+import { toast } from "react-toastify";
+import { serverUri } from "../../config";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -99,6 +106,22 @@ function Filters(): JSX.Element {
 
   const searchFilters = (event): void => {
     debounceSearchFilters(event.target.value);
+  };
+
+  const clipboardCopy = (cryptId) => {
+    console.log(serverUri(), cryptId);
+    const selBox = document.createElement("textarea");
+    selBox.style.position = "fixed";
+    selBox.style.left = "0";
+    selBox.style.top = "0";
+    selBox.style.opacity = "0";
+    selBox.value = serverUri() + "/filters/shared/" + cryptId;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand("copy");
+    document.body.removeChild(selBox);
+    toast.success("Shared link was copied succesfully");
   };
 
   useEffect(() => {
@@ -236,6 +259,13 @@ function Filters(): JSX.Element {
                       className="double-space-left"
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={() => clipboardCopy(filterList["_cryptId"])}
+                      className="double-space-left"
+                    >
+                      <FontAwesomeIcon icon={faShare as IconProp} />
                     </Link>
                   </td>
                 </tr>

@@ -19,6 +19,7 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useHistory } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { toast } from "react-toastify";
+import { serverUri } from "../../config";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -204,6 +205,22 @@ function FilterPage(props) {
     });
   };
 
+  const clipboardCopy = (cryptId) => {
+    console.log(serverUri(), cryptId);
+    const selBox = document.createElement("textarea");
+    selBox.style.position = "fixed";
+    selBox.style.left = "0";
+    selBox.style.top = "0";
+    selBox.style.opacity = "0";
+    selBox.value = serverUri() + "/filters/shared/" + cryptId;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand("copy");
+    document.body.removeChild(selBox);
+    toast.success("Shared link was copied succesfully");
+  };
+
   const closeModalCallback = () => {
     setShowMoveModal(false);
   };
@@ -372,6 +389,18 @@ function FilterPage(props) {
                         </Form.Control>
                       </Form.Group>
                     </Col>
+                    <Col>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          clipboardCopy(filterList["_cryptId"]);
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </Col>
+                  </Form.Row>
+                  <Form.Row style={{ marginTop: -20 }}>
                     <Col>
                       <Form.Label className={"text-dim"}>
                         Shared lists will be accessible to other nodes if they
