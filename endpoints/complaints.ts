@@ -1,6 +1,11 @@
 import { Router, Request, Response } from 'express';
 import * as db from "../db";
+import * as emailTemplates from "../email-templates";
 const databaseName = "complaints";
+
+const sgMail = require('@sendgrid/mail')
+//we should put this on a env file
+sgMail.setApiKey('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');
 
 const usersRouter = Router();
 
@@ -47,12 +52,20 @@ usersRouter.get("/complaints/:_id", (req: Request, res: Response) => {
 });
 
 usersRouter.post("/complaints", (req: Request, res: Response) => {
+    const emailRegexValidator = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if(!emailRegexValidator.test(String(req.body.reporterEmail).toLowerCase())){
+        res.status(400).send({ err: 'Invalid email'});
+        return;
+    }
+
     db.insert(databaseName, "complaints", req.body)
-        .then((data) =>
+        .then((data) => {
+            sendEmail(req.body.reporterEmail);
             res.send({
                 success: true,
                 _id: data,
             })
+            }
         )
         .catch((err) => {
             console.log('insert err is', err);
@@ -95,5 +108,25 @@ usersRouter.delete("/complaints/:id", (req: Request, res: Response) => {
             });
         });
 });
+
+// we should move this to a service file
+const sendEmail = (receiver) => {
+
+    const msg = {
+        to: receiver,
+        from: 'office@keyko.io',
+        subject: emailTemplates.CreateComplaint.subject,
+        html: emailTemplates.CreateComplaint.body,
+    }
+
+    sgMail
+    .send(msg)
+    .then(() => {
+        console.log('Email sent')
+    })
+    .catch((error) => {
+        console.error(error)
+    })
+}
 
 export default usersRouter;
