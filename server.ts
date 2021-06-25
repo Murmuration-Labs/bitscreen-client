@@ -49,8 +49,8 @@ try {
   );
 }
 
-console.log(configPath);
-console.log(filterPath);
+console.log('config path:', configPath);
+console.log('filter path:', filterPath);
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, "build")));
@@ -68,7 +68,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/config", (req: Request, res: Response) => {
-  console.log("config requested");
   res.sendFile(configPath);
 });
 

@@ -206,7 +206,6 @@ function FilterPage(props) {
   };
 
   const clipboardCopy = (cryptId) => {
-    console.log(serverUri(), cryptId);
     const selBox = document.createElement("textarea");
     selBox.style.position = "fixed";
     selBox.style.left = "0";
