@@ -63,7 +63,8 @@
     "eject": "react-scripts eject",
     "server": "ts-node -O '{\"module\": \"commonjs\"}' server.ts",
     "lint": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx .",
-    "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix"
+    "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'"
   },
   "eslintConfig": {
     "extends": [

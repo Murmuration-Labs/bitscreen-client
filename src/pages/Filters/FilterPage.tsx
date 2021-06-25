@@ -175,7 +175,6 @@ function FilterPage(props) {
 
   const cancelEdit = (editItem: CidItem, index: number) => {
     if (editItem.cid) {
-      console.log(2, editItem);
       editItem.edit = false;
       editItem.rerender = false;
       cidItems[index] = editItem;
@@ -466,7 +465,7 @@ function FilterPage(props) {
                               saveItem={saveItem}
                               deleteItem={deleteItem}
                               changeCidValue={changeCidValue}
-                              cancelEdit={() => cancelEdit(item, index)}
+                              cancelEdit={cancelEdit}
                               beginMoveToDifferentFilter={
                                 beginMoveToDifferentFilter
                               }
@@ -499,20 +498,20 @@ function FilterPage(props) {
             <Row>
               <Col>
                 <Button
-                  variant="secondary"
-                  style={{ marginBottom: 5 }}
-                  onClick={onNewCid}
-                  disabled={!!filterList.origin}
-                >
-                  Cancel
-                </Button>
-                <Button
                   variant="primary"
-                  style={{ marginBottom: 5, marginLeft: 5 }}
+                  style={{ marginBottom: 5 }}
                   onClick={save}
                   disabled={!!filterList.origin}
                 >
                   Save
+                </Button>
+                <Button
+                  variant="secondary"
+                  style={{ marginBottom: 5, marginLeft: 5 }}
+                  onClick={cancel}
+                  disabled={!!filterList.origin}
+                >
+                  Cancel
                 </Button>
               </Col>
             </Row>

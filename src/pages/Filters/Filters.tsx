@@ -176,32 +176,36 @@ function Filters(): JSX.Element {
                     <CIDFilterShared {...filterList} />
                   </td>
                   <td>
-                    <OverlayTrigger
-                      placement="right"
-                      delay={{ show: 150, hide: 500 }}
-                      transition={false}
-                      overlay={(props: OverlayInjectedProps): JSX.Element => (
-                        <Tooltip id="button-tooltip" {...props}>
-                          {filterList.cids.map((cid, index) => (
-                            <p key={`cid-${filterList._id}-${index}`}>
-                              {filterList.origin
-                                ? FilterService.renderHashedCid(cid)
-                                : cid}
-                            </p>
-                          ))}
-                        </Tooltip>
-                      )}
-                    >
-                      <span
-                        style={{
-                          textAlign: "center",
-                          color: "blue",
-                          fontWeight: "bold",
-                        }}
+                    {filterList.cids && filterList.cids.length ? (
+                      <OverlayTrigger
+                        placement="right"
+                        delay={{ show: 150, hide: 500 }}
+                        transition={false}
+                        overlay={(props: OverlayInjectedProps): JSX.Element => (
+                          <Tooltip id="button-tooltip" {...props}>
+                            {filterList.cids.map((cid, index) => (
+                              <p key={`cid-${filterList._id}-${index}`}>
+                                {filterList.origin
+                                  ? FilterService.renderHashedCid(cid)
+                                  : cid}
+                              </p>
+                            ))}
+                          </Tooltip>
+                        )}
                       >
-                        {filterList.cids ? filterList.cids.length : 0}
-                      </span>
-                    </OverlayTrigger>
+                        <span
+                          style={{
+                            textAlign: "center",
+                            color: "blue",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {filterList.cids ? filterList.cids.length : 0}
+                        </span>
+                      </OverlayTrigger>
+                    ) : (
+                      0
+                    )}
                   </td>
                   <td>
                     <div onClick={() => toggleFilterEnabled(filterList)}>

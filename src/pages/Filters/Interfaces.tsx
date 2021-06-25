@@ -39,7 +39,7 @@ export interface CidItemProps {
   saveItem: (i: CidItem) => void;
   deleteItem: (i: CidItem) => void;
   changeCidValue: (i: CidItem) => void;
-  cancelEdit: () => void;
+  cancelEdit: (i: CidItem, index: number) => void;
   beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
   index: number;
   isOverrideFilter: boolean;
