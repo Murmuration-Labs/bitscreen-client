@@ -395,7 +395,7 @@ function FilterPage(props) {
                           clipboardCopy(filterList["_cryptId"]);
                         }}
                       >
-                        Copy
+                        Direct share
                       </Button>
                     </Col>
                   </Form.Row>
