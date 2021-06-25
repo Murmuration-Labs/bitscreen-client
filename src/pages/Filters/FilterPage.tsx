@@ -1,5 +1,7 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import { Prompt } from "react-router";
+
 import {
   CidItem,
   FilterList,
@@ -31,6 +33,8 @@ function FilterPage(props) {
   };
 
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [alertUnsaved, setAlertUnsaved] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
 
   const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
@@ -53,23 +57,28 @@ function FilterPage(props) {
   };
 
   const initFilter = (id: number): void => {
-    ApiService.getFilters().then((filterLists: FilterList[]) => {
-      filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
-      if (filterLists.length === 0) {
-        setInvalidFilterId(true);
-        return;
-      }
+    if (id) {
+      setIsEdit(true);
+      ApiService.getFilters().then((filterLists: FilterList[]) => {
+        filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
+        if (filterLists.length === 0) {
+          setInvalidFilterId(true);
+          return;
+        }
 
-      setFilterList(filterLists[0]);
-      setCidItems(
-        filterLists[0].cids
-          ? filterLists[0].cids.map((cid: string, index: number) => {
-              return { cid, id: index, edit: false };
-            })
-          : []
-      );
+        setFilterList(filterLists[0]);
+        setCidItems(
+          filterLists[0].cids
+            ? filterLists[0].cids.map((cid: string, index: number) => {
+                return { cid, id: index, edit: false, rerender: true };
+              })
+            : []
+        );
+        setLoaded(true);
+      });
+    } else {
       setLoaded(true);
-    });
+    }
   };
 
   useEffect(() => {
@@ -82,7 +91,36 @@ function FilterPage(props) {
     }
 
     setFilterList(fl);
-    putFilters(fl);
+    setAlertUnsaved(true);
+    // putFilters(fl);
+  };
+
+  const save = (): void => {
+    if (isEdit) {
+      setLoaded(true);
+      ApiService.updateFilter(filterList)
+        .then((res) => {
+          history.push(`/filters`);
+          setLoaded(false);
+        })
+        .catch((err) => {
+          setLoaded(false);
+        });
+    } else {
+      ApiService.addFilter(filterList)
+        .then((res) => {
+          history.push(`/filters`);
+          setLoaded(false);
+        })
+        .catch((err) => {
+          setLoaded(false);
+        });
+    }
+    setAlertUnsaved(false);
+  };
+
+  const cancel = (): void => {
+    history.push(`/filters`);
   };
 
   const changeName = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -106,7 +144,7 @@ function FilterPage(props) {
   const onNewCid = (): void => {
     setNotice("");
     const items = cidItems;
-    items.push({ cid: "", edit: true, id: items.length });
+    items.push({ cid: "", edit: true, id: items.length, rerender: true });
     const cids = filterList.cids;
     cids.push("");
     setFilterList({ ...filterList, cids });
@@ -124,6 +162,55 @@ function FilterPage(props) {
     setCidItems(items);
     setNotice("CIDs successfully saved.");
   };
+
+  const changeCidValue = (editItem: CidItem) => {
+    const items = cidItems.map((item: CidItem) => {
+      return item.id === editItem.id ? editItem : item;
+    });
+    const fl = {
+      ...filterList,
+      cids: items.map((i: CidItem) => i.cid),
+    };
+    saveFilter(fl);
+    setCidItems(items);
+  };
+
+  const cancelEdit = (editItem: CidItem, index: number) => {
+    if (editItem.cid) {
+      editItem.edit = false;
+      editItem.rerender = false;
+      cidItems[index] = editItem;
+      setCidItems([...cidItems.map((x) => ({ ...x }))]);
+
+      const fl = {
+        ...filterList,
+        cids: cidItems.map((i: CidItem) => i.cid),
+      };
+      saveFilter(fl);
+    } else {
+      cidItems.splice(index, 1);
+      setCidItems([...cidItems.map((x) => ({ ...x }))]);
+      const fl = {
+        ...filterList,
+        cids: cidItems.map((i: CidItem) => i.cid),
+      };
+      saveFilter(fl);
+    }
+  };
+
+  useEffect(() => {
+    let ok = false;
+    for (let i = 0; i < cidItems.length; i++) {
+      if (!cidItems[i].rerender) {
+        cidItems[i].rerender = true;
+        ok = true;
+      }
+    }
+
+    if (ok) {
+      setCidItems([...cidItems.map((x) => ({ ...x }))]);
+    }
+  }, [cidItems]);
 
   const saveBatchItemCids = () => {
     const itemsId: string[] = [];
@@ -144,12 +231,16 @@ function FilterPage(props) {
   const onNewCidsBatch = (cidsBatch): void => {
     setNotice("");
     cidsBatch.forEach((element: string) => {
-      const item = { cid: element, edit: false, id: cidItems.length };
+      const item = {
+        cid: element,
+        edit: true,
+        id: cidItems.length,
+        rerender: true,
+      };
       cidItems.push(item);
     });
     saveBatchItemCids();
-    const cids = filterList.cids;
-    cids.push("");
+    const cids = filterList.cids.concat(cidsBatch);
     setFilterList({ ...filterList, cids });
   };
 
@@ -306,7 +397,7 @@ function FilterPage(props) {
             <Row style={{ width: "100%" }}>
               <Col>
                 {renderTitle()}
-                <SaveNotice notice={notice} />
+                {/* <SaveNotice notice={notice} /> */}
               </Col>
               <Col>
                 <Button
@@ -402,27 +493,50 @@ function FilterPage(props) {
                         + Add CIDs batch
                       </Button>
                       <ListGroup style={{ width: "100%" }}>
-                        {cidItems.map((item: CidItem, index: number) => (
-                          <CidItemRender
-                            index={index}
-                            key={item.id.toString() + " " + item.cid}
-                            cidItem={item}
-                            isOverrideFilter={filterList.override}
-                            saveItem={saveItem}
-                            deleteItem={deleteItem}
-                            beginMoveToDifferentFilter={
-                              beginMoveToDifferentFilter
-                            }
-                            isHashedCid={!!filterList.origin}
-                          />
-                        ))}
+                        {cidItems
+                          .filter((item: CidItem) => item.rerender)
+                          .map((item: CidItem, index: number) => (
+                            <CidItemRender
+                              index={index}
+                              key={item.id.toString()}
+                              cidItem={item}
+                              isOverrideFilter={filterList.override}
+                              saveItem={saveItem}
+                              deleteItem={deleteItem}
+                              changeCidValue={changeCidValue}
+                              cancelEdit={cancelEdit}
+                              beginMoveToDifferentFilter={
+                                beginMoveToDifferentFilter
+                              }
+                              isHashedCid={!!filterList.origin}
+                            />
+                          ))}
                       </ListGroup>
                     </Col>
                   </Form.Row>
                 </Form>
               </Col>
             </Row>
-
+            <Row>
+              <Col>
+                <Button
+                  variant="primary"
+                  style={{ marginBottom: 5 }}
+                  onClick={save}
+                  disabled={!!filterList.origin}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="secondary"
+                  style={{ marginBottom: 5, marginLeft: 5 }}
+                  onClick={cancel}
+                  disabled={!!filterList.origin}
+                >
+                  Cancel
+                </Button>
+              </Col>
+            </Row>
             <MoveCIDModal
               cidItem={moveCidItem}
               optionFilters={moveOptionFilters}
@@ -430,7 +544,6 @@ function FilterPage(props) {
               closeCallback={closeModalCallback}
               show={showMoveModal}
             />
-
             <AddCidBatchModal
               closeCallback={async (cidsBatch = []): Promise<void> => {
                 if (0 != cidsBatch.length) {
@@ -439,8 +552,11 @@ function FilterPage(props) {
                 setAddCidBatchModal(false);
               }}
               show={addCidBatchModal}
+            />            
+            <Prompt
+              when={alertUnsaved}
+              message="You have unsaved changes, are you sure you want to leave?"
             />
-
             <ConfirmModal
               show={showConfirmDelete}
               title={title}

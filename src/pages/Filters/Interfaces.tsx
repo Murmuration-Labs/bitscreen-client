@@ -31,12 +31,15 @@ export interface CidItem {
   id: number;
   cid: string;
   edit: boolean;
+  rerender?: boolean;
 }
 
 export interface CidItemProps {
   cidItem: CidItem;
   saveItem: (i: CidItem) => void;
   deleteItem: (i: CidItem) => void;
+  changeCidValue: (i: CidItem) => void;
+  cancelEdit: (i: CidItem, index: number) => void;
   beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
   index: number;
   isOverrideFilter: boolean;

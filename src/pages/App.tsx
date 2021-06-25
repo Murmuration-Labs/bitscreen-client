@@ -13,7 +13,6 @@ import { Col, Container, Row } from "react-bootstrap";
 
 import FilterPage from "./Filters/FilterPage";
 import AccountContactPage from "./Contact/AccountContactPage";
-import AddFilterPage from "./Filters/AddFilterPage";
 import { ToastContainer } from "react-toastify";
 
 import "./App.css";
@@ -38,8 +37,8 @@ function App(): JSX.Element {
           <Col md={10} sm={9} className={"stage"}>
             <Route path="/settings" exact component={Settings} />
             <Route path="/filters" exact component={Filters} />
-            <Route path="/filters/add" exact component={AddFilterPage} />
             <Route path="/filters/edit/:id?" exact component={FilterPage} />
+            <Route path="/filters/new" exact component={FilterPage} />
             <Route path="/account" exact component={AccountContactPage} />
             <Route exact path="/">
               <Redirect to="/settings" />

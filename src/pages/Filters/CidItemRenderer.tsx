@@ -57,20 +57,14 @@ export default class CidItemRender extends React.Component<
     return item;
   }
   enterEdit = (): void => {
-    console.info("enterEdit");
     if (this.state.item != null) {
-      console.info("enterEdit" + this.state.item.edit.toString());
       this.setState({ item: { ...this.state.item, edit: true } });
     }
-  };
-  cancelEdit = (): void => {
-    this.setState({ item: { ...this.props.cidItem, edit: false } });
   };
   handleSave = (e: any): void => {
     // e.preventDefault();
     const ref = this.state.cidInputRef.current;
     const value = ref !== null ? ref.value : null;
-    console.info("handleSave: input value is ", value);
     let updatedItem: CidItem = { ...this.state.item };
     if (value !== null) {
       updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
@@ -78,13 +72,28 @@ export default class CidItemRender extends React.Component<
       this.props.saveItem(updatedItem);
     }
   };
+
+  hangleChangeCidValue = (e: any): void => {
+    const ref = this.state.cidInputRef.current;
+    const value = ref !== null ? ref.value : null;
+    let updatedItem: CidItem = { ...this.state.item };
+    if (value !== null) {
+      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
+      // this.setState({ item: { ...updatedItem, edit: false } });
+      this.props.changeCidValue(updatedItem);
+    }
+  };
+
   handleDelete = (): void => {
-    console.info("handleDelete");
     this.props.deleteItem(this.state.item);
   };
 
   handleMovePress = (): void => {
     this.props.beginMoveToDifferentFilter(this.state.item);
+  };
+
+  handleCancelEdit = (): void => {
+    this.props.cancelEdit(this.state.item, this.props.index);
   };
 
   checkIfIsOverrideExists = (): void => {
@@ -189,21 +198,20 @@ export default class CidItemRender extends React.Component<
                 <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
                 <Form.Control
                   ref={this.state.cidInputRef}
-                  id={"cid_value_" + this.props.index}
                   type="text"
                   placeholder=""
                   defaultValue={this.state.item.cid}
+                  onChange={this.hangleChangeCidValue}
                 />
-                <Button
-                  className="k-button"
-                  style={{ marginRight: 5 }}
-                  variant="primary"
-                  type="submit"
-                  onClick={this.handleSave}
-                >
+                <Button className="k-button" onClick={this.handleSave}>
                   Save
                 </Button>
-                <Button className="k-button" onClick={this.cancelEdit}>
+                <Button
+                  className="k-button"
+                  variant="secondary"
+                  style={{ marginLeft: 5 }}
+                  onClick={this.handleCancelEdit}
+                >
                   Cancel
                 </Button>
               </Form.Group>
