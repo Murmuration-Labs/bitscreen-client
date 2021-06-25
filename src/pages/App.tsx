@@ -10,11 +10,14 @@ import Filters from "./Filters/Filters";
 import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
 import { Col, Container, Row } from "react-bootstrap";
-import "./App.css";
-import "react-bootstrap-typeahead/css/Typeahead.css";
 
 import FilterPage from "./Filters/FilterPage";
 import AccountContactPage from "./Contact/AccountContactPage";
+import { ToastContainer } from "react-toastify";
+
+import "./App.css";
+import "react-bootstrap-typeahead/css/Typeahead.css";
+import "react-toastify/dist/ReactToastify.css";
 
 interface MatchParams {
   id: string;
@@ -42,6 +45,7 @@ function App(): JSX.Element {
             </Route>
           </Col>
         </Row>
+        <ToastContainer />
       </Container>
     </Router>
   );

@@ -19,6 +19,8 @@ import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useHistory } from "react-router-dom";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
+import { toast } from "react-toastify";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -269,6 +271,30 @@ function FilterPage(props) {
     setShowMoveModal(true);
   };
 
+  const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>("");
+  const [message, setMessage] = useState<string>("false");
+  const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
+
+  const confirmDelete = (): void => {
+    setShowConfirmDelete(true);
+    setDeletedFilterList(filterList);
+  };
+
+  useEffect(() => {
+    setTitle(`Delete filter ${filterList._id}`);
+    setMessage(`Are you sure you want to delete filter "${filterList.name}?"`);
+  }, [showConfirmDelete, deletedFilterList]);
+
+  const deleteCurrentFilter = async (): Promise<void> => {
+    ApiService.deleteFilter(filterList._id as number).then(() => {
+      toast.success("Filter list deleted successfully");
+      history.push("/filters");
+    });
+  };
+
   const closeModalCallback = () => {
     setShowMoveModal(false);
   };
@@ -368,9 +394,22 @@ function FilterPage(props) {
       {loaded ? (
         <>
           <Container>
-            <Row>
-              {renderTitle()}
-              {/* <SaveNotice notice={notice} /> */}
+            <Row style={{ width: "100%" }}>
+              <Col>
+                {renderTitle()}
+                {/* <SaveNotice notice={notice} /> */}
+              </Col>
+              <Col>
+                <Button
+                  variant="warning"
+                  onClick={() => {
+                    confirmDelete();
+                  }}
+                  style={{ float: "right" }}
+                >
+                  Delete
+                </Button>
+              </Col>
             </Row>
             <Row>
               <Col>
@@ -478,23 +517,6 @@ function FilterPage(props) {
                 </Form>
               </Col>
             </Row>
-
-            <MoveCIDModal
-              cidItem={moveCidItem}
-              optionFilters={moveOptionFilters}
-              move={move}
-              closeCallback={closeModalCallback}
-              show={showMoveModal}
-            />
-            <AddCidBatchModal
-              closeCallback={async (cidsBatch = []): Promise<void> => {
-                if (0 != cidsBatch.length) {
-                  onNewCidsBatch(cidsBatch);
-                }
-                setAddCidBatchModal(false);
-              }}
-              show={addCidBatchModal}
-            />
             <Row>
               <Col>
                 <Button
@@ -515,9 +537,35 @@ function FilterPage(props) {
                 </Button>
               </Col>
             </Row>
+            <MoveCIDModal
+              cidItem={moveCidItem}
+              optionFilters={moveOptionFilters}
+              move={move}
+              closeCallback={closeModalCallback}
+              show={showMoveModal}
+            />
+            <AddCidBatchModal
+              closeCallback={async (cidsBatch = []): Promise<void> => {
+                if (0 != cidsBatch.length) {
+                  onNewCidsBatch(cidsBatch);
+                }
+                setAddCidBatchModal(false);
+              }}
+              show={addCidBatchModal}
+            />            
             <Prompt
               when={alertUnsaved}
               message="You have unsaved changes, are you sure you want to leave?"
+            />
+            <ConfirmModal
+              show={showConfirmDelete}
+              title={title}
+              message={message}
+              callback={() => deleteCurrentFilter()}
+              closeCallback={() => {
+                setDeletedFilterList(FilterService.emptyFilterList());
+                setShowConfirmDelete(false);
+              }}
             />
           </Container>
         </>

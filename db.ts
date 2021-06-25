@@ -43,7 +43,9 @@ Object.keys(databases).forEach((database) => {
     );
   } catch (e) {
     databases[database].tables.forEach((table) => {
-      dbFileData[databases[database].name] = {};
+      if (!dbFileData[databases[database].name]) {
+        dbFileData[databases[database].name] = {};
+      }
       dbFileData[databases[database].name][table] = {
         name: table,
         data: {}, // object in order to index better
