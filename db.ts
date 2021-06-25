@@ -147,10 +147,6 @@ export const insert = async (
   dbFileData[databaseName][table].data[data._id] = data;
   dbFileData[databaseName][table].nextInsertId++;
 
-  console.log(
-    "Updated next insert id to",
-    dbFileData[databaseName][table].nextInsertId
-  );
   return await syncToDisk(databaseName, data._id);
 };
 
