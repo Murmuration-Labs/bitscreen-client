@@ -294,6 +294,47 @@ export const searchFilter = async (
       );
 };
 
+export interface SortingCriteria {
+  field: string;
+  direction: string;
+}
+
+export const advancedFind = async (
+  databaseName: string,
+  table: string,
+  page: number,
+  per_page: number,
+  sort: SortingCriteria[]
+) => {
+  forceExistingTable(databaseName, table);
+
+  const sortedResults = Object.values(
+    dbFileData[databaseName][table].data
+  ).sort((objectA: any, objectB: any) => {
+    for (let i = 0; i < sort.length; i++) {
+      const criterion = sort[i];
+
+      if (criterion.direction === "ASC") {
+        if (objectA[criterion.field] < objectB[criterion.field]) {
+          return -1;
+        } else if (objectA[criterion.field] > objectB[criterion.field]) {
+          return 1;
+        }
+      } else {
+        if (objectA[criterion.field] < objectB[criterion.field]) {
+          return 1;
+        } else if (objectA[criterion.field] > objectB[criterion.field]) {
+          return -1;
+        }
+      }
+    }
+
+    return 0;
+  });
+
+  return sortedResults.slice(page * per_page, page * per_page + per_page);
+};
+
 export const findById = async (
   databaseName: string,
   table: string,

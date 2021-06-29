@@ -3,6 +3,7 @@ import { mkdirSync, writeFile, openSync, readFileSync, existsSync } from "fs";
 
 import * as db from "./db";
 import complaintsRoutes from './endpoints/complaints';
+import {SortingCriteria} from "./db";
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -231,6 +232,27 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
             console.log("Version error log", err);
             res.status(404).send({});
         })
+});
+
+app.get("/filters/public", (req: Request, res: Response) => {
+    const itemsPerPage = parseInt(req.query.per_page as any);
+    const page = parseInt(req.query.page as any);
+    const sorting = (req.query.sort || {}) as any;
+
+    const computedSorting: SortingCriteria[] = [];
+    Object.keys(sorting).map(key => {
+        computedSorting.push({
+            field: key,
+            direction: sorting[key],
+        });
+    });
+
+    db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting)
+        .then(data => {
+            console.log('data length', data.length);
+            res.send(data);
+        });
+
 });
 
 app.get("/cid/is-override/:cid", (req: Request, res: Response) => {
