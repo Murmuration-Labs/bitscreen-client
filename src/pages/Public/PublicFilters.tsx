@@ -17,6 +17,8 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { Data, HeadCell } from "./Interfaces";
 import ApiService from "../../services/ApiService";
+import InputGroup from "react-bootstrap/InputGroup";
+import FormControl from "react-bootstrap/FormControl";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -113,14 +115,19 @@ export default function PublicFilters() {
   const [mySort, setMySort] = React.useState("asc");
   const [mySortBy, setMySortBy] = React.useState("name");
   const [dataCount, setDataCount] = React.useState<number>(0);
+  const [searchedValue, setSearchedValue] = React.useState("");
 
   useEffect(() => {
     const getAllData = async () => {
-      await ApiService.getAllFilters(page, rowsPerPage, mySortBy, mySort).then(
-        (response) => {
-          setPublicFiltersData(response as Data[]);
-        }
-      );
+      await ApiService.getAllFilters(
+        page,
+        rowsPerPage,
+        mySortBy,
+        mySort,
+        searchedValue
+      ).then((response) => {
+        setPublicFiltersData(response as Data[]);
+      });
     };
 
     const getCountAllData = async () => {
@@ -154,6 +161,12 @@ export default function PublicFilters() {
     setPage(0);
   };
 
+  const handlerInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchedValue(event.target.value);
+  };
+
+  console.log(searchedValue);
+
   const emptyRows =
     rowsPerPage -
     Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
@@ -161,6 +174,14 @@ export default function PublicFilters() {
   return (
     <Container>
       <h2>Public Filters</h2>
+      <InputGroup size="lg">
+        <FormControl
+          aria-label="Large"
+          aria-describedby="inputGroup-sizing-sm"
+          placeholder="Search..."
+          onChange={handlerInputChange}
+        />
+      </InputGroup>
       <Paper>
         <TableContainer>
           <Table aria-label="enhanced table">

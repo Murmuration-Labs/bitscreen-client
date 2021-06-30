@@ -54,7 +54,8 @@ const ApiService = {
     page: number,
     rowsPerPage: number,
     mySortBy: string,
-    mySort: string
+    mySort: string,
+    searchedValue: string
   ): Promise<FilterList[]> => {
     const response = await axios.get(`${serverUri()}/filters/public`, {
       params: {
@@ -63,6 +64,7 @@ const ApiService = {
         sort: {
           [mySortBy]: mySort,
         },
+        searchedValue: searchedValue,
       },
     });
     return response.data;
