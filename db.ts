@@ -212,7 +212,7 @@ export const findBy = async (
     .filter((x) => {
       for (let i = 0; i < criteria.length; i++) {
         if (
-          dbFileData[databaseName][table].data[x][criteria[i].field] !==
+          dbFileData[databaseName][table].data[x][criteria[i].field] !=
           criteria[i].value
         ) {
           return false;
@@ -304,17 +304,18 @@ export const advancedFind = async (
   table: string,
   page: number,
   per_page: number,
-  sort: SortingCriteria[]
+  sort: SortingCriteria[],
+  filteringCriteria: StringFilteringCriteria[],
 ) => {
   forceExistingTable(databaseName, table);
 
-  const sortedResults = Object.values(
+  let sortedResults = Object.values(
     dbFileData[databaseName][table].data
   ).sort((objectA: any, objectB: any) => {
     for (let i = 0; i < sort.length; i++) {
       const criterion = sort[i];
 
-      if (criterion.direction === "ASC") {
+      if (criterion.direction === "asc") {
         if (objectA[criterion.field] < objectB[criterion.field]) {
           return -1;
         } else if (objectA[criterion.field] > objectB[criterion.field]) {
@@ -330,6 +331,18 @@ export const advancedFind = async (
     }
 
     return 0;
+  });
+
+  sortedResults = sortedResults.filter((x: any) => {
+    for (let i = 0; i < filteringCriteria.length; i++) {
+      if (
+          dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field] !=
+          filteringCriteria[i].value
+      ) {
+        return false;
+      }
+    }
+    return true;
   });
 
   return sortedResults.slice(page * per_page, page * per_page + per_page);

@@ -106,12 +106,13 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function PublicFilters() {
   const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<keyof Data>("_id");
+  const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [publicFiltersData, setPublicFiltersData] = React.useState<Data[]>([]);
-  const [mySort, setMySort] = React.useState("ASC");
-  const [mySortBy, setMySortBy] = React.useState("id");
+  const [mySort, setMySort] = React.useState("asc");
+  const [mySortBy, setMySortBy] = React.useState("name");
+  const [dataCount, setDataCount] = React.useState<number>(0);
 
   useEffect(() => {
     const getAllData = async () => {
@@ -121,16 +122,25 @@ export default function PublicFilters() {
         }
       );
     };
+
+    const getCountAllData = async () => {
+      await ApiService.getCountAllFilter().then(setDataCount);
+    };
+
     getAllData();
+    getCountAllData();
   }, [rowsPerPage, page, mySortBy, mySort]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
-    const sortAsc = mySort;
-    setMySort(sortAsc === "ASC" ? "DESC" : "ASC");
+    if (property === "cids") return;
+
+    setMySort(mySort === "asc" ? "desc" : "asc");
+    setOrder(mySort === "asc" ? "desc" : "asc");
     setMySortBy(property);
+    setOrderBy(property);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -160,7 +170,7 @@ export default function PublicFilters() {
               mySort={mySort}
               mySortBy={mySortBy}
               onRequestSort={handleRequestSort}
-              rowCount={publicFiltersData.length}
+              rowCount={dataCount}
             />
             <TableBody>
               {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
@@ -169,7 +179,7 @@ export default function PublicFilters() {
                 return (
                   <TableRow key={row.name}>
                     <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.cids.length}</TableCell>
+                    <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
                     <TableCell>
                       {row.enabled ? (
                         <CheckCircleIcon style={{ color: "green" }} />
@@ -192,7 +202,7 @@ export default function PublicFilters() {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={publicFiltersData.length}
+        count={dataCount}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}

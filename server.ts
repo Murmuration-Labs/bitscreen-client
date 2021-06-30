@@ -237,9 +237,10 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
 app.get("/filters/public", (req: Request, res: Response) => {
     const itemsPerPage = parseInt(req.query.per_page as any);
     const page = parseInt(req.query.page as any);
-    const sorting = (req.query.sort || {}) as any;
+    const sorting = (JSON.parse(req.query.sort as any) || {}) as any;
 
     const computedSorting: SortingCriteria[] = [];
+
     Object.keys(sorting).map(key => {
         computedSorting.push({
             field: key,
@@ -247,12 +248,27 @@ app.get("/filters/public", (req: Request, res: Response) => {
         });
     });
 
-    db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting)
+    db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting, [{
+        field: "visibility",
+        value: "2",
+    }])
         .then(data => {
             console.log('data length', data.length);
             res.send(data);
         });
 
+});
+
+app.get("/filters/public/count", (req: Request, res: Response) => {
+    db.findBy(databaseName, "bitscreen", [{
+        field: "visibility",
+        value: "2",
+    }])
+        .then(data => {
+            res.send({
+                count: data.length,
+            });
+        });
 });
 
 app.get("/cid/is-override/:cid", (req: Request, res: Response) => {

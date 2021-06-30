@@ -67,6 +67,12 @@ const ApiService = {
     });
     return response.data;
   },
+
+  getCountAllFilter: async (): Promise<number> => {
+    const response = await axios.get(`${serverUri()}/filters/public/count`);
+
+    return response.data.count;
+  },
 };
 
 export default ApiService;
