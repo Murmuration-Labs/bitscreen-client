@@ -64,14 +64,18 @@ const ApiService = {
         sort: {
           [mySortBy]: mySort,
         },
-        searchedValue: searchedValue,
+        q: searchedValue,
       },
     });
     return response.data;
   },
 
-  getCountAllFilter: async (): Promise<number> => {
-    const response = await axios.get(`${serverUri()}/filters/public/count`);
+  getCountAllFilter: async (searchedValue: string): Promise<number> => {
+    const response = await axios.get(`${serverUri()}/filters/public/count`, {
+      params: {
+        q: searchedValue,
+      },
+    });
 
     return response.data.count;
   },

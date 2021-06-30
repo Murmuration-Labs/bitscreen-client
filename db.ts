@@ -239,31 +239,36 @@ export const searchInColumns = async (
 ) => {
   forceExistingTable(databaseName, table);
 
-  return Object.values(dbFileData[databaseName][table].data).filter(
-    (item: any) => {
-      if (!searchTerm) {
-        return true;
-      }
-
-      let found = false;
-
-      for (let i = 0; i < Object.keys(item).length; i++) {
-        const itemKey = Object.keys(item)[i];
-
-        if (
-          (searchInColumns.length === 0 ||
-            searchInColumns.indexOf(itemKey) > -1) &&
-          item[itemKey].toLowerCase().includes(searchTerm.toLowerCase())
-        ) {
-          found = true;
-          break;
-        }
-      }
-
-      return found;
-    }
-  );
+  return await filterInColumns(Object.values(dbFileData[databaseName][table].data));
 };
+
+export const filterInColumns = async (data: any, searchTerm: string = "", searchInColumns: string[] = []) => {
+  return data.filter(
+      (item: any) => {
+        if (!searchTerm) {
+          return true;
+        }
+
+        let found = false;
+
+        for (let i = 0; i < Object.keys(item).length; i++) {
+          const itemKey = Object.keys(item)[i];
+          const searchInValue = (typeof item[itemKey] === "string") ? item[itemKey] : item[itemKey].toString();
+
+          if (
+              (searchInColumns.length === 0 ||
+                  searchInColumns.indexOf(itemKey) > -1) &&
+              searchInValue.toLowerCase().includes(searchTerm.toLowerCase())
+          ) {
+            found = true;
+            break;
+          }
+        }
+
+        return found;
+      }
+  );
+}
 
 export const searchFilter = async (
   databaseName: string,
@@ -285,11 +290,7 @@ export const searchFilter = async (
           }
 
           const hashedUtil = util.map(getAddressHash);
-          if (-1 != hashedUtil.indexOf(searchTerm.toLowerCase())) {
-            return true;
-          }
-
-          return false;
+          return hashedUtil.indexOf(searchTerm.toLowerCase()) != -1;
         }
       );
 };
@@ -306,6 +307,8 @@ export const advancedFind = async (
   per_page: number,
   sort: SortingCriteria[],
   filteringCriteria: StringFilteringCriteria[],
+  searchQuery: string,
+  searchInColumns: string[] = []
 ) => {
   forceExistingTable(databaseName, table);
 
@@ -333,17 +336,22 @@ export const advancedFind = async (
     return 0;
   });
 
-  sortedResults = sortedResults.filter((x: any) => {
-    for (let i = 0; i < filteringCriteria.length; i++) {
-      if (
-          dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field] !=
-          filteringCriteria[i].value
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
+  sortedResults = sortedResults
+      // apply exact string filtering criteria
+      .filter((x: any) => {
+        for (let i = 0; i < filteringCriteria.length; i++) {
+          if (
+              dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field] !=
+              filteringCriteria[i].value
+          ) {
+            return false;
+          }
+        }
+        return true;
+      })
+  ;
+
+  sortedResults = await filterInColumns(sortedResults, searchQuery, searchInColumns);
 
   return sortedResults.slice(page * per_page, page * per_page + per_page);
 };

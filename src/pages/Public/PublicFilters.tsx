@@ -131,12 +131,12 @@ export default function PublicFilters() {
     };
 
     const getCountAllData = async () => {
-      await ApiService.getCountAllFilter().then(setDataCount);
+      await ApiService.getCountAllFilter(searchedValue).then(setDataCount);
     };
 
     getAllData();
     getCountAllData();
-  }, [rowsPerPage, page, mySortBy, mySort]);
+  }, [rowsPerPage, page, mySortBy, mySort, searchedValue]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -164,8 +164,6 @@ export default function PublicFilters() {
   const handlerInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchedValue(event.target.value);
   };
-
-  console.log(searchedValue);
 
   const emptyRows =
     rowsPerPage -

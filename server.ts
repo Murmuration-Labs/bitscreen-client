@@ -238,6 +238,7 @@ app.get("/filters/public", (req: Request, res: Response) => {
     const itemsPerPage = parseInt(req.query.per_page as any);
     const page = parseInt(req.query.page as any);
     const sorting = (JSON.parse(req.query.sort as any) || {}) as any;
+    const searchQuery = req.query.q as string;
 
     const computedSorting: SortingCriteria[] = [];
 
@@ -251,7 +252,12 @@ app.get("/filters/public", (req: Request, res: Response) => {
     db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting, [{
         field: "visibility",
         value: "2",
-    }])
+    }], searchQuery, [
+        "name",
+        "description",
+        "cids",
+        "notes",
+    ])
         .then(data => {
             console.log('data length', data.length);
             res.send(data);
@@ -264,9 +270,16 @@ app.get("/filters/public/count", (req: Request, res: Response) => {
         field: "visibility",
         value: "2",
     }])
-        .then(data => {
+        .then(async data => {
+            const filteredData = await db.filterInColumns(data, req.query.q as string, [
+                "name",
+                "description",
+                "cids",
+                "notes",
+            ]);
+
             res.send({
-                count: data.length,
+                count: filteredData.length,
             });
         });
 });
