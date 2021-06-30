@@ -1,5 +1,13 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  ListGroup,
+  Row,
+  FormCheck,
+} from "react-bootstrap";
 import { Prompt } from "react-router";
 
 import {
@@ -43,6 +51,7 @@ function FilterPage(props) {
     FilterService.emptyFilterList()
   );
 
+  const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
 
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
@@ -76,6 +85,7 @@ function FilterPage(props) {
             : []
         );
         setLoaded(true);
+        setFilterOverride(filterLists[0].override);
       });
     } else {
       setLoaded(true);
@@ -311,6 +321,11 @@ function FilterPage(props) {
     toast.success("Shared link was copied succesfully");
   };
 
+  const toggleFilterOverride = () => {
+    filterList.override = !filterList.override;
+    setFilterOverride(filterList.override);
+  };
+
   const closeModalCallback = () => {
     setShowMoveModal(false);
   };
@@ -490,6 +505,29 @@ function FilterPage(props) {
                       </Button>
                     </Col>
                   </Form.Row>
+                  <Form.Row
+                    style={{
+                      marginLeft: 2,
+                      marginTop: -20,
+                      marginBottom: 20,
+                    }}
+                    onClick={() => toggleFilterOverride()}
+                  >
+                    <FormCheck
+                      readOnly
+                      type="switch"
+                      checked={filterOverride}
+                    />
+                    <Form.Label
+                      style={{
+                        marginRight: 10,
+                        marginTop: 2,
+                      }}
+                      className={"text-dim"}
+                    >
+                      Override?
+                    </Form.Label>
+                  </Form.Row>
                   <Form.Row style={{ marginTop: -20 }}>
                     <Col>
                       <Form.Label className={"text-dim"}>
@@ -580,7 +618,7 @@ function FilterPage(props) {
                 setAddCidBatchModal(false);
               }}
               show={addCidBatchModal}
-            />            
+            />
             <Prompt
               when={alertUnsaved}
               message="You have unsaved changes, are you sure you want to leave?"
