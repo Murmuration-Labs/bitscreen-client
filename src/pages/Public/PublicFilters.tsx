@@ -1,5 +1,5 @@
-import React from "react";
-import publicData from "../data/data.js";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./PublicFilters.css";
 import { Container, Row } from "react-bootstrap";
 import {
@@ -16,21 +16,7 @@ import {
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { Data, HeadCell } from "./Interfaces";
-
-function createData(
-  name: string,
-  cids: number,
-  enabled: boolean,
-  id: number
-): Data {
-  return { name, cids, enabled, id };
-}
-
-const rows = [
-  publicData.map((item) =>
-    createData(item.name, item.cids.length, item.enabled, item._id)
-  ),
-];
+import ApiService from "../../services/ApiService";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -69,7 +55,7 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
 const headCells: HeadCell[] = [
   { id: "name", numeric: false, label: "Filter Name" },
   { id: "cids", numeric: true, label: "# of CIDs" },
-  { id: "enabled", numeric: true, label: "Enabled" },
+  { id: "enabled", numeric: false, label: "Enabled" },
 ];
 
 interface EnhancedTableProps {
@@ -80,10 +66,12 @@ interface EnhancedTableProps {
   order: Order;
   orderBy: string;
   rowCount: number;
+  mySort: string;
+  mySortBy: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, rowCount, onRequestSort } = props;
+  const { order, orderBy, rowCount, onRequestSort, mySort, mySortBy } = props;
   const createSortHandler =
     (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -116,19 +104,33 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-export default function EnhancedTable() {
+export default function PublicFilters() {
   const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<keyof Data>("id");
+  const [orderBy, setOrderBy] = React.useState<keyof Data>("_id");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [publicFiltersData, setPublicFiltersData] = React.useState<Data[]>([]);
+  const [mySort, setMySort] = React.useState("ASC");
+  const [mySortBy, setMySortBy] = React.useState("id");
+
+  useEffect(() => {
+    const getAllData = async () => {
+      await ApiService.getAllFilters(page, rowsPerPage, mySortBy, mySort).then(
+        (response) => {
+          setPublicFiltersData(response as Data[]);
+        }
+      );
+    };
+    getAllData();
+  }, [rowsPerPage, page, mySortBy, mySort]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+    const sortAsc = mySort;
+    setMySort(sortAsc === "ASC" ? "DESC" : "ASC");
+    setMySortBy(property);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -143,7 +145,8 @@ export default function EnhancedTable() {
   };
 
   const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+    rowsPerPage -
+    Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
 
   return (
     <Container>
@@ -154,27 +157,29 @@ export default function EnhancedTable() {
             <EnhancedTableHead
               order={order}
               orderBy={orderBy}
+              mySort={mySort}
+              mySortBy={mySortBy}
               onRequestSort={handleRequestSort}
-              rowCount={rows[0].length}
+              rowCount={publicFiltersData.length}
             />
             <TableBody>
-              {stableSort(rows[0], getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  return (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.name}</TableCell>
-                      <TableCell>{row.cids}</TableCell>
-                      <TableCell>
-                        {row.enabled ? (
-                          <CheckCircleIcon style={{ color: "green" }} />
-                        ) : (
-                          <CancelIcon color="secondary" />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+              {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+              {publicFiltersData.map((row, index) => {
+                return (
+                  <TableRow key={row.name}>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.cids.length}</TableCell>
+                    <TableCell>
+                      {row.enabled ? (
+                        <CheckCircleIcon style={{ color: "green" }} />
+                      ) : (
+                        <CancelIcon color="secondary" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {emptyRows > 0 && (
                 <TableRow>
                   <TableCell colSpan={6} />
@@ -187,7 +192,7 @@ export default function EnhancedTable() {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={rows[0].length}
+        count={publicFiltersData.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={handleChangePage}

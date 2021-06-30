@@ -49,6 +49,24 @@ const ApiService = {
   updateProviderInfo: async (account: Account): Promise<void> => {
     await axios.put(`${serverUri()}/provider_info`, account);
   },
+
+  getAllFilters: async (
+    page: number,
+    rowsPerPage: number,
+    mySortBy: string,
+    mySort: string
+  ): Promise<FilterList[]> => {
+    const response = await axios.get(`${serverUri()}/filters/public`, {
+      params: {
+        per_page: rowsPerPage,
+        page: page,
+        sort: {
+          [mySortBy]: mySort,
+        },
+      },
+    });
+    return response.data;
+  },
 };
 
 export default ApiService;
