@@ -41,6 +41,7 @@ export interface CidItemProps {
   changeCidValue: (i: CidItem) => void;
   cancelEdit: (i: CidItem, index: number) => void;
   beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
+  filterList: FilterList;
   index: number;
   isOverrideFilter: boolean;
   isHashedCid: boolean;

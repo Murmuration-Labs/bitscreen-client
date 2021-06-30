@@ -36,8 +36,20 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getCidOverride: async (cid: string): Promise<FilterList> => {
-    const response = await axios.get(`${serverUri()}/cid/is-override/${cid}`);
+  getCidOverride: async (cid: string, fl: FilterList): Promise<FilterList> => {
+    const response = await axios.get(
+      `${serverUri()}/cid/is-override-remote/${fl._id}/${cid}`
+    );
+    return response.data as FilterList;
+  },
+
+  getCidOverrideLocal: async (
+    cid: string,
+    fl: FilterList
+  ): Promise<FilterList> => {
+    const response = await axios.get(
+      `${serverUri()}/cid/is-override-local/${fl._id}/${cid}`
+    );
     return response.data as FilterList;
   },
 
@@ -51,12 +63,11 @@ const ApiService = {
   },
 
   getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
-    // const response = await axios.post(
-    //   `${serverUri()}/cids/override`,
-    //   filterList.cids
-    // );
-    // return response.data as string[];
-    return filterList.cids;
+    const response = await axios.post(
+      `${serverUri()}/cids/override/${filterList._id}`,
+      filterList.cids
+    );
+    return response.data as string[];
   },
 };
 

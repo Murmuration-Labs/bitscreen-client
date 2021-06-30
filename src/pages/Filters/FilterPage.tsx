@@ -599,6 +599,7 @@ function FilterPage(props) {
                               beginMoveToDifferentFilter={
                                 beginMoveToDifferentFilter
                               }
+                              filterList={filterList}
                               isHashedCid={!!filterList.origin}
                             />
                           ))}
