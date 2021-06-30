@@ -265,7 +265,11 @@ app.get("/filters/public", (req: Request, res: Response) => {
             console.log('data length', data.length);
             res.send(data.map(x => {
                 let y = JSON.parse(JSON.stringify(x));
-                y.cids = y.cids.map(getAddressHash);
+
+                if (y.cids) {
+                    y.cids = y.cids.map(getAddressHash);
+                }
+
                 return y;
             }));
         });

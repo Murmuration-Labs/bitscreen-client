@@ -347,11 +347,11 @@ export const advancedFind = async (
     // apply exact string filtering criteria
     .filter((x: any) => {
       for (let i = 0; i < filteringCriteria.length; i++) {
-        if (
-          dbFileData[databaseName][table].data[x._id][
-            filteringCriteria[i].field
-          ] != filteringCriteria[i].value
-        ) {
+        let compareValue = dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field];
+
+        if (compareValue === undefined) compareValue = "";
+
+        if (compareValue != filteringCriteria[i].value) {
           return false;
         }
       }
