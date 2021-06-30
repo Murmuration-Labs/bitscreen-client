@@ -257,10 +257,21 @@ export default class CidItemRender extends React.Component<
                     }}
                   >
                     {this.renderOverride(true)}
+                  </div>
+                </Col>
+                <Col sm={2} md={2} lg={1}>
+                  <div
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
                     {this.renderOverride()}
                   </div>
                 </Col>
-                <Col sm={10} md={10} lg={5}>
+                <Col sm={8} md={8} lg={4}>
                   <Form.Label
                     style={{
                       fontSize: 24,
