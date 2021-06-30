@@ -130,6 +130,31 @@ function FilterPage(props) {
     setAlertUnsaved(false);
   };
 
+  const [showOverrideCids, setShowOverrideCids] = useState<boolean>(false);
+  const [overrideCidsTitle, setOverrideCidsTitle] = useState<string>("");
+  const [overrrideCidsMessage, setOverrrideCidsMessage] =
+    useState<string>("false");
+  const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
+
+  const canSave = (): void => {
+    ApiService.getOverrideCids(filterList)
+      .then((res) => {
+        if (Object.keys(res).length > 0) {
+          setOverrideCidsTitle("Local filter cids override warning");
+          setOverrrideCidsMessage(
+            "The following cids are present on local filter lists:"
+          );
+          setOverrideCidsBullets(res);
+          setShowOverrideCids(true);
+        } else {
+          save();
+        }
+      })
+      .catch(() => {
+        toast.error("Something wrong happend please try again later.");
+      });
+  };
+
   const cancel = (): void => {
     history.push(`/filters`);
   };
@@ -588,7 +613,7 @@ function FilterPage(props) {
                 <Button
                   variant="primary"
                   style={{ marginBottom: 5 }}
-                  onClick={save}
+                  onClick={canSave}
                   disabled={!!filterList.origin}
                 >
                   Save
@@ -631,6 +656,16 @@ function FilterPage(props) {
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());
                 setShowConfirmDelete(false);
+              }}
+            />
+            <ConfirmModal
+              show={showOverrideCids}
+              title={overrideCidsTitle}
+              message={overrrideCidsMessage}
+              bullets={overrideCidsBullets}
+              callback={save}
+              closeCallback={() => {
+                setShowOverrideCids(false);
               }}
             />
           </Container>

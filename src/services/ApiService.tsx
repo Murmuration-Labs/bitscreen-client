@@ -49,6 +49,15 @@ const ApiService = {
   updateProviderInfo: async (account: Account): Promise<void> => {
     await axios.put(`${serverUri()}/provider_info`, account);
   },
+
+  getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
+    // const response = await axios.post(
+    //   `${serverUri()}/cids/override`,
+    //   filterList.cids
+    // );
+    // return response.data as string[];
+    return filterList.cids;
+  },
 };
 
 export default ApiService;
