@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   Modal,
   Button,
@@ -65,13 +65,8 @@ export default function ImportFilterModal(
           <thead>
             <tr>
               <th>
-                {fetchedFilterList.enabled ? "Enabled" : "Disabled"}
-                <FormCheck
-                  readOnly
-                  type="switch"
-                  checked={fetchedFilterList.enabled}
-                  disabled
-                />
+                Enabled
+                <FormCheck readOnly type="switch" checked={true} disabled />
               </th>
             </tr>
             <tr>
@@ -127,6 +122,16 @@ export default function ImportFilterModal(
       props.closeCallback(true);
     }, 1500);
   };
+
+  useEffect(() => {
+    if (props.prefetch) {
+      fetchRemoteFilter();
+    }
+  }, [remoteFilterUri]);
+
+  if (props.prefetch && !remoteFilterUri) {
+    setRemoteFilterUri(props.prefetch);
+  }
 
   const renderActionButtons = (): JSX.Element => {
     if (!fetchedFilterList.name) {

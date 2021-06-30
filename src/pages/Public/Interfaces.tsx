@@ -8,6 +8,9 @@ export interface Data {
   name: string;
   cids: string[];
   enabled: boolean;
+  actions?: string;
+  _cryptId?: string;
+  description?: string;
   _id?: number;
 }
 export interface FilterList {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./PublicFilters.css";
-import { Container, Row } from "react-bootstrap";
+import { Container, Row, Button } from "react-bootstrap";
 import {
   TableContainer,
   Table,
@@ -19,6 +19,8 @@ import { Data, HeadCell } from "./Interfaces";
 import ApiService from "../../services/ApiService";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
+import ImportFilterModal from "../Filters/ImportFilterModal";
+import { remoteMarketplaceUri } from "../../config";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -57,7 +59,9 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
 const headCells: HeadCell[] = [
   { id: "name", numeric: false, label: "Filter Name" },
   { id: "cids", numeric: true, label: "# of CIDs" },
-  { id: "enabled", numeric: false, label: "Enabled" },
+  { id: "description", numeric: false, label: "Description" },
+  { id: "actions", numeric: false, label: "Actions" },
+  // { id: "enabled", numeric: false, label: "Enabled" },
 ];
 
 interface EnhancedTableProps {
@@ -116,6 +120,12 @@ export default function PublicFilters() {
   const [mySortBy, setMySortBy] = React.useState("name");
   const [dataCount, setDataCount] = React.useState<number>(0);
   const [searchedValue, setSearchedValue] = React.useState("");
+  const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
+  const [prefetch, setPrefetch] = useState<string>("");
+
+  useEffect(() => {
+    setShowImportFilter(!!prefetch);
+  }, [prefetch]);
 
   useEffect(() => {
     const getAllData = async () => {
@@ -142,7 +152,7 @@ export default function PublicFilters() {
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
-    if (property === "cids") return;
+    if (property === "cids" || property == "actions") return;
 
     setMySort(mySort === "asc" ? "desc" : "asc");
     setOrder(mySort === "asc" ? "desc" : "asc");
@@ -199,12 +209,27 @@ export default function PublicFilters() {
                   <TableRow key={row.name}>
                     <TableCell>{row.name}</TableCell>
                     <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
+                    {/*<TableCell>*/}
+                    {/*  {row.enabled ? (*/}
+                    {/*    <CheckCircleIcon style={{ color: "green" }} />*/}
+                    {/*  ) : (*/}
+                    {/*    <CancelIcon color="secondary" />*/}
+                    {/*  )}*/}
+                    {/*</TableCell>*/}
+                    <TableCell>{row.description}</TableCell>
                     <TableCell>
-                      {row.enabled ? (
-                        <CheckCircleIcon style={{ color: "green" }} />
-                      ) : (
-                        <CancelIcon color="secondary" />
-                      )}
+                      <Button
+                        onClick={() => {
+                          setPrefetch(
+                            `${remoteMarketplaceUri()}/filters/shared/${
+                              row._cryptId
+                            }`
+                          );
+                        }}
+                        variant="primary"
+                      >
+                        Import
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
@@ -226,6 +251,20 @@ export default function PublicFilters() {
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+
+      <ImportFilterModal
+        closeCallback={async (refreshParent = false): Promise<void> => {
+          setPrefetch("");
+          if (refreshParent) {
+            console.log(
+              "import filter closed, refresh parent is",
+              refreshParent
+            );
+          }
+        }}
+        show={showImportFilter}
+        prefetch={prefetch}
       />
     </Container>
   );

@@ -252,6 +252,9 @@ app.get("/filters/public", (req: Request, res: Response) => {
     db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting, [{
         field: "visibility",
         value: "2",
+    }, {
+        field: "override",
+        value: "",
     }], searchQuery, [
         "name",
         "description",
@@ -260,7 +263,11 @@ app.get("/filters/public", (req: Request, res: Response) => {
     ])
         .then(data => {
             console.log('data length', data.length);
-            res.send(data);
+            res.send(data.map(x => {
+                let y = JSON.parse(JSON.stringify(x));
+                y.cids = y.cids.map(getAddressHash);
+                return y;
+            }));
         });
 
 });
@@ -269,6 +276,9 @@ app.get("/filters/public/count", (req: Request, res: Response) => {
     db.findBy(databaseName, "bitscreen", [{
         field: "visibility",
         value: "2",
+    }, {
+        field: "override",
+        value: "",
     }])
         .then(async data => {
             const filteredData = await db.filterInColumns(data, req.query.q as string, [
@@ -383,6 +393,7 @@ cron.schedule("0 */4 * * *", () => {
                     const updatedImportFilter = (await axios.get(importFilter.origin)).data;
 
                     updatedImportFilter._id = importFilter._id;
+                    updatedImportFilter.enabled = importFilter.enabled;
 
                     return await db.update(databaseName, "bitscreen", updatedImportFilter);
                 } else {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { FilterList } from "../pages/Filters/Interfaces";
-import { serverUri } from "../config";
+import { serverUri, remoteMarketplaceUri } from "../config";
 import { Account } from "../pages/Contact/Interfaces";
 
 // For authentication purposes we will use axios.createInstance
@@ -57,25 +57,31 @@ const ApiService = {
     mySort: string,
     searchedValue: string
   ): Promise<FilterList[]> => {
-    const response = await axios.get(`${serverUri()}/filters/public`, {
-      params: {
-        per_page: rowsPerPage,
-        page: page,
-        sort: {
-          [mySortBy]: mySort,
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filters/public`,
+      {
+        params: {
+          per_page: rowsPerPage,
+          page: page,
+          sort: {
+            [mySortBy]: mySort,
+          },
+          q: searchedValue,
         },
-        q: searchedValue,
-      },
-    });
+      }
+    );
     return response.data;
   },
 
   getCountAllFilter: async (searchedValue: string): Promise<number> => {
-    const response = await axios.get(`${serverUri()}/filters/public/count`, {
-      params: {
-        q: searchedValue,
-      },
-    });
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filters/public/count`,
+      {
+        params: {
+          q: searchedValue,
+        },
+      }
+    );
 
     return response.data.count;
   },

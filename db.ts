@@ -239,36 +239,43 @@ export const searchInColumns = async (
 ) => {
   forceExistingTable(databaseName, table);
 
-  return await filterInColumns(Object.values(dbFileData[databaseName][table].data));
+  return await filterInColumns(
+    Object.values(dbFileData[databaseName][table].data)
+  );
 };
 
-export const filterInColumns = async (data: any, searchTerm: string = "", searchInColumns: string[] = []) => {
-  return data.filter(
-      (item: any) => {
-        if (!searchTerm) {
-          return true;
-        }
+export const filterInColumns = async (
+  data: any,
+  searchTerm: string = "",
+  searchInColumns: string[] = []
+) => {
+  return data.filter((item: any) => {
+    if (!searchTerm) {
+      return true;
+    }
 
-        let found = false;
+    let found = false;
 
-        for (let i = 0; i < Object.keys(item).length; i++) {
-          const itemKey = Object.keys(item)[i];
-          const searchInValue = (typeof item[itemKey] === "string") ? item[itemKey] : item[itemKey].toString();
+    for (let i = 0; i < Object.keys(item).length; i++) {
+      const itemKey = Object.keys(item)[i];
+      const searchInValue =
+        typeof item[itemKey] === "string"
+          ? item[itemKey]
+          : item[itemKey].toString();
 
-          if (
-              (searchInColumns.length === 0 ||
-                  searchInColumns.indexOf(itemKey) > -1) &&
-              searchInValue.toLowerCase().includes(searchTerm.toLowerCase())
-          ) {
-            found = true;
-            break;
-          }
-        }
-
-        return found;
+      if (
+        (searchInColumns.length === 0 ||
+          searchInColumns.indexOf(itemKey) > -1) &&
+        searchInValue.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        found = true;
+        break;
       }
-  );
-}
+    }
+
+    return found;
+  });
+};
 
 export const searchFilter = async (
   databaseName: string,
@@ -312,46 +319,50 @@ export const advancedFind = async (
 ) => {
   forceExistingTable(databaseName, table);
 
-  let sortedResults = Object.values(
-    dbFileData[databaseName][table].data
-  ).sort((objectA: any, objectB: any) => {
-    for (let i = 0; i < sort.length; i++) {
-      const criterion = sort[i];
+  let sortedResults = Object.values(dbFileData[databaseName][table].data).sort(
+    (objectA: any, objectB: any) => {
+      for (let i = 0; i < sort.length; i++) {
+        const criterion = sort[i];
 
-      if (criterion.direction === "asc") {
-        if (objectA[criterion.field] < objectB[criterion.field]) {
-          return -1;
-        } else if (objectA[criterion.field] > objectB[criterion.field]) {
-          return 1;
-        }
-      } else {
-        if (objectA[criterion.field] < objectB[criterion.field]) {
-          return 1;
-        } else if (objectA[criterion.field] > objectB[criterion.field]) {
-          return -1;
-        }
-      }
-    }
-
-    return 0;
-  });
-
-  sortedResults = sortedResults
-      // apply exact string filtering criteria
-      .filter((x: any) => {
-        for (let i = 0; i < filteringCriteria.length; i++) {
-          if (
-              dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field] !=
-              filteringCriteria[i].value
-          ) {
-            return false;
+        if (criterion.direction === "asc") {
+          if (objectA[criterion.field] < objectB[criterion.field]) {
+            return -1;
+          } else if (objectA[criterion.field] > objectB[criterion.field]) {
+            return 1;
+          }
+        } else {
+          if (objectA[criterion.field] < objectB[criterion.field]) {
+            return 1;
+          } else if (objectA[criterion.field] > objectB[criterion.field]) {
+            return -1;
           }
         }
-        return true;
-      })
-  ;
+      }
 
-  sortedResults = await filterInColumns(sortedResults, searchQuery, searchInColumns);
+      return 0;
+    }
+  );
+
+  sortedResults = sortedResults
+    // apply exact string filtering criteria
+    .filter((x: any) => {
+      for (let i = 0; i < filteringCriteria.length; i++) {
+        if (
+          dbFileData[databaseName][table].data[x._id][
+            filteringCriteria[i].field
+          ] != filteringCriteria[i].value
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+  sortedResults = await filterInColumns(
+    sortedResults,
+    searchQuery,
+    searchInColumns
+  );
 
   return sortedResults.slice(page * per_page, page * per_page + per_page);
 };
