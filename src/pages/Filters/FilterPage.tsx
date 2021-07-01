@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { toast } from "react-toastify";
 import { serverUri } from "../../config";
@@ -44,6 +44,7 @@ function FilterPage(props) {
   );
 
   const history = useHistory();
+  const currentUrl = useLocation().pathname;
 
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
     if (!fl) {
@@ -331,7 +332,7 @@ function FilterPage(props) {
       return <h2>View filter list</h2>;
     }
 
-    if (filterList.name) {
+    if (currentUrl.includes("edit")) {
       return <h2>Edit filter list</h2>;
     }
 
