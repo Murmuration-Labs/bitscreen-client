@@ -410,6 +410,26 @@ function FilterPage(props) {
     );
   }
 
+  const renderDeleteButton = (): JSX.Element => {
+    if (currentUrl.includes("new")) {
+      return <></>;
+    }
+
+    return (
+      <Col>
+        <Button
+          variant="warning"
+          onClick={() => {
+            confirmDelete();
+          }}
+          style={{ float: "right" }}
+        >
+          Delete
+        </Button>
+      </Col>
+    );
+  };
+
   return (
     <>
       {loaded ? (
@@ -420,17 +440,7 @@ function FilterPage(props) {
                 {renderTitle()}
                 {/* <SaveNotice notice={notice} /> */}
               </Col>
-              <Col>
-                <Button
-                  variant="warning"
-                  onClick={() => {
-                    confirmDelete();
-                  }}
-                  style={{ float: "right" }}
-                >
-                  Delete
-                </Button>
-              </Col>
+              {renderDeleteButton()}
             </Row>
             <Row>
               <Col>
