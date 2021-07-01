@@ -410,8 +410,8 @@ function FilterPage(props) {
     );
   }
 
-  const renderDeleteButton = (): JSX.Element => {
-    if (currentUrl.includes("new")) {
+  const renderDeleteButton = (props: FilterList): JSX.Element => {
+    if (currentUrl.includes("new") || props.origin) {
       return <></>;
     }
 
@@ -440,7 +440,7 @@ function FilterPage(props) {
                 {renderTitle()}
                 {/* <SaveNotice notice={notice} /> */}
               </Col>
-              {renderDeleteButton()}
+              {renderDeleteButton(filterList)}
             </Row>
             <Row>
               <Col>
