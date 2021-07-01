@@ -580,7 +580,7 @@ function FilterPage(props) {
                 setAddCidBatchModal(false);
               }}
               show={addCidBatchModal}
-            />            
+            />
             <Prompt
               when={alertUnsaved}
               message="You have unsaved changes, are you sure you want to leave?"
