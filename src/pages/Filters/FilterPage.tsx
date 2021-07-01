@@ -103,18 +103,22 @@ function FilterPage(props) {
       ApiService.updateFilter(filterList)
         .then((res) => {
           history.push(`/filters`);
+          toast.success("Filter list updated successfully");
           setLoaded(false);
         })
         .catch((err) => {
+          toast.error("Error: " + err.message);
           setLoaded(false);
         });
     } else {
       ApiService.addFilter(filterList)
         .then((res) => {
           history.push(`/filters`);
+          toast.success("Filter list created successfully");
           setLoaded(false);
         })
         .catch((err) => {
+          toast.error("Error: " + err.message);
           setLoaded(false);
         });
     }
