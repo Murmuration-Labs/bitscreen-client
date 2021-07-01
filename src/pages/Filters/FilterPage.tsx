@@ -430,6 +430,37 @@ function FilterPage(props) {
     );
   };
 
+  const renderSaveAndCancelButtons = (props: FilterList): JSX.Element => {
+    if (props.origin) {
+      return (
+        <Col>
+          <Button
+            variant="primary"
+            style={{ marginBottom: 5 }}
+            onClick={cancel}
+          >
+            Go Back
+          </Button>
+        </Col>
+      );
+    }
+
+    return (
+      <Col>
+        <Button variant="primary" style={{ marginBottom: 5 }} onClick={save}>
+          Save
+        </Button>
+        <Button
+          variant="secondary"
+          style={{ marginBottom: 5, marginLeft: 5 }}
+          onClick={cancel}
+        >
+          Cancel
+        </Button>
+      </Col>
+    );
+  };
+
   return (
     <>
       {loaded ? (
@@ -560,26 +591,7 @@ function FilterPage(props) {
                 </Form>
               </Col>
             </Row>
-            <Row>
-              <Col>
-                <Button
-                  variant="primary"
-                  style={{ marginBottom: 5 }}
-                  onClick={save}
-                  disabled={!!filterList.origin}
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="secondary"
-                  style={{ marginBottom: 5, marginLeft: 5 }}
-                  onClick={cancel}
-                  disabled={!!filterList.origin}
-                >
-                  Cancel
-                </Button>
-              </Col>
-            </Row>
+            <Row>{renderSaveAndCancelButtons(filterList)}</Row>
             <MoveCIDModal
               cidItem={moveCidItem}
               optionFilters={moveOptionFilters}
