@@ -249,6 +249,12 @@ export default class CidItemRender extends React.Component<
             <Container>
               <Row>
                 <Col sm={2} md={2} lg={1}>
+                  <Form.Check
+                    type="checkbox"
+                    checked={this.state.item.isChecked}
+                  />
+                </Col>
+                <Col sm={2} md={2} lg={1}>
                   <div
                     style={{
                       height: "100%",
@@ -282,7 +288,7 @@ export default class CidItemRender extends React.Component<
                     {FilterService.renderHashedCid(this.state.item.cid, false)}
                   </Form.Label>
                 </Col>
-                <Col sm={12} md={12} lg={6}>
+                <Col sm={12} md={12} lg={4}>
                   {this.renderCidActions()}
                 </Col>
               </Row>
