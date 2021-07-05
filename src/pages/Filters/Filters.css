@@ -70,3 +70,7 @@
     border-color: white;
     color: #000;
 }
+
+.input-group {
+    margin-bottom: 10px;
+}
