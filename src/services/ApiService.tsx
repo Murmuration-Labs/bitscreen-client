@@ -68,6 +68,7 @@ const ApiService = {
       filterList.cids
     );
     return response.data as string[];
+  },
 
   getAllFilters: async (
     page: number,
