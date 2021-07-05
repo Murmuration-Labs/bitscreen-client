@@ -1,5 +1,13 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  ListGroup,
+  Row,
+  FormCheck,
+} from "react-bootstrap";
 import { Prompt } from "react-router";
 
 import {
@@ -43,6 +51,7 @@ function FilterPage(props) {
     FilterService.emptyFilterList()
   );
 
+  const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
 
   const putFilters = async (fl?: FilterList): Promise<FilterList> => {
@@ -76,6 +85,7 @@ function FilterPage(props) {
             : []
         );
         setLoaded(true);
+        setFilterOverride(filterLists[0].override);
       });
     } else {
       setLoaded(true);
@@ -118,6 +128,31 @@ function FilterPage(props) {
         });
     }
     setAlertUnsaved(false);
+  };
+
+  const [showOverrideCids, setShowOverrideCids] = useState<boolean>(false);
+  const [overrideCidsTitle, setOverrideCidsTitle] = useState<string>("");
+  const [overrrideCidsMessage, setOverrrideCidsMessage] =
+    useState<string>("false");
+  const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
+
+  const canSave = (): void => {
+    ApiService.getOverrideCids(filterList)
+      .then((res) => {
+        if (Object.keys(res).length > 0) {
+          setOverrideCidsTitle("Local filter cids override warning");
+          setOverrrideCidsMessage(
+            "The following cids are present on local filter lists:"
+          );
+          setOverrideCidsBullets(res);
+          setShowOverrideCids(true);
+        } else {
+          save();
+        }
+      })
+      .catch(() => {
+        toast.error("Something wrong happend please try again later.");
+      });
   };
 
   const cancel = (): void => {
@@ -311,6 +346,11 @@ function FilterPage(props) {
     toast.success("Shared link was copied succesfully");
   };
 
+  const toggleFilterOverride = () => {
+    filterList.override = !filterList.override;
+    setFilterOverride(filterList.override);
+  };
+
   const closeModalCallback = () => {
     setShowMoveModal(false);
   };
@@ -490,6 +530,29 @@ function FilterPage(props) {
                       </Button>
                     </Col>
                   </Form.Row>
+                  <Form.Row
+                    style={{
+                      marginLeft: 2,
+                      marginTop: -20,
+                      marginBottom: 20,
+                    }}
+                    onClick={() => toggleFilterOverride()}
+                  >
+                    <FormCheck
+                      readOnly
+                      type="switch"
+                      checked={filterOverride}
+                    />
+                    <Form.Label
+                      style={{
+                        marginRight: 10,
+                        marginTop: 2,
+                      }}
+                      className={"text-dim"}
+                    >
+                      Override?
+                    </Form.Label>
+                  </Form.Row>
                   <Form.Row style={{ marginTop: -20 }}>
                     <Col>
                       <Form.Label className={"text-dim"}>
@@ -536,6 +599,7 @@ function FilterPage(props) {
                               beginMoveToDifferentFilter={
                                 beginMoveToDifferentFilter
                               }
+                              filterList={filterList}
                               isHashedCid={!!filterList.origin}
                             />
                           ))}
@@ -550,7 +614,7 @@ function FilterPage(props) {
                 <Button
                   variant="primary"
                   style={{ marginBottom: 5 }}
-                  onClick={save}
+                  onClick={canSave}
                   disabled={!!filterList.origin}
                 >
                   Save
@@ -593,6 +657,16 @@ function FilterPage(props) {
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());
                 setShowConfirmDelete(false);
+              }}
+            />
+            <ConfirmModal
+              show={showOverrideCids}
+              title={overrideCidsTitle}
+              message={overrrideCidsMessage}
+              bullets={overrideCidsBullets}
+              callback={save}
+              closeCallback={() => {
+                setShowOverrideCids(false);
               }}
             />
           </Container>

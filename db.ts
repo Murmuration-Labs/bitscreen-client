@@ -384,20 +384,38 @@ export const findById = async (
 export const checkOverriddenCid = async (
   databaseName: string,
   table: string,
-  cid: string
+  cid: string,
+  exceptFilterListId: any,
+  local = false
 ) => {
   forceExistingTable(databaseName, table);
-  const hashedCid = getAddressHash(cid);
+
+  let hashedCid = cid;
+
+  if (!local) {
+    hashedCid = getAddressHash(cid);
+  }
+
   return Object.values(dbFileData[databaseName][table].data).find(
     (element: any) => {
-      if (
-        element.override !== undefined &&
-        element.override === false &&
-        element.origin !== undefined &&
-        element.origin !== null
-      ) {
-        return element.cids.indexOf(hashedCid) === -1 ? false : true;
+      if (element._id == exceptFilterListId) {
+        return false;
       }
+      // for local filters, we want them to be override, and w/o origin
+      // for remote filters, we want them to NOT be override, and w/ origin
+      const overrideConditional = !local;
+      const originConditional = local;
+
+      if (
+        !element.override === overrideConditional &&
+        !!element.origin === originConditional
+      ) {
+        if (element.cids && element.cids.indexOf(hashedCid) > -1) {
+          return true;
+        }
+      }
+
+      return false;
     }
   );
 };

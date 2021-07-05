@@ -122,20 +122,23 @@ app.get("/search-filters", (req: Request, res: Response) => {
 app.post("/filters", (req: Request, res: Response) => {
   db.insert(databaseName, "bitscreen", req.body)
     .then(async (data) => {
-      if (!req.body.name) {
-        const updateObj = {
-          _id: data,
-          name: `New filter (${data})`,
-          cids: [],
-        };
+        if (!req.body.name) {
+            const updateObj = {
+                _id: data,
+                name: `New filter (${data})`,
+            } as any;
 
-        await db.update(databaseName, "bitscreen", updateObj);
-      }
+            if (!req.body.cids) {
+                updateObj.cids = [];
+            }
 
-      res.send({
-        success: true,
-        _id: data,
-      });
+            await db.update(databaseName, "bitscreen", updateObj);
+        }
+
+        res.send({
+            success: true,
+            _id: data,
+        })
     })
     .catch((err) =>
       res.send({
@@ -184,10 +187,6 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
     },
   ])
     .then((data) => {
-      data = data.filter((element) => {
-        return !element.override;
-      });
-
       if (data.length === 0) {
         res.status(404).send([]);
         return;
@@ -298,14 +297,43 @@ app.get("/filters/public/count", (req: Request, res: Response) => {
         });
 });
 
-app.get("/cid/is-override/:cid", (req: Request, res: Response) => {
-  db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid)
-    .then((data) => {
-      res.status(200).send(data);
-    })
-    .catch((err) => {
-      console.log("Version error log", err);
-      res.status(404).send({});
+app.get("/cid/is-override-remote/:_filterId/:cid", (req: Request, res: Response) => {
+    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid, req.params._filterId)
+        .then((data) => {
+            res.status(200).send(data);
+        })
+        .catch((err) => {
+            console.log("Version error log", err);
+            res.status(404).send({});
+        })
+});
+
+app.get("/cid/is-override-local/:_filterId/:cid", (req: Request, res: Response) => {
+    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid, req.params._filterId,true)
+        .then((data) => {
+            res.status(200).send(data);
+        })
+        .catch((err) => {
+            console.log("Version error log", err);
+            res.status(404).send({});
+        })
+});
+
+app.post("/cids/override/:_filterId", (req: Request, res: Response) => {
+    const cids = req.body || [];
+
+    Promise.all(cids.map(x =>
+        db.checkOverriddenCid(
+            databaseName,
+            "bitscreen",
+            x,
+            req.params._filterId,
+            true
+        )
+    )).then(results => {
+        res.send(cids.filter((item, index) => {
+            return !!results[index];
+        }));
     });
 });
 
