@@ -50,8 +50,8 @@ try {
   );
 }
 
-console.log('config path:', configPath);
-console.log('filter path:', filterPath);
+console.log("config path:", configPath);
+console.log("filter path:", filterPath);
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, "build")));
@@ -106,7 +106,6 @@ app.put("/config", (req: Request, res: Response) => {
     });
 });
 
-
 app.get("/filters", (req: Request, res: Response) => {
   db.findAll(databaseName, "bitscreen")
     .then((data) => res.send(data))
@@ -123,21 +122,20 @@ app.get("/search-filters", (req: Request, res: Response) => {
 app.post("/filters", (req: Request, res: Response) => {
   db.insert(databaseName, "bitscreen", req.body)
     .then(async (data) => {
+      if (!req.body.name) {
+        const updateObj = {
+          _id: data,
+          name: `New filter (${data})`,
+          cids: [],
+        };
 
-        if (!req.body.name) {
-            const updateObj = {
-                _id: data,
-                name: `New filter (${data})`,
-                cids: [],
-            };
+        await db.update(databaseName, "bitscreen", updateObj);
+      }
 
-            await db.update(databaseName, "bitscreen", updateObj);
-        }
-
-        res.send({
-            success: true,
-            _id: data,
-        })
+      res.send({
+        success: true,
+        _id: data,
+      });
     })
     .catch((err) =>
       res.send({
@@ -187,25 +185,25 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
   ])
     .then((data) => {
       data = data.filter((element) => {
-        return !element.override
-      })
+        return !element.override;
+      });
 
       if (data.length === 0) {
-         res.status(404).send([]);
-         return;
+        res.status(404).send([]);
+        return;
       }
 
       // don't rehash cids fetched from another origin
       if (data[0].origin) {
-          res.send(data[0]);
+        res.send(data[0]);
       } else {
-          res.send(
-              data.map((x) => {
-                  let y = JSON.parse(JSON.stringify(x));
-                  y.cids = x.cids.map(getAddressHash);
-                  return y;
-              })[0]
-          );
+        res.send(
+          data.map((x) => {
+            let y = JSON.parse(JSON.stringify(x));
+            y.cids = x.cids.map(getAddressHash);
+            return y;
+          })[0]
+        );
       }
     })
     .catch(() => {
@@ -214,24 +212,26 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
 });
 
 app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
-    db.findBy(databaseName, "bitscreen", [{
-        field: '_cryptId',
-        value: req.params._cryptId,
-    }])
-        .then((data) => {
-            if (data.length > 0) {
-                res.send({
-                    _cryptId: data[0]._cryptId,
-                    _lastUpdatedAt: data[0]._lastUpdatedAt,
-                });
-            } else {
-                res.status(404).send({});
-            }
-        })
-        .catch((err) => {
-            console.log("Version error log", err);
-            res.status(404).send({});
-        })
+  db.findBy(databaseName, "bitscreen", [
+    {
+      field: "_cryptId",
+      value: req.params._cryptId,
+    },
+  ])
+    .then((data) => {
+      if (data.length > 0) {
+        res.send({
+          _cryptId: data[0]._cryptId,
+          _lastUpdatedAt: data[0]._lastUpdatedAt,
+        });
+      } else {
+        res.status(404).send({});
+      }
+    })
+    .catch((err) => {
+      console.log("Version error log", err);
+      res.status(404).send({});
+    });
 });
 
 app.get("/filters/public", (req: Request, res: Response) => {
@@ -299,116 +299,127 @@ app.get("/filters/public/count", (req: Request, res: Response) => {
 });
 
 app.get("/cid/is-override/:cid", (req: Request, res: Response) => {
-    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid)
-        .then((data) => {
-            res.status(200).send(data);
-        })
-        .catch((err) => {
-            console.log("Version error log", err);
-            res.status(404).send({});
-        })
+  db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log("Version error log", err);
+      res.status(404).send({});
+    });
 });
 
 app.get("/provider_info", (req: Request, res: Response) => {
-    db.findAll(databaseName, "provider_info")
-        .then(results => {
-            if (results.length > 0) {
-                res.send(results[0]);
-            } else {
-                res.send({
-                    fileCoinAddress: "",
-                    businessName: "",
-                    website: "",
-                    email: "",
-                    contactPerson: "",
-                    address: "",
-                    country: "",
-                });
-            }
-        })
-        .catch(err => {
-            console.log("GET provider_info err is", err);
-            res.status(503).send({});
-        })
-    ;
+  db.findAll(databaseName, "provider_info")
+    .then((results) => {
+      if (results.length > 0) {
+        res.send(results[0]);
+      } else {
+        res.send({
+          fileCoinAddress: "",
+          businessName: "",
+          website: "",
+          email: "",
+          contactPerson: "",
+          address: "",
+          country: "",
+        });
+      }
+    })
+    .catch((err) => {
+      console.log("GET provider_info err is", err);
+      res.status(503).send({});
+    });
 });
 
 app.put("/provider_info", (req: Request, res: Response) => {
-    db.findAll(databaseName, "provider_info")
-        .then(results => {
-            if (results.length > 0) {
-                const existing: any = results[0];
+  db.findAll(databaseName, "provider_info")
+    .then((results) => {
+      if (results.length > 0) {
+        const existing: any = results[0];
 
-                const saveObject = {
-                    ...existing,
-                    ...req.body,
-                    _id: existing._id, // prevent frontend from injecting _id
-                    _cryptId: existing._cryptId, // prevent frontend from injecting _cryptId
-                };
+        const saveObject = {
+          ...existing,
+          ...req.body,
+          _id: existing._id, // prevent frontend from injecting _id
+          _cryptId: existing._cryptId, // prevent frontend from injecting _cryptId
+        };
 
-                db.update(databaseName, "provider_info", saveObject)
-                    .then(() => {
-                        res.send({});
-                    })
-                    .catch(() => {
-                        res.status(503).send({});
-                    })
-                ;
-            } else {
-                db.insert(databaseName, "provider_info", req.body)
-                    .then(() => {
-                        res.send({});
-                    })
-                    .catch(() => {
-                        res.status(503).send({});
-                    })
-                ;
-            }
-        })
-        .catch(err => {
-            console.log("POST provider_info err is", err);
+        db.update(databaseName, "provider_info", saveObject)
+          .then(() => {
+            res.send({});
+          })
+          .catch(() => {
             res.status(503).send({});
-        })
-    ;
+          });
+      } else {
+        db.insert(databaseName, "provider_info", req.body)
+          .then(() => {
+            res.send({});
+          })
+          .catch(() => {
+            res.status(503).send({});
+          });
+      }
+    })
+    .catch((err) => {
+      console.log("POST provider_info err is", err);
+      res.status(503).send({});
+    });
 });
 
 interface Filter {
-    _id?: number;
-    cids: string[];
-    visibility: number;
-    enabled: boolean;
-    override: boolean;
-    origin?: string;
-    _cryptId?: string;
-    _lastUpdatedAt?: number;
+  _id?: number;
+  cids: string[];
+  visibility: number;
+  enabled: boolean;
+  override: boolean;
+  origin?: string;
+  _cryptId?: string;
+  _lastUpdatedAt?: number;
 }
 
-cron.schedule("0 */4 * * *", () => {
-    db.findAll(databaseName, "bitscreen")
-        .then((data) => {
-            const external = (data as Filter[]).filter((x: Filter) => {
-                return !!x.origin;
-            });
+cron.schedule(
+  "0 */4 * * *",
+  () => {
+    db.findAll(databaseName, "bitscreen").then((data) => {
+      const external = (data as Filter[]).filter((x: Filter) => {
+        return !!x.origin;
+      });
 
-            const promises = external.map((importFilter: Filter) => new Promise(async (resolve, reject) => {
-                const version = (await axios.get(`${importFilter.origin}/version`)).data;
+      const promises = external.map(
+        (importFilter: Filter) =>
+          new Promise(async (resolve, reject) => {
+            const version = (await axios.get(`${importFilter.origin}/version`))
+              .data;
 
-                if (!version._lastUpdatedAt || (importFilter._lastUpdatedAt && version._lastUpdatedAt > importFilter._lastUpdatedAt)) {
-                    const updatedImportFilter = (await axios.get(importFilter.origin)).data;
+            if (
+              !version._lastUpdatedAt ||
+              (importFilter._lastUpdatedAt &&
+                version._lastUpdatedAt > importFilter._lastUpdatedAt)
+            ) {
+              const updatedImportFilter = (await axios.get(importFilter.origin))
+                .data;
 
-                    updatedImportFilter._id = importFilter._id;
-                    updatedImportFilter.enabled = importFilter.enabled;
+              updatedImportFilter._id = importFilter._id;
 
-                    return await db.update(databaseName, "bitscreen", updatedImportFilter);
-                } else {
-                    return importFilter._id;
-                }
-            }));
+              return await db.update(
+                databaseName,
+                "bitscreen",
+                updatedImportFilter
+              );
+            } else {
+              return importFilter._id;
+            }
+          })
+      );
 
-            Promise.all(promises).then((updated) => {
-                console.log('Updated items:', promises.length);
-            });
-        });
-}, true);
+      Promise.all(promises).then((updated) => {
+        console.log("Updated items:", promises.length);
+      });
+    });
+  },
+  true
+);
 
 app.listen(process.env.PORT || 3030);
