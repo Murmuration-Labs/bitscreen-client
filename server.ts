@@ -2,7 +2,8 @@ import { Request, Response, Application } from "express";
 import { mkdirSync, writeFile, openSync, readFileSync, existsSync } from "fs";
 
 import * as db from "./db";
-import complaintsRoutes from "./endpoints/complaints";
+import complaintsRoutes from './endpoints/complaints';
+import {SortingCriteria} from "./db";
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -231,6 +232,70 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
       console.log("Version error log", err);
       res.status(404).send({});
     });
+});
+
+app.get("/filters/public", (req: Request, res: Response) => {
+    const itemsPerPage = parseInt(req.query.per_page as any);
+    const page = parseInt(req.query.page as any);
+    const sorting = (JSON.parse(req.query.sort as any) || {}) as any;
+    const searchQuery = req.query.q as string;
+
+    const computedSorting: SortingCriteria[] = [];
+
+    Object.keys(sorting).map(key => {
+        computedSorting.push({
+            field: key,
+            direction: sorting[key],
+        });
+    });
+
+    db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting, [{
+        field: "visibility",
+        value: "2",
+    }, {
+        field: "override",
+        value: "",
+    }], searchQuery, [
+        "name",
+        "description",
+        "cids",
+        "notes",
+    ])
+        .then(data => {
+            console.log('data length', data.length);
+            res.send(data.map(x => {
+                let y = JSON.parse(JSON.stringify(x));
+
+                if (y.cids) {
+                    y.cids = y.cids.map(getAddressHash);
+                }
+
+                return y;
+            }));
+        });
+
+});
+
+app.get("/filters/public/count", (req: Request, res: Response) => {
+    db.findBy(databaseName, "bitscreen", [{
+        field: "visibility",
+        value: "2",
+    }, {
+        field: "override",
+        value: "",
+    }])
+        .then(async data => {
+            const filteredData = await db.filterInColumns(data, req.query.q as string, [
+                "name",
+                "description",
+                "cids",
+                "notes",
+            ]);
+
+            res.send({
+                count: filteredData.length,
+            });
+        });
 });
 
 app.get("/cid/is-override/:cid", (req: Request, res: Response) => {
