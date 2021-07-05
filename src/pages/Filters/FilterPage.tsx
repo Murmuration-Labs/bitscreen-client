@@ -46,18 +46,6 @@ function FilterPage(props) {
   const history = useHistory();
   const currentUrl = useLocation().pathname;
 
-  const putFilters = async (fl?: FilterList): Promise<FilterList> => {
-    if (!fl) {
-      fl = filterList;
-    }
-
-    if (!fl) return fl;
-
-    await ApiService.updateFilter(fl);
-
-    return fl;
-  };
-
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
@@ -94,7 +82,6 @@ function FilterPage(props) {
 
     setFilterList(fl);
     setAlertUnsaved(true);
-    // putFilters(fl);
   };
 
   const save = (): void => {
@@ -392,14 +379,6 @@ function FilterPage(props) {
     );
   };
 
-  const SaveNotice = (props: { notice: string }): JSX.Element => {
-    return (
-      <div className={"fading"}>
-        <p>{props.notice}</p>
-      </div>
-    );
-  };
-
   if (invalidFilterId) {
     return (
       <Container>
@@ -467,10 +446,7 @@ function FilterPage(props) {
         <>
           <Container>
             <Row style={{ width: "100%" }}>
-              <Col>
-                {renderTitle()}
-                {/* <SaveNotice notice={notice} /> */}
-              </Col>
+              <Col>{renderTitle()}</Col>
               {renderDeleteButton(filterList)}
             </Row>
             <Row>
