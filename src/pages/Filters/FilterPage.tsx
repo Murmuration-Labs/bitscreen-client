@@ -128,6 +128,22 @@ function FilterPage(props) {
     useState<string>("false");
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
+  const isAnyCidSelected = (): boolean => {
+    return false;
+  };
+
+  const handleBulkEditCids = (): void => {
+    // TODO
+  };
+
+  const handleBulkDeleteCids = (): void => {
+    // TODO
+  };
+
+  const handleBulkMoveCids = (): void => {
+    // TODO
+  };
+
   const canSave = (): void => {
     ApiService.getOverrideCids(filterList)
       .then((res) => {
@@ -604,6 +620,30 @@ function FilterPage(props) {
                         disabled={!!filterList.origin}
                       >
                         + Add CIDs batch
+                      </Button>
+                      <Button
+                        variant="primary"
+                        style={{ marginBottom: 5, marginLeft: 5 }}
+                        onClick={handleBulkEditCids}
+                        disabled={!isAnyCidSelected()}
+                      >
+                        Edit selected CIDs
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        style={{ marginBottom: 5, marginLeft: 5 }}
+                        onClick={handleBulkEditCids}
+                        disabled={!isAnyCidSelected()}
+                      >
+                        Delete selected CIDs
+                      </Button>
+                      <Button
+                        variant="warning"
+                        style={{ marginBottom: 5, marginLeft: 5 }}
+                        onClick={handleBulkEditCids}
+                        disabled={!isAnyCidSelected()}
+                      >
+                        Move selected CIDs
                       </Button>
                       <ListGroup style={{ width: "100%" }}>
                         {cidItems
