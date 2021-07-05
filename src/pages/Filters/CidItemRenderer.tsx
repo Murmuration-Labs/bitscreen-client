@@ -137,7 +137,7 @@ export default class CidItemRender extends React.Component<
               delay={{ show: 150, hide: 300 }}
               overlay={
                 <Tooltip id="button-tooltip">
-                  This Cid overrides another Cid from an imported filter
+                  This CID overrides the one in imported filter
                 </Tooltip>
               }
             >
@@ -155,7 +155,8 @@ export default class CidItemRender extends React.Component<
               delay={{ show: 150, hide: 300 }}
               overlay={
                 <Tooltip id="button-tooltip">
-                  This Cid overrides another Cid from a local filter
+                  This CID is already in a local filter, please remove the CID
+                  from the local filter instead of adding it to an override list
                 </Tooltip>
               }
             >

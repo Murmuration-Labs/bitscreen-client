@@ -328,8 +328,15 @@ export const checkOverriddenCid = async (
       if (element._id == exceptFilterListId) {
         return false;
       }
+      // for local filters, we want them to be override, and w/o origin
+      // for remote filters, we want them to NOT be override, and w/ origin
+      const overrideConditional = !local;
+      const originConditional = local;
 
-      if (!element.override === !local && !!element.origin === !local) {
+      if (
+        !element.override === overrideConditional &&
+        !!element.origin === originConditional
+      ) {
         if (element.cids && element.cids.indexOf(hashedCid) > -1) {
           return true;
         }

@@ -188,9 +188,6 @@ app.get("/filters/shared/:_cryptId", (req: Request, res: Response) => {
     },
   ])
     .then((data) => {
-      // data = data.filter((element) => {
-      //   return !element.override
-      // })
 
       if (data.length === 0) {
          res.status(404).send([]);
