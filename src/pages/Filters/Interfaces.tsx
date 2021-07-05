@@ -31,6 +31,7 @@ export interface CidItem {
   id: number;
   cid: string;
   edit: boolean;
+  isChecked?: boolean;
   rerender?: boolean;
 }
 
