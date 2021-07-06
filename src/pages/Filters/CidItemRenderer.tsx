@@ -252,6 +252,10 @@ export default class CidItemRender extends React.Component<
                   <Form.Check
                     type="checkbox"
                     checked={this.state.item.isChecked}
+                    disabled={this.props.isHashedCid}
+                    onChange={() => {
+                      this.state.item.isChecked = !this.state.item.isChecked;
+                    }}
                   />
                 </Col>
                 <Col sm={2} md={2} lg={1}>

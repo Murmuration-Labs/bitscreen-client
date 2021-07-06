@@ -129,7 +129,8 @@ function FilterPage(props) {
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
   const isAnyCidSelected = (): boolean => {
-    return false;
+    return true;
+    // TODO
   };
 
   const handleBulkEditCids = (): void => {
