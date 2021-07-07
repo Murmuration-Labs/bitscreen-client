@@ -24,6 +24,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faEdit,
+  faEye,
   faGlobe,
   faTrash,
   faShare,
@@ -154,6 +155,14 @@ function Filters(): JSX.Element {
     );
   };
 
+  const editOrEyeIcon = (props: FilterList): JSX.Element => {
+    if (props.origin) {
+      return <FontAwesomeIcon icon={faEye as IconProp} />;
+    }
+
+    return <FontAwesomeIcon icon={faEdit as IconProp} />;
+  };
+
   const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card"}>
@@ -255,7 +264,7 @@ function Filters(): JSX.Element {
                       to={`/filters/edit/${filterList._id}`}
                       className="double-space-left"
                     >
-                      <FontAwesomeIcon icon={faEdit as IconProp} />
+                      {editOrEyeIcon(filterList)}
                     </Link>
                     <Link
                       to="#"

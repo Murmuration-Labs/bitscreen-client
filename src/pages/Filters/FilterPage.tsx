@@ -26,7 +26,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import AddCidBatchModal from "./AddCidBatchModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { toast } from "react-toastify";
 import { serverUri } from "../../config";
@@ -53,18 +53,7 @@ function FilterPage(props) {
 
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
-
-  const putFilters = async (fl?: FilterList): Promise<FilterList> => {
-    if (!fl) {
-      fl = filterList;
-    }
-
-    if (!fl) return fl;
-
-    await ApiService.updateFilter(fl);
-
-    return fl;
-  };
+  const currentUrl = useLocation().pathname;
 
   const initFilter = (id: number): void => {
     if (id) {
@@ -103,7 +92,6 @@ function FilterPage(props) {
 
     setFilterList(fl);
     setAlertUnsaved(true);
-    // putFilters(fl);
   };
 
   const save = (): void => {
@@ -112,18 +100,22 @@ function FilterPage(props) {
       ApiService.updateFilter(filterList)
         .then((res) => {
           history.push(`/filters`);
+          toast.success("Filter list updated successfully");
           setLoaded(false);
         })
         .catch((err) => {
+          toast.error("Error: " + err.message);
           setLoaded(false);
         });
     } else {
       ApiService.addFilter(filterList)
         .then((res) => {
           history.push(`/filters`);
+          toast.success("Filter list created successfully");
           setLoaded(false);
         })
         .catch((err) => {
+          toast.error("Error: " + err.message);
           setLoaded(false);
         });
     }
@@ -371,7 +363,7 @@ function FilterPage(props) {
       return <h2>View filter list</h2>;
     }
 
-    if (filterList.name) {
+    if (currentUrl.includes("edit")) {
       return <h2>Edit filter list</h2>;
     }
 
@@ -427,14 +419,6 @@ function FilterPage(props) {
     );
   };
 
-  const SaveNotice = (props: { notice: string }): JSX.Element => {
-    return (
-      <div className={"fading"}>
-        <p>{props.notice}</p>
-      </div>
-    );
-  };
-
   if (invalidFilterId) {
     return (
       <Container>
@@ -445,27 +429,65 @@ function FilterPage(props) {
     );
   }
 
+  const renderDeleteButton = (props: FilterList): JSX.Element => {
+    if (currentUrl.includes("new") || props.origin) {
+      return <></>;
+    }
+
+    return (
+      <Col>
+        <Button
+          variant="warning"
+          onClick={() => {
+            confirmDelete();
+          }}
+          style={{ float: "right" }}
+        >
+          Delete
+        </Button>
+      </Col>
+    );
+  };
+
+  const renderSaveAndCancelButtons = (props: FilterList): JSX.Element => {
+    if (props.origin) {
+      return (
+        <Col>
+          <Button
+            variant="primary"
+            style={{ marginBottom: 5 }}
+            onClick={cancel}
+          >
+            Go Back
+          </Button>
+        </Col>
+      );
+    }
+
+    return (
+      <Col>
+        <Button variant="primary" style={{ marginBottom: 5 }} onClick={save}>
+          Save
+        </Button>
+        <Button
+          variant="secondary"
+          style={{ marginBottom: 5, marginLeft: 5 }}
+          onClick={cancel}
+        >
+          Cancel
+        </Button>
+      </Col>
+    );
+  };
+
   return (
     <>
       {loaded ? (
         <>
           <Container>
             <Row style={{ width: "100%" }}>
-              <Col>
-                {renderTitle()}
-                {/* <SaveNotice notice={notice} /> */}
-              </Col>
-              <Col>
-                <Button
-                  variant="warning"
-                  onClick={() => {
-                    confirmDelete();
-                  }}
-                  style={{ float: "right" }}
-                >
-                  Delete
-                </Button>
-              </Col>
+              <Col>{renderTitle()}</Col>
+              {renderDeleteButton(filterList)}
             </Row>
             <Row>
               <Col>
@@ -609,26 +631,7 @@ function FilterPage(props) {
                 </Form>
               </Col>
             </Row>
-            <Row>
-              <Col>
-                <Button
-                  variant="primary"
-                  style={{ marginBottom: 5 }}
-                  onClick={canSave}
-                  disabled={!!filterList.origin}
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="secondary"
-                  style={{ marginBottom: 5, marginLeft: 5 }}
-                  onClick={cancel}
-                  disabled={!!filterList.origin}
-                >
-                  Cancel
-                </Button>
-              </Col>
-            </Row>
+            <Row>{renderSaveAndCancelButtons(filterList)}</Row>
             <MoveCIDModal
               cidItem={moveCidItem}
               optionFilters={moveOptionFilters}
