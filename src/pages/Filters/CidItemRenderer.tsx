@@ -100,7 +100,7 @@ export default class CidItemRender extends React.Component<
 
   handleSelectedCid = (): void => {
     this.state.item.isChecked = !this.state.item.isChecked;
-    this.props.syncSelectedCids(this.state.item);
+    this.props.syncSelectedCids();
   };
 
   checkIfIsOverrideExists = (): void => {
