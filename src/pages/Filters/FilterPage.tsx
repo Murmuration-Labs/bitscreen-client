@@ -335,7 +335,9 @@ function FilterPage(props) {
       return item.id;
     });
     const items = cidItems.map((item: CidItem) => {
-      return selectedCids.includes(item.id) ? { ...item, edit: true } : item;
+      return selectedCids.includes(item.id)
+        ? { ...item, edit: true, rerender: false }
+        : item;
     });
     setCidItems(items);
   };
