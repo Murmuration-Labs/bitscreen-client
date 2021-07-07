@@ -60,8 +60,13 @@ export default class CidItemRender extends React.Component<
   }
   enterEdit = (): void => {
     if (this.state.item != null) {
-      this.setState({ item: { ...this.state.item, edit: true } });
+      this.state.item.edit = true;
+      this.state.item.isChecked = false;
+      // this.setState({
+      //   item: { ...this.state.item, edit: true, isChecked: false },
+      // });
     }
+    this.props.updateCidItem(this.state.item);
   };
   handleSave = (e: any): void => {
     // e.preventDefault();
@@ -99,8 +104,14 @@ export default class CidItemRender extends React.Component<
   };
 
   handleSelectedCid = (): void => {
+    console.log(
+      "s-a apasat pe checkbox. from " +
+        this.state.item.isChecked +
+        " to " +
+        !this.state.item.isChecked
+    );
     this.state.item.isChecked = !this.state.item.isChecked;
-    this.props.syncSelectedCids();
+    this.props.updateCidItem(this.state.item);
   };
 
   checkIfIsOverrideExists = (): void => {

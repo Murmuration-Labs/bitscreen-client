@@ -31,7 +31,7 @@ export interface CidItem {
   id: number;
   cid: string;
   edit: boolean;
-  isChecked?: boolean;
+  isChecked: boolean;
   rerender?: boolean;
 }
 
@@ -41,7 +41,7 @@ export interface CidItemProps {
   deleteItem: (i: CidItem) => void;
   changeCidValue: (i: CidItem) => void;
   cancelEdit: (i: CidItem, index: number) => void;
-  syncSelectedCids: () => void;
+  updateCidItem: (i: CidItem) => void;
   beginMoveToDifferentFilter: (i: CidItem[]) => Promise<void>;
   filterList: FilterList;
   index: number;

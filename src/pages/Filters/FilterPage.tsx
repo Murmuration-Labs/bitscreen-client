@@ -64,7 +64,13 @@ function FilterPage(props) {
         setCidItems(
           filterLists[0].cids
             ? filterLists[0].cids.map((cid: string, index: number) => {
-                return { cid, id: index, edit: false, rerender: true };
+                return {
+                  cid,
+                  id: index,
+                  edit: false,
+                  rerender: true,
+                  isChecked: false,
+                };
               })
             : []
         );
@@ -167,25 +173,16 @@ function FilterPage(props) {
   const onNewCid = (): void => {
     setNotice("");
     const items = cidItems;
-    items.push({ cid: "", edit: true, id: items.length, rerender: true });
+    items.push({
+      cid: "",
+      edit: true,
+      id: items.length,
+      rerender: true,
+      isChecked: false,
+    });
     const cids = filterList.cids;
     cids.push("");
     setFilterList({ ...filterList, cids });
-  };
-
-  const saveItem = (editItem: CidItem) => {
-    const items = cidItems.map((item: CidItem) => {
-      return item.id === editItem.id
-        ? { ...editItem, edit: false, isChecked: false }
-        : item;
-    });
-    const fl = {
-      ...filterList,
-      cids: items.map((i: CidItem) => i.cid),
-    };
-    saveFilter(fl);
-    setCidItems(items);
-    setNotice("CIDs successfully saved.");
   };
 
   const getSelectedCidItems = (items: CidItem[]): CidItem[] => {
@@ -193,6 +190,7 @@ function FilterPage(props) {
       return item.isChecked;
     });
     console.log(selectedItems);
+    console.log(cidItems);
     return selectedItems;
   };
 
@@ -212,6 +210,29 @@ function FilterPage(props) {
     }
   };
 
+  const updateCidItem = (cidItem: CidItem) => {
+    console.log(cidItem.isChecked);
+    const items = cidItems.map((item: CidItem) => {
+      return item.id === cidItem.id ? cidItem : item;
+    });
+    setCidItems(items);
+    syncSelectedCids(items);
+  };
+
+  const saveItem = (editItem: CidItem) => {
+    const items = cidItems.map((item: CidItem) => {
+      return item.id === editItem.id ? { ...editItem, edit: false } : item;
+    });
+    const fl = {
+      ...filterList,
+      cids: items.map((i: CidItem) => i.cid),
+    };
+    saveFilter(fl);
+    setCidItems(items);
+    syncSelectedCids(items);
+    setNotice("CIDs successfully saved.");
+  };
+
   const changeCidValue = (editItem: CidItem) => {
     const items = cidItems.map((item: CidItem) => {
       return item.id === editItem.id ? editItem : item;
@@ -222,15 +243,17 @@ function FilterPage(props) {
     };
     saveFilter(fl);
     setCidItems(items);
+    syncSelectedCids(items);
   };
 
   const cancelEdit = (editItem: CidItem, index: number) => {
     if (editItem.cid) {
       editItem.edit = false;
-      editItem.rerender = false;
-      editItem.isChecked = false;
+      // editItem.rerender = false;
       cidItems[index] = editItem;
-      setCidItems([...cidItems.map((x) => ({ ...x }))]);
+      // const newCidItems = [...cidItems.map((x) => ({ ...x }))];
+      // setCidItems(newCidItems);
+      syncSelectedCids();
 
       const fl = {
         ...filterList,
@@ -239,7 +262,10 @@ function FilterPage(props) {
       saveFilter(fl);
     } else {
       cidItems.splice(index, 1);
-      setCidItems([...cidItems.map((x) => ({ ...x }))]);
+      // const newCidItems = [...cidItems.map((x) => ({ ...x }))];
+      // setCidItems(newCidItems);
+      syncSelectedCids();
+
       const fl = {
         ...filterList,
         cids: cidItems.map((i: CidItem) => i.cid),
@@ -286,6 +312,7 @@ function FilterPage(props) {
         edit: true,
         id: cidItems.length,
         rerender: true,
+        isChecked: false,
       };
       cidItems.push(item);
     });
@@ -329,6 +356,7 @@ function FilterPage(props) {
         : item;
     });
     setCidItems(items);
+    syncSelectedCids(items);
   };
 
   const handleBulkDeleteCids = (): void => {
@@ -699,7 +727,7 @@ function FilterPage(props) {
                               deleteItem={deleteItem}
                               changeCidValue={changeCidValue}
                               cancelEdit={cancelEdit}
-                              syncSelectedCids={syncSelectedCids}
+                              updateCidItem={updateCidItem}
                               beginMoveToDifferentFilter={
                                 beginMoveToDifferentFilter
                               }
