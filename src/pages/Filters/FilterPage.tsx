@@ -138,37 +138,6 @@ function FilterPage(props) {
     useState<string>("false");
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
-  const handleBulkEditCids = (): void => {
-    const selectedCids = selectedCidItems.map((item: CidItem) => {
-      return item.id;
-    });
-    const items = cidItems.map((item: CidItem) => {
-      return selectedCids.includes(item.id) ? { ...item, edit: true } : item;
-    });
-    setCidItems(items);
-  };
-
-  const handleBulkDeleteCids = (): void => {
-    const selectedCids = selectedCidItems.map((item: CidItem) => {
-      return item.id;
-    });
-    const items = cidItems.filter(
-      (item: CidItem) => !selectedCids.includes(item.id)
-    );
-    const fl = {
-      ...filterList,
-      cids: items.map((i: CidItem) => i.cid),
-    };
-    saveFilter(fl);
-    setCidItems(items);
-    setSelectedCidItems([]);
-    setNotice("CIDs successfully saved.");
-  };
-
-  const handleBulkMoveCids = (): void => {
-    // TODO
-  };
-
   const canSave = (): void => {
     ApiService.getOverrideCids(filterList)
       .then((res) => {
@@ -346,19 +315,50 @@ function FilterPage(props) {
   };
 
   const [showMoveModal, setShowMoveModal] = useState<boolean>(false);
-  const [moveCidItem, setMoveCidItem] = useState<CidItem>(emptyCidItem);
+  const [moveCidItems, setMoveCidItems] = useState<CidItem[]>([]);
   const [moveOptionFilters, setMoveOptionFilters] = useState<FilterList[]>([]);
 
   const beginMoveToDifferentFilter = async (
-    moveItem: CidItem
+    moveItems: CidItem[]
   ): Promise<void> => {
     const filterLists: FilterList[] = await ApiService.getFilters();
 
-    setMoveCidItem(moveItem);
+    setMoveCidItems(moveItems);
     setMoveOptionFilters(
       filterLists.filter((x) => x._id !== filterList._id && !x.origin)
     );
     setShowMoveModal(true);
+  };
+
+  const handleBulkEditCids = (): void => {
+    const selectedCids = selectedCidItems.map((item: CidItem) => {
+      return item.id;
+    });
+    const items = cidItems.map((item: CidItem) => {
+      return selectedCids.includes(item.id) ? { ...item, edit: true } : item;
+    });
+    setCidItems(items);
+  };
+
+  const handleBulkDeleteCids = (): void => {
+    const selectedCids = selectedCidItems.map((item: CidItem) => {
+      return item.id;
+    });
+    const items = cidItems.filter(
+      (item: CidItem) => !selectedCids.includes(item.id)
+    );
+    const fl = {
+      ...filterList,
+      cids: items.map((i: CidItem) => i.cid),
+    };
+    saveFilter(fl);
+    setCidItems(items);
+    setSelectedCidItems([]);
+    setNotice("CIDs successfully saved.");
+  };
+
+  const handleBulkMoveCids = (): void => {
+    beginMoveToDifferentFilter(selectedCidItems);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
@@ -410,11 +410,15 @@ function FilterPage(props) {
   };
 
   const move = async (
-    cidItem: CidItem,
+    cidItems: CidItem[],
     selectedFilter: FilterList
   ): Promise<void> => {
-    selectedFilter.cids.push(cidItem.cid);
-    filterList.cids = filterList.cids.filter((x) => x !== cidItem.cid);
+    const cids = cidItems.map((item: CidItem) => {
+      return item.cid;
+    });
+
+    selectedFilter.cids.push(...cids);
+    filterList.cids = filterList.cids.filter((x) => !cids.includes(x));
 
     await ApiService.updateFilter([selectedFilter, filterList]);
     initFilter(props.match.params.id);
@@ -709,7 +713,7 @@ function FilterPage(props) {
               </Col>
             </Row>
             <MoveCIDModal
-              cidItem={moveCidItem}
+              cidItems={moveCidItems}
               optionFilters={moveOptionFilters}
               move={move}
               closeCallback={closeModalCallback}
