@@ -182,7 +182,9 @@ function FilterPage(props) {
 
   const saveItem = (editItem: CidItem) => {
     const items = cidItems.map((item: CidItem) => {
-      return item.id === editItem.id ? { ...editItem, edit: false } : item;
+      return item.id === editItem.id
+        ? { ...editItem, edit: false, isChecked: false }
+        : item;
     });
     const fl = {
       ...filterList,
@@ -191,6 +193,11 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     setNotice("CIDs successfully saved.");
+
+    const selectedItems = selectedCidItems.filter((item: CidItem) => {
+      return item.id !== editItem.id;
+    });
+    setSelectedCidItems(selectedItems);
   };
 
   const syncSelectedCids = (cidItem: CidItem) => {
@@ -230,6 +237,7 @@ function FilterPage(props) {
     if (editItem.cid) {
       editItem.edit = false;
       editItem.rerender = false;
+      editItem.isChecked = false;
       cidItems[index] = editItem;
       setCidItems([...cidItems.map((x) => ({ ...x }))]);
 
@@ -247,6 +255,11 @@ function FilterPage(props) {
       };
       saveFilter(fl);
     }
+
+    const selectedItems = selectedCidItems.filter((item: CidItem) => {
+      return item.id !== editItem.id;
+    });
+    setSelectedCidItems(selectedItems);
   };
 
   useEffect(() => {
