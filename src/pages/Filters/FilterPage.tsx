@@ -131,11 +131,30 @@ function FilterPage(props) {
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
   const handleBulkEditCids = (): void => {
-    // TODO
+    const selectedCids = selectedCidItems.map((item: CidItem) => {
+      return item.id;
+    });
+    const items = cidItems.map((item: CidItem) => {
+      return selectedCids.includes(item.id) ? { ...item, edit: true } : item;
+    });
+    setCidItems(items);
   };
 
   const handleBulkDeleteCids = (): void => {
-    // TODO
+    const selectedCids = selectedCidItems.map((item: CidItem) => {
+      return item.id;
+    });
+    const items = cidItems.filter(
+      (item: CidItem) => !selectedCids.includes(item.id)
+    );
+    const fl = {
+      ...filterList,
+      cids: items.map((i: CidItem) => i.cid),
+    };
+    saveFilter(fl);
+    setCidItems(items);
+    setSelectedCidItems([]);
+    setNotice("CIDs successfully saved.");
   };
 
   const handleBulkMoveCids = (): void => {
@@ -651,7 +670,7 @@ function FilterPage(props) {
                       <Button
                         variant="secondary"
                         style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={handleBulkEditCids}
+                        onClick={handleBulkDeleteCids}
                         disabled={!isAnyCidSelected}
                       >
                         Delete selected CIDs
@@ -659,7 +678,7 @@ function FilterPage(props) {
                       <Button
                         variant="warning"
                         style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={handleBulkEditCids}
+                        onClick={handleBulkMoveCids}
                         disabled={!isAnyCidSelected}
                       >
                         Move selected CIDs
