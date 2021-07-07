@@ -98,6 +98,11 @@ export default class CidItemRender extends React.Component<
     this.props.cancelEdit(this.state.item, this.props.index);
   };
 
+  handleSelectedCid = (): void => {
+    this.state.item.isChecked = !this.state.item.isChecked;
+    this.props.syncSelectedCids(this.state.item);
+  };
+
   checkIfIsOverrideExists = (): void => {
     Promise.all([
       ApiService.getCidOverride(this.props.cidItem.cid, this.props.filterList),
@@ -251,11 +256,8 @@ export default class CidItemRender extends React.Component<
                 <Col sm={2} md={2} lg={1}>
                   <Form.Check
                     type="checkbox"
-                    checked={this.state.item.isChecked}
                     disabled={this.props.isHashedCid}
-                    onChange={() => {
-                      this.state.item.isChecked = !this.state.item.isChecked;
-                    }}
+                    onChange={this.handleSelectedCid}
                   />
                 </Col>
                 <Col sm={2} md={2} lg={1}>

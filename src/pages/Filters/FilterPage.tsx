@@ -33,6 +33,8 @@ import { serverUri } from "../../config";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
+  const [selectedCidItems, setSelectedCidItems] = useState<CidItem[]>([]);
+  const [isAnyCidSelected, setIsAnyCidSelected] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>("");
 
   const emptyCidItem: CidItem = {
@@ -128,11 +130,6 @@ function FilterPage(props) {
     useState<string>("false");
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
-  const isAnyCidSelected = (): boolean => {
-    return true;
-    // TODO
-  };
-
   const handleBulkEditCids = (): void => {
     // TODO
   };
@@ -206,6 +203,27 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     setNotice("CIDs successfully saved.");
+  };
+
+  const syncSelectedCids = (cidItem: CidItem) => {
+    let count = selectedCidItems.length;
+    if (cidItem.isChecked) {
+      selectedCidItems.push(cidItem);
+      setSelectedCidItems(selectedCidItems);
+      ++count;
+    } else {
+      const items = selectedCidItems.filter(
+        (item: CidItem) => item.id !== cidItem.id
+      );
+      setSelectedCidItems(items);
+      --count;
+    }
+
+    if (count > 0) {
+      setIsAnyCidSelected(true);
+    } else {
+      setIsAnyCidSelected(false);
+    }
   };
 
   const changeCidValue = (editItem: CidItem) => {
@@ -626,7 +644,7 @@ function FilterPage(props) {
                         variant="primary"
                         style={{ marginBottom: 5, marginLeft: 5 }}
                         onClick={handleBulkEditCids}
-                        disabled={!isAnyCidSelected()}
+                        disabled={!isAnyCidSelected}
                       >
                         Edit selected CIDs
                       </Button>
@@ -634,7 +652,7 @@ function FilterPage(props) {
                         variant="secondary"
                         style={{ marginBottom: 5, marginLeft: 5 }}
                         onClick={handleBulkEditCids}
-                        disabled={!isAnyCidSelected()}
+                        disabled={!isAnyCidSelected}
                       >
                         Delete selected CIDs
                       </Button>
@@ -642,7 +660,7 @@ function FilterPage(props) {
                         variant="warning"
                         style={{ marginBottom: 5, marginLeft: 5 }}
                         onClick={handleBulkEditCids}
-                        disabled={!isAnyCidSelected()}
+                        disabled={!isAnyCidSelected}
                       >
                         Move selected CIDs
                       </Button>
@@ -659,6 +677,7 @@ function FilterPage(props) {
                               deleteItem={deleteItem}
                               changeCidValue={changeCidValue}
                               cancelEdit={cancelEdit}
+                              syncSelectedCids={syncSelectedCids}
                               beginMoveToDifferentFilter={
                                 beginMoveToDifferentFilter
                               }
