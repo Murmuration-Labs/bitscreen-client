@@ -677,10 +677,9 @@ function FilterPage(props) {
                           .filter((item: CidItem) => item.rerender)
                           .map((item: CidItem, index: number) => (
                             <CidItemRender
-                              index={index}
+                              // Each child in a list should have a unique "key" prop
                               key={item.id.toString()}
                               cidItem={item}
-                              isOverrideFilter={filterList.override}
                               saveItem={saveItem}
                               deleteItem={deleteItem}
                               changeCidValue={changeCidValue}
@@ -690,6 +689,8 @@ function FilterPage(props) {
                                 beginMoveToDifferentFilter
                               }
                               filterList={filterList}
+                              index={index}
+                              isOverrideFilter={filterList.override}
                               isHashedCid={!!filterList.origin}
                             />
                           ))}
