@@ -358,7 +358,9 @@ function FilterPage(props) {
   };
 
   const handleBulkMoveCids = (): void => {
-    beginMoveToDifferentFilter(selectedCidItems);
+    const items = selectedCidItems;
+    beginMoveToDifferentFilter(items);
+    setSelectedCidItems([]);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
