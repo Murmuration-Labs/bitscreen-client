@@ -362,6 +362,9 @@ function FilterPage(props) {
     FilterService.emptyFilterList()
   );
 
+  const [showConfirmBulkDelete, setShowConfirmBulkDelete] =
+    useState<boolean>(false);
+
   const confirmDelete = (): void => {
     setShowConfirmDelete(true);
     setDeletedFilterList(filterList);
@@ -676,7 +679,9 @@ function FilterPage(props) {
                       <Button
                         variant="secondary"
                         style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={handleBulkDeleteCids}
+                        onClick={() => {
+                          setShowConfirmBulkDelete(true);
+                        }}
                         disabled={!isAnyCidSelected}
                       >
                         Delete selected CIDs
@@ -745,6 +750,15 @@ function FilterPage(props) {
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());
                 setShowConfirmDelete(false);
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmBulkDelete}
+              title="Confirm bulk delete CIDs"
+              message="Are you sure you want to delete the selected items?"
+              callback={() => handleBulkDeleteCids()}
+              closeCallback={() => {
+                setShowConfirmBulkDelete(false);
               }}
             />
             <ConfirmModal
