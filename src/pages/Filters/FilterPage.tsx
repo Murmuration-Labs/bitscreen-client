@@ -33,15 +33,8 @@ import { serverUri } from "../../config";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
-  const [selectedCidItems, setSelectedCidItems] = useState<CidItem[]>([]);
   const [isAnyCidSelected, setIsAnyCidSelected] = useState<boolean>(false);
   const [notice, setNotice] = useState<string>("");
-
-  const emptyCidItem: CidItem = {
-    id: 0,
-    cid: "",
-    edit: false,
-  };
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [alertUnsaved, setAlertUnsaved] = useState<boolean>(false);
@@ -201,26 +194,24 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     setNotice("CIDs successfully saved.");
-
-    const selectedItems = selectedCidItems.filter((item: CidItem) => {
-      return item.id !== editItem.id;
-    });
-    setSelectedCidItems(selectedItems);
   };
 
-  const syncSelectedCids = (cidItem: CidItem) => {
-    let count = selectedCidItems.length;
-    if (cidItem.isChecked) {
-      selectedCidItems.push(cidItem);
-      setSelectedCidItems(selectedCidItems);
-      ++count;
+  const getSelectedCidItems = (items: CidItem[]): CidItem[] => {
+    const selectedItems = items.filter((item: CidItem) => {
+      return item.isChecked;
+    });
+    console.log(selectedItems);
+    return selectedItems;
+  };
+
+  const syncSelectedCids = (...args) => {
+    let selectedCidItems: CidItem[] = [];
+    if (args.length === 0) {
+      selectedCidItems = getSelectedCidItems(cidItems);
     } else {
-      const items = selectedCidItems.filter(
-        (item: CidItem) => item.id !== cidItem.id
-      );
-      setSelectedCidItems(items);
-      --count;
+      selectedCidItems = getSelectedCidItems(args[0]);
     }
+    const count = selectedCidItems.length;
 
     if (count > 0) {
       setIsAnyCidSelected(true);
@@ -263,11 +254,6 @@ function FilterPage(props) {
       };
       saveFilter(fl);
     }
-
-    const selectedItems = selectedCidItems.filter((item: CidItem) => {
-      return item.id !== editItem.id;
-    });
-    setSelectedCidItems(selectedItems);
   };
 
   useEffect(() => {
@@ -324,6 +310,7 @@ function FilterPage(props) {
     };
     saveFilter(fl);
     setCidItems(items);
+    syncSelectedCids(items);
     setNotice("CIDs successfully saved.");
   };
 
@@ -344,38 +331,29 @@ function FilterPage(props) {
   };
 
   const handleBulkEditCids = (): void => {
-    const selectedCids = selectedCidItems.map((item: CidItem) => {
-      return item.id;
-    });
     const items = cidItems.map((item: CidItem) => {
-      return selectedCids.includes(item.id)
-        ? { ...item, edit: true, rerender: false }
+      return item.isChecked
+        ? { ...item, edit: true, rerender: false, isChecked: false }
         : item;
     });
     setCidItems(items);
   };
 
   const handleBulkDeleteCids = (): void => {
-    const selectedCids = selectedCidItems.map((item: CidItem) => {
-      return item.id;
-    });
-    const items = cidItems.filter(
-      (item: CidItem) => !selectedCids.includes(item.id)
-    );
+    const items = cidItems.filter((item: CidItem) => !item.isChecked);
     const fl = {
       ...filterList,
       cids: items.map((i: CidItem) => i.cid),
     };
     saveFilter(fl);
     setCidItems(items);
-    setSelectedCidItems([]);
+    syncSelectedCids(items);
     setNotice("CIDs successfully saved.");
   };
 
   const handleBulkMoveCids = (): void => {
-    const items = selectedCidItems;
-    beginMoveToDifferentFilter(items);
-    setSelectedCidItems([]);
+    const selectedCidItems = getSelectedCidItems(cidItems);
+    beginMoveToDifferentFilter(selectedCidItems);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
