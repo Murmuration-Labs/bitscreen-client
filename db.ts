@@ -212,7 +212,7 @@ export const findBy = async (
     .filter((x) => {
       for (let i = 0; i < criteria.length; i++) {
         if (
-          dbFileData[databaseName][table].data[x][criteria[i].field] !==
+          dbFileData[databaseName][table].data[x][criteria[i].field] !=
           criteria[i].value
         ) {
           return false;
@@ -239,30 +239,42 @@ export const searchInColumns = async (
 ) => {
   forceExistingTable(databaseName, table);
 
-  return Object.values(dbFileData[databaseName][table].data).filter(
-    (item: any) => {
-      if (!searchTerm) {
-        return true;
-      }
-
-      let found = false;
-
-      for (let i = 0; i < Object.keys(item).length; i++) {
-        const itemKey = Object.keys(item)[i];
-
-        if (
-          (searchInColumns.length === 0 ||
-            searchInColumns.indexOf(itemKey) > -1) &&
-          item[itemKey].toLowerCase().includes(searchTerm.toLowerCase())
-        ) {
-          found = true;
-          break;
-        }
-      }
-
-      return found;
-    }
+  return await filterInColumns(
+    Object.values(dbFileData[databaseName][table].data)
   );
+};
+
+export const filterInColumns = async (
+  data: any,
+  searchTerm: string = "",
+  searchInColumns: string[] = []
+) => {
+  return data.filter((item: any) => {
+    if (!searchTerm) {
+      return true;
+    }
+
+    let found = false;
+
+    for (let i = 0; i < Object.keys(item).length; i++) {
+      const itemKey = Object.keys(item)[i];
+      const searchInValue =
+        typeof item[itemKey] === "string"
+          ? item[itemKey]
+          : item[itemKey].toString();
+
+      if (
+        (searchInColumns.length === 0 ||
+          searchInColumns.indexOf(itemKey) > -1) &&
+        searchInValue.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        found = true;
+        break;
+      }
+    }
+
+    return found;
+  });
 };
 
 export const searchFilter = async (
@@ -285,13 +297,74 @@ export const searchFilter = async (
           }
 
           const hashedUtil = util.map(getAddressHash);
-          if (-1 != hashedUtil.indexOf(searchTerm.toLowerCase())) {
-            return true;
-          }
-
-          return false;
+          return hashedUtil.indexOf(searchTerm.toLowerCase()) != -1;
         }
       );
+};
+
+export interface SortingCriteria {
+  field: string;
+  direction: string;
+}
+
+export const advancedFind = async (
+  databaseName: string,
+  table: string,
+  page: number,
+  per_page: number,
+  sort: SortingCriteria[],
+  filteringCriteria: StringFilteringCriteria[],
+  searchQuery: string,
+  searchInColumns: string[] = []
+) => {
+  forceExistingTable(databaseName, table);
+
+  let sortedResults = Object.values(dbFileData[databaseName][table].data).sort(
+    (objectA: any, objectB: any) => {
+      for (let i = 0; i < sort.length; i++) {
+        const criterion = sort[i];
+
+        if (criterion.direction === "asc") {
+          if (objectA[criterion.field] < objectB[criterion.field]) {
+            return -1;
+          } else if (objectA[criterion.field] > objectB[criterion.field]) {
+            return 1;
+          }
+        } else {
+          if (objectA[criterion.field] < objectB[criterion.field]) {
+            return 1;
+          } else if (objectA[criterion.field] > objectB[criterion.field]) {
+            return -1;
+          }
+        }
+      }
+
+      return 0;
+    }
+  );
+
+  sortedResults = sortedResults
+    // apply exact string filtering criteria
+    .filter((x: any) => {
+      for (let i = 0; i < filteringCriteria.length; i++) {
+        let compareValue = dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field];
+
+        if (compareValue === undefined) compareValue = "";
+
+        if (compareValue != filteringCriteria[i].value) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+  sortedResults = await filterInColumns(
+    sortedResults,
+    searchQuery,
+    searchInColumns
+  );
+
+  return sortedResults.slice(page * per_page, page * per_page + per_page);
 };
 
 export const findById = async (
@@ -311,20 +384,38 @@ export const findById = async (
 export const checkOverriddenCid = async (
   databaseName: string,
   table: string,
-  cid: string
+  cid: string,
+  exceptFilterListId: any,
+  local = false
 ) => {
   forceExistingTable(databaseName, table);
-  const hashedCid = getAddressHash(cid);
+
+  let hashedCid = cid;
+
+  if (!local) {
+    hashedCid = getAddressHash(cid);
+  }
+
   return Object.values(dbFileData[databaseName][table].data).find(
     (element: any) => {
-      if (
-        element.override !== undefined &&
-        element.override === false &&
-        element.origin !== undefined &&
-        element.origin !== null
-      ) {
-        return element.cids.indexOf(hashedCid) === -1 ? false : true;
+      if (element._id == exceptFilterListId) {
+        return false;
       }
+      // for local filters, we want them to be override, and w/o origin
+      // for remote filters, we want them to NOT be override, and w/ origin
+      const overrideConditional = !local;
+      const originConditional = local;
+
+      if (
+        !element.override === overrideConditional &&
+        !!element.origin === originConditional
+      ) {
+        if (element.cids && element.cids.indexOf(hashedCid) > -1) {
+          return true;
+        }
+      }
+
+      return false;
     }
   );
 };

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { FilterList } from "../pages/Filters/Interfaces";
-import { serverUri } from "../config";
+import { serverUri, remoteMarketplaceUri } from "../config";
 import { Account } from "../pages/Contact/Interfaces";
 
 // For authentication purposes we will use axios.createInstance
@@ -36,8 +36,20 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getCidOverride: async (cid: string): Promise<FilterList> => {
-    const response = await axios.get(`${serverUri()}/cid/is-override/${cid}`);
+  getCidOverride: async (cid: string, fl: FilterList): Promise<FilterList> => {
+    const response = await axios.get(
+      `${serverUri()}/cid/is-override-remote/${fl._id}/${cid}`
+    );
+    return response.data as FilterList;
+  },
+
+  getCidOverrideLocal: async (
+    cid: string,
+    fl: FilterList
+  ): Promise<FilterList> => {
+    const response = await axios.get(
+      `${serverUri()}/cid/is-override-local/${fl._id}/${cid}`
+    );
     return response.data as FilterList;
   },
 
@@ -48,6 +60,49 @@ const ApiService = {
 
   updateProviderInfo: async (account: Account): Promise<void> => {
     await axios.put(`${serverUri()}/provider_info`, account);
+  },
+
+  getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
+    const response = await axios.post(
+      `${serverUri()}/cids/override/${filterList._id}`,
+      filterList.cids
+    );
+    return response.data as string[];
+
+  getAllFilters: async (
+    page: number,
+    rowsPerPage: number,
+    mySortBy: string,
+    mySort: string,
+    searchedValue: string
+  ): Promise<FilterList[]> => {
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filters/public`,
+      {
+        params: {
+          per_page: rowsPerPage,
+          page: page,
+          sort: {
+            [mySortBy]: mySort,
+          },
+          q: searchedValue,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getCountAllFilter: async (searchedValue: string): Promise<number> => {
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filters/public/count`,
+      {
+        params: {
+          q: searchedValue,
+        },
+      }
+    );
+
+    return response.data.count;
   },
 };
 

@@ -31,6 +31,7 @@ export default class CidItemRender extends React.Component<
     loaded: boolean;
     isOverrideFilter: boolean;
     overrideCid: boolean;
+    localOverrideCid: boolean;
   }
 > {
   constructor(props: CidItemProps) {
@@ -43,6 +44,7 @@ export default class CidItemRender extends React.Component<
         ? this.props.isOverrideFilter
         : true,
       overrideCid: false,
+      localOverrideCid: false,
     };
 
     if (this.props.isOverrideFilter) {
@@ -97,27 +99,36 @@ export default class CidItemRender extends React.Component<
   };
 
   checkIfIsOverrideExists = (): void => {
-    ApiService.getCidOverride(this.props.cidItem.cid)
+    Promise.all([
+      ApiService.getCidOverride(this.props.cidItem.cid, this.props.filterList),
+      ApiService.getCidOverrideLocal(
+        this.props.cidItem.cid,
+        this.props.filterList
+      ),
+    ])
       .then((res) => {
-        if (res) {
-          this.setState({ overrideCid: true });
-        } else {
-          this.setState({ overrideCid: false });
-        }
-        this.setState({ loaded: true });
+        this.setState({
+          ...this.state,
+          overrideCid: !!res[0],
+          localOverrideCid: !!res[1],
+          loaded: true,
+        });
       })
       .catch((err) => {
-        this.setState({ loaded: true });
+        this.setState({
+          ...this.state,
+          loaded: true,
+        });
       });
   };
 
-  renderOverride(): JSX.Element {
+  renderOverride(local = false): JSX.Element {
     if (!this.props.isOverrideFilter) {
       // filter is not overrideing
       return <></>;
     }
     if (this.state.loaded) {
-      if (this.state.overrideCid) {
+      if (!local && this.state.overrideCid) {
         // override
         return (
           <>
@@ -126,11 +137,30 @@ export default class CidItemRender extends React.Component<
               delay={{ show: 150, hide: 300 }}
               overlay={
                 <Tooltip id="button-tooltip">
-                  This Cid override another Cid from an imported filter
+                  This CID overrides the one in imported filter
                 </Tooltip>
               }
             >
               <FontAwesomeIcon icon={faCheck as IconProp} color="#28a745" />
+            </OverlayTrigger>
+          </>
+        );
+      }
+
+      if (local && this.state.localOverrideCid) {
+        return (
+          <>
+            <OverlayTrigger
+              placement="right"
+              delay={{ show: 150, hide: 300 }}
+              overlay={
+                <Tooltip id="button-tooltip">
+                  This CID is already in a local filter, please remove the CID
+                  from the local filter instead of adding it to an override list
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCheck as IconProp} color="#ffc107" />
             </OverlayTrigger>
           </>
         );
@@ -145,7 +175,6 @@ export default class CidItemRender extends React.Component<
       </>
     );
   }
-
   renderCidActions(): JSX.Element {
     if (this.props.isHashedCid) {
       return <></>;
@@ -228,10 +257,22 @@ export default class CidItemRender extends React.Component<
                       alignItems: "center",
                     }}
                   >
+                    {this.renderOverride(true)}
+                  </div>
+                </Col>
+                <Col sm={2} md={2} lg={1}>
+                  <div
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
                     {this.renderOverride()}
                   </div>
                 </Col>
-                <Col sm={10} md={10} lg={5}>
+                <Col sm={8} md={8} lg={4}>
                   <Form.Label
                     style={{
                       fontSize: 24,
