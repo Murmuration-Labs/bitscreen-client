@@ -62,9 +62,6 @@ export default class CidItemRender extends React.Component<
     if (this.state.item != null) {
       this.state.item.edit = true;
       this.state.item.isChecked = false;
-      // this.setState({
-      //   item: { ...this.state.item, edit: true, isChecked: false },
-      // });
     }
     this.props.updateCidItem(this.state.item);
   };
@@ -104,12 +101,6 @@ export default class CidItemRender extends React.Component<
   };
 
   handleSelectedCid = (): void => {
-    console.log(
-      "s-a apasat pe checkbox. from " +
-        this.state.item.isChecked +
-        " to " +
-        !this.state.item.isChecked
-    );
     this.state.item.isChecked = !this.state.item.isChecked;
     this.props.updateCidItem(this.state.item);
   };
