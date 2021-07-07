@@ -91,7 +91,7 @@ export default class CidItemRender extends React.Component<
   };
 
   handleMovePress = (): void => {
-    this.props.beginMoveToDifferentFilter(this.state.item);
+    this.props.beginMoveToDifferentFilter([this.state.item]);
   };
 
   handleCancelEdit = (): void => {

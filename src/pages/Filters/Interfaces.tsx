@@ -42,7 +42,7 @@ export interface CidItemProps {
   changeCidValue: (i: CidItem) => void;
   cancelEdit: (i: CidItem, index: number) => void;
   syncSelectedCids: (i: CidItem) => void;
-  beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
+  beginMoveToDifferentFilter: (i: CidItem[]) => Promise<void>;
   filterList: FilterList;
   index: number;
   isOverrideFilter: boolean;
@@ -50,9 +50,9 @@ export interface CidItemProps {
 }
 
 export interface MoveCIDModalProps {
-  cidItem: CidItem;
+  cidItems: CidItem[];
   optionFilters: FilterList[];
-  move: (i: CidItem, fl: FilterList) => Promise<void>;
+  move: (i: CidItem[], fl: FilterList) => Promise<void>;
   closeCallback: () => void;
   show: boolean;
 }
