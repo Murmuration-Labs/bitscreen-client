@@ -436,10 +436,10 @@ function FilterPage(props) {
   };
 
   const move = async (
-    cidItems: CidItem[],
+    items: CidItem[],
     selectedFilter: FilterList
   ): Promise<void> => {
-    const cids = cidItems.map((item: CidItem) => {
+    const cids = items.map((item: CidItem) => {
       return item.cid;
     });
 
@@ -447,7 +447,15 @@ function FilterPage(props) {
     filterList.cids = filterList.cids.filter((x) => !cids.includes(x));
 
     await ApiService.updateFilter([selectedFilter, filterList]);
-    initFilter(props.match.params.id);
+
+    const ids = items.map((item: CidItem) => {
+      return item.id;
+    });
+    const newCidItems = cidItems.filter(
+      (item: CidItem) => !ids.includes(item.id)
+    );
+    setCidItems(newCidItems);
+    syncSelectedCids(newCidItems);
   };
 
   const renderTitle = (): JSX.Element => {
