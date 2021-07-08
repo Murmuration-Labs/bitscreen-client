@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -16,6 +16,7 @@ import {
   mapVisibilityString,
   Visibility,
   VisibilityString,
+  ViewTypes,
 } from "./Interfaces";
 import "./Filters.css";
 import CidItemRender from "./CidItemRenderer";
@@ -30,6 +31,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { toast } from "react-toastify";
 import { serverUri } from "../../config";
+import { filter } from "lodash";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -45,15 +47,20 @@ function FilterPage(props) {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [initialFilterList, setInitialFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
+  const [notesChanged, setNotesChanged] = useState<boolean>(false);
 
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
-  const currentUrl = useLocation().pathname;
 
+  const mountedRef = useRef(true);
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
       ApiService.getFilters().then((filterLists: FilterList[]) => {
+        if (!mountedRef.current) return;
         filterLists = filterLists.filter((fl: FilterList) => fl._id == id);
         if (filterLists.length === 0) {
           setInvalidFilterId(true);
@@ -61,6 +68,7 @@ function FilterPage(props) {
         }
 
         setFilterList(filterLists[0]);
+        setInitialFilterList({ ...filterLists[0] });
         setCidItems(
           filterLists[0].cids
             ? filterLists[0].cids.map((cid: string, index: number) => {
@@ -84,7 +92,20 @@ function FilterPage(props) {
 
   useEffect(() => {
     void initFilter(props.match.params.id as number);
+
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
+
+  useEffect(() => {
+    if (
+      filterList.notes === initialFilterList.notes ||
+      (filterList.notes === "" && !initialFilterList.notes)
+    ) {
+      setNotesChanged(false);
+    }
+  }, [filterList]);
 
   const saveFilter = (fl?: FilterList) => {
     if (!fl) {
@@ -290,16 +311,18 @@ function FilterPage(props) {
 
   const onNewCidsBatch = (cidsBatch): void => {
     setNotice("");
-    cidsBatch.forEach((element: string) => {
+    const newCids: Array<CidItem> = [];
+    cidsBatch.forEach((element: string, index: number) => {
       const item = {
         cid: element,
         edit: true,
-        id: cidItems.length,
+        id: index,
         rerender: true,
         isChecked: false,
       };
-      cidItems.push(item);
+      newCids.push(item);
     });
+    setCidItems([...cidItems, ...newCids]);
     saveBatchItemCids();
     const cids = filterList.cids.concat(cidsBatch);
     setFilterList({ ...filterList, cids });
@@ -433,12 +456,23 @@ function FilterPage(props) {
     updateIsAnyCidSelected(newCidItems);
   };
 
+  const checkViewType = (): ViewTypes => {
+    if (isEdit && filterList.origin) {
+      return ViewTypes.Imported;
+    }
+
+    if (isEdit && !filterList.origin) {
+      return ViewTypes.Edit;
+    }
+
+    return ViewTypes.View;
+  };
+
   const renderTitle = (): JSX.Element => {
     if (filterList.origin) {
       return <h2>View filter list</h2>;
     }
-
-    if (currentUrl.includes("edit")) {
+    if (isEdit) {
       return <h2>Edit filter list</h2>;
     }
 
@@ -483,7 +517,7 @@ function FilterPage(props) {
                 notes: ev.target.value,
               });
 
-              setNotice("Notes successfully saved");
+              setNotesChanged(true);
             }}
             as="textarea"
             placeholder="Notes"
@@ -505,7 +539,7 @@ function FilterPage(props) {
   }
 
   const renderDeleteButton = (props: FilterList): JSX.Element => {
-    if (currentUrl.includes("new") || props.origin) {
+    if (!isEdit) {
       return <></>;
     }
 
@@ -525,23 +559,14 @@ function FilterPage(props) {
   };
 
   const renderSaveAndCancelButtons = (props: FilterList): JSX.Element => {
-    if (props.origin) {
-      return (
-        <Col>
-          <Button
-            variant="primary"
-            style={{ marginBottom: 5 }}
-            onClick={cancel}
-          >
-            Go Back
-          </Button>
-        </Col>
-      );
-    }
-
     return (
       <Col>
-        <Button variant="primary" style={{ marginBottom: 5 }} onClick={save}>
+        <Button
+          variant="primary"
+          style={{ marginBottom: 5 }}
+          disabled={checkViewType() === ViewTypes.Imported && !notesChanged}
+          onClick={save}
+        >
           Save
         </Button>
         <Button
@@ -566,7 +591,7 @@ function FilterPage(props) {
             </Row>
             <Row>
               <Col>
-                <Form>
+                <div>
                   <Form.Row>
                     <Col>
                       <Form.Control
@@ -660,78 +685,85 @@ function FilterPage(props) {
                   </Form.Row>
                   {renderOrigin()}
                   {renderNotes()}
-                  <Form.Row>
-                    <Col>
-                      <Button
-                        variant="primary"
-                        style={{ marginBottom: 5 }}
-                        onClick={onNewCid}
-                        disabled={!!filterList.origin}
-                      >
-                        + new CID
-                      </Button>
-                      <Button
-                        variant="primary"
-                        style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={() => {
-                          setAddCidBatchModal(true);
-                        }}
-                        disabled={!!filterList.origin}
-                      >
-                        + Add CIDs batch
-                      </Button>
-                      <Button
-                        variant="primary"
-                        style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={handleBulkEditCids}
-                        disabled={!isAnyCidSelected}
-                      >
-                        Edit selected CIDs
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={() => {
-                          setShowConfirmBulkDelete(true);
-                        }}
-                        disabled={!isAnyCidSelected}
-                      >
-                        Delete selected CIDs
-                      </Button>
-                      <Button
-                        variant="warning"
-                        style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={handleBulkMoveCids}
-                        disabled={!isAnyCidSelected}
-                      >
-                        Move selected CIDs
-                      </Button>
-                      <ListGroup style={{ width: "100%" }}>
-                        {cidItems
-                          .filter((item: CidItem) => item.rerender)
-                          .map((item: CidItem, index: number) => (
-                            <CidItemRender
-                              // Each child in a list should have a unique "key" prop
-                              key={item.id.toString()}
-                              cidItem={item}
-                              saveItem={saveItem}
-                              deleteItem={deleteItem}
-                              changeCidValue={changeCidValue}
-                              cancelEdit={cancelEdit}
-                              updateCidItem={updateCidItem}
-                              beginMoveToDifferentFilter={
-                                beginMoveToDifferentFilter
-                              }
-                              filterList={filterList}
-                              index={index}
-                              isOverrideFilter={filterList.override}
-                              isHashedCid={!!filterList.origin}
-                            />
-                          ))}
-                      </ListGroup>
-                    </Col>
-                  </Form.Row>
-                </Form>
+                  {checkViewType() !== ViewTypes.Imported && (
+                    <Form.Row>
+                      <Col>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5 }}
+                          onClick={onNewCid}
+                          disabled={!!filterList.origin}
+                        >
+                          + new CID
+                        </Button>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={() => {
+                            setAddCidBatchModal(true);
+                          }}
+                          disabled={!!filterList.origin}
+                        >
+                          + Add CIDs batch
+                        </Button>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={handleBulkEditCids}
+                          disabled={!isAnyCidSelected}
+                        >
+                          Edit selected CIDs
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={() => {
+                            setShowConfirmBulkDelete(true);
+                          }}
+                          disabled={!isAnyCidSelected}
+                        >
+                          Delete selected CIDs
+                        </Button>
+                        {checkViewType() === ViewTypes.Edit && (
+                          <Button
+                            variant="warning"
+                            style={{ marginBottom: 5, marginLeft: 5 }}
+                            onClick={handleBulkMoveCids}
+                            disabled={!isAnyCidSelected}
+                          >
+                            Move selected CIDs
+                          </Button>
+                        )}
+                        <ListGroup style={{ width: "100%" }}>
+                          {cidItems
+                            .filter((item: CidItem) => item.rerender)
+                            .map((item: CidItem, index: number) => {
+                              return (
+                                <CidItemRender
+                                  // Each child in a list should have a unique "key" prop
+                                  key={item.id.toString()}
+                                  cidItem={item}
+                                  isEdit={isEdit}
+                                  saveItem={saveItem}
+                                  deleteItem={deleteItem}
+                                  changeCidValue={changeCidValue}
+                                  cancelEdit={cancelEdit}
+                                  updateCidItem={updateCidItem}
+                                  beginMoveToDifferentFilter={
+                                    beginMoveToDifferentFilter
+                                  }
+                                  filterList={filterList}
+                                  index={index}
+                                  isOverrideFilter={filterList.override}
+                                  isHashedCid={!!filterList.origin}
+                                />
+                              );
+                            })}
+                        </ListGroup>
+                      </Col>
+                    </Form.Row>
+                  )}
+                </div>
               </Col>
             </Row>
             <Row>{renderSaveAndCancelButtons(filterList)}</Row>

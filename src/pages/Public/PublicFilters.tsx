@@ -249,7 +249,7 @@ export default function PublicFilters() {
         count={dataCount}
         rowsPerPage={rowsPerPage}
         page={page}
-        onChangePage={handleChangePage}
+        onPageChange={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
 

@@ -5,6 +5,12 @@ export const VisibilityString: string[] = [
   "ThirdParty",
 ];
 
+export enum ViewTypes {
+  View,
+  Edit,
+  Imported,
+}
+
 export enum Visibility {
   None,
   Private,
@@ -47,6 +53,7 @@ export interface CidItemProps {
   index: number;
   isOverrideFilter: boolean;
   isHashedCid: boolean;
+  isEdit: boolean;
 }
 
 export interface MoveCIDModalProps {
