@@ -51,7 +51,7 @@ export default function AddCidBatchModal(
       <Modal.Body>
         <Row>
           <Col>
-            <Form>
+            <div>
               <Form.Row>
                 <Col>
                   <Form.Control
@@ -68,7 +68,7 @@ export default function AddCidBatchModal(
                   {renderCidsInputError()}
                 </Col>
               </Form.Row>
-            </Form>
+            </div>
           </Col>
         </Row>
       </Modal.Body>

@@ -32,6 +32,7 @@ export default class CidItemRender extends React.Component<
     isOverrideFilter: boolean;
     overrideCid: boolean;
     localOverrideCid: boolean;
+    isEdit: boolean;
   }
 > {
   constructor(props: CidItemProps) {
@@ -45,6 +46,7 @@ export default class CidItemRender extends React.Component<
         : true,
       overrideCid: false,
       localOverrideCid: false,
+      isEdit: this.props.isEdit,
     };
 
     if (this.props.isOverrideFilter) {
@@ -211,14 +213,16 @@ export default class CidItemRender extends React.Component<
             </Button>
           </Col>
           <Col sm={3} md={3} lg={3}>
-            <Button
-              variant="warning"
-              className="k-button"
-              style={{ minWidth: 74 }}
-              onClick={this.handleMovePress}
-            >
-              Move
-            </Button>
+            {this.state.isEdit && (
+              <Button
+                variant="warning"
+                className="k-button"
+                style={{ minWidth: 74 }}
+                onClick={this.handleMovePress}
+              >
+                Move
+              </Button>
+            )}
           </Col>
         </Row>
       </>
