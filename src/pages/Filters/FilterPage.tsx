@@ -346,6 +346,7 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     updateIsAnyCidSelected(items);
+    toast.info("Don't forget to press Save to save the changes.");
   };
 
   const prepareModalForDeleteItems = (itemsToDelete: CidItem[]) => {
