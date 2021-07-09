@@ -273,13 +273,15 @@ function Filters(): JSX.Element {
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    <Link
-                      to="#"
-                      onClick={() => clipboardCopy(filterList["_cryptId"])}
-                      className="double-space-left"
-                    >
-                      <FontAwesomeIcon icon={faShare as IconProp} />
-                    </Link>
+                    {!filterList.origin && (
+                      <Link
+                        to="#"
+                        onClick={() => clipboardCopy(filterList["_cryptId"])}
+                        className="double-space-left"
+                      >
+                        <FontAwesomeIcon icon={faShare as IconProp} />
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}
