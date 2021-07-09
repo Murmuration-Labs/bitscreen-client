@@ -47,6 +47,8 @@ function FilterPage(props) {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [moveToFilterList, setMoveToFilterList] =
+    useState<FilterList | undefined>(undefined);
   const [initialFilterList, setInitialFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
@@ -121,7 +123,11 @@ function FilterPage(props) {
   const save = (): void => {
     if (isEdit) {
       setLoaded(true);
-      ApiService.updateFilter(filterList)
+      const filtersToUpdate = [filterList];
+      if (moveToFilterList) {
+        filtersToUpdate.push(moveToFilterList);
+      }
+      ApiService.updateFilter(filtersToUpdate)
         .then((res) => {
           history.push(`/filters`);
           toast.success("Filter list updated successfully");
@@ -449,7 +455,7 @@ function FilterPage(props) {
     selectedFilter.cids.push(...cids);
     filterList.cids = filterList.cids.filter((x) => !cids.includes(x));
 
-    await ApiService.updateFilter([selectedFilter, filterList]);
+    setMoveToFilterList(selectedFilter);
 
     const ids = items.map((item: CidItem) => {
       return item.id;
@@ -459,6 +465,7 @@ function FilterPage(props) {
     );
     setCidItems(newCidItems);
     updateIsAnyCidSelected(newCidItems);
+    toast.info("Don't forget to press Save to save the changes.");
   };
 
   const checkViewType = (): ViewTypes => {
