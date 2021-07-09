@@ -642,14 +642,16 @@ function FilterPage(props) {
                       </Form.Group>
                     </Col>
                     <Col>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          clipboardCopy(filterList["_cryptId"]);
-                        }}
-                      >
-                        Direct share
-                      </Button>
+                      {checkViewType() !== ViewTypes.Imported && (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            clipboardCopy(filterList["_cryptId"]);
+                          }}
+                        >
+                          Direct share
+                        </Button>
+                      )}
                     </Col>
                   </Form.Row>
                   <Form.Row
