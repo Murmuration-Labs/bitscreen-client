@@ -31,7 +31,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { toast } from "react-toastify";
 import { serverUri } from "../../config";
-import { filter } from "lodash";
+import _ from "lodash";
 
 function FilterPage(props) {
   const [cidItems, setCidItems] = useState<CidItem[]>([]);
@@ -52,7 +52,7 @@ function FilterPage(props) {
   const [initialFilterList, setInitialFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-  const [notesChanged, setNotesChanged] = useState<boolean>(false);
+  const [filterListChanged, setFilterListChanged] = useState<boolean>(false);
 
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
@@ -104,12 +104,15 @@ function FilterPage(props) {
 
   useEffect(() => {
     if (
-      filterList.notes === initialFilterList.notes ||
-      (filterList.notes === "" && !initialFilterList.notes)
+      _.isEqual(filterList, initialFilterList) &&
+      initialFilterList.enabled === filterEnabled &&
+      initialFilterList.override === filterOverride
     ) {
-      setNotesChanged(false);
+      setFilterListChanged(false);
+    } else {
+      setFilterListChanged(true);
     }
-  }, [filterList]);
+  }, [filterList, filterEnabled, filterOverride]);
 
   const saveFilter = (fl?: FilterList) => {
     if (!fl) {
@@ -528,8 +531,6 @@ function FilterPage(props) {
                 ...filterList,
                 notes: ev.target.value,
               });
-
-              setNotesChanged(true);
             }}
             as="textarea"
             placeholder="Notes"
@@ -576,7 +577,9 @@ function FilterPage(props) {
         <Button
           variant="primary"
           style={{ marginBottom: 5 }}
-          disabled={checkViewType() === ViewTypes.Imported && !notesChanged}
+          disabled={
+            checkViewType() === ViewTypes.Imported && !filterListChanged
+          }
           onClick={save}
         >
           Save
