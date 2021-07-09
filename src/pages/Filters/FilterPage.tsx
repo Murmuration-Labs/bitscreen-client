@@ -555,7 +555,7 @@ function FilterPage(props) {
           onClick={() => {
             confirmDelete();
           }}
-          style={{ float: "right" }}
+          style={{ float: "right", marginRight: -30 }}
         >
           Delete
         </Button>
