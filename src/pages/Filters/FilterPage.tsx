@@ -52,6 +52,7 @@ function FilterPage(props) {
   );
   const [notesChanged, setNotesChanged] = useState<boolean>(false);
 
+  const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
 
@@ -83,6 +84,7 @@ function FilterPage(props) {
             : []
         );
         setLoaded(true);
+        setFilterEnabled(filterLists[0].enabled);
         setFilterOverride(filterLists[0].override);
       });
     } else {
@@ -421,6 +423,11 @@ function FilterPage(props) {
     toast.success("Shared link was copied succesfully");
   };
 
+  const toggleFilterEnabled = () => {
+    filterList.enabled = !filterList.enabled;
+    setFilterEnabled(filterList.enabled);
+  };
+
   const toggleFilterOverride = () => {
     filterList.override = !filterList.override;
     setFilterOverride(filterList.override);
@@ -655,6 +662,25 @@ function FilterPage(props) {
                     style={{
                       marginLeft: 2,
                       marginTop: -20,
+                      marginBottom: 20,
+                    }}
+                    onClick={() => toggleFilterEnabled()}
+                  >
+                    <FormCheck readOnly type="switch" checked={filterEnabled} />
+                    <Form.Label
+                      style={{
+                        marginRight: 10,
+                        marginTop: 2,
+                      }}
+                      className={"text-dim"}
+                    >
+                      Enabled?
+                    </Form.Label>
+                  </Form.Row>
+                  <Form.Row
+                    style={{
+                      marginLeft: 2,
+                      marginTop: -35,
                       marginBottom: 20,
                     }}
                     onClick={() => toggleFilterOverride()}
