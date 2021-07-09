@@ -6,7 +6,7 @@ export const VisibilityString: string[] = [
 ];
 
 export enum ViewTypes {
-  View,
+  New,
   Edit,
   Imported,
 }

@@ -470,7 +470,7 @@ function FilterPage(props) {
       return ViewTypes.Edit;
     }
 
-    return ViewTypes.View;
+    return ViewTypes.New;
   };
 
   const renderTitle = (): JSX.Element => {
