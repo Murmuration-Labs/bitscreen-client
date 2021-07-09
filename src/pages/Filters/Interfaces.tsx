@@ -44,7 +44,7 @@ export interface CidItem {
 export interface CidItemProps {
   cidItem: CidItem;
   saveItem: (i: CidItem) => void;
-  deleteItem: (i: CidItem) => void;
+  prepareModalForDeleteItems: (i: CidItem[]) => void;
   changeCidValue: (i: CidItem) => void;
   cancelEdit: (i: CidItem, index: number) => void;
   updateCidItem: (i: CidItem) => void;

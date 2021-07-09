@@ -91,7 +91,7 @@ export default class CidItemRender extends React.Component<
   };
 
   handleDelete = (): void => {
-    this.props.deleteItem(this.state.item);
+    this.props.prepareModalForDeleteItems([this.state.item]);
   };
 
   handleMovePress = (): void => {

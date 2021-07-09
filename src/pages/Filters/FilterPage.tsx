@@ -328,8 +328,15 @@ function FilterPage(props) {
     setFilterList({ ...filterList, cids });
   };
 
-  const deleteItem = (deleteItem: CidItem) => {
-    const items = cidItems.filter((item: CidItem) => item.id !== deleteItem.id);
+  const [showDeleteItemsModal, setShowDeleteItemsModal] =
+    useState<boolean>(false);
+  const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
+
+  const deleteItems = () => {
+    const idsToDelete = deleteCidItems.map((i: CidItem) => i.id);
+    const items = cidItems.filter(
+      (item: CidItem) => !idsToDelete.includes(item.id)
+    );
     const fl = {
       ...filterList,
       cids: items.map((i: CidItem) => i.cid),
@@ -337,7 +344,11 @@ function FilterPage(props) {
     saveFilter(fl);
     setCidItems(items);
     updateIsAnyCidSelected(items);
-    setNotice("CIDs successfully saved.");
+  };
+
+  const prepareModalForDeleteItems = (itemsToDelete: CidItem[]) => {
+    setDeleteCidItems(itemsToDelete);
+    setShowDeleteItemsModal(true);
   };
 
   const [showMoveModal, setShowMoveModal] = useState<boolean>(false);
@@ -366,17 +377,6 @@ function FilterPage(props) {
     updateIsAnyCidSelected(items);
   };
 
-  const handleBulkDeleteCids = (): void => {
-    const items = cidItems.filter((item: CidItem) => !item.isChecked);
-    const fl = {
-      ...filterList,
-      cids: items.map((i: CidItem) => i.cid),
-    };
-    saveFilter(fl);
-    setCidItems(items);
-    updateIsAnyCidSelected(items);
-  };
-
   const handleBulkMoveCids = (): void => {
     const selectedCidItems = getSelectedCidItems(cidItems);
     beginMoveToDifferentFilter(selectedCidItems);
@@ -388,9 +388,6 @@ function FilterPage(props) {
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-
-  const [showConfirmBulkDelete, setShowConfirmBulkDelete] =
-    useState<boolean>(false);
 
   const confirmDelete = (): void => {
     setShowConfirmDelete(true);
@@ -720,7 +717,10 @@ function FilterPage(props) {
                           variant="secondary"
                           style={{ marginBottom: 5, marginLeft: 5 }}
                           onClick={() => {
-                            setShowConfirmBulkDelete(true);
+                            const items = cidItems.filter(
+                              (item: CidItem) => item.isChecked
+                            );
+                            prepareModalForDeleteItems(items);
                           }}
                           disabled={!isAnyCidSelected}
                         >
@@ -747,7 +747,9 @@ function FilterPage(props) {
                                   cidItem={item}
                                   isEdit={isEdit}
                                   saveItem={saveItem}
-                                  deleteItem={deleteItem}
+                                  prepareModalForDeleteItems={
+                                    prepareModalForDeleteItems
+                                  }
                                   changeCidValue={changeCidValue}
                                   cancelEdit={cancelEdit}
                                   updateCidItem={updateCidItem}
@@ -800,12 +802,14 @@ function FilterPage(props) {
               }}
             />
             <ConfirmModal
-              show={showConfirmBulkDelete}
-              title="Confirm bulk delete CIDs"
+              show={showDeleteItemsModal}
+              title="Confirm removal of selected CIDs"
               message="Are you sure you want to delete the selected items?"
-              callback={() => handleBulkDeleteCids()}
+              callback={() => {
+                deleteItems();
+              }}
               closeCallback={() => {
-                setShowConfirmBulkDelete(false);
+                setShowDeleteItemsModal(false);
               }}
             />
             <ConfirmModal
