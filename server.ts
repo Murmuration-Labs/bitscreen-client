@@ -2,8 +2,8 @@ import { Request, Response, Application } from "express";
 import { mkdirSync, writeFile, openSync, readFileSync, existsSync } from "fs";
 
 import * as db from "./db";
-import complaintsRoutes from './endpoints/complaints';
-import {SortingCriteria} from "./db";
+import complaintsRoutes from "./endpoints/complaints";
+import { SortingCriteria } from "./db";
 
 const path = require("path");
 const bodyParser = require("body-parser");
@@ -122,23 +122,23 @@ app.get("/search-filters", (req: Request, res: Response) => {
 app.post("/filters", (req: Request, res: Response) => {
   db.insert(databaseName, "bitscreen", req.body)
     .then(async (data) => {
-        if (!req.body.name) {
-            const updateObj = {
-                _id: data,
-                name: `New filter (${data})`,
-            } as any;
+      if (!req.body.name) {
+        const updateObj: any = {
+          _id: data,
+          name: `New filter (${data})`,
+        };
 
-            if (!req.body.cids) {
-                updateObj.cids = [];
-            }
-
-            await db.update(databaseName, "bitscreen", updateObj);
+        if (!req.body.cids) {
+          updateObj.cids = [];
         }
 
-        res.send({
-            success: true,
-            _id: data,
-        })
+        await db.update(databaseName, "bitscreen", updateObj);
+      }
+
+      res.send({
+        success: true,
+        _id: data,
+      });
     })
     .catch((err) =>
       res.send({
@@ -234,107 +234,137 @@ app.get("/filters/shared/:_cryptId/version", (req: Request, res: Response) => {
 });
 
 app.get("/filters/public", (req: Request, res: Response) => {
-    const itemsPerPage = parseInt(req.query.per_page as any);
-    const page = parseInt(req.query.page as any);
-    const sorting = (JSON.parse(req.query.sort as any) || {}) as any;
-    const searchQuery = req.query.q as string;
+  const itemsPerPage = parseInt(req.query.per_page as any);
+  const page = parseInt(req.query.page as any);
+  const sorting = (JSON.parse(req.query.sort as any) || {}) as any;
+  const searchQuery = req.query.q as string;
 
-    const computedSorting: SortingCriteria[] = [];
+  const computedSorting: SortingCriteria[] = [];
 
-    Object.keys(sorting).map(key => {
-        computedSorting.push({
-            field: key,
-            direction: sorting[key],
-        });
+  Object.keys(sorting).map((key) => {
+    computedSorting.push({
+      field: key,
+      direction: sorting[key],
     });
+  });
 
-    db.advancedFind(databaseName, "bitscreen", page, itemsPerPage, computedSorting, [{
+  db.advancedFind(
+    databaseName,
+    "bitscreen",
+    page,
+    itemsPerPage,
+    computedSorting,
+    [
+      {
         field: "visibility",
         value: "2",
-    }, {
+      },
+      {
         field: "override",
         value: "",
-    }], searchQuery, [
-        "name",
-        "description",
-        "cids",
-        "notes",
-    ])
-        .then(data => {
-            console.log('data length', data.length);
-            res.send(data.map(x => {
-                let y = JSON.parse(JSON.stringify(x));
+      },
+    ],
+    searchQuery,
+    ["name", "description", "cids", "notes"]
+  ).then((data) => {
+    console.log("data length", data.length);
+    res.send(
+      data.map((x) => {
+        let y = JSON.parse(JSON.stringify(x));
 
-                if (y.cids) {
-                    y.cids = y.cids.map(getAddressHash);
-                }
+        if (y.cids) {
+          y.cids = y.cids.map(getAddressHash);
+        }
 
-                return y;
-            }));
-        });
-
+        return y;
+      })
+    );
+  });
 });
 
 app.get("/filters/public/count", (req: Request, res: Response) => {
-    db.findBy(databaseName, "bitscreen", [{
-        field: "visibility",
-        value: "2",
-    }, {
-        field: "override",
-        value: "",
-    }])
-        .then(async data => {
-            const filteredData = await db.filterInColumns(data, req.query.q as string, [
-                "name",
-                "description",
-                "cids",
-                "notes",
-            ]);
+  db.findBy(databaseName, "bitscreen", [
+    {
+      field: "visibility",
+      value: "2",
+    },
+    {
+      field: "override",
+      value: "",
+    },
+  ]).then(async (data) => {
+    const filteredData = await db.filterInColumns(data, req.query.q as string, [
+      "name",
+      "description",
+      "cids",
+      "notes",
+    ]);
 
-            res.send({
-                count: filteredData.length,
-            });
-        });
+    res.send({
+      count: filteredData.length,
+    });
+  });
 });
 
-app.get("/cid/is-override-remote/:_filterId/:cid", (req: Request, res: Response) => {
-    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid, req.params._filterId)
-        .then((data) => {
-            res.status(200).send(data);
-        })
-        .catch((err) => {
-            console.log("Version error log", err);
-            res.status(404).send({});
-        })
-});
+app.get(
+  "/cid/is-override-remote/:_filterId/:cid",
+  (req: Request, res: Response) => {
+    db.checkOverriddenCid(
+      databaseName,
+      "bitscreen",
+      req.params.cid,
+      req.params._filterId
+    )
+      .then((data) => {
+        res.status(200).send(data);
+      })
+      .catch((err) => {
+        console.log("Version error log", err);
+        res.status(404).send({});
+      });
+  }
+);
 
-app.get("/cid/is-override-local/:_filterId/:cid", (req: Request, res: Response) => {
-    db.checkOverriddenCid(databaseName, "bitscreen", req.params.cid, req.params._filterId,true)
-        .then((data) => {
-            res.status(200).send(data);
-        })
-        .catch((err) => {
-            console.log("Version error log", err);
-            res.status(404).send({});
-        })
-});
+app.get(
+  "/cid/is-override-local/:_filterId/:cid",
+  (req: Request, res: Response) => {
+    db.checkOverriddenCid(
+      databaseName,
+      "bitscreen",
+      req.params.cid,
+      req.params._filterId,
+      true
+    )
+      .then((data) => {
+        res.status(200).send(data);
+      })
+      .catch((err) => {
+        console.log("Version error log", err);
+        res.status(404).send({});
+      });
+  }
+);
 
 app.post("/cids/override/:_filterId", (req: Request, res: Response) => {
-    const cids = req.body || [];
+  const cids = req.body || [];
 
-    Promise.all(cids.map(x =>
-        db.checkOverriddenCid(
-            databaseName,
-            "bitscreen",
-            x,
-            req.params._filterId,
-            true
-        )
-    )).then(results => {
-        res.send(cids.filter((item, index) => {
-            return !!results[index];
-        }));
-    });
+  Promise.all(
+    cids.map((x) =>
+      db.checkOverriddenCid(
+        databaseName,
+        "bitscreen",
+        x,
+        req.params._filterId,
+        true
+      )
+    )
+  ).then((results) => {
+    res.send(
+      cids.filter((item, index) => {
+        return !!results[index];
+      })
+    );
+  });
 });
 
 app.get("/provider_info", (req: Request, res: Response) => {

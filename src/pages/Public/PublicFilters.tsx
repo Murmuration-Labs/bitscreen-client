@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./PublicFilters.css";
-import { Container, Row, Button } from "react-bootstrap";
 import {
-  TableContainer,
+  Paper,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
+  TableRow,
   TableSortLabel,
-  Paper,
 } from "@material-ui/core";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import CancelIcon from "@material-ui/icons/Cancel";
-import { Data, HeadCell } from "./Interfaces";
-import ApiService from "../../services/ApiService";
-import InputGroup from "react-bootstrap/InputGroup";
+import React, { useEffect, useState } from "react";
+import { Button, Container } from "react-bootstrap";
 import FormControl from "react-bootstrap/FormControl";
-import ImportFilterModal from "../Filters/ImportFilterModal";
+import InputGroup from "react-bootstrap/InputGroup";
 import { remoteMarketplaceUri } from "../../config";
+import ApiService from "../../services/ApiService";
+import ImportFilterModal from "../Filters/ImportFilterModal";
+import { Data, HeadCell } from "./Interfaces";
+import "./PublicFilters.css";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -249,7 +246,7 @@ export default function PublicFilters() {
         count={dataCount}
         rowsPerPage={rowsPerPage}
         page={page}
-        onChangePage={handleChangePage}
+        onPageChange={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
 

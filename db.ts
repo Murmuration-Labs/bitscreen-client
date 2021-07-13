@@ -233,9 +233,9 @@ export const findAll = async (databaseName: string, table: string) => {
 
 export const searchInColumns = async (
   databaseName: string,
-  table: string,
-  searchTerm: string = "",
-  searchInColumns: string[] = []
+  table: string
+  // searchTerm: string = "",
+  // searchInColumns: string[] = []
 ) => {
   forceExistingTable(databaseName, table);
 
@@ -347,7 +347,10 @@ export const advancedFind = async (
     // apply exact string filtering criteria
     .filter((x: any) => {
       for (let i = 0; i < filteringCriteria.length; i++) {
-        let compareValue = dbFileData[databaseName][table].data[x._id][filteringCriteria[i].field];
+        let compareValue =
+          dbFileData[databaseName][table].data[x._id][
+            filteringCriteria[i].field
+          ];
 
         if (compareValue === undefined) compareValue = "";
 
