@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { CidItem, CidItemProps } from "./Interfaces";
 import {
   Button,
@@ -23,121 +23,108 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 //     return true;
 // }
 
-export default class CidItemRender extends React.Component<
-  CidItemProps,
-  {
-    item: CidItem;
-    cidInputRef: RefObject<HTMLInputElement>;
-    loaded: boolean;
-    isOverrideFilter: boolean;
-    overrideCid: boolean;
-    localOverrideCid: boolean;
-    isEdit: boolean;
-  }
-> {
-  constructor(props: CidItemProps) {
-    super(props);
-    this.state = {
-      item: this.props.cidItem,
-      cidInputRef: React.createRef<HTMLInputElement>(),
-      loaded: this.props.isOverrideFilter ? !this.props.isOverrideFilter : true,
-      isOverrideFilter: this.props.isOverrideFilter
-        ? this.props.isOverrideFilter
-        : true,
-      overrideCid: false,
-      localOverrideCid: false,
-      isEdit: this.props.isEdit,
-    };
+export default function CidItemRender(props: CidItemProps) {
+  const [cidItem, setCidItem] = useState<CidItem>(props.cidItem);
+  const [cidInputRef, setCidInputRef] = useState<RefObject<HTMLInputElement>>(
+    React.createRef<HTMLInputElement>()
+  );
+  const [loaded, setLoaded] = useState<boolean>(
+    props.isOverrideFilter ? !props.isOverrideFilter : true
+  );
+  const [isOverrideFilter, setIsOverrideFilter] = useState<boolean>(
+    props.isOverrideFilter ? props.isOverrideFilter : true
+  );
+  const [overrideCid, setOverrideCid] = useState<boolean>(false);
+  const [localOverrideCid, setLocalOverrideCid] = useState<boolean>(false);
+  const [isEdit, setIsEdit] = useState<boolean>(props.isEdit);
 
-    if (this.props.isOverrideFilter) {
-      this.checkIfIsOverrideExists();
+  const checkIfIsOverrideExists = (): void => {
+    Promise.all([
+      ApiService.getCidOverride(props.cidItem.cid, props.filterList),
+      ApiService.getCidOverrideLocal(props.cidItem.cid, props.filterList),
+    ])
+      .then((res) => {
+        setOverrideCid(!!res[0]);
+        setLocalOverrideCid(!!res[1]);
+        setLoaded(true);
+      })
+      .catch((err) => {
+        setLoaded(true);
+      });
+  };
+
+  useEffect(() => {
+    if (props.isOverrideFilter) {
+      checkIfIsOverrideExists();
     }
-  }
+  });
 
-  static updateItemField(field: string, value: string, item: CidItem): CidItem {
+  const updateItemField = (
+    field: string,
+    value: string,
+    item: CidItem
+  ): CidItem => {
     if (field === "cid") {
       item.cid = value;
     }
     return item;
-  }
-  enterEdit = (): void => {
-    if (this.state.item != null) {
-      this.state.item.edit = true;
-      this.state.item.isChecked = false;
-    }
-    this.props.updateCidItem(this.state.item);
   };
-  handleSave = (e: any): void => {
+
+  const enterEdit = (): void => {
+    if (cidItem != null) {
+      cidItem.edit = true;
+      cidItem.isChecked = false;
+    }
+    props.updateCidItem(cidItem);
+  };
+
+  const handleSave = (e: any): void => {
     // e.preventDefault();
-    const ref = this.state.cidInputRef.current;
+    const ref = cidInputRef.current;
     const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...this.state.item };
+    let updatedItem: CidItem = { ...cidItem };
     if (value !== null) {
-      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
-      this.setState({ item: { ...updatedItem, edit: false } });
-      this.props.saveItem(updatedItem);
+      updatedItem = updateItemField("cid", value, updatedItem);
+      setCidItem({ ...updatedItem, edit: false });
+      props.saveItem(updatedItem);
     }
   };
 
-  hangleChangeCidValue = (e: any): void => {
-    const ref = this.state.cidInputRef.current;
+  const hangleChangeCidValue = (e: any): void => {
+    const ref = cidInputRef.current;
     const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...this.state.item };
+    let updatedItem: CidItem = { ...cidItem };
     if (value !== null) {
-      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
-      // this.setState({ item: { ...updatedItem, edit: false } });
-      this.props.changeCidValue(updatedItem);
+      updatedItem = updateItemField("cid", value, updatedItem);
+      // setCidItem({ ...updatedItem, edit: false });
+      props.changeCidValue(updatedItem);
     }
   };
 
-  handleDelete = (): void => {
-    this.props.prepareModalForDeleteItems([this.state.item]);
+  const handleDelete = (): void => {
+    props.prepareModalForDeleteItems([cidItem]);
   };
 
-  handleMovePress = (): void => {
-    this.props.beginMoveToDifferentFilter([this.state.item]);
+  const handleMovePress = (): void => {
+    props.beginMoveToDifferentFilter([cidItem]);
   };
 
-  handleCancelEdit = (): void => {
-    this.props.cancelEdit(this.state.item, this.props.index);
+  const handleCancelEdit = (): void => {
+    props.cancelEdit(cidItem, props.index);
   };
 
-  handleSelectedCid = (): void => {
-    this.state.item.isChecked = !this.state.item.isChecked;
-    this.props.updateCidItem(this.state.item);
+  const handleSelectedCid = (): void => {
+    cidItem.isChecked = !cidItem.isChecked;
+    props.updateCidItem(cidItem);
   };
 
-  checkIfIsOverrideExists = (): void => {
-    Promise.all([
-      ApiService.getCidOverride(this.props.cidItem.cid, this.props.filterList),
-      ApiService.getCidOverrideLocal(
-        this.props.cidItem.cid,
-        this.props.filterList
-      ),
-    ])
-      .then((res) => {
-        this.setState({
-          ...this.state,
-          overrideCid: !!res[0],
-          localOverrideCid: !!res[1],
-          loaded: true,
-        });
-      })
-      .catch((err) => {
-        this.setState({
-          ...this.state,
-          loaded: true,
-        });
-      });
-  };
-
-  renderOverride(local = false): JSX.Element {
-    if (!this.props.isOverrideFilter) {
+  const renderOverride = (local = false): JSX.Element => {
+    if (!props.isOverrideFilter) {
       // filter is not overrideing
       return <></>;
     }
-    if (this.state.loaded) {
-      if (!local && this.state.overrideCid) {
+    if (loaded) {
+      if (!local && overrideCid) {
         // override
         return (
           <>
@@ -156,7 +143,7 @@ export default class CidItemRender extends React.Component<
         );
       }
 
-      if (local && this.state.localOverrideCid) {
+      if (local && localOverrideCid) {
         return (
           <>
             <OverlayTrigger
@@ -183,9 +170,10 @@ export default class CidItemRender extends React.Component<
         <PuffLoader color={"#28a745"} size={20} />
       </>
     );
-  }
-  renderCidActions(): JSX.Element {
-    if (this.props.isHashedCid) {
+  };
+
+  const renderCidActions = (): JSX.Element => {
+    if (props.isHashedCid) {
       return <></>;
     }
 
@@ -197,7 +185,7 @@ export default class CidItemRender extends React.Component<
               variant="primary"
               className="k-button"
               style={{ minWidth: 74 }}
-              onClick={this.enterEdit}
+              onClick={enterEdit}
             >
               Edit
             </Button>
@@ -207,18 +195,18 @@ export default class CidItemRender extends React.Component<
               variant="secondary"
               className="k-button"
               style={{ minWidth: 74 }}
-              onClick={this.handleDelete}
+              onClick={handleDelete}
             >
               Delete
             </Button>
           </Col>
           <Col sm={3} md={3} lg={3}>
-            {this.state.isEdit && (
+            {isEdit && (
               <Button
                 variant="warning"
                 className="k-button"
                 style={{ minWidth: 74 }}
-                onClick={this.handleMovePress}
+                onClick={handleMovePress}
               >
                 Move
               </Button>
@@ -227,87 +215,86 @@ export default class CidItemRender extends React.Component<
         </Row>
       </>
     );
-  }
-  render(): JSX.Element {
-    return (
-      <div key={this.state.item.cid}>
-        <ListGroup.Item>
-          {this.state.item.edit ? (
-            <Form inline>
-              <Form.Group controlId="cidItemEdit">
-                <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
-                <Form.Control
-                  ref={this.state.cidInputRef}
-                  type="text"
-                  placeholder=""
-                  defaultValue={this.state.item.cid}
-                  onChange={this.hangleChangeCidValue}
+  };
+
+  return (
+    <div key={cidItem.cid}>
+      <ListGroup.Item>
+        {cidItem.edit ? (
+          <Form inline>
+            <Form.Group controlId="cidItemEdit">
+              <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
+              <Form.Control
+                ref={cidInputRef}
+                type="text"
+                placeholder=""
+                defaultValue={cidItem.cid}
+                onChange={hangleChangeCidValue}
+              />
+              <Button className="k-button" onClick={handleSave}>
+                Save
+              </Button>
+              <Button
+                className="k-button"
+                variant="secondary"
+                style={{ marginLeft: 5 }}
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+            </Form.Group>
+          </Form>
+        ) : (
+          <Container>
+            <Row>
+              <Col sm={2} md={2} lg={1}>
+                <Form.Check
+                  type="checkbox"
+                  disabled={props.isHashedCid}
+                  onChange={handleSelectedCid}
                 />
-                <Button className="k-button" onClick={this.handleSave}>
-                  Save
-                </Button>
-                <Button
-                  className="k-button"
-                  variant="secondary"
-                  style={{ marginLeft: 5 }}
-                  onClick={this.handleCancelEdit}
+              </Col>
+              <Col sm={2} md={2} lg={1}>
+                <div
+                  style={{
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  Cancel
-                </Button>
-              </Form.Group>
-            </Form>
-          ) : (
-            <Container>
-              <Row>
-                <Col sm={2} md={2} lg={1}>
-                  <Form.Check
-                    type="checkbox"
-                    disabled={this.props.isHashedCid}
-                    onChange={this.handleSelectedCid}
-                  />
-                </Col>
-                <Col sm={2} md={2} lg={1}>
-                  <div
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {this.renderOverride(true)}
-                  </div>
-                </Col>
-                <Col sm={2} md={2} lg={1}>
-                  <div
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {this.renderOverride()}
-                  </div>
-                </Col>
-                <Col sm={8} md={8} lg={4}>
-                  <Form.Label
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {FilterService.renderHashedCid(this.state.item.cid, false)}
-                  </Form.Label>
-                </Col>
-                <Col sm={12} md={12} lg={4}>
-                  {this.renderCidActions()}
-                </Col>
-              </Row>
-            </Container>
-          )}
-        </ListGroup.Item>
-      </div>
-    );
-  }
+                  {renderOverride(true)}
+                </div>
+              </Col>
+              <Col sm={2} md={2} lg={1}>
+                <div
+                  style={{
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {renderOverride()}
+                </div>
+              </Col>
+              <Col sm={8} md={8} lg={4}>
+                <Form.Label
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {FilterService.renderHashedCid(cidItem.cid, false)}
+                </Form.Label>
+              </Col>
+              <Col sm={12} md={12} lg={4}>
+                {renderCidActions()}
+              </Col>
+            </Row>
+          </Container>
+        )}
+      </ListGroup.Item>
+    </div>
+  );
 }
