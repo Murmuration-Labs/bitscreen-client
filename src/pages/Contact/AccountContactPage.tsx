@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useEffect, useState, MouseEvent } from "react";
+import React, {
+  ChangeEvent,
+  useEffect,
+  useState,
+  MouseEvent,
+  useCallback,
+} from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import PuffLoader from "react-spinners/PuffLoader";
 import { Account } from "./Interfaces";
@@ -31,17 +37,17 @@ export default function AccountContactPage(): JSX.Element {
     ContactService.emptyAccount()
   );
 
-  const fetchAccount = async (): Promise<void> => {
-    if (!loaded) {
-      const loadedAccount: Account = await ApiService.getProviderInfo();
-      setAccount(loadedAccount);
-      setLoaded(true);
-    }
-  };
-
   useEffect(() => {
-    void fetchAccount();
-  }, []);
+    if (!loaded) {
+      (async () =>
+        await ApiService.getProviderInfo()
+          .then((loadedAccount) => {
+            setAccount(loadedAccount);
+            setLoaded(true);
+          })
+          .catch((err) => console.error(err)))();
+    }
+  }, [loaded]);
 
   const handleFieldChange = (
     key: string,

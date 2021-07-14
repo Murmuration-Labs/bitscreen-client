@@ -28,19 +28,20 @@ export function mapVisibilityString(visibilityStr: string): Visibility {
 }
 
 export interface CidItem {
-  id: number;
+  id?: number;
   cid: string;
-  edit: boolean;
+  refUrl?: string;
+  edit?: boolean;
   rerender?: boolean;
 }
 
 export interface CidItemProps {
   cidItem: CidItem;
-  saveItem: (i: CidItem) => void;
-  deleteItem: (i: CidItem) => void;
-  changeCidValue: (i: CidItem) => void;
+  saveItem: (i: CidItem, idx: number) => void;
+  deleteItem: (i: CidItem, idx: number) => void;
+  changeCidValue: (i: CidItem, idx: number) => void;
   cancelEdit: (i: CidItem, index: number) => void;
-  beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
+  beginMoveToDifferentFilter: (i: CidItem, idx: number) => Promise<void>;
   filterList: FilterList;
   index: number;
   isOverrideFilter: boolean;
@@ -86,15 +87,16 @@ export interface FilterState {
 }
 
 export interface FilterList {
-  _id?: number;
+  id: number;
   name: string;
-  cids: string[];
+  cids: CidItem[];
   visibility: Visibility;
   enabled: boolean;
   override: boolean;
   origin?: string;
   isBulkSelected?: boolean;
   description?: string;
+  providerId: number;
   notes?: string;
 }
 

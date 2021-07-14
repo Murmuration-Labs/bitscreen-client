@@ -126,7 +126,7 @@ function Filters(): JSX.Element {
   };
 
   useEffect(() => {
-    setTitle(`Delete filter ${deletedFilterList._id}`);
+    setTitle(`Delete filter ${deletedFilterList.id}`);
     setMessage(
       `Are you sure you want to delete filter "${deletedFilterList.name}?"`
     );
@@ -182,7 +182,7 @@ function Filters(): JSX.Element {
             </thead>
             <tbody>
               {filterLists.map((filterList) => (
-                <tr key={`filterList-${filterList._id}`}>
+                <tr key={`filterList-${filterList.id}`}>
                   <td>
                     <Form.Check
                       type="checkbox"
@@ -195,7 +195,7 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <Link
-                      to={`/filters/edit/${filterList._id}`}
+                      to={`/filters/edit/${filterList.id}`}
                       className="double-space-left"
                     >
                       {filterList.name}
@@ -216,7 +216,7 @@ function Filters(): JSX.Element {
                         overlay={(props: OverlayInjectedProps): JSX.Element => (
                           <Tooltip id="button-tooltip" {...props}>
                             {filterList.cids.map((cid, index) => (
-                              <p key={`cid-${filterList._id}-${index}`}>
+                              <p key={`cid-${filterList.id}-${index}`}>
                                 {filterList.origin
                                   ? FilterService.renderHashedCid(cid)
                                   : cid}
@@ -261,7 +261,7 @@ function Filters(): JSX.Element {
                   </td>
                   <td style={{ textAlign: "justify" }}>
                     <Link
-                      to={`/filters/edit/${filterList._id}`}
+                      to={`/filters/edit/${filterList.id}`}
                       className="double-space-left"
                     >
                       {editOrEyeIcon(filterList)}
@@ -314,7 +314,7 @@ function Filters(): JSX.Element {
     const selected = filterLists
       .filter((x) => x.isBulkSelected)
       .map((x) => ({
-        _id: x._id,
+        id: x.id,
         enabled,
       }));
 
@@ -335,7 +335,7 @@ function Filters(): JSX.Element {
     const selected = filterLists
       .filter((x) => x.isBulkSelected)
       .map((x) => ({
-        _id: x._id,
+        id: x.id,
         enabled,
       }));
 
@@ -534,7 +534,7 @@ function Filters(): JSX.Element {
               title={title}
               message={message}
               callback={() => {
-                deleteFilter(deletedFilterList._id ? deletedFilterList._id : 0);
+                deleteFilter(deletedFilterList.id ? deletedFilterList.id : 0);
               }}
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());

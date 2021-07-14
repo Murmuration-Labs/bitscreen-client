@@ -56,7 +56,7 @@ Call in the root of the project `docker-compose up`
 
 `PUT /filters` - updates one or more filters lists
 
-`GET /search-filters?search=:search_term` - returns all filters lists that have either a partial match between `search_term` and the filter list name, or an exact match between `search_term` and one of the CIDs on the filter list
+`GET /filter/search?q=:search_term` - returns all filters lists that have either a partial match between `search_term` and the filter list name, or an exact match between `search_term` and one of the CIDs on the filter list
 
 `GET /filters/:id` - returns the filter with the matching `:id`
 

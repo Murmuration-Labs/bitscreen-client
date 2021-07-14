@@ -46,7 +46,7 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
             await props.move(props.cidItem, selectedFilter);
             props.closeCallback();
           }}
-          disabled={!selectedFilter._id}
+          disabled={!selectedFilter.id}
         >
           Ok
         </Button>

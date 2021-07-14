@@ -1,134 +1,98 @@
-import * as React from "react";
-import { CidItem, CidItemProps } from "./Interfaces";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { BaseSyntheticEvent, useState } from "react";
 import {
   Button,
   Col,
+  Container,
   Form,
   ListGroup,
-  Container,
-  Row,
   OverlayTrigger,
+  Row,
   Tooltip,
 } from "react-bootstrap";
-import { RefObject } from "react";
-import FilterService from "../../services/FilterService";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../services/ApiService";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import FilterService from "../../services/FilterService";
+import { CidItem, CidItemProps } from "./Interfaces";
 
 // function validateCid(cid: string): boolean{
 //     // :TODO: check length, check allowed characters
 //     return true;
 // }
 
-export default class CidItemRender extends React.Component<
-  CidItemProps,
-  {
-    item: CidItem;
-    cidInputRef: RefObject<HTMLInputElement>;
-    loaded: boolean;
-    isOverrideFilter: boolean;
-    overrideCid: boolean;
-    localOverrideCid: boolean;
-  }
-> {
-  constructor(props: CidItemProps) {
-    super(props);
-    this.state = {
-      item: this.props.cidItem,
-      cidInputRef: React.createRef<HTMLInputElement>(),
-      loaded: this.props.isOverrideFilter ? !this.props.isOverrideFilter : true,
-      isOverrideFilter: this.props.isOverrideFilter
-        ? this.props.isOverrideFilter
-        : true,
-      overrideCid: false,
-      localOverrideCid: false,
-    };
+const CidItemRender = (props: CidItemProps): JSX.Element => {
+  const [cidItem, setCidItem] = useState(props.cidItem);
+  const [oldCidItem, setOldCidItem] = useState(cidItem);
+  const [edit, setEdit] = useState(false);
+  const [loaded, setLoaded] = useState(
+    props.isOverrideFilter ? !props.isOverrideFilter : true
+  );
+  const [overrideCid, setOverrideCid] = useState(false);
+  const [localOverrideCid, setLocalOverrideCid] = useState(false);
 
-    if (this.props.isOverrideFilter) {
-      this.checkIfIsOverrideExists();
-    }
-  }
-
-  static updateItemField(field: string, value: string, item: CidItem): CidItem {
+  const updateItemField = (
+    field: string,
+    value: string,
+    item: CidItem
+  ): CidItem => {
     if (field === "cid") {
       item.cid = value;
     }
     return item;
-  }
-  enterEdit = (): void => {
-    if (this.state.item != null) {
-      this.setState({ item: { ...this.state.item, edit: true } });
-    }
   };
-  handleSave = (e: any): void => {
-    // e.preventDefault();
-    const ref = this.state.cidInputRef.current;
-    const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...this.state.item };
-    if (value !== null) {
-      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
-      this.setState({ item: { ...updatedItem, edit: false } });
-      this.props.saveItem(updatedItem);
+  const enterEdit = (): void => {
+    if (cidItem) {
+      setEdit(true);
+      setOldCidItem({ ...cidItem });
     }
   };
 
-  hangleChangeCidValue = (e: any): void => {
-    const ref = this.state.cidInputRef.current;
-    const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...this.state.item };
-    if (value !== null) {
-      updatedItem = CidItemRender.updateItemField("cid", value, updatedItem);
-      // this.setState({ item: { ...updatedItem, edit: false } });
-      this.props.changeCidValue(updatedItem);
-    }
+  const handleSave = (e: any): void => {
+    props.saveItem(cidItem, props.index);
+    setOldCidItem(cidItem);
+    setEdit(false);
   };
 
-  handleDelete = (): void => {
-    this.props.deleteItem(this.state.item);
+  const hangleChangeCidValue = (e: BaseSyntheticEvent): void => {
+    const cid = e.target.value;
+    setCidItem({ ...cidItem, cid });
   };
 
-  handleMovePress = (): void => {
-    this.props.beginMoveToDifferentFilter(this.state.item);
+  const handleDelete = (): void => {
+    props.deleteItem(cidItem, props.index);
   };
 
-  handleCancelEdit = (): void => {
-    this.props.cancelEdit(this.state.item, this.props.index);
+  const handleMovePress = (): void => {
+    props.beginMoveToDifferentFilter(cidItem, props.index);
   };
 
-  checkIfIsOverrideExists = (): void => {
+  const handleCancelEdit = (): void => {
+    setCidItem(oldCidItem);
+    setEdit(false);
+  };
+
+  const checkIfIsOverrideExists = (): void => {
     Promise.all([
-      ApiService.getCidOverride(this.props.cidItem.cid, this.props.filterList),
-      ApiService.getCidOverrideLocal(
-        this.props.cidItem.cid,
-        this.props.filterList
-      ),
+      ApiService.getCidOverride(props.cidItem.cid, props.filterList),
+      ApiService.getCidOverrideLocal(cidItem.cid, props.filterList),
     ])
       .then((res) => {
-        this.setState({
-          ...this.state,
-          overrideCid: !!res[0],
-          localOverrideCid: !!res[1],
-          loaded: true,
-        });
+        setOverrideCid(!!res[0]);
+        setLocalOverrideCid(!!res[1]);
+        setLoaded(true);
       })
-      .catch((err) => {
-        this.setState({
-          ...this.state,
-          loaded: true,
-        });
-      });
+      .catch((err) => setLoaded(true));
   };
 
-  renderOverride(local = false): JSX.Element {
-    if (!this.props.isOverrideFilter) {
+  const renderOverride = (local = false) => {
+    if (!props.isOverrideFilter) {
       // filter is not overrideing
       return <></>;
     }
-    if (this.state.loaded) {
-      if (!local && this.state.overrideCid) {
+    if (loaded) {
+      if (!local && overrideCid) {
         // override
         return (
           <>
@@ -147,7 +111,7 @@ export default class CidItemRender extends React.Component<
         );
       }
 
-      if (local && this.state.localOverrideCid) {
+      if (local && localOverrideCid) {
         return (
           <>
             <OverlayTrigger
@@ -174,9 +138,10 @@ export default class CidItemRender extends React.Component<
         <PuffLoader color={"#28a745"} size={20} />
       </>
     );
-  }
-  renderCidActions(): JSX.Element {
-    if (this.props.isHashedCid) {
+  };
+
+  const renderCidActions = (): JSX.Element => {
+    if (props.isHashedCid) {
       return <></>;
     }
 
@@ -188,7 +153,7 @@ export default class CidItemRender extends React.Component<
               variant="primary"
               className="k-button"
               style={{ minWidth: 74 }}
-              onClick={this.enterEdit}
+              onClick={enterEdit}
             >
               Edit
             </Button>
@@ -198,7 +163,7 @@ export default class CidItemRender extends React.Component<
               variant="secondary"
               className="k-button"
               style={{ minWidth: 74 }}
-              onClick={this.handleDelete}
+              onClick={handleDelete}
             >
               Delete
             </Button>
@@ -208,7 +173,7 @@ export default class CidItemRender extends React.Component<
               variant="warning"
               className="k-button"
               style={{ minWidth: 74 }}
-              onClick={this.handleMovePress}
+              onClick={handleMovePress}
             >
               Move
             </Button>
@@ -216,80 +181,80 @@ export default class CidItemRender extends React.Component<
         </Row>
       </>
     );
-  }
-  render(): JSX.Element {
-    return (
-      <div key={this.state.item.cid}>
-        <ListGroup.Item>
-          {this.state.item.edit ? (
-            <Form inline>
-              <Form.Group controlId="cidItemEdit">
-                <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
-                <Form.Control
-                  ref={this.state.cidInputRef}
-                  type="text"
-                  placeholder=""
-                  defaultValue={this.state.item.cid}
-                  onChange={this.hangleChangeCidValue}
-                />
-                <Button className="k-button" onClick={this.handleSave}>
-                  Save
-                </Button>
-                <Button
-                  className="k-button"
-                  variant="secondary"
-                  style={{ marginLeft: 5 }}
-                  onClick={this.handleCancelEdit}
+  };
+
+  return (
+    <div key={props.index}>
+      <ListGroup.Item>
+        {edit ? (
+          <Form inline>
+            <Form.Group controlId="cidItemEdit">
+              <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={cidItem.cid}
+                onChange={hangleChangeCidValue}
+              />
+              <Button className="k-button" onClick={handleSave}>
+                Save
+              </Button>
+              <Button
+                className="k-button"
+                variant="secondary"
+                style={{ marginLeft: 5 }}
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+            </Form.Group>
+          </Form>
+        ) : (
+          <Container>
+            <Row>
+              <Col sm={2} md={2} lg={1}>
+                <div
+                  style={{
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  Cancel
-                </Button>
-              </Form.Group>
-            </Form>
-          ) : (
-            <Container>
-              <Row>
-                <Col sm={2} md={2} lg={1}>
-                  <div
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {this.renderOverride(true)}
-                  </div>
-                </Col>
-                <Col sm={2} md={2} lg={1}>
-                  <div
-                    style={{
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {this.renderOverride()}
-                  </div>
-                </Col>
-                <Col sm={8} md={8} lg={4}>
-                  <Form.Label
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {FilterService.renderHashedCid(this.state.item.cid, false)}
-                  </Form.Label>
-                </Col>
-                <Col sm={12} md={12} lg={6}>
-                  {this.renderCidActions()}
-                </Col>
-              </Row>
-            </Container>
-          )}
-        </ListGroup.Item>
-      </div>
-    );
-  }
-}
+                  {renderOverride(true)}
+                </div>
+              </Col>
+              <Col sm={2} md={2} lg={1}>
+                <div
+                  style={{
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {renderOverride()}
+                </div>
+              </Col>
+              <Col sm={8} md={8} lg={4}>
+                <Form.Label
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {FilterService.renderHashedCid(props.cidItem, false)}
+                </Form.Label>
+              </Col>
+              <Col sm={12} md={12} lg={6}>
+                {renderCidActions()}
+              </Col>
+            </Row>
+          </Container>
+        )}
+      </ListGroup.Item>
+    </div>
+  );
+};
+
+export default CidItemRender;
