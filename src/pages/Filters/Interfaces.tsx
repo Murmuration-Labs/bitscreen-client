@@ -117,11 +117,6 @@ export interface DataProps {
   data: [];
 }
 
-export interface SettingsState {
-  loaded: boolean;
-  config: Config;
-}
-
 export interface Filters {
   internal: boolean;
   external: boolean;
