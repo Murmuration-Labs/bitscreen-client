@@ -25,7 +25,7 @@ import { CidItem, CidItemProps } from "./Interfaces";
 const CidItemRender = (props: CidItemProps): JSX.Element => {
   const [cidItem, setCidItem] = useState(props.cidItem);
   const [oldCidItem, setOldCidItem] = useState(cidItem);
-  const [edit, setEdit] = useState(false);
+  const [edit, setEdit] = useState(cidItem.edit);
   const [loaded, setLoaded] = useState(
     props.isOverrideFilter ? !props.isOverrideFilter : true
   );

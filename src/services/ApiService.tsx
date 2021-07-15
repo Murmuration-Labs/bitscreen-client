@@ -36,7 +36,7 @@ const ApiService = {
       filterList.cids.map((cid) =>
         axios.post<CidItem>(`${serverUri()}/cid`, {
           cid: cid.cid,
-          filterId: filterList.id,
+          filterId: response.data.id,
         })
       )
     );
@@ -73,7 +73,7 @@ const ApiService = {
   },
 
   deleteFilter: async (id: number): Promise<void> => {
-    await axios.delete(`${serverUri()}/filters/${id}`);
+    await axios.delete(`${serverUri()}/filter/${id}`);
   },
 
   deleteCid: async (_cid: CidItem | CidItem[]) => {

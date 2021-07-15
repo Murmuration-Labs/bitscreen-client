@@ -168,8 +168,8 @@ const FilterPage = (props) => {
   };
 
   const saveItem = (editItem: CidItem, idx: number) => {
-    const items = filterList.cids.map((item: CidItem) => {
-      return item.id === editItem.id ? { ...editItem, edit: false } : item;
+    const items = filterList.cids.map((item: CidItem, _idx: number) => {
+      return idx === _idx ? { ...editItem, edit: false } : item;
     });
     const fl = {
       ...filterList,
