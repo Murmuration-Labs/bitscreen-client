@@ -1,4 +1,5 @@
 import React, { ComponentType, FormEvent, useEffect, useState } from "react";
+import axios from "axios";
 
 import { Col, Container, FormCheck, FormGroup, Row } from "react-bootstrap";
 import "./Settings.css";
@@ -22,9 +23,8 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
   useEffect(() => {
     async function setInitialConfig() {
-      const config = await fetch(`${serverUri()}/config`).then((response) =>
-        response.json()
-      );
+      const response = await axios.get(`${serverUri()}/config`);
+      const config = response.data;
       console.log("config", config);
 
       setLoaded(true);
@@ -36,15 +36,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
   const putConfig = async (config: Config): Promise<void> => {
     console.log("putting config", config);
-
-    await fetch(`${serverUri()}/config`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(config),
-    });
-
+    await axios.put(`${serverUri()}/config`, config);
     console.log("config set", config);
   };
 
