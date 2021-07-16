@@ -5,6 +5,12 @@ export const VisibilityString: string[] = [
   "ThirdParty",
 ];
 
+export enum ViewTypes {
+  New,
+  Edit,
+  Imported,
+}
+
 export enum Visibility {
   None,
   Private,
@@ -32,26 +38,29 @@ export interface CidItem {
   cid: string;
   refUrl?: string;
   edit?: boolean;
+  isChecked: boolean;
   rerender?: boolean;
 }
 
 export interface CidItemProps {
-  cidItem: CidItem;
-  saveItem: (i: CidItem, idx: number) => void;
-  deleteItem: (i: CidItem, idx: number) => void;
-  changeCidValue: (i: CidItem, idx: number) => void;
-  cancelEdit: (i: CidItem, index: number) => void;
-  beginMoveToDifferentFilter: (i: CidItem, idx: number) => Promise<void>;
-  filterList: FilterList;
   index: number;
+  cidItem: CidItem;
+  filterList: FilterList;
+  isEdit: boolean;
   isOverrideFilter: boolean;
   isHashedCid: boolean;
+  saveItem: (i: CidItem, idx: number) => void;
+  updateCidItem: (i: CidItem, idx: number) => void;
+  changeCidValue: (i: CidItem, idx: number) => void;
+  cancelEdit: (i: CidItem, index: number) => void;
+  beginMoveToDifferentFilter: (i: CidItem[], idx: number) => Promise<void>;
+  prepareModalForDeleteItems: (i: CidItem[]) => void;
 }
 
 export interface MoveCIDModalProps {
-  cidItem: CidItem;
+  cidItems: CidItem[];
   optionFilters: FilterList[];
-  move: (i: CidItem, fl: FilterList) => Promise<void>;
+  move: (i: CidItem[], fl: FilterList) => Promise<void>;
   closeCallback: () => void;
   show: boolean;
 }
@@ -108,11 +117,6 @@ export interface CidListProps {
 
 export interface DataProps {
   data: [];
-}
-
-export interface SettingsState {
-  loaded: boolean;
-  config: Config;
 }
 
 export interface Filters {

@@ -3,13 +3,20 @@ import { Typeahead } from "react-bootstrap-typeahead";
 
 import { Modal, Button } from "react-bootstrap";
 
-import { FilterList, MoveCIDModalProps } from "./Interfaces";
+import { CidItem, FilterList, MoveCIDModalProps } from "./Interfaces";
 import FilterService from "../../services/FilterService";
 
 export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
   const [selectedFilter, setSelectedFilter] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+
+  const renderTitle = (cidItems: CidItem[]): JSX.Element => {
+    const titleText =
+      "Move CIDs: " +
+      cidItems.reduce((result, item) => result + item.cid + ", ", "");
+    return <Modal.Title>{titleText.slice(0, -2)}</Modal.Title>;
+  };
 
   return (
     <Modal
@@ -18,9 +25,7 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
         props.closeCallback();
       }}
     >
-      <Modal.Header closeButton>
-        <Modal.Title>Move CID {props.cidItem.cid}</Modal.Title>
-      </Modal.Header>
+      <Modal.Header closeButton>{renderTitle(props.cidItems)}</Modal.Header>
       <Modal.Body>
         <Typeahead
           id="typeahead-autocomplete"
@@ -43,7 +48,7 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
         <Button
           variant="primary"
           onClick={async () => {
-            await props.move(props.cidItem, selectedFilter);
+            await props.move(props.cidItems, selectedFilter);
             props.closeCallback();
           }}
           disabled={!selectedFilter.id}

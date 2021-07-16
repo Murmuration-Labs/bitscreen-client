@@ -1,7 +1,7 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -16,6 +16,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { serverUri } from "../../config";
+import _ from "lodash";
 import ApiService from "../../services/ApiService";
 import FilterService from "../../services/FilterService";
 import AddCidBatchModal from "./AddCidBatchModal";
@@ -26,17 +27,13 @@ import {
   FilterList,
   mapVisibilityString,
   VisibilityString,
+  ViewTypes,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 
 const FilterPage = (props) => {
+  const [isAnyCidSelected, setIsAnyCidSelected] = useState<boolean>(false);
   const [_notice, setNotice] = useState<string>("");
-
-  const emptyCidItem: CidItem = {
-    id: 0,
-    cid: "",
-    edit: false,
-  };
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [alertUnsaved, setAlertUnsaved] = useState<boolean>(false);
@@ -47,16 +44,23 @@ const FilterPage = (props) => {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-  const [toBeDeletedCids, setToBeDeletedCids] = useState<CidItem[]>([]);
+  const [moveToFilterList, setMoveToFilterList] =
+    useState<FilterList | undefined>(undefined);
+  const [initialFilterList, setInitialFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
+  const [filterListChanged, setFilterListChanged] = useState<boolean>(false);
 
+  const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
-  const currentUrl = useLocation().pathname;
 
+  const mountedRef = useRef(true);
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
       ApiService.getFilters().then((filterLists: FilterList[]) => {
+        if (!mountedRef.current) return;
         filterLists = filterLists.filter((fl: FilterList) => fl.id == id);
         if (filterLists.length === 0) {
           setInvalidFilterId(true);
@@ -64,7 +68,9 @@ const FilterPage = (props) => {
         }
 
         setFilterList(filterLists[0]);
+        setInitialFilterList({ ...filterLists[0] });
         setLoaded(true);
+        setFilterEnabled(filterLists[0].enabled);
         setFilterOverride(filterLists[0].override);
       });
     } else {
@@ -74,7 +80,23 @@ const FilterPage = (props) => {
 
   useEffect(() => {
     void initFilter(props.match.params.id as number);
+
+    return () => {
+      mountedRef.current = false;
+    };
   }, [props.match.params.id]);
+
+  useEffect(() => {
+    if (
+      _.isEqual(filterList, initialFilterList) &&
+      initialFilterList.enabled === filterEnabled &&
+      initialFilterList.override === filterOverride
+    ) {
+      setFilterListChanged(false);
+    } else {
+      setFilterListChanged(true);
+    }
+  }, [filterList, filterEnabled, filterOverride]);
 
   const saveFilter = (fl?: FilterList) => {
     if (!fl) {
@@ -85,10 +107,16 @@ const FilterPage = (props) => {
     setAlertUnsaved(true);
   };
 
+  const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
+
   const save = (): void => {
     if (isEdit) {
       setLoaded(true);
-      ApiService.updateFilter(filterList)
+      const filtersToUpdate = [filterList];
+      if (moveToFilterList) {
+        filtersToUpdate.push(moveToFilterList);
+      }
+      ApiService.updateFilter(filtersToUpdate)
         .then((res) => {
           history.push(`/filters`);
           toast.success("Filter list updated successfully");
@@ -98,7 +126,7 @@ const FilterPage = (props) => {
           toast.error("Error: " + err.message);
           setLoaded(false);
         });
-      ApiService.deleteCid(toBeDeletedCids);
+      ApiService.deleteCid(deleteCidItems);
     } else {
       ApiService.addFilter(filterList)
         .then((res) => {
@@ -163,8 +191,38 @@ const FilterPage = (props) => {
 
   const onNewCid = (): void => {
     setNotice("");
-    const cids = [...filterList.cids, { cid: "", edit: true, rerender: true }];
+    const cids = [
+      ...filterList.cids,
+      { cid: "", edit: true, rerender: true, isChecked: false },
+    ];
     setFilterList({ ...filterList, cids });
+  };
+
+  const getSelectedCidItems = (items: CidItem[]): CidItem[] => {
+    return items.filter((item: CidItem) => item.isChecked);
+  };
+
+  const updateIsAnyCidSelected = (items: CidItem[]) => {
+    const selectedCidItems = getSelectedCidItems(items);
+    const count = selectedCidItems.length;
+
+    if (count > 0) {
+      setIsAnyCidSelected(true);
+    } else {
+      setIsAnyCidSelected(false);
+    }
+  };
+
+  const updateCidItem = (cidItem: CidItem, idx: number) => {
+    const items = filterList.cids.map((item: CidItem, _idx: number) => {
+      return idx === _idx ? cidItem : item;
+    });
+    const fl = {
+      ...filterList,
+      cids: items,
+    };
+    saveFilter(fl);
+    updateIsAnyCidSelected(items);
   };
 
   const saveItem = (editItem: CidItem, idx: number) => {
@@ -176,6 +234,7 @@ const FilterPage = (props) => {
       cids: items,
     };
     saveFilter(fl);
+    updateIsAnyCidSelected(items);
     setNotice("CIDs successfully saved.");
   };
 
@@ -188,6 +247,7 @@ const FilterPage = (props) => {
       cids: items,
     };
     saveFilter(fl);
+    updateIsAnyCidSelected(items);
   };
 
   const cancelEdit = (editItem: CidItem, index: number) => {
@@ -195,9 +255,9 @@ const FilterPage = (props) => {
 
     if (editItem.cid) {
       editItem.edit = false;
-      editItem.rerender = false;
 
       cids[index] = editItem;
+      updateIsAnyCidSelected(cids);
 
       saveFilter({
         ...filterList,
@@ -241,34 +301,62 @@ const FilterPage = (props) => {
     saveFilter({ ...filterList, cids: [...filterList.cids, ...cids] });
   };
 
-  const deleteItem = async (deleteItem: CidItem, idx: number) => {
-    const copy = filterList.cids.slice();
-    console.log(idx);
-    const toBeDeleted = copy.splice(idx, 1);
-    console.log(copy);
-    setToBeDeletedCids([...toBeDeletedCids, ...toBeDeleted]);
+  const [showDeleteItemsModal, setShowDeleteItemsModal] =
+    useState<boolean>(false);
+
+  const deleteItems = () => {
+    const items = filterList.cids.filter(
+      (item: CidItem) => !deleteCidItems.includes(item)
+    );
+
     saveFilter({
       ...filterList,
-      cids: copy,
+      cids: items,
     });
+    updateIsAnyCidSelected(items);
+    toast.info("Don't forget to press Save to save the changes.");
     setNotice("CIDs successfully saved.");
   };
 
+  const prepareModalForDeleteItems = (itemsToDelete: CidItem[]) => {
+    setDeleteCidItems(itemsToDelete);
+    setShowDeleteItemsModal(true);
+  };
+
   const [showMoveModal, setShowMoveModal] = useState<boolean>(false);
-  const [moveCidItem, setMoveCidItem] = useState<CidItem>(emptyCidItem);
+  const [moveCidItems, setMoveCidItems] = useState<CidItem[]>([]);
   const [moveOptionFilters, setMoveOptionFilters] = useState<FilterList[]>([]);
 
   const beginMoveToDifferentFilter = async (
-    moveItem: CidItem,
+    moveItems: CidItem[],
     idx: number
   ): Promise<void> => {
     const filterLists: FilterList[] = await ApiService.getFilters();
 
-    setMoveCidItem(moveItem);
+    setMoveCidItems(moveItems);
     setMoveOptionFilters(
       filterLists.filter((x, _idx) => _idx !== idx && !x.origin)
     );
     setShowMoveModal(true);
+  };
+
+  const handleBulkEditCids = (): void => {
+    const items = filterList.cids.map((item: CidItem) => {
+      return item.isChecked
+        ? { ...item, edit: true, rerender: false, isChecked: false }
+        : item;
+    });
+    const fl = {
+      ...filterList,
+      cids: items,
+    };
+    saveFilter(fl);
+    updateIsAnyCidSelected(items);
+  };
+
+  const handleBulkMoveCids = (): void => {
+    const selectedCidItems = getSelectedCidItems(filterList.cids);
+    beginMoveToDifferentFilter(selectedCidItems, filterList.id);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
@@ -310,6 +398,11 @@ const FilterPage = (props) => {
     toast.success("Shared link was copied succesfully");
   };
 
+  const toggleFilterEnabled = () => {
+    filterList.enabled = !filterList.enabled;
+    setFilterEnabled(filterList.enabled);
+  };
+
   const toggleFilterOverride = () => {
     filterList.override = !filterList.override;
     setFilterOverride(filterList.override);
@@ -320,17 +413,27 @@ const FilterPage = (props) => {
   };
 
   const move = async (
-    cidItem: CidItem,
+    items: CidItem[],
     selectedFilter: FilterList
   ): Promise<void> => {
-    await ApiService.updateFilter([
-      { ...selectedFilter, cids: [...selectedFilter.cids, cidItem] },
-      {
-        ...filterList,
-        cids: [...filterList.cids.splice(filterList.cids.indexOf(cidItem), 1)],
-      },
-    ]);
-    initFilter(props.match.params.id);
+    selectedFilter.cids = [...selectedFilter.cids, ...items];
+    setMoveToFilterList(selectedFilter);
+
+    filterList.cids = filterList.cids.filter((x) => !items.includes(x));
+    updateIsAnyCidSelected(filterList.cids);
+    toast.info("Don't forget to press Save to save the changes.");
+  };
+
+  const checkViewType = (): ViewTypes => {
+    if (isEdit && filterList.origin) {
+      return ViewTypes.Imported;
+    }
+
+    if (isEdit && !filterList.origin) {
+      return ViewTypes.Edit;
+    }
+
+    return ViewTypes.New;
   };
 
   const renderTitle = (): JSX.Element => {
@@ -338,7 +441,7 @@ const FilterPage = (props) => {
       return <h2>View filter list</h2>;
     }
 
-    if (currentUrl.includes("edit")) {
+    if (isEdit) {
       return <h2>Edit filter list</h2>;
     }
 
@@ -382,8 +485,6 @@ const FilterPage = (props) => {
                 ...filterList,
                 notes: ev.target.value,
               });
-
-              setNotice("Notes successfully saved");
             }}
             as="textarea"
             placeholder="Notes"
@@ -405,7 +506,7 @@ const FilterPage = (props) => {
   }
 
   const renderDeleteButton = (props: FilterList): JSX.Element => {
-    if (currentUrl.includes("new") || props.origin) {
+    if (!isEdit) {
       return <></>;
     }
 
@@ -416,7 +517,7 @@ const FilterPage = (props) => {
           onClick={() => {
             confirmDelete();
           }}
-          style={{ float: "right" }}
+          style={{ float: "right", marginRight: -30 }}
         >
           Delete
         </Button>
@@ -425,23 +526,16 @@ const FilterPage = (props) => {
   };
 
   const renderSaveAndCancelButtons = (props: FilterList): JSX.Element => {
-    if (props.origin) {
-      return (
-        <Col>
-          <Button
-            variant="primary"
-            style={{ marginBottom: 5 }}
-            onClick={cancel}
-          >
-            Go Back
-          </Button>
-        </Col>
-      );
-    }
-
     return (
       <Col>
-        <Button variant="primary" style={{ marginBottom: 5 }} onClick={save}>
+        <Button
+          variant="primary"
+          style={{ marginBottom: 5 }}
+          disabled={
+            checkViewType() === ViewTypes.Imported && !filterListChanged
+          }
+          onClick={save}
+        >
           Save
         </Button>
         <Button
@@ -466,7 +560,7 @@ const FilterPage = (props) => {
             </Row>
             <Row>
               <Col>
-                <Form>
+                <div>
                   <Form.Row>
                     <Col>
                       <Form.Control
@@ -517,20 +611,41 @@ const FilterPage = (props) => {
                       </Form.Group>
                     </Col>
                     <Col>
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          clipboardCopy(filterList["_cryptId"]);
-                        }}
-                      >
-                        Direct share
-                      </Button>
+                      {checkViewType() !== ViewTypes.Imported && (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            clipboardCopy(filterList["_cryptId"]);
+                          }}
+                        >
+                          Direct share
+                        </Button>
+                      )}
                     </Col>
                   </Form.Row>
                   <Form.Row
                     style={{
                       marginLeft: 2,
                       marginTop: -20,
+                      marginBottom: 20,
+                    }}
+                    onClick={() => toggleFilterEnabled()}
+                  >
+                    <FormCheck readOnly type="switch" checked={filterEnabled} />
+                    <Form.Label
+                      style={{
+                        marginRight: 10,
+                        marginTop: 2,
+                      }}
+                      className={"text-dim"}
+                    >
+                      Enabled?
+                    </Form.Label>
+                  </Form.Row>
+                  <Form.Row
+                    style={{
+                      marginLeft: 2,
+                      marginTop: -35,
                       marginBottom: 20,
                     }}
                     onClick={() => toggleFilterOverride()}
@@ -560,53 +675,93 @@ const FilterPage = (props) => {
                   </Form.Row>
                   {renderOrigin()}
                   {renderNotes()}
-                  <Form.Row>
-                    <Col>
-                      <Button
-                        variant="primary"
-                        style={{ marginBottom: 5 }}
-                        onClick={onNewCid}
-                        disabled={!!filterList.origin}
-                      >
-                        + new CID
-                      </Button>
-                      <Button
-                        variant="primary"
-                        style={{ marginBottom: 5, marginLeft: 5 }}
-                        onClick={() => {
-                          setAddCidBatchModal(true);
-                        }}
-                        disabled={!!filterList.origin}
-                      >
-                        + Add CIDs batch
-                      </Button>
-                      <ListGroup style={{ width: "100%" }}>
-                        {filterList.cids.map((item: CidItem, index: number) => (
-                          <CidItemRender
-                            index={index}
-                            key={index}
-                            cidItem={item}
-                            isOverrideFilter={filterList.override}
-                            saveItem={saveItem}
-                            deleteItem={deleteItem}
-                            changeCidValue={changeCidValue}
-                            cancelEdit={cancelEdit}
-                            beginMoveToDifferentFilter={
-                              beginMoveToDifferentFilter
-                            }
-                            filterList={filterList}
-                            isHashedCid={!!filterList.origin}
-                          />
-                        ))}
-                      </ListGroup>
-                    </Col>
-                  </Form.Row>
-                </Form>
+                  {checkViewType() !== ViewTypes.Imported && (
+                    <Form.Row>
+                      <Col>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5 }}
+                          onClick={onNewCid}
+                          disabled={!!filterList.origin}
+                        >
+                          + new CID
+                        </Button>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={() => {
+                            setAddCidBatchModal(true);
+                          }}
+                          disabled={!!filterList.origin}
+                        >
+                          + Add CIDs batch
+                        </Button>
+                        <Button
+                          variant="primary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={handleBulkEditCids}
+                          disabled={!isAnyCidSelected}
+                        >
+                          Edit selected CIDs
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          style={{ marginBottom: 5, marginLeft: 5 }}
+                          onClick={() => {
+                            const items = filterList.cids.filter(
+                              (item: CidItem) => item.isChecked
+                            );
+                            prepareModalForDeleteItems(items);
+                          }}
+                          disabled={!isAnyCidSelected}
+                        >
+                          Delete selected CIDs
+                        </Button>
+                        {checkViewType() === ViewTypes.Edit && (
+                          <Button
+                            variant="warning"
+                            style={{ marginBottom: 5, marginLeft: 5 }}
+                            onClick={handleBulkMoveCids}
+                            disabled={!isAnyCidSelected}
+                          >
+                            Move selected CIDs
+                          </Button>
+                        )}
+                        <ListGroup style={{ width: "100%" }}>
+                          {filterList.cids.map(
+                            (item: CidItem, index: number) => (
+                              <CidItemRender
+                                // Each child in a list should have a unique "key" prop
+                                key={item.id?.toString()}
+                                index={index}
+                                cidItem={item}
+                                filterList={filterList}
+                                isEdit={isEdit}
+                                isOverrideFilter={filterList.override}
+                                isHashedCid={!!filterList.origin}
+                                saveItem={saveItem}
+                                updateCidItem={updateCidItem}
+                                changeCidValue={changeCidValue}
+                                cancelEdit={cancelEdit}
+                                beginMoveToDifferentFilter={
+                                  beginMoveToDifferentFilter
+                                }
+                                prepareModalForDeleteItems={
+                                  prepareModalForDeleteItems
+                                }
+                              />
+                            )
+                          )}
+                        </ListGroup>
+                      </Col>
+                    </Form.Row>
+                  )}
+                </div>
               </Col>
             </Row>
             <Row>{renderSaveAndCancelButtons(filterList)}</Row>
             <MoveCIDModal
-              cidItem={moveCidItem}
+              cidItems={moveCidItems}
               optionFilters={moveOptionFilters}
               move={move}
               closeCallback={closeModalCallback}
@@ -633,6 +788,17 @@ const FilterPage = (props) => {
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());
                 setShowConfirmDelete(false);
+              }}
+            />
+            <ConfirmModal
+              show={showDeleteItemsModal}
+              title="Confirm removal of selected CIDs"
+              message="Are you sure you want to delete the selected items?"
+              callback={() => {
+                deleteItems();
+              }}
+              closeCallback={() => {
+                setShowDeleteItemsModal(false);
               }}
             />
             <ConfirmModal
