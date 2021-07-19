@@ -32,14 +32,6 @@ const ApiService = {
 
   addFilter: async (filterList: FilterList): Promise<number> => {
     const response = await axios.post(`${serverUri()}/filter`, filterList);
-    await Promise.all(
-      filterList.cids.map((cid) =>
-        axios.post<CidItem>(`${serverUri()}/cid`, {
-          cid: cid.cid,
-          filterId: response.data.id,
-        })
-      )
-    );
     return response.data.id;
   },
 
