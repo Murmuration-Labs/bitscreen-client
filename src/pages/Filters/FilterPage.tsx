@@ -55,6 +55,13 @@ const FilterPage = (props) => {
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const history = useHistory();
 
+  const generateUniqueKey = (): string => {
+    // Math.random should be unique because of its seeding algorithm.
+    // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+    // after the decimal.
+    return "_" + Math.random().toString(36).substr(2, 9);
+  };
+
   const mountedRef = useRef(true);
   const initFilter = (id: number): void => {
     if (id) {
@@ -67,11 +74,21 @@ const FilterPage = (props) => {
           return;
         }
 
-        setFilterList(filterLists[0]);
-        setInitialFilterList({ ...filterLists[0] });
+        const cidItems = filterLists[0].cids
+          ? filterLists[0].cids.map((cid: CidItem) => {
+              return { ...cid, tableKey: generateUniqueKey() };
+            })
+          : [];
+        const fl = {
+          ...filterLists[0],
+          cids: cidItems,
+        };
+
+        setFilterList(fl);
+        setInitialFilterList({ ...fl });
         setLoaded(true);
-        setFilterEnabled(filterLists[0].enabled);
-        setFilterOverride(filterLists[0].override);
+        setFilterEnabled(fl.enabled);
+        setFilterOverride(fl.override);
       });
     } else {
       setLoaded(true);
@@ -193,7 +210,13 @@ const FilterPage = (props) => {
     setNotice("");
     const cids = [
       ...filterList.cids,
-      { cid: "", edit: true, rerender: true, isChecked: false },
+      {
+        tableKey: generateUniqueKey(),
+        cid: "",
+        edit: true,
+        rerender: true,
+        isChecked: false,
+      },
     ];
     setFilterList({ ...filterList, cids });
   };
@@ -293,6 +316,7 @@ const FilterPage = (props) => {
   const onNewCidsBatch = (cidsBatch): void => {
     setNotice("");
     const cids = cidsBatch.map((element: string) => ({
+      tableKey: generateUniqueKey(),
       cid: element,
       edit: true,
       rerender: true,
@@ -732,7 +756,7 @@ const FilterPage = (props) => {
                             (item: CidItem, index: number) => (
                               <CidItemRender
                                 // Each child in a list should have a unique "key" prop
-                                key={item.id?.toString()}
+                                key={item.tableKey}
                                 index={index}
                                 cidItem={item}
                                 filterList={filterList}

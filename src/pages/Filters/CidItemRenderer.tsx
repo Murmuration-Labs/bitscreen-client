@@ -25,6 +25,7 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 export default function CidItemRender(props: CidItemProps) {
   const emptyCidItem: CidItem = {
+    tableKey: "",
     cid: "",
     isChecked: false,
   };
@@ -225,7 +226,7 @@ export default function CidItemRender(props: CidItemProps) {
   };
 
   return (
-    <div key={cidItem.id?.toString()}>
+    <div key={cidItem.tableKey}>
       <ListGroup.Item>
         {cidItem.edit ? (
           <Form inline>
