@@ -109,7 +109,7 @@ export default function ImportFilterModal(
   const importFilter = async (): Promise<void> => {
     setIsSavingFetchedFilter(true);
 
-    fetchedFilterList.origin = remoteFilterUri;
+    fetchedFilterList.originId = remoteFilterUri;
 
     await ApiService.addFilter(fetchedFilterList);
 

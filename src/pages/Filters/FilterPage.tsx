@@ -358,7 +358,7 @@ const FilterPage = (props) => {
 
     setMoveCidItems(moveItems);
     setMoveOptionFilters(
-      filterLists.filter((x) => x.id !== filterList.id && !x.origin)
+      filterLists.filter((x) => x.id !== filterList.id && !x.originId)
     );
     setShowMoveModal(true);
   };
@@ -448,11 +448,11 @@ const FilterPage = (props) => {
   };
 
   const checkViewType = (): ViewTypes => {
-    if (isEdit && filterList.origin) {
+    if (isEdit && filterList.originId) {
       return ViewTypes.Imported;
     }
 
-    if (isEdit && !filterList.origin) {
+    if (isEdit && !filterList.originId) {
       return ViewTypes.Edit;
     }
 
@@ -460,7 +460,7 @@ const FilterPage = (props) => {
   };
 
   const renderTitle = (): JSX.Element => {
-    if (filterList.origin) {
+    if (filterList.originId) {
       return <h2>View filter list</h2>;
     }
 
@@ -472,7 +472,7 @@ const FilterPage = (props) => {
   };
 
   const renderOrigin = (): JSX.Element => {
-    if (!filterList.origin) {
+    if (!filterList.originId) {
       return <></>;
     }
 
@@ -480,8 +480,8 @@ const FilterPage = (props) => {
       <Form.Row>
         <Col>
           <h4>Origin</h4>
-          <a href={filterList.origin} className="origin-link" target="_blank">
-            {filterList.origin}
+          <a href={filterList.originId} className="origin-link" target="_blank">
+            {filterList.originId}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
               className="space-left"
@@ -493,7 +493,7 @@ const FilterPage = (props) => {
   };
 
   const renderNotes = (): JSX.Element => {
-    if (!filterList.origin) {
+    if (!filterList.originId) {
       return <></>;
     }
 
@@ -592,7 +592,7 @@ const FilterPage = (props) => {
                         type="text"
                         placeholder="List Name"
                         value={filterList.name}
-                        disabled={!!filterList.origin}
+                        disabled={!!filterList.originId}
                       />
                     </Col>
                   </Form.Row>
@@ -614,7 +614,7 @@ const FilterPage = (props) => {
                         as="textarea"
                         placeholder="List Description"
                         value={filterList.description}
-                        disabled={!!filterList.origin}
+                        disabled={!!filterList.originId}
                       />
                     </Col>
                   </Form.Row>
@@ -624,7 +624,7 @@ const FilterPage = (props) => {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
-                          disabled={!!filterList.origin}
+                          disabled={!!filterList.originId}
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
@@ -705,7 +705,7 @@ const FilterPage = (props) => {
                           variant="primary"
                           style={{ marginBottom: 5 }}
                           onClick={onNewCid}
-                          disabled={!!filterList.origin}
+                          disabled={!!filterList.originId}
                         >
                           + new CID
                         </Button>
@@ -715,7 +715,7 @@ const FilterPage = (props) => {
                           onClick={() => {
                             setAddCidBatchModal(true);
                           }}
-                          disabled={!!filterList.origin}
+                          disabled={!!filterList.originId}
                         >
                           + Add CIDs batch
                         </Button>
@@ -761,7 +761,7 @@ const FilterPage = (props) => {
                                 filterList={filterList}
                                 isEdit={isEdit}
                                 isOverrideFilter={filterList.override}
-                                isHashedCid={!!filterList.origin}
+                                isHashedCid={!!filterList.originId}
                                 saveItem={saveItem}
                                 updateCidItem={updateCidItem}
                                 changeCidValue={changeCidValue}

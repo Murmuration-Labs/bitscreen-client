@@ -73,7 +73,7 @@ function Filters(): JSX.Element {
   const toggleFilterOverride = async (
     filterList: FilterList
   ): Promise<void> => {
-    if (filterList.origin) return;
+    if (filterList.originId) return;
     filterList.override = !filterList.override;
     await ApiService.updateFilter(filterList);
     await getFilters();
@@ -116,7 +116,7 @@ function Filters(): JSX.Element {
     selBox.style.left = "0";
     selBox.style.top = "0";
     selBox.style.opacity = "0";
-    selBox.value = serverUri() + "/filters/shared/" + cryptId;
+    selBox.value = serverUri() + "/filter/share/" + cryptId;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
@@ -133,7 +133,7 @@ function Filters(): JSX.Element {
   }, [showConfirmDelete, deletedFilterList]);
 
   const CIDFilterShared = (props: FilterList): JSX.Element => {
-    if (props.origin) {
+    if (props.originId) {
       return <FontAwesomeIcon icon={faGlobe as IconProp} />;
     }
 
@@ -156,7 +156,7 @@ function Filters(): JSX.Element {
   };
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
-    if (props.origin) {
+    if (props.originId) {
       return <FontAwesomeIcon icon={faEye as IconProp} />;
     }
 
@@ -217,7 +217,7 @@ function Filters(): JSX.Element {
                           <Tooltip id="button-tooltip" {...props}>
                             {filterList.cids.map((cid, index) => (
                               <p key={`cid-${filterList.id}-${index}`}>
-                                {filterList.origin
+                                {filterList.originId
                                   ? FilterService.renderHashedCid(cid)
                                   : cid}
                               </p>
@@ -273,10 +273,10 @@ function Filters(): JSX.Element {
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    {!filterList.origin && (
+                    {!filterList.originId && (
                       <Link
                         to="#"
-                        onClick={() => clipboardCopy(filterList["_cryptId"])}
+                        onClick={() => clipboardCopy(filterList.shareId)}
                         className="double-space-left"
                       >
                         <FontAwesomeIcon icon={faShare as IconProp} />
@@ -370,7 +370,7 @@ function Filters(): JSX.Element {
         break;
 
       case BulkSelectedType.Imported:
-        conditional = (x: FilterList) => !!x.origin;
+        conditional = (x: FilterList) => !!x.originId;
         break;
 
       default:

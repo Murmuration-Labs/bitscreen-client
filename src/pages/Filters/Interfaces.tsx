@@ -103,7 +103,9 @@ export interface FilterList {
   visibility: Visibility;
   enabled: boolean;
   override: boolean;
-  origin?: string;
+  shareId?: string;
+  shared?: boolean;
+  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
   providerId: number;

@@ -31,6 +31,12 @@ const ApiService = {
   },
 
   addFilter: async (filterList: FilterList): Promise<number> => {
+    //TODO: Need to populate with an ACTUAL provierId
+    // Hardcoding it to id 0 (Anonymous) for now
+    if (filterList.providerId !== 0 && !filterList.providerId) {
+      filterList.providerId = 0;
+    }
+
     const response = await axios.post(`${serverUri()}/filter`, filterList);
     return response.data.id;
   },
