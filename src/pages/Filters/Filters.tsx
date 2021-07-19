@@ -16,6 +16,7 @@ import {
 import "./Filters.css";
 import {
   BulkSelectedType,
+  CidItem,
   FilterList,
   Visibility,
   VisibilityString,
@@ -215,13 +216,15 @@ function Filters(): JSX.Element {
                         transition={false}
                         overlay={(props: OverlayInjectedProps): JSX.Element => (
                           <Tooltip id="button-tooltip" {...props}>
-                            {filterList.cids.map((cid, index) => (
-                              <p key={`cid-${filterList.id}-${index}`}>
-                                {filterList.originId
-                                  ? FilterService.renderHashedCid(cid)
-                                  : cid}
-                              </p>
-                            ))}
+                            {filterList.cids.map(
+                              (cidItem: CidItem, index: number) => (
+                                <p key={`cid-${filterList.id}-${index}`}>
+                                  {filterList.originId
+                                    ? FilterService.renderHashedCid(cidItem)
+                                    : cidItem.cid}
+                                </p>
+                              )
+                            )}
                           </Tooltip>
                         )}
                       >
