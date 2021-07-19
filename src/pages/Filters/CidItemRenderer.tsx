@@ -114,7 +114,7 @@ export default function CidItemRender(props: CidItemProps) {
   };
 
   const handleMovePress = (): void => {
-    props.beginMoveToDifferentFilter([cidItem], props.index);
+    props.beginMoveToDifferentFilter([cidItem]);
   };
 
   const handleCancelEdit = (): void => {

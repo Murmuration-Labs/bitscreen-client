@@ -54,7 +54,7 @@ export interface CidItemProps {
   updateCidItem: (i: CidItem, idx: number) => void;
   changeCidValue: (i: CidItem, idx: number) => void;
   cancelEdit: (i: CidItem, index: number) => void;
-  beginMoveToDifferentFilter: (i: CidItem[], idx: number) => Promise<void>;
+  beginMoveToDifferentFilter: (i: CidItem[]) => Promise<void>;
   prepareModalForDeleteItems: (i: CidItem[]) => void;
 }
 

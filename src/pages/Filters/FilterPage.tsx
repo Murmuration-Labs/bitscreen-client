@@ -352,14 +352,13 @@ const FilterPage = (props) => {
   const [moveOptionFilters, setMoveOptionFilters] = useState<FilterList[]>([]);
 
   const beginMoveToDifferentFilter = async (
-    moveItems: CidItem[],
-    idx: number
+    moveItems: CidItem[]
   ): Promise<void> => {
     const filterLists: FilterList[] = await ApiService.getFilters();
 
     setMoveCidItems(moveItems);
     setMoveOptionFilters(
-      filterLists.filter((x, _idx) => _idx !== idx && !x.origin)
+      filterLists.filter((x) => x.id !== filterList.id && !x.origin)
     );
     setShowMoveModal(true);
   };
@@ -380,7 +379,7 @@ const FilterPage = (props) => {
 
   const handleBulkMoveCids = (): void => {
     const selectedCidItems = getSelectedCidItems(filterList.cids);
-    beginMoveToDifferentFilter(selectedCidItems, filterList.id);
+    beginMoveToDifferentFilter(selectedCidItems);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
