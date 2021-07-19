@@ -24,19 +24,19 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 // }
 
 export default function CidItemRender(props: CidItemProps) {
-  const [cidItem, setCidItem] = useState<CidItem>(props.cidItem);
+  const emptyCidItem: CidItem = {
+    cid: "",
+    isChecked: false,
+  };
+  const [cidItem, setCidItem] = useState<CidItem>(emptyCidItem);
   const [cidInputRef, setCidInputRef] = useState<RefObject<HTMLInputElement>>(
     React.createRef<HTMLInputElement>()
   );
-  const [loaded, setLoaded] = useState<boolean>(
-    props.isOverrideFilter ? !props.isOverrideFilter : true
-  );
-  const [isOverrideFilter, setIsOverrideFilter] = useState<boolean>(
-    props.isOverrideFilter ? props.isOverrideFilter : true
-  );
+  const [loaded, setLoaded] = useState<boolean>(false);
+  const [isOverrideFilter, setIsOverrideFilter] = useState<boolean>(false);
   const [overrideCid, setOverrideCid] = useState<boolean>(false);
   const [localOverrideCid, setLocalOverrideCid] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState<boolean>(props.isEdit);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
 
   const checkIfIsOverrideExists = (): void => {
     Promise.all([
@@ -54,10 +54,17 @@ export default function CidItemRender(props: CidItemProps) {
   };
 
   useEffect(() => {
+    setCidItem(props.cidItem);
+    setLoaded(props.isOverrideFilter ? !props.isOverrideFilter : true);
+    setIsOverrideFilter(props.isOverrideFilter ? props.isOverrideFilter : true);
+    setIsEdit(props.isEdit);
+  });
+
+  useEffect(() => {
     if (props.isOverrideFilter) {
       checkIfIsOverrideExists();
     }
-  });
+  }, []);
 
   const updateItemField = (
     field: string,

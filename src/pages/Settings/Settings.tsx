@@ -32,7 +32,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     }
 
     setInitialConfig();
-  });
+  }, []);
 
   const putConfig = async (config: Config): Promise<void> => {
     console.log("putting config", config);
