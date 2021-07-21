@@ -2,6 +2,7 @@ import axios from "axios";
 import { remoteMarketplaceUri, serverUri } from "../config";
 import { Account } from "../pages/Contact/Interfaces";
 import { CidItem, FilterList } from "../pages/Filters/Interfaces";
+import * as AuthService from "./AuthService";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -33,8 +34,10 @@ const ApiService = {
   addFilter: async (filterList: FilterList): Promise<number> => {
     //TODO: Need to populate with an ACTUAL provierId
     // Hardcoding it to id 0 (Anonymous) for now
-    if (filterList.providerId !== 0 && !filterList.providerId) {
-      filterList.providerId = 0;
+    const provider = AuthService.getAccount();
+
+    if (filterList.providerId !== 0 && !filterList.providerId && provider) {
+      filterList.providerId = provider.id as number;
     }
 
     const response = await axios.post(`${serverUri()}/filter`, filterList);
@@ -115,13 +118,34 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getProviderInfo: async (): Promise<Account> => {
-    const response = await axios.get(`${serverUri()}/provider`);
-    return response.data as Account;
+  getProvider: async (account: Account | string): Promise<Account | null> => {
+    const wallet =
+      typeof account === "string" ? account : account.walletAddress;
+
+    const response = await axios.get<Account | null>(
+      `${serverUri()}/provider/${wallet}`
+    );
+
+    if (!response.data) {
+      return null;
+    }
+
+    return {
+      ...(typeof account === "string" ? { walletAddress: wallet } : account),
+      ...response.data,
+    };
   },
 
-  updateProviderInfo: async (account: Account): Promise<void> => {
-    await axios.put(`${serverUri()}/provider_info`, account);
+  createProvider: async (wallet: string): Promise<Account> => {
+    return axios.post(`${serverUri()}/provider/${wallet}`);
+  },
+
+  updateProvider: async (account: Account): Promise<Account> => {
+    const response = await axios.put(`${serverUri()}/provider`, account);
+    return {
+      ...account,
+      ...response.data,
+    };
   },
 
   getOverrideCids: async (filterList: FilterList): Promise<string[]> => {

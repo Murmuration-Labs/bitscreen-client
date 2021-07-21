@@ -1,24 +1,22 @@
 import React from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 import {
   BrowserRouter as Router,
   Redirect,
   Route,
   RouteComponentProps,
 } from "react-router-dom";
-import Settings from "./Settings/Settings";
-import Filters from "./Filters/Filters";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
-import { Col, Container, Row } from "react-bootstrap";
-
-import FilterPage from "./Filters/FilterPage";
-import AccountContactPage from "./Contact/AccountContactPage";
-import PublicFilters from "./Public/PublicFilters";
-import { ToastContainer } from "react-toastify";
-
 import "./App.css";
-import "react-bootstrap-typeahead/css/Typeahead.css";
-import "react-toastify/dist/ReactToastify.css";
+import AccountContactPage from "./Contact/AccountContactPage";
+import FilterPage from "./Filters/FilterPage";
+import Filters from "./Filters/Filters";
+import PublicFilters from "./Public/PublicFilters";
+import Settings from "./Settings/Settings";
 
 interface MatchParams {
   id: string;
@@ -43,7 +41,7 @@ function App(): JSX.Element {
             <Route path="/account" exact component={AccountContactPage} />
             <Route path="/public" exact component={PublicFilters} />
             <Route exact path="/">
-              <Redirect to="/settings" />
+              <Redirect to="/account" />
             </Route>
           </Col>
         </Row>

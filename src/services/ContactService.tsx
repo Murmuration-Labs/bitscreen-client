@@ -3,7 +3,7 @@ import { Account } from "../pages/Contact/Interfaces";
 const ContactService = {
   emptyAccount: (): Account => {
     return {
-      fileCoinAddress: "",
+      walletAddress: "",
       businessName: "",
       website: "",
       email: "",
