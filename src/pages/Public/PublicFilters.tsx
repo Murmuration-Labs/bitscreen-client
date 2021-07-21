@@ -133,16 +133,12 @@ export default function PublicFilters() {
         mySort,
         searchedValue
       ).then((response) => {
-        setPublicFiltersData(response as Data[]);
+        setPublicFiltersData(response.data as Data[]);
+        setDataCount(response.count);
       });
     };
 
-    const getCountAllData = async () => {
-      await ApiService.getCountAllFilter(searchedValue).then(setDataCount);
-    };
-
     getAllData();
-    getCountAllData();
   }, [rowsPerPage, page, mySortBy, mySort, searchedValue]);
 
   const handleRequestSort = (
@@ -218,8 +214,8 @@ export default function PublicFilters() {
                       <Button
                         onClick={() => {
                           setPrefetch(
-                            `${remoteMarketplaceUri()}/filters/shared/${
-                              row._cryptId
+                            `${remoteMarketplaceUri()}/filter/share/${
+                              row.shareId
                             }`
                           );
                         }}

@@ -138,9 +138,15 @@ const ApiService = {
     mySortBy: string,
     mySort: string,
     searchedValue: string
-  ): Promise<FilterList[]> => {
+  ): Promise<{
+    data: FilterList[];
+    sort: any;
+    page: number;
+    per_page: number;
+    count: number;
+  }> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filters/public`,
+      `${remoteMarketplaceUri()}/filter/public`,
       {
         params: {
           per_page: rowsPerPage,
@@ -157,7 +163,7 @@ const ApiService = {
 
   getCountAllFilter: async (searchedValue: string): Promise<number> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filters/public/count`,
+      `${remoteMarketplaceUri()}/filter/public/count`,
       {
         params: {
           q: searchedValue,

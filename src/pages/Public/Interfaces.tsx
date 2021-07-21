@@ -11,12 +11,12 @@ export interface Data {
   cids: CidItem[];
   enabled: boolean;
   actions?: string;
-  _cryptId?: string;
+  shareId?: string;
   description?: string;
-  _id?: number;
+  id?: number;
 }
 export interface FilterList {
-  _id?: number;
+  id?: number;
   name: string;
   cids: string[];
   enabled: boolean;
