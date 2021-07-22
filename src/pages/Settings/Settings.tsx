@@ -35,9 +35,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   }, []);
 
   const putConfig = async (config: Config): Promise<void> => {
-    console.log("putting config", config);
     await axios.put(`${serverUri()}/config`, config);
-    console.log("config set", config);
   };
 
   const toggleBitScreen = async (): Promise<void> => {
@@ -92,13 +90,14 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     putConfig(newConfig);
   };
 
-  const setFilter = async (
-    event: FormEvent<HTMLDivElement>,
-    filterName: string
-  ): Promise<void> => {
-    event.persist();
-    configuration.filters[filterName] = !configuration.filters[filterName];
-
+  const setFilter = async (filterName: string): Promise<void> => {
+    setConfiguration({
+      ...configuration,
+      filters: {
+        ...configuration.filters,
+        [filterName]: !configuration.filters[filterName],
+      },
+    });
     putConfig(configuration);
   };
 
@@ -131,13 +130,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <h4>Filter CIDs</h4>
                   <FormGroup controlId={"external"}>
                     <FormCheck
-                      checked={
-                        configuration.filters
-                          ? configuration.filters.external
-                          : false
-                      }
+                      checked={configuration.filters.external}
                       onChange={(evt: FormEvent<HTMLDivElement>) =>
-                        setFilter(evt, "external")
+                        setFilter("external")
                       }
                       type="checkbox"
                       label="blocked by any node"
@@ -145,13 +140,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </FormGroup>
                   <FormGroup controlId={"internal"}>
                     <FormCheck
-                      checked={
-                        configuration.filters
-                          ? configuration.filters.internal
-                          : false
-                      }
+                      checked={configuration.filters.internal}
                       onChange={(evt: FormEvent<HTMLDivElement>) =>
-                        setFilter(evt, "internal")
+                        setFilter("internal")
                       }
                       type="checkbox"
                       label="on my custom lists"
