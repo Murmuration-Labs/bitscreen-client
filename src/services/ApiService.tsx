@@ -1,7 +1,11 @@
 import axios from "axios";
 import { remoteMarketplaceUri, serverUri } from "../config";
 import { Account } from "../pages/Contact/Interfaces";
-import { CidItem, FilterList } from "../pages/Filters/Interfaces";
+import {
+  CidItem,
+  FilterList,
+  ProviderFilter,
+} from "../pages/Filters/Interfaces";
 import * as AuthService from "./AuthService";
 
 // For authentication purposes we will use axios.createInstance
@@ -22,7 +26,14 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 };
 
 const ApiService = {
-  getFilters: async (searchTerm?: string): Promise<FilterList[]> => {
+  getFilters: async (searchTerm = ""): Promise<FilterList[]> => {
+    if (searchTerm) {
+      searchTerm += ";";
+    }
+
+    const providerId = AuthService.getProviderId();
+    searchTerm += "providerId=" + providerId;
+
     const query = searchTerm
       ? `filter/search?q=${searchTerm}`
       : `filter/search`;
@@ -32,49 +43,90 @@ const ApiService = {
   },
 
   addFilter: async (filterList: FilterList): Promise<number> => {
-    //TODO: Need to populate with an ACTUAL provierId
-    // Hardcoding it to id 0 (Anonymous) for now
-    const provider = AuthService.getAccount();
+    const providerId = AuthService.getProviderId();
 
-    if (filterList.providerId !== 0 && !filterList.providerId && provider) {
-      filterList.providerId = provider.id as number;
-    }
+    filterList.providerId = providerId;
 
     const response = await axios.post(`${serverUri()}/filter`, filterList);
-    return response.data.id;
+    const filterId = response.data.id;
+
+    const providerFilter: ProviderFilter = {
+      providerId,
+      filterId,
+      notes: filterList.notes,
+      active: filterList.enabled,
+    };
+    await axios.post(`${serverUri()}/providerfilter`, providerFilter);
+
+    return filterId;
   },
 
-  updateFilter: async (
-    filterList: FilterList | FilterList[]
-  ): Promise<FilterList[]> => {
-    const array = filterList as FilterList[];
+  addProviderFilter: async (providerFilter: ProviderFilter): Promise<void> => {
+    await axios.post(`${serverUri()}/providerfilter`, providerFilter);
+  },
 
-    if (array && array.length) {
-      const responses = await Promise.all(
-        array.map((filter) =>
-          axios.put<FilterList>(`${serverUri()}/filter/${filter.id}`, filter)
-        )
-      );
+  updateFilter: async (filters: FilterList[]): Promise<FilterList[]> => {
+    const importedFilters: FilterList[] = [];
+    const regularFilters: FilterList[] = [];
 
-      await Promise.all(array.flatMap((f) => cidsRequests(f)));
+    filters.forEach((filter) => {
+      // check for both undefined and null
+      if (filter.originId == null) {
+        regularFilters.push(filter);
+      } else {
+        importedFilters.push(filter);
+      }
+    });
 
-      return responses.map(({ data }) => data);
-    }
+    const currentProviderId = AuthService.getProviderId();
+    await Promise.all(
+      importedFilters.map((filter) => {
+        const providerFilter: ProviderFilter = {
+          notes: filter.notes,
+          active: filter.enabled,
+        };
+        const response = axios.put(
+          `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`,
+          providerFilter
+        );
 
-    const filter = filterList as FilterList;
-
-    const response = await axios.put(
-      `${serverUri()}/filter/${filter.id}`,
-      filter
+        return response;
+      })
     );
 
-    await Promise.all(cidsRequests(filter));
+    const responses = await Promise.all(
+      regularFilters.map((filter) => {
+        const providerFilter: ProviderFilter = {
+          notes: filter.notes,
+          active: filter.enabled,
+        };
+        axios.put(
+          `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`,
+          providerFilter
+        );
 
-    return [response.data];
+        const response = axios.put<FilterList>(
+          `${serverUri()}/filter/${filter.id}`,
+          filter
+        );
+
+        return response;
+      })
+    );
+
+    await Promise.all(regularFilters.flatMap((f) => cidsRequests(f)));
+
+    return responses.map(({ data }) => data);
   },
 
-  deleteFilter: async (id: number): Promise<void> => {
-    await axios.delete(`${serverUri()}/filter/${id}`);
+  deleteFilter: async (filter: FilterList): Promise<void> => {
+    const currentProviderId = AuthService.getProviderId();
+    await axios.delete(
+      `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`
+    );
+    if (!filter.originId) {
+      await axios.delete(`${serverUri()}/filter/${filter.id}`);
+    }
   },
 
   deleteCid: async (_cid: CidItem | CidItem[]) => {

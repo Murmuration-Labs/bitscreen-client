@@ -400,7 +400,7 @@ const FilterPage = (props) => {
   }, [showConfirmDelete, deletedFilterList]);
 
   const deleteCurrentFilter = async (): Promise<void> => {
-    ApiService.deleteFilter(filterList.id as number).then(() => {
+    ApiService.deleteFilter(filterList).then(() => {
       toast.success("Filter list deleted successfully");
       history.push("/filters");
     });
@@ -665,29 +665,31 @@ const FilterPage = (props) => {
                       Enabled?
                     </Form.Label>
                   </Form.Row>
-                  <Form.Row
-                    style={{
-                      marginLeft: 2,
-                      marginTop: -35,
-                      marginBottom: 20,
-                    }}
-                    onClick={() => toggleFilterOverride()}
-                  >
-                    <FormCheck
-                      readOnly
-                      type="switch"
-                      checked={filterOverride}
-                    />
-                    <Form.Label
+                  {!filterList.originId && (
+                    <Form.Row
                       style={{
-                        marginRight: 10,
-                        marginTop: 2,
+                        marginLeft: 2,
+                        marginTop: -35,
+                        marginBottom: 20,
                       }}
-                      className={"text-dim"}
+                      onClick={() => toggleFilterOverride()}
                     >
-                      Override?
-                    </Form.Label>
-                  </Form.Row>
+                      <FormCheck
+                        readOnly
+                        type="switch"
+                        checked={filterOverride}
+                      />
+                      <Form.Label
+                        style={{
+                          marginRight: 10,
+                          marginTop: 2,
+                        }}
+                        className={"text-dim"}
+                      >
+                        Override?
+                      </Form.Label>
+                    </Form.Row>
+                  )}
                   <Form.Row style={{ marginTop: -20 }}>
                     <Col>
                       <Form.Label className={"text-dim"}>

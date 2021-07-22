@@ -44,3 +44,14 @@ export const subscribe = (
     subscribers.splice(subscribers.indexOf(handler), 1);
   };
 };
+
+export const getProviderId = (): number => {
+  let providerId = 0;
+
+  const provider = getAccount();
+  if (provider?.id) {
+    providerId = provider.id;
+  }
+
+  return providerId;
+};

@@ -8,6 +8,7 @@ import {
   Table,
   FormCheck,
 } from "react-bootstrap";
+import { toast } from "react-toastify";
 import { css } from "@emotion/core";
 
 import "./Filters.css";
@@ -15,6 +16,7 @@ import "./Filters.css";
 import PuffLoader from "react-spinners/PuffLoader";
 import { FilterList, ImportFilterModalProps } from "./Interfaces";
 import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -91,7 +93,7 @@ export default function ImportFilterModal(
       const fl = await ApiService.fetchRemoteFilter(remoteFilterUri);
       setTimeout(() => {
         // small gimmick to see loader in action
-        setFetchedFilterList(fl);
+        setFetchedFilterList({ ...fl, notes: fetchedFilterList.notes });
         setIsFetchingRemoteFilter(false);
       }, 1500);
     } catch (e) {
@@ -109,9 +111,19 @@ export default function ImportFilterModal(
   const importFilter = async (): Promise<void> => {
     setIsSavingFetchedFilter(true);
 
-    fetchedFilterList.originId = remoteFilterUri;
-
-    await ApiService.addFilter(fetchedFilterList);
+    const currentProviderId = AuthService.getProviderId();
+    if (currentProviderId === fetchedFilterList.provider.id) {
+      toast.error(
+        "You cannot import your own filter! Please try to import an external filter."
+      );
+    } else {
+      await ApiService.addProviderFilter({
+        providerId: currentProviderId,
+        filterId: fetchedFilterList.id,
+        notes: fetchedFilterList.notes,
+        active: fetchedFilterList.enabled,
+      });
+    }
 
     setTimeout(() => {
       // small gimmick to see loader in action

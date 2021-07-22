@@ -38,6 +38,7 @@ import debounce from "lodash.debounce";
 import ImportFilterModal from "./ImportFilterModal";
 import { toast } from "react-toastify";
 import { serverUri } from "../../config";
+import * as AuthService from "../../services/AuthService";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -50,7 +51,7 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
-  const getFilters = async (searchTerm?: string) => {
+  const getFilters = async (searchTerm = "") => {
     const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
@@ -59,15 +60,14 @@ function Filters(): JSX.Element {
     setLoaded(true);
   };
 
-  const deleteFilter = async (id: number) => {
-    await ApiService.deleteFilter(id);
-
+  const deleteFilter = async (filter: FilterList) => {
+    await ApiService.deleteFilter(filter);
     await getFilters();
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter(filterList);
+    await ApiService.updateFilter([filterList]);
     await getFilters();
   };
 
@@ -76,7 +76,7 @@ function Filters(): JSX.Element {
   ): Promise<void> => {
     if (filterList.originId) return;
     filterList.override = !filterList.override;
-    await ApiService.updateFilter(filterList);
+    await ApiService.updateFilter([filterList]);
     await getFilters();
   };
 
@@ -107,7 +107,9 @@ function Filters(): JSX.Element {
   }, 300);
 
   const searchFilters = (event): void => {
-    debounceSearchFilters(event.target.value);
+    debounceSearchFilters(
+      event.target.value ? "cid=" + event.target.value : ""
+    );
   };
 
   const clipboardCopy = (cryptId) => {
@@ -252,15 +254,17 @@ function Filters(): JSX.Element {
                     </div>
                   </td>
                   <td>
-                    <div onClick={() => toggleFilterOverride(filterList)}>
-                      <FormCheck
-                        readOnly
-                        type="switch"
-                        checked={
-                          filterList.override ? filterList.override : false
-                        }
-                      />
-                    </div>
+                    {!filterList.originId && (
+                      <div onClick={() => toggleFilterOverride(filterList)}>
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={
+                            filterList.override ? filterList.override : false
+                          }
+                        />
+                      </div>
+                    )}
                   </td>
                   <td style={{ textAlign: "justify" }}>
                     <Link
@@ -539,7 +543,7 @@ function Filters(): JSX.Element {
               title={title}
               message={message}
               callback={() => {
-                deleteFilter(deletedFilterList.id ? deletedFilterList.id : 0);
+                deleteFilter(deletedFilterList);
               }}
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());

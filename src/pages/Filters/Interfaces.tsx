@@ -109,7 +109,16 @@ export interface FilterList {
   isBulkSelected?: boolean;
   description?: string;
   providerId: number;
+  provider?: any;
   notes?: string;
+}
+
+export interface ProviderFilter {
+  id?: number;
+  active: boolean;
+  notes?: string;
+  providerId?: number;
+  filterId?: number;
 }
 
 export interface CidListProps {
