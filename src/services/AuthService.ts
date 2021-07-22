@@ -31,7 +31,9 @@ export const getAccount = (): Account | null => {
   return account;
 };
 
-export const subscribe = (handler: any): (() => void) => {
+export const subscribe = (
+  handler: (account: Account) => void
+): (() => void) => {
   subscribers = [...subscribers, handler];
   return () => {
     const idx = subscribers.indexOf(handler);

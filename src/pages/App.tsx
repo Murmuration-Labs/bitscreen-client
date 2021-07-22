@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import {
@@ -17,6 +17,7 @@ import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
+import * as AuthService from "../services/AuthService";
 
 interface MatchParams {
   id: string;
@@ -25,6 +26,19 @@ interface MatchParams {
 export type RouterProps = RouteComponentProps<MatchParams>;
 
 function App(): JSX.Element {
+  const [provider, setProvider] = useState(AuthService.getAccount());
+
+  useEffect(() => {
+    const unsubscribe = AuthService.subscribe((acc) => setProvider(acc));
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const authHandler = (transition) => {
+    console.log(transition);
+  };
+
   return (
     <Router>
       <Header />
@@ -34,12 +48,42 @@ function App(): JSX.Element {
             <Navigation />
           </Col>
           <Col md={10} sm={9} className={"stage"}>
-            <Route path="/settings" exact component={Settings} />
-            <Route path="/filters" exact component={Filters} />
-            <Route path="/filters/edit/:id?" exact component={FilterPage} />
-            <Route path="/filters/new" exact component={FilterPage} />
+            <Route
+              path="/settings"
+              exact
+              component={provider ? Settings : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters"
+              exact
+              component={provider ? Filters : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters/edit/:id?"
+              exact
+              component={provider ? FilterPage : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters/new"
+              exact
+              component={provider ? FilterPage : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
             <Route path="/account" exact component={AccountContactPage} />
-            <Route path="/public" exact component={PublicFilters} />
+            <Route
+              path="/public"
+              exact
+              component={provider ? PublicFilters : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
             <Route exact path="/">
               <Redirect to="/account" />
             </Route>
