@@ -102,9 +102,7 @@ export default function AccountContactPage(): JSX.Element {
     }
 
     await ApiService.createProvider(plainWallet)
-      .then((newProvider) => {
-        setAccount(newProvider);
-      })
+      .then(logIn)
       .catch((_err) => {
         setLoggingIn(false);
         setErrorMessage("Error Logging In");
