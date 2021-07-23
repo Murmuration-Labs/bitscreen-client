@@ -56,13 +56,13 @@ const ApiService = {
       notes: filterList.notes,
       active: filterList.enabled,
     };
-    await axios.post(`${serverUri()}/providerfilter`, providerFilter);
+    await axios.post(`${serverUri()}/provider-filter`, providerFilter);
 
     return filterId;
   },
 
   addProviderFilter: async (providerFilter: ProviderFilter): Promise<void> => {
-    await axios.post(`${serverUri()}/providerfilter`, providerFilter);
+    await axios.post(`${serverUri()}/provider-filter`, providerFilter);
   },
 
   updateFilter: async (filters: FilterList[]): Promise<FilterList[]> => {
@@ -86,7 +86,7 @@ const ApiService = {
           active: filter.enabled,
         };
         const response = axios.put(
-          `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`,
+          `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`,
           providerFilter
         );
 
@@ -101,7 +101,7 @@ const ApiService = {
           active: filter.enabled,
         };
         axios.put(
-          `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`,
+          `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`,
           providerFilter
         );
 
@@ -122,7 +122,7 @@ const ApiService = {
   deleteFilter: async (filter: FilterList): Promise<void> => {
     const currentProviderId = AuthService.getProviderId();
     await axios.delete(
-      `${serverUri()}/providerfilter/${currentProviderId}/${filter.id}`
+      `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`
     );
     if (!filter.originId) {
       await axios.delete(`${serverUri()}/filter/${filter.id}`);
