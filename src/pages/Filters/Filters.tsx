@@ -1,5 +1,14 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import {
+  faEdit,
+  faEye,
+  faGlobe,
+  faShare,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import debounce from "lodash.debounce";
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
 import {
   Badge,
   Button,
@@ -13,7 +22,15 @@ import {
   Table,
   Tooltip,
 } from "react-bootstrap";
+import { OverlayInjectedProps } from "react-bootstrap/Overlay";
+import { Link, useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
+import { serverUri } from "../../config";
+import ApiService from "../../services/ApiService";
+import FilterService from "../../services/FilterService";
 import "./Filters.css";
+import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
   CidItem,
@@ -21,24 +38,6 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faEdit,
-  faEye,
-  faGlobe,
-  faTrash,
-  faShare,
-} from "@fortawesome/free-solid-svg-icons";
-import ApiService from "../../services/ApiService";
-import { OverlayInjectedProps } from "react-bootstrap/Overlay";
-import ConfirmModal from "../../components/Modal/ConfirmModal";
-import FilterService from "../../services/FilterService";
-import debounce from "lodash.debounce";
-import ImportFilterModal from "./ImportFilterModal";
-import { toast } from "react-toastify";
-import { serverUri } from "../../config";
-import * as AuthService from "../../services/AuthService";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
