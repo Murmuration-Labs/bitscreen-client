@@ -276,10 +276,22 @@ const FilterPage = (props) => {
   const cancelEdit = (editItem: CidItem, index: number) => {
     const cids = [...filterList.cids];
 
-    if (editItem.cid) {
-      editItem.edit = false;
+    // Not persisted case
+    if (typeof editItem.id === "undefined") {
+      // This alters the array
+      cids.splice(index, 1);
 
-      cids[index] = editItem;
+      return saveFilter({
+        ...filterList,
+        cids,
+      });
+    }
+
+    if (editItem.cid) {
+      cids[index] = {
+        ...editItem,
+        edit: false,
+      };
       updateIsAnyCidSelected(cids);
 
       saveFilter({
