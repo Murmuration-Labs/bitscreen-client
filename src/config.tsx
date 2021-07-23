@@ -1,4 +1,7 @@
-const environment = process.env.REACT_APP_ENV || process.env.NODE_ENV;
+// process.env.NODE_ENV is automatically set by react-scripts from package.json
+// react-scripts start -> process.env.NODE_ENV = "development"
+// react-scripts build -> process.env.NODE_ENV = "production"
+const environment = process.env.NODE_ENV;
 
 export const serverUri = (): string => {
   switch (environment) {
