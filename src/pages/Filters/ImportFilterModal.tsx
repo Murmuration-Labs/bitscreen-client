@@ -34,9 +34,9 @@ export default function ImportFilterModal(
 ): JSX.Element {
   const [remoteFilterUri, setRemoteFilterUri] = useState<string>("");
   const [remoteFilterError, setRemoteFilterError] = useState<boolean>(false);
-  const [fetchedFilterList, setFetchedFilterList] = useState<FilterList>(
-    FilterService.emptyFilterList()
-  );
+  const [fetchedFilterList, setFetchedFilterList] = useState<
+    FilterList | undefined
+  >(props.filter);
   const [isFetchingRemoteFilter, setIsFetchingRemoteFilter] =
     useState<boolean>(false);
 
@@ -56,7 +56,7 @@ export default function ImportFilterModal(
   };
 
   const renderReviewFilterList = (): JSX.Element => {
-    if (!fetchedFilterList.name || isSavingFetchedFilter) {
+    if (!fetchedFilterList?.name || isSavingFetchedFilter) {
       return <></>;
     }
 
@@ -75,13 +75,6 @@ export default function ImportFilterModal(
               <th>{fetchedFilterList.cids.length} CIDS</th>
             </tr>
           </thead>
-          <tbody>
-            {fetchedFilterList.cids.map((x) => (
-              <tr>
-                <td>{FilterService.renderHashedCid(x)}</td>
-              </tr>
-            ))}
-          </tbody>
         </Table>
       </>
     );
@@ -93,7 +86,7 @@ export default function ImportFilterModal(
       const fl = await ApiService.fetchRemoteFilter(remoteFilterUri);
       setTimeout(() => {
         // small gimmick to see loader in action
-        setFetchedFilterList({ ...fl, notes: fetchedFilterList.notes });
+        setFetchedFilterList({ ...fl, notes: fetchedFilterList?.notes });
         setIsFetchingRemoteFilter(false);
       }, 1500);
     } catch (e) {
@@ -112,16 +105,16 @@ export default function ImportFilterModal(
     setIsSavingFetchedFilter(true);
 
     const currentProviderId = AuthService.getProviderId();
-    if (currentProviderId === fetchedFilterList.provider.id) {
+    if (currentProviderId === fetchedFilterList?.provider.id) {
       toast.error(
         "You cannot import your own filter! Please try to import an external filter."
       );
     } else {
       await ApiService.addProviderFilter({
         providerId: currentProviderId,
-        filterId: fetchedFilterList.id,
-        notes: fetchedFilterList.notes,
-        active: fetchedFilterList.enabled,
+        filterId: fetchedFilterList?.id,
+        notes: fetchedFilterList?.notes,
+        active: !!fetchedFilterList?.enabled,
       });
     }
 
@@ -146,7 +139,7 @@ export default function ImportFilterModal(
   }
 
   const renderActionButtons = (): JSX.Element => {
-    if (!fetchedFilterList.name) {
+    if (!fetchedFilterList?.name) {
       return (
         <>
           <Button
@@ -203,7 +196,7 @@ export default function ImportFilterModal(
                     placeholder="Remote filter URI"
                     value={remoteFilterUri}
                     disabled={
-                      isFetchingRemoteFilter || !!fetchedFilterList.name
+                      isFetchingRemoteFilter || !!fetchedFilterList?.name
                     }
                   />
                   {renderFilterError()}
@@ -236,14 +229,16 @@ export default function ImportFilterModal(
                   <Form.Control
                     role="notes"
                     onChange={(ev: ChangeEvent<HTMLInputElement>) => {
-                      setFetchedFilterList({
-                        ...fetchedFilterList,
-                        notes: ev.target.value,
-                      });
+                      if (fetchedFilterList) {
+                        setFetchedFilterList({
+                          ...fetchedFilterList,
+                          notes: ev.target.value,
+                        });
+                      }
                     }}
                     as="textarea"
                     placeholder="List Notes"
-                    value={fetchedFilterList.notes}
+                    value={fetchedFilterList?.notes}
                   />
                 </Col>
               </Form.Row>

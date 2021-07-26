@@ -41,10 +41,8 @@ import {
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
-  // const [filtersCache, setFiltersCache] = useState<string>("");
 
   const [loaded, setLoaded] = useState<boolean>(false);
-  // const [enabled, setEnabled] = useState<boolean>(true);
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
@@ -54,7 +52,6 @@ function Filters(): JSX.Element {
     const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
-    // setFiltersCache(JSON.stringify(filterLists));
 
     setLoaded(true);
   };

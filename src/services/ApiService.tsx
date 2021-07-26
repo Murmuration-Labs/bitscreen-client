@@ -231,6 +231,7 @@ const ApiService = {
             [mySortBy]: mySort,
           },
           q: searchedValue,
+          providerId: AuthService.getProviderId(),
         },
       }
     );

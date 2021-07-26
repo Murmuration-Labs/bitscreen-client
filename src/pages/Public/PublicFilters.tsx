@@ -13,9 +13,9 @@ import React, { useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
-import { remoteMarketplaceUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
+import { FilterList } from "../Filters/Interfaces";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
 
@@ -119,10 +119,12 @@ export default function PublicFilters() {
   const [searchedValue, setSearchedValue] = React.useState("");
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
   const [prefetch, setPrefetch] = useState<string>("");
+  const [toBeImportedFilter, setToBeImportedFilter] =
+    useState<FilterList | null>(null);
 
   useEffect(() => {
-    setShowImportFilter(!!prefetch);
-  }, [prefetch]);
+    setShowImportFilter(!!prefetch || !!toBeImportedFilter);
+  }, [prefetch, toBeImportedFilter]);
 
   useEffect(() => {
     const getAllData = async () => {
@@ -199,25 +201,19 @@ export default function PublicFilters() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
               {publicFiltersData.map((row, index) => {
                 return (
-                  <TableRow key={row.name}>
+                  <TableRow key={index}>
                     <TableCell>{row.name}</TableCell>
                     <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
-                    {/*<TableCell>*/}
-                    {/*  {row.enabled ? (*/}
-                    {/*    <CheckCircleIcon style={{ color: "green" }} />*/}
-                    {/*  ) : (*/}
-                    {/*    <CancelIcon color="secondary" />*/}
-                    {/*  )}*/}
-                    {/*</TableCell>*/}
                     <TableCell>{row.description}</TableCell>
                     <TableCell>
                       <Button
                         onClick={() => {
-                          setPrefetch(
-                            `${remoteMarketplaceUri()}/filter/share/${
-                              row.shareId
-                            }`
-                          );
+                          // setPrefetch(
+                          //   `${remoteMarketplaceUri()}/filter/share/${
+                          //     row.shareId
+                          //   }`
+                          // );
+                          setToBeImportedFilter(row as FilterList);
                         }}
                         variant="primary"
                       >
@@ -246,19 +242,23 @@ export default function PublicFilters() {
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
 
-      <ImportFilterModal
-        closeCallback={async (refreshParent = false): Promise<void> => {
-          setPrefetch("");
-          if (refreshParent) {
-            console.log(
-              "import filter closed, refresh parent is",
-              refreshParent
-            );
-          }
-        }}
-        show={showImportFilter}
-        prefetch={prefetch}
-      />
+      {toBeImportedFilter && (
+        <ImportFilterModal
+          closeCallback={async (refreshParent = false): Promise<void> => {
+            setPrefetch("");
+            setToBeImportedFilter(null);
+            if (refreshParent) {
+              console.log(
+                "import filter closed, refresh parent is",
+                refreshParent
+              );
+            }
+          }}
+          filter={toBeImportedFilter}
+          show={showImportFilter}
+          prefetch={prefetch}
+        />
+      )}
     </Container>
   );
 }

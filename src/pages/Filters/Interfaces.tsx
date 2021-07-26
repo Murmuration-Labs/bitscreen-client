@@ -68,6 +68,7 @@ export interface MoveCIDModalProps {
 
 export interface ImportFilterModalProps {
   prefetch?: string;
+  filter?: FilterList;
   closeCallback: (refreshParent: boolean) => Promise<void>;
   show: boolean;
 }
