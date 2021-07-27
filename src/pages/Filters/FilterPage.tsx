@@ -424,7 +424,7 @@ const FilterPage = (props) => {
     selBox.style.left = "0";
     selBox.style.top = "0";
     selBox.style.opacity = "0";
-    selBox.value = serverUri() + "/filters/shared/" + cryptId;
+    selBox.value = serverUri() + "/filter/share/" + cryptId;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
@@ -645,18 +645,20 @@ const FilterPage = (props) => {
                         </Form.Control>
                       </Form.Group>
                     </Col>
-                    <Col>
-                      {checkViewType() !== ViewTypes.Imported && (
-                        <Button
-                          variant="primary"
-                          onClick={() => {
-                            clipboardCopy(filterList["_cryptId"]);
-                          }}
-                        >
-                          Direct share
-                        </Button>
-                      )}
-                    </Col>
+                    {filterList.id && (
+                      <Col>
+                        {checkViewType() !== ViewTypes.Imported && (
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              clipboardCopy(filterList.shareId);
+                            }}
+                          >
+                            Direct share
+                          </Button>
+                        )}
+                      </Col>
+                    )}
                   </Form.Row>
                   <Form.Row
                     style={{
