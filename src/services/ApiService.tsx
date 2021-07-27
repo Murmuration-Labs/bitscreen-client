@@ -149,7 +149,9 @@ const ApiService = {
   },
 
   fetchRemoteFilter: async (filterUri: string): Promise<FilterList> => {
-    const response = await axios.get(filterUri);
+    const response = await axios.get(
+      `${filterUri}?providerId=${AuthService.getProviderId()}`
+    );
     return response.data as FilterList;
   },
 
