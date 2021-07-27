@@ -31,28 +31,6 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = "asc" | "desc";
 
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key
-): (
-  a: { [key in Key]: number | string | boolean },
-  b: { [key in Key]: number | string | boolean }
-) => number {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
-
 const headCells: HeadCell[] = [
   { id: "name", numeric: false, label: "Filter Name" },
   { id: "cids", numeric: true, label: "# of CIDs" },
@@ -128,23 +106,21 @@ export default function PublicFilters() {
   }, [prefetch, toBeImportedFilter]);
 
   useEffect(() => {
-    if (needsRefresh) {
-      setNeedsRefresh(false);
-      const getAllData = async () => {
-        await ApiService.getAllFilters(
-          page,
-          rowsPerPage,
-          mySortBy,
-          mySort,
-          searchedValue
-        ).then((response) => {
-          setPublicFiltersData(response.data as Data[]);
-          setDataCount(response.count);
-        });
-      };
+    setNeedsRefresh(false);
+    const getAllData = async () => {
+      await ApiService.getAllFilters(
+        page,
+        rowsPerPage,
+        mySortBy,
+        mySort,
+        searchedValue
+      ).then((response) => {
+        setPublicFiltersData(response.data as Data[]);
+        setDataCount(response.count);
+      });
+    };
 
-      getAllData();
-    }
+    getAllData();
   }, [rowsPerPage, page, mySortBy, mySort, searchedValue, needsRefresh]);
 
   const handleRequestSort = (

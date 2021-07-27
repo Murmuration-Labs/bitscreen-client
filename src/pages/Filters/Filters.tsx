@@ -101,7 +101,7 @@ function Filters(): JSX.Element {
   const debounceSearchFilters = debounce(() => getFilters(), 300);
 
   const searchFilters = (event): void => {
-    setSearchTerm(event.target.value ? `cid=${event.target.value}` : "");
+    setSearchTerm(event.target.value);
   };
 
   const clipboardCopy = (cryptId) => {
