@@ -41,14 +41,14 @@ import {
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
-
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
   };
 
-  const getFilters = async (searchTerm = "") => {
+  const getFilters = async () => {
     const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
@@ -98,14 +98,10 @@ function Filters(): JSX.Element {
     setDeletedFilterList(filterList);
   };
 
-  const debounceSearchFilters = debounce((searchTerm): void => {
-    getFilters(searchTerm);
-  }, 300);
+  const debounceSearchFilters = debounce(() => getFilters(), 300);
 
   const searchFilters = (event): void => {
-    debounceSearchFilters(
-      event.target.value ? "cid=" + event.target.value : ""
-    );
+    setSearchTerm(event.target.value ? `cid=${event.target.value}` : "");
   };
 
   const clipboardCopy = (cryptId) => {
@@ -166,6 +162,10 @@ function Filters(): JSX.Element {
     return (
       <div className={"card"}>
         <div className={"card-container"}>
+          <p>
+            {filterLists ? filterLists.length : "0"} result
+            {filterLists.length === 1 ? "" : "s"} found
+          </p>
           <Table>
             <thead>
               <tr>
@@ -296,8 +296,8 @@ function Filters(): JSX.Element {
   };
 
   useEffect(() => {
-    void getFilters();
-  }, []);
+    debounceSearchFilters();
+  }, [searchTerm]);
 
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
 
