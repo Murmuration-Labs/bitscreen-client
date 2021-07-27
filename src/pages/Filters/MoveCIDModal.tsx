@@ -13,7 +13,9 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
 
   const renderTitle = (cidItems: CidItem[]): JSX.Element => {
     const titleText =
-      "Move CIDs: " +
+      "Move " +
+      cidItems.length +
+      " CIDs: " +
       cidItems.reduce((result, item) => result + item.cid + ", ", "");
     return <Modal.Title>{titleText.slice(0, -2)}</Modal.Title>;
   };
@@ -27,6 +29,7 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
     >
       <Modal.Header closeButton>{renderTitle(props.cidItems)}</Modal.Header>
       <Modal.Body>
+        <p> Choose another filter list to move CID(s): </p>
         <Typeahead
           id="typeahead-autocomplete"
           labelKey="name"
