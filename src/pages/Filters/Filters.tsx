@@ -502,7 +502,7 @@ function Filters(): JSX.Element {
                   <Form.Group controlId="search">
                     <Form.Control
                       type="text"
-                      placeholder="Search CID"
+                      placeholder="Search CID or Filter Name"
                       onChange={searchFilters}
                     />
                   </Form.Group>
