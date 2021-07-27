@@ -38,6 +38,7 @@ const FilterPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [alertUnsaved, setAlertUnsaved] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isImported, setIsimported] = useState<boolean>(false);
   const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
 
   const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
@@ -84,6 +85,9 @@ const FilterPage = (props) => {
           cids: cidItems,
         };
 
+        if (fl.originId) {
+          setIsimported(true);
+        }
         setFilterList(fl);
         setInitialFilterList({ ...fl });
         setLoaded(true);
@@ -407,8 +411,14 @@ const FilterPage = (props) => {
   };
 
   useEffect(() => {
-    setTitle(`Delete filter ${filterList.id}`);
-    setMessage(`Are you sure you want to delete filter "${filterList.name}?"`);
+    const title = isImported
+      ? `Discard filter ${filterList.id}`
+      : `Delete filter ${filterList.id}`;
+    const message = isImported
+      ? `Are you sure you want to discard filter "${filterList.name}?"`
+      : `Are you sure you want to delete filter "${filterList.name}?"`;
+    setTitle(title);
+    setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
   const deleteCurrentFilter = async (): Promise<void> => {
@@ -523,7 +533,7 @@ const FilterPage = (props) => {
             }}
             as="textarea"
             placeholder="Notes"
-            value={filterList.notes}
+            value={filterList.notes || ""}
           />
         </Col>
       </Form.Row>
@@ -554,7 +564,7 @@ const FilterPage = (props) => {
           }}
           style={{ float: "right", marginRight: -30 }}
         >
-          Delete
+          {isImported ? "Discard" : "Delete"}
         </Button>
       </Col>
     );
@@ -608,7 +618,6 @@ const FilterPage = (props) => {
                       />
                     </Col>
                   </Form.Row>
-
                   <Form.Row>
                     <Col>
                       <Form.Control
