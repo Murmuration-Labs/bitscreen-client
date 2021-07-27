@@ -243,7 +243,7 @@ export default function PublicFilters() {
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
       {toBeImportedFilter && (

@@ -121,10 +121,14 @@ function Filters(): JSX.Element {
   };
 
   useEffect(() => {
-    setTitle(`Delete filter ${deletedFilterList.id}`);
-    setMessage(
-      `Are you sure you want to delete filter "${deletedFilterList.name}?"`
-    );
+    let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
+    let title = `Delete filter ${deletedFilterList.id}`;
+    if (deletedFilterList.originId) {
+      message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
+      title = `Discard filter ${deletedFilterList.id}`;
+    }
+    setTitle(title);
+    setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
   const CIDFilterShared = (props: FilterList): JSX.Element => {
