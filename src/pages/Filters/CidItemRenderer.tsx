@@ -33,6 +33,9 @@ export default function CidItemRender(props: CidItemProps) {
   const [cidInputRef, setCidInputRef] = useState<RefObject<HTMLInputElement>>(
     React.createRef<HTMLInputElement>()
   );
+  const [cidUrlInputRef, setCidUrlInputRef] = useState<
+    RefObject<HTMLInputElement>
+  >(React.createRef<HTMLInputElement>());
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isOverrideFilter, setIsOverrideFilter] = useState<boolean>(false);
   const [overrideCid, setOverrideCid] = useState<boolean>(false);
@@ -75,6 +78,9 @@ export default function CidItemRender(props: CidItemProps) {
     if (field === "cid") {
       item.cid = value;
     }
+    if (field == "refUrl") {
+      item.refUrl = value;
+    }
     return item;
   };
 
@@ -105,6 +111,16 @@ export default function CidItemRender(props: CidItemProps) {
     if (value !== null) {
       updatedItem = updateItemField("cid", value, updatedItem);
       // setCidItem({ ...updatedItem, edit: false });
+      props.changeCidValue(updatedItem, props.index);
+    }
+  };
+
+  const hangleChangeCidUrlValue = (e: any): void => {
+    const ref = cidUrlInputRef.current;
+    const value = ref !== null ? ref.value : null;
+    let updatedItem: CidItem = { ...cidItem };
+    if (value !== null) {
+      updatedItem = updateItemField("refUrl", value, updatedItem);
       props.changeCidValue(updatedItem, props.index);
     }
   };
@@ -239,6 +255,14 @@ export default function CidItemRender(props: CidItemProps) {
                 defaultValue={cidItem.cid}
                 onChange={hangleChangeCidValue}
               />
+              <Form.Label style={{ marginRight: 3 }}>URL:</Form.Label>
+              <Form.Control
+                ref={cidUrlInputRef}
+                type="text"
+                placeholder=""
+                defaultValue={cidItem.refUrl ?? ""}
+                onChange={hangleChangeCidUrlValue}
+              />
               <Button className="k-button" onClick={handleSave}>
                 Save
               </Button>
@@ -294,6 +318,26 @@ export default function CidItemRender(props: CidItemProps) {
                   }}
                 >
                   {FilterService.renderHashedCid(cidItem, false)}
+                </Form.Label>
+                <Form.Label
+                  style={{
+                    marginLeft: 10,
+                  }}
+                >
+                  {cidItem.refUrl ? (
+                    <a
+                      href={cidItem.refUrl}
+                      style={{
+                        fontSize: 19,
+                        fontWeight: "normal",
+                        color: "blue",
+                      }}
+                    >
+                      (See complaint)
+                    </a>
+                  ) : (
+                    ""
+                  )}
                 </Form.Label>
               </Col>
               <Col sm={12} md={12} lg={4}>

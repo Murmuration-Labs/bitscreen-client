@@ -16,10 +16,12 @@ const cidsRequests = ({ id, cids }: FilterList) => {
     typeof cid.id === "number"
       ? axios.put<CidItem>(`${serverUri()}/cid/${cid.id}`, {
           cid: cid.cid,
+          refUrl: cid.refUrl,
           filterId: id,
         })
       : axios.post<CidItem>(`${serverUri()}/cid`, {
           cid: cid.cid,
+          refUrl: cid.refUrl,
           filterId: id,
         })
   );
