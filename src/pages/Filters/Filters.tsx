@@ -504,6 +504,13 @@ function Filters(): JSX.Element {
                       type="text"
                       placeholder="Search CID or Filter Name"
                       onChange={searchFilters}
+                      onKeyDown={(
+                        event: React.KeyboardEvent<HTMLInputElement>
+                      ) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                        }
+                      }}
                     />
                   </Form.Group>
                 </Form>
