@@ -121,27 +121,31 @@ export default function PublicFilters() {
   const [prefetch, setPrefetch] = useState<string>("");
   const [toBeImportedFilter, setToBeImportedFilter] =
     useState<FilterList | null>(null);
+  const [needsRefresh, setNeedsRefresh] = useState(true);
 
   useEffect(() => {
     setShowImportFilter(!!prefetch || !!toBeImportedFilter);
   }, [prefetch, toBeImportedFilter]);
 
   useEffect(() => {
-    const getAllData = async () => {
-      await ApiService.getAllFilters(
-        page,
-        rowsPerPage,
-        mySortBy,
-        mySort,
-        searchedValue
-      ).then((response) => {
-        setPublicFiltersData(response.data as Data[]);
-        setDataCount(response.count);
-      });
-    };
+    if (needsRefresh) {
+      setNeedsRefresh(false);
+      const getAllData = async () => {
+        await ApiService.getAllFilters(
+          page,
+          rowsPerPage,
+          mySortBy,
+          mySort,
+          searchedValue
+        ).then((response) => {
+          setPublicFiltersData(response.data as Data[]);
+          setDataCount(response.count);
+        });
+      };
 
-    getAllData();
-  }, [rowsPerPage, page, mySortBy, mySort, searchedValue]);
+      getAllData();
+    }
+  }, [rowsPerPage, page, mySortBy, mySort, searchedValue, needsRefresh]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -244,15 +248,10 @@ export default function PublicFilters() {
 
       {toBeImportedFilter && (
         <ImportFilterModal
-          closeCallback={async (refreshParent = false): Promise<void> => {
+          closeCallback={async (_needsRefresh = false): Promise<void> => {
             setPrefetch("");
             setToBeImportedFilter(null);
-            if (refreshParent) {
-              console.log(
-                "import filter closed, refresh parent is",
-                refreshParent
-              );
-            }
+            setNeedsRefresh(_needsRefresh);
           }}
           filter={toBeImportedFilter}
           show={showImportFilter}
