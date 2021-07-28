@@ -63,7 +63,7 @@ function Filters(): JSX.Element {
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList]);
+    await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
 
@@ -72,7 +72,7 @@ function Filters(): JSX.Element {
   ): Promise<void> => {
     if (filterList.originId) return;
     filterList.override = !filterList.override;
-    await ApiService.updateFilter([filterList]);
+    await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
 
@@ -343,7 +343,7 @@ function Filters(): JSX.Element {
         enabled,
       }));
 
-    await ApiService.updateFilter(selectedFilters);
+    await ApiService.updateFilter(selectedFilters, false);
 
     // update in front as well
     for (let i = 0; i < filterLists.length; i++) {
