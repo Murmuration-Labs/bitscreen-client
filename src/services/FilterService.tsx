@@ -1,29 +1,30 @@
-import { FilterList, Visibility } from "../pages/Filters/Interfaces";
 import React from "react";
+import { CidItem, FilterList, Visibility } from "../pages/Filters/Interfaces";
 
 const FilterService = {
   emptyFilterList: (): FilterList => {
     return {
-      _id: 0,
+      id: 0,
       name: "",
       cids: [],
       visibility: Visibility.Private,
       enabled: true,
       override: false,
+      providerId: 0,
       description: "",
     };
   },
-  renderHashedCid: (hashedCid: string, short = true): JSX.Element => {
+  renderHashedCid: ({ cid }: CidItem, short = true): JSX.Element => {
     if (short) {
       return (
         <span className="mono-hashes">
-          {hashedCid.substr(0, 16)}...
-          {hashedCid.substr(hashedCid.length - 10, 10)}
+          {cid.substr(0, 16)}...
+          {cid.substr(cid.length - 10, 10)}
         </span>
       );
     }
 
-    return <span className="mono-hashes">{hashedCid}</span>;
+    return <span className="mono-hashes">{cid}</span>;
   },
 };
 

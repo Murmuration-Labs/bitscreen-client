@@ -1,5 +1,14 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import {
+  faEdit,
+  faEye,
+  faGlobe,
+  faShare,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import debounce from "lodash.debounce";
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
 import {
   Badge,
   Button,
@@ -13,69 +22,57 @@ import {
   Table,
   Tooltip,
 } from "react-bootstrap";
+import { OverlayInjectedProps } from "react-bootstrap/Overlay";
+import { Link, useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
+import { serverUri } from "../../config";
+import ApiService from "../../services/ApiService";
+import FilterService from "../../services/FilterService";
 import "./Filters.css";
+import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
+  CidItem,
   FilterList,
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faEdit,
-  faEye,
-  faGlobe,
-  faTrash,
-  faShare,
-} from "@fortawesome/free-solid-svg-icons";
-import ApiService from "../../services/ApiService";
-import { OverlayInjectedProps } from "react-bootstrap/Overlay";
-import ConfirmModal from "../../components/Modal/ConfirmModal";
-import FilterService from "../../services/FilterService";
-import debounce from "lodash.debounce";
-import ImportFilterModal from "./ImportFilterModal";
-import { toast } from "react-toastify";
-import { serverUri } from "../../config";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
-  // const [filtersCache, setFiltersCache] = useState<string>("");
-
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
-  // const [enabled, setEnabled] = useState<boolean>(true);
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
   };
 
-  const getFilters = async (searchTerm?: string) => {
+  const getFilters = async () => {
     const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
-    // setFiltersCache(JSON.stringify(filterLists));
 
     setLoaded(true);
   };
 
-  const deleteFilter = async (id: number) => {
-    await ApiService.deleteFilter(id);
-
+  const deleteFilter = async (filter: FilterList) => {
+    await ApiService.deleteFilter(filter);
     await getFilters();
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter(filterList);
+    await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
 
   const toggleFilterOverride = async (
     filterList: FilterList
   ): Promise<void> => {
-    if (filterList.origin) return;
+    if (filterList.originId) return;
     filterList.override = !filterList.override;
-    await ApiService.updateFilter(filterList);
+    await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
 
@@ -101,12 +98,10 @@ function Filters(): JSX.Element {
     setDeletedFilterList(filterList);
   };
 
-  const debounceSearchFilters = debounce((searchTerm): void => {
-    getFilters(searchTerm);
-  }, 300);
+  const debounceSearchFilters = debounce(() => getFilters(), 300);
 
   const searchFilters = (event): void => {
-    debounceSearchFilters(event.target.value);
+    setSearchTerm(event.target.value);
   };
 
   const clipboardCopy = (cryptId) => {
@@ -116,7 +111,7 @@ function Filters(): JSX.Element {
     selBox.style.left = "0";
     selBox.style.top = "0";
     selBox.style.opacity = "0";
-    selBox.value = serverUri() + "/filters/shared/" + cryptId;
+    selBox.value = serverUri() + "/filter/share/" + cryptId;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
@@ -126,14 +121,18 @@ function Filters(): JSX.Element {
   };
 
   useEffect(() => {
-    setTitle(`Delete filter ${deletedFilterList._id}`);
-    setMessage(
-      `Are you sure you want to delete filter "${deletedFilterList.name}?"`
-    );
+    let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
+    let title = `Delete filter ${deletedFilterList.id}`;
+    if (deletedFilterList.originId) {
+      message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
+      title = `Discard filter ${deletedFilterList.id}`;
+    }
+    setTitle(title);
+    setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
   const CIDFilterShared = (props: FilterList): JSX.Element => {
-    if (props.origin) {
+    if (props.originId) {
       return <FontAwesomeIcon icon={faGlobe as IconProp} />;
     }
 
@@ -156,7 +155,7 @@ function Filters(): JSX.Element {
   };
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
-    if (props.origin) {
+    if (props.originId) {
       return <FontAwesomeIcon icon={faEye as IconProp} />;
     }
 
@@ -167,6 +166,10 @@ function Filters(): JSX.Element {
     return (
       <div className={"card"}>
         <div className={"card-container"}>
+          <p>
+            {filterLists ? filterLists.length : "0"} result
+            {filterLists.length === 1 ? "" : "s"} found
+          </p>
           <Table>
             <thead>
               <tr>
@@ -182,7 +185,7 @@ function Filters(): JSX.Element {
             </thead>
             <tbody>
               {filterLists.map((filterList) => (
-                <tr key={`filterList-${filterList._id}`}>
+                <tr key={`filterList-${filterList.id}`}>
                   <td>
                     <Form.Check
                       type="checkbox"
@@ -195,7 +198,7 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <Link
-                      to={`/filters/edit/${filterList._id}`}
+                      to={`/filters/edit/${filterList.id}`}
                       className="double-space-left"
                     >
                       {filterList.name}
@@ -215,13 +218,15 @@ function Filters(): JSX.Element {
                         transition={false}
                         overlay={(props: OverlayInjectedProps): JSX.Element => (
                           <Tooltip id="button-tooltip" {...props}>
-                            {filterList.cids.map((cid, index) => (
-                              <p key={`cid-${filterList._id}-${index}`}>
-                                {filterList.origin
-                                  ? FilterService.renderHashedCid(cid)
-                                  : cid}
-                              </p>
-                            ))}
+                            {filterList.cids.map(
+                              (cidItem: CidItem, index: number) => (
+                                <p key={`cid-${filterList.id}-${index}`}>
+                                  {filterList.originId
+                                    ? FilterService.renderHashedCid(cidItem)
+                                    : cidItem.cid}
+                                </p>
+                              )
+                            )}
                           </Tooltip>
                         )}
                       >
@@ -249,19 +254,21 @@ function Filters(): JSX.Element {
                     </div>
                   </td>
                   <td>
-                    <div onClick={() => toggleFilterOverride(filterList)}>
-                      <FormCheck
-                        readOnly
-                        type="switch"
-                        checked={
-                          filterList.override ? filterList.override : false
-                        }
-                      />
-                    </div>
+                    {!filterList.originId && (
+                      <div onClick={() => toggleFilterOverride(filterList)}>
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={
+                            filterList.override ? filterList.override : false
+                          }
+                        />
+                      </div>
+                    )}
                   </td>
                   <td style={{ textAlign: "justify" }}>
                     <Link
-                      to={`/filters/edit/${filterList._id}`}
+                      to={`/filters/edit/${filterList.id}`}
                       className="double-space-left"
                     >
                       {editOrEyeIcon(filterList)}
@@ -273,13 +280,15 @@ function Filters(): JSX.Element {
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    <Link
-                      to="#"
-                      onClick={() => clipboardCopy(filterList["_cryptId"])}
-                      className="double-space-left"
-                    >
-                      <FontAwesomeIcon icon={faShare as IconProp} />
-                    </Link>
+                    {!filterList.originId && (
+                      <Link
+                        to="#"
+                        onClick={() => clipboardCopy(filterList.shareId)}
+                        className="double-space-left"
+                      >
+                        <FontAwesomeIcon icon={faShare as IconProp} />
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -291,8 +300,8 @@ function Filters(): JSX.Element {
   };
 
   useEffect(() => {
-    void getFilters();
-  }, []);
+    debounceSearchFilters();
+  }, [searchTerm]);
 
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
 
@@ -311,35 +320,30 @@ function Filters(): JSX.Element {
   }, [filterLists]);
 
   const beginBulkSetEnabled = (enabled: boolean): void => {
-    const selected = filterLists
-      .filter((x) => x.isBulkSelected)
-      .map((x) => ({
-        _id: x._id,
-        enabled,
-      }));
+    const selectedFilters = filterLists.filter((x) => x.isBulkSelected);
 
     if (enabled) {
       setShowConfirmEnableBulkAction(true);
       setConfirmEnableBulkActionMessage(
-        `Are you sure you want to enable ${selected.length} items?`
+        `Are you sure you want to enable ${selectedFilters.length} items?`
       );
     } else {
       setShowConfirmDisableBulkAction(true);
       setConfirmDisableBulkActionMessage(
-        `Are you sure you want to disable ${selected.length} items?`
+        `Are you sure you want to disable ${selectedFilters.length} items?`
       );
     }
   };
 
   const bulkSetEnabled = async (enabled: boolean): Promise<void> => {
-    const selected = filterLists
+    const selectedFilters = filterLists
       .filter((x) => x.isBulkSelected)
       .map((x) => ({
-        _id: x._id,
+        ...x,
         enabled,
       }));
 
-    await ApiService.updateFilter(selected as FilterList[]);
+    await ApiService.updateFilter(selectedFilters, false);
 
     // update in front as well
     for (let i = 0; i < filterLists.length; i++) {
@@ -368,7 +372,7 @@ function Filters(): JSX.Element {
         break;
 
       case BulkSelectedType.Imported:
-        conditional = (x: FilterList) => !!x.origin;
+        conditional = (x: FilterList) => !!x.originId;
         break;
 
       default:
@@ -493,15 +497,20 @@ function Filters(): JSX.Element {
                 </Row>
               </Col>
               <Col>
-                <Form inline>
-                  <Form.Group controlId="search">
-                    <Form.Control
-                      type="text"
-                      placeholder="Search CID"
-                      onChange={searchFilters}
-                    />
-                  </Form.Group>
-                </Form>
+                <Form.Group controlId="search">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search CID or Filter Name"
+                    onChange={searchFilters}
+                    onKeyDown={(
+                      event: React.KeyboardEvent<HTMLInputElement>
+                    ) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Form.Group>
               </Col>
               <Col className="text-right">
                 <Button
@@ -534,7 +543,7 @@ function Filters(): JSX.Element {
               title={title}
               message={message}
               callback={() => {
-                deleteFilter(deletedFilterList._id ? deletedFilterList._id : 0);
+                deleteFilter(deletedFilterList);
               }}
               closeCallback={() => {
                 setDeletedFilterList(FilterService.emptyFilterList());

@@ -1,3 +1,5 @@
+import { CidItem } from "../Filters/Interfaces";
+
 export interface HeadCell {
   id: keyof Data;
   label: string;
@@ -6,20 +8,20 @@ export interface HeadCell {
 
 export interface Data {
   name: string;
-  cids: string[];
+  cids: CidItem[];
   enabled: boolean;
   actions?: string;
-  _cryptId?: string;
+  shareId?: string;
   description?: string;
-  _id?: number;
+  id?: number;
 }
 export interface FilterList {
-  _id?: number;
+  id?: number;
   name: string;
   cids: string[];
   enabled: boolean;
   override: boolean;
-  origin?: string;
+  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
   notes?: string;

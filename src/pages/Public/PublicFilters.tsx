@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "./PublicFilters.css";
-import { Container, Row, Button } from "react-bootstrap";
 import {
-  TableContainer,
+  Paper,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
+  TableRow,
   TableSortLabel,
-  Paper,
 } from "@material-ui/core";
-import CheckCircleIcon from "@material-ui/icons/CheckCircle";
-import CancelIcon from "@material-ui/icons/Cancel";
-import { Data, HeadCell } from "./Interfaces";
-import ApiService from "../../services/ApiService";
-import InputGroup from "react-bootstrap/InputGroup";
+import React, { useEffect, useState } from "react";
+import { Button, Container } from "react-bootstrap";
 import FormControl from "react-bootstrap/FormControl";
+import InputGroup from "react-bootstrap/InputGroup";
+import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
-import { remoteMarketplaceUri } from "../../config";
+import { FilterList } from "../Filters/Interfaces";
+import { Data, HeadCell } from "./Interfaces";
+import "./PublicFilters.css";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -33,28 +30,6 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 }
 
 type Order = "asc" | "desc";
-
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key
-): (
-  a: { [key in Key]: number | string | boolean },
-  b: { [key in Key]: number | string | boolean }
-) => number {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
 
 const headCells: HeadCell[] = [
   { id: "name", numeric: false, label: "Filter Name" },
@@ -122,12 +97,16 @@ export default function PublicFilters() {
   const [searchedValue, setSearchedValue] = React.useState("");
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
   const [prefetch, setPrefetch] = useState<string>("");
+  const [toBeImportedFilter, setToBeImportedFilter] =
+    useState<FilterList | null>(null);
+  const [needsRefresh, setNeedsRefresh] = useState(true);
 
   useEffect(() => {
-    setShowImportFilter(!!prefetch);
-  }, [prefetch]);
+    setShowImportFilter(!!prefetch || !!toBeImportedFilter);
+  }, [prefetch, toBeImportedFilter]);
 
   useEffect(() => {
+    setNeedsRefresh(false);
     const getAllData = async () => {
       await ApiService.getAllFilters(
         page,
@@ -136,17 +115,13 @@ export default function PublicFilters() {
         mySort,
         searchedValue
       ).then((response) => {
-        setPublicFiltersData(response as Data[]);
+        setPublicFiltersData(response.data as Data[]);
+        setDataCount(response.count);
       });
     };
 
-    const getCountAllData = async () => {
-      await ApiService.getCountAllFilter(searchedValue).then(setDataCount);
-    };
-
     getAllData();
-    getCountAllData();
-  }, [rowsPerPage, page, mySortBy, mySort, searchedValue]);
+  }, [rowsPerPage, page, mySortBy, mySort, searchedValue, needsRefresh]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -206,25 +181,19 @@ export default function PublicFilters() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
               {publicFiltersData.map((row, index) => {
                 return (
-                  <TableRow key={row.name}>
+                  <TableRow key={index}>
                     <TableCell>{row.name}</TableCell>
                     <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
-                    {/*<TableCell>*/}
-                    {/*  {row.enabled ? (*/}
-                    {/*    <CheckCircleIcon style={{ color: "green" }} />*/}
-                    {/*  ) : (*/}
-                    {/*    <CancelIcon color="secondary" />*/}
-                    {/*  )}*/}
-                    {/*</TableCell>*/}
                     <TableCell>{row.description}</TableCell>
                     <TableCell>
                       <Button
                         onClick={() => {
-                          setPrefetch(
-                            `${remoteMarketplaceUri()}/filters/shared/${
-                              row._cryptId
-                            }`
-                          );
+                          // setPrefetch(
+                          //   `${remoteMarketplaceUri()}/filter/share/${
+                          //     row.shareId
+                          //   }`
+                          // );
+                          setToBeImportedFilter(row as FilterList);
                         }}
                         variant="primary"
                       >
@@ -249,23 +218,22 @@ export default function PublicFilters() {
         count={dataCount}
         rowsPerPage={rowsPerPage}
         page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
       />
 
-      <ImportFilterModal
-        closeCallback={async (refreshParent = false): Promise<void> => {
-          setPrefetch("");
-          if (refreshParent) {
-            console.log(
-              "import filter closed, refresh parent is",
-              refreshParent
-            );
-          }
-        }}
-        show={showImportFilter}
-        prefetch={prefetch}
-      />
+      {toBeImportedFilter && (
+        <ImportFilterModal
+          closeCallback={async (_needsRefresh = false): Promise<void> => {
+            setPrefetch("");
+            setToBeImportedFilter(null);
+            setNeedsRefresh(_needsRefresh);
+          }}
+          filter={toBeImportedFilter}
+          show={showImportFilter}
+          prefetch={prefetch}
+        />
+      )}
     </Container>
   );
 }

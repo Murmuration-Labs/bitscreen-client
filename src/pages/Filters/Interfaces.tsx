@@ -5,6 +5,12 @@ export const VisibilityString: string[] = [
   "ThirdParty",
 ];
 
+export enum ViewTypes {
+  New,
+  Edit,
+  Imported,
+}
+
 export enum Visibility {
   None,
   Private,
@@ -28,35 +34,40 @@ export function mapVisibilityString(visibilityStr: string): Visibility {
 }
 
 export interface CidItem {
-  id: number;
+  id?: number;
+  tableKey: string;
   cid: string;
-  edit: boolean;
-  rerender?: boolean;
+  refUrl?: string;
+  edit?: boolean;
+  isChecked: boolean;
+  isSaved: boolean;
 }
 
 export interface CidItemProps {
-  cidItem: CidItem;
-  saveItem: (i: CidItem) => void;
-  deleteItem: (i: CidItem) => void;
-  changeCidValue: (i: CidItem) => void;
-  cancelEdit: (i: CidItem, index: number) => void;
-  beginMoveToDifferentFilter: (i: CidItem) => Promise<void>;
-  filterList: FilterList;
   index: number;
+  cidItem: CidItem;
+  filterList: FilterList;
+  isEdit: boolean;
   isOverrideFilter: boolean;
   isHashedCid: boolean;
+  saveItem: (i: CidItem, idx: number) => void;
+  updateCidItem: (i: CidItem, idx: number) => void;
+  cancelEdit: (i: CidItem, index: number) => void;
+  beginMoveToDifferentFilter: (i: CidItem[]) => Promise<void>;
+  prepareModalForDeleteItems: (i: CidItem[]) => void;
 }
 
 export interface MoveCIDModalProps {
-  cidItem: CidItem;
+  cidItems: CidItem[];
   optionFilters: FilterList[];
-  move: (i: CidItem, fl: FilterList) => Promise<void>;
+  move: (i: CidItem[], fl: FilterList) => Promise<void>;
   closeCallback: () => void;
   show: boolean;
 }
 
 export interface ImportFilterModalProps {
   prefetch?: string;
+  filter?: FilterList;
   closeCallback: (refreshParent: boolean) => Promise<void>;
   show: boolean;
 }
@@ -86,16 +97,28 @@ export interface FilterState {
 }
 
 export interface FilterList {
-  _id?: number;
+  id: number;
   name: string;
-  cids: string[];
+  cids: CidItem[];
   visibility: Visibility;
   enabled: boolean;
   override: boolean;
-  origin?: string;
+  shareId?: string;
+  shared?: boolean;
+  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
+  providerId: number;
+  provider?: any;
   notes?: string;
+}
+
+export interface ProviderFilter {
+  id?: number;
+  active: boolean;
+  notes?: string;
+  providerId?: number;
+  filterId?: number;
 }
 
 export interface CidListProps {
@@ -106,11 +129,6 @@ export interface CidListProps {
 
 export interface DataProps {
   data: [];
-}
-
-export interface SettingsState {
-  loaded: boolean;
-  config: Config;
 }
 
 export interface Filters {

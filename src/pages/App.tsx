@@ -1,24 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 import {
   BrowserRouter as Router,
   Redirect,
   Route,
   RouteComponentProps,
 } from "react-router-dom";
-import Settings from "./Settings/Settings";
-import Filters from "./Filters/Filters";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
-import { Col, Container, Row } from "react-bootstrap";
-
-import FilterPage from "./Filters/FilterPage";
-import AccountContactPage from "./Contact/AccountContactPage";
-import PublicFilters from "./Public/PublicFilters";
-import { ToastContainer } from "react-toastify";
-
 import "./App.css";
-import "react-bootstrap-typeahead/css/Typeahead.css";
-import "react-toastify/dist/ReactToastify.css";
+import AccountContactPage from "./Contact/AccountContactPage";
+import FilterPage from "./Filters/FilterPage";
+import Filters from "./Filters/Filters";
+import PublicFilters from "./Public/PublicFilters";
+import Settings from "./Settings/Settings";
+import * as AuthService from "../services/AuthService";
 
 interface MatchParams {
   id: string;
@@ -27,6 +26,19 @@ interface MatchParams {
 export type RouterProps = RouteComponentProps<MatchParams>;
 
 function App(): JSX.Element {
+  const [provider, setProvider] = useState(AuthService.getAccount());
+
+  useEffect(() => {
+    const unsubscribe = AuthService.subscribe((acc) => setProvider(acc));
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const authHandler = (transition) => {
+    console.log(transition);
+  };
+
   return (
     <Router>
       <Header />
@@ -36,14 +48,44 @@ function App(): JSX.Element {
             <Navigation />
           </Col>
           <Col md={10} sm={9} className={"stage"}>
-            <Route path="/settings" exact component={Settings} />
-            <Route path="/filters" exact component={Filters} />
-            <Route path="/filters/edit/:id?" exact component={FilterPage} />
-            <Route path="/filters/new" exact component={FilterPage} />
+            <Route
+              path="/settings"
+              exact
+              component={provider ? Settings : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters"
+              exact
+              component={provider ? Filters : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters/edit/:id?"
+              exact
+              component={provider ? FilterPage : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/filters/new"
+              exact
+              component={provider ? FilterPage : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
             <Route path="/account" exact component={AccountContactPage} />
-            <Route path="/public" exact component={PublicFilters} />
+            <Route
+              path="/public"
+              exact
+              component={provider ? PublicFilters : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
             <Route exact path="/">
-              <Redirect to="/settings" />
+              <Redirect to="/account" />
             </Route>
           </Col>
         </Row>
