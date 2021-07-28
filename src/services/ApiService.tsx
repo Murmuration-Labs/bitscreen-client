@@ -32,7 +32,7 @@ const ApiService = {
     const providerId = AuthService.getProviderId();
     const query = `q=${encodeURIComponent(
       searchTerm
-    )};providerId=${encodeURIComponent(providerId)}`;
+    )}&providerId=${encodeURIComponent(providerId)}`;
 
     const response = await axios.get(`${serverUri()}/filter/search?${query}`);
     console.log(response);
