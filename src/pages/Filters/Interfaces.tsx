@@ -40,7 +40,6 @@ export interface CidItem {
   refUrl?: string;
   edit?: boolean;
   isChecked: boolean;
-  rerender?: boolean;
 }
 
 export interface CidItemProps {
@@ -52,7 +51,6 @@ export interface CidItemProps {
   isHashedCid: boolean;
   saveItem: (i: CidItem, idx: number) => void;
   updateCidItem: (i: CidItem, idx: number) => void;
-  changeCidValue: (i: CidItem, idx: number) => void;
   cancelEdit: (i: CidItem, index: number) => void;
   beginMoveToDifferentFilter: (i: CidItem[]) => Promise<void>;
   prepareModalForDeleteItems: (i: CidItem[]) => void;

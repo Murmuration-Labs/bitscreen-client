@@ -86,36 +86,9 @@ export default function CidItemRender(props: CidItemProps) {
   };
 
   const handleSave = (e: any): void => {
-    // e.preventDefault();
-    const ref = cidInputRef.current;
-    const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...cidItem };
-    if (value !== null) {
-      updatedItem = updateItemField("cid", value, updatedItem);
-      setCidItem({ ...updatedItem, edit: false });
-      props.saveItem(updatedItem, props.index);
-    }
-  };
-
-  const hangleChangeCidValue = (e: any): void => {
-    const ref = cidInputRef.current;
-    const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...cidItem };
-    if (value !== null) {
-      updatedItem = updateItemField("cid", value, updatedItem);
-      // setCidItem({ ...updatedItem, edit: false });
-      props.changeCidValue(updatedItem, props.index);
-    }
-  };
-
-  const hangleChangeCidUrlValue = (e: any): void => {
-    const ref = cidUrlInputRef.current;
-    const value = ref !== null ? ref.value : null;
-    let updatedItem: CidItem = { ...cidItem };
-    if (value !== null) {
-      updatedItem = updateItemField("refUrl", value, updatedItem);
-      props.changeCidValue(updatedItem, props.index);
-    }
+    cidItem.cid = cidInputRef.current?.value ?? "";
+    cidItem.refUrl = cidUrlInputRef.current?.value ?? "";
+    props.saveItem(cidItem, props.index);
   };
 
   const handleDelete = (): void => {
@@ -246,7 +219,6 @@ export default function CidItemRender(props: CidItemProps) {
                 type="text"
                 placeholder=""
                 defaultValue={cidItem.cid}
-                onChange={hangleChangeCidValue}
               />
               <Form.Label style={{ marginRight: 3 }}>URL:</Form.Label>
               <Form.Control
@@ -254,7 +226,6 @@ export default function CidItemRender(props: CidItemProps) {
                 type="text"
                 placeholder=""
                 defaultValue={cidItem.refUrl ?? ""}
-                onChange={hangleChangeCidUrlValue}
               />
               <Button className="k-button" onClick={handleSave}>
                 Save

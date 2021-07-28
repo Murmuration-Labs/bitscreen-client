@@ -33,7 +33,6 @@ import MoveCIDModal from "./MoveCIDModal";
 
 const FilterPage = (props) => {
   const [isAnyCidSelected, setIsAnyCidSelected] = useState<boolean>(false);
-  const [_notice, setNotice] = useState<string>("");
 
   const [loaded, setLoaded] = useState<boolean>(false);
   const [alertUnsaved, setAlertUnsaved] = useState<boolean>(false);
@@ -195,7 +194,6 @@ const FilterPage = (props) => {
   const changeName = (event: React.ChangeEvent<HTMLInputElement>): void => {
     event.preventDefault();
     saveFilter({ ...filterList, name: event.target.value });
-    setNotice("Name successfully saved.");
   };
 
   const changeVisibility = (
@@ -207,18 +205,15 @@ const FilterPage = (props) => {
       visibility: mapVisibilityString(event.target.value),
     };
     saveFilter(fl);
-    setNotice("Visibility successfully saved.");
   };
 
   const onNewCid = (): void => {
-    setNotice("");
     const cids = [
       ...filterList.cids,
       {
         tableKey: generateUniqueKey(),
         cid: "",
         edit: true,
-        rerender: true,
         isChecked: false,
       },
     ];
@@ -262,26 +257,16 @@ const FilterPage = (props) => {
     };
     saveFilter(fl);
     updateIsAnyCidSelected(items);
-    setNotice("CIDs successfully saved.");
-  };
-
-  const changeCidValue = (editItem: CidItem, idx: number) => {
-    const items = filterList.cids.map((item: CidItem, _idx) => {
-      return _idx === idx ? editItem : item;
-    });
-    const fl = {
-      ...filterList,
-      cids: items,
-    };
-    saveFilter(fl);
-    updateIsAnyCidSelected(items);
   };
 
   const cancelEdit = (editItem: CidItem, index: number) => {
     const cids = [...filterList.cids];
+    console.log(cids.length);
+    console.log(cids);
 
     // Not persisted case
     if (typeof editItem.id === "undefined") {
+      console.log("1");
       // This alters the array
       cids.splice(index, 1);
 
@@ -292,6 +277,7 @@ const FilterPage = (props) => {
     }
 
     if (editItem.cid) {
+      console.log("2");
       cids[index] = {
         ...editItem,
         edit: false,
@@ -303,6 +289,7 @@ const FilterPage = (props) => {
         cids,
       });
     } else {
+      console.log(3);
       saveFilter({
         ...filterList,
         cids: cids.splice(index, 1),
@@ -310,32 +297,15 @@ const FilterPage = (props) => {
     }
   };
 
-  // useEffect(() => {
-  //   let ok = false;
-  //   for (let i = 0; i < cidItems.length; i++) {
-  //     if (!cidItems[i].rerender) {
-  //       cidItems[i].rerender = true;
-  //       ok = true;
-  //     }
-  //   }
-
-  //   if (ok) {
-  //     setCidItems([...cidItems.map((x) => ({ ...x }))]);
-  //   }
-  // }, [cidItems]);
-
   const saveBatchItemCids = () => {
     saveFilter(filterList);
-    setNotice("CIDs successfully saved.");
   };
 
   const onNewCidsBatch = (cidsBatch): void => {
-    setNotice("");
     const cids = cidsBatch.map((element: string) => ({
       tableKey: generateUniqueKey(),
       cid: element,
       edit: true,
-      rerender: true,
     }));
 
     saveFilter({ ...filterList, cids: [...filterList.cids, ...cids] });
@@ -355,7 +325,6 @@ const FilterPage = (props) => {
     });
     updateIsAnyCidSelected(items);
     toast.info("Don't forget to press Save to save the changes.");
-    setNotice("CIDs successfully saved.");
   };
 
   const prepareModalForDeleteItems = (itemsToDelete: CidItem[]) => {
@@ -381,9 +350,7 @@ const FilterPage = (props) => {
 
   const handleBulkEditCids = (): void => {
     const items = filterList.cids.map((item: CidItem) => {
-      return item.isChecked
-        ? { ...item, edit: true, rerender: false, isChecked: false }
-        : item;
+      return item.isChecked ? { ...item, edit: true, isChecked: false } : item;
     });
     const fl = {
       ...filterList,
@@ -629,8 +596,6 @@ const FilterPage = (props) => {
                             ...filterList,
                             description: ev.target.value,
                           });
-
-                          setNotice("Description successfully saved");
                         }}
                         as="textarea"
                         placeholder="List Description"
@@ -808,7 +773,6 @@ const FilterPage = (props) => {
                                 isHashedCid={!!filterList.originId}
                                 saveItem={saveItem}
                                 updateCidItem={updateCidItem}
-                                changeCidValue={changeCidValue}
                                 cancelEdit={cancelEdit}
                                 beginMoveToDifferentFilter={
                                   beginMoveToDifferentFilter
