@@ -101,7 +101,7 @@ function Filters(): JSX.Element {
   const debounceSearchFilters = debounce(() => getFilters(), 300);
 
   const searchFilters = (event): void => {
-    setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value ? `cid=${event.target.value}` : "");
   };
 
   const clipboardCopy = (cryptId) => {
@@ -497,22 +497,20 @@ function Filters(): JSX.Element {
                 </Row>
               </Col>
               <Col>
-                <Form inline>
-                  <Form.Group controlId="search">
-                    <Form.Control
-                      type="text"
-                      placeholder="Search CID or Filter Name"
-                      onChange={searchFilters}
-                      onKeyDown={(
-                        event: React.KeyboardEvent<HTMLInputElement>
-                      ) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                        }
-                      }}
-                    />
-                  </Form.Group>
-                </Form>
+                <Form.Group controlId="search">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search CID or Filter Name"
+                    onChange={searchFilters}
+                    onKeyDown={(
+                      event: React.KeyboardEvent<HTMLInputElement>
+                    ) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Form.Group>
               </Col>
               <Col className="text-right">
                 <Button
