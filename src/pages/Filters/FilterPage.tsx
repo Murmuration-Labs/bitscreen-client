@@ -673,32 +673,19 @@ const FilterPage = (props) => {
                       marginTop: -20,
                       marginBottom: 20,
                     }}
-                    onClick={() => toggleFilterEnabled()}
                   >
-                    <FormCheck readOnly type="switch" checked={filterEnabled} />
-                    <Form.Label
+                    <div
                       style={{
-                        marginRight: 10,
-                        marginTop: 2,
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "center",
                       }}
-                      className={"text-dim"}
-                    >
-                      Enabled?
-                    </Form.Label>
-                  </Form.Row>
-                  {!filterList.originId && (
-                    <Form.Row
-                      style={{
-                        marginLeft: 2,
-                        marginTop: -35,
-                        marginBottom: 20,
-                      }}
-                      onClick={() => toggleFilterOverride()}
+                      onClick={() => toggleFilterEnabled()}
                     >
                       <FormCheck
                         readOnly
                         type="switch"
-                        checked={filterOverride}
+                        checked={filterEnabled}
                       />
                       <Form.Label
                         style={{
@@ -707,8 +694,42 @@ const FilterPage = (props) => {
                         }}
                         className={"text-dim"}
                       >
-                        Override?
+                        Enabled?
                       </Form.Label>
+                    </div>
+                  </Form.Row>
+                  {!filterList.originId && (
+                    <Form.Row
+                      style={{
+                        marginLeft: 2,
+                        marginTop: -35,
+                        marginBottom: 20,
+                        width: "auto",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => toggleFilterOverride()}
+                      >
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={filterOverride}
+                        />
+                        <Form.Label
+                          style={{
+                            marginRight: 10,
+                            marginTop: 2,
+                          }}
+                          className={"text-dim"}
+                        >
+                          Override?
+                        </Form.Label>
+                      </div>
                     </Form.Row>
                   )}
                   <Form.Row style={{ marginTop: -20 }}>
