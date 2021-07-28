@@ -654,20 +654,18 @@ const FilterPage = (props) => {
                         </Form.Control>
                       </Form.Group>
                     </Col>
-                    {filterList.id && (
-                      <Col>
-                        {checkViewType() !== ViewTypes.Imported && (
-                          <Button
-                            variant="primary"
-                            onClick={() => {
-                              clipboardCopy(filterList.shareId);
-                            }}
-                          >
-                            Direct share
-                          </Button>
-                        )}
-                      </Col>
-                    )}
+                    <Col>
+                      {checkViewType() === ViewTypes.Edit && (
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            clipboardCopy(filterList.shareId);
+                          }}
+                        >
+                          Direct share
+                        </Button>
+                      )}
+                    </Col>
                   </Form.Row>
                   <Form.Row
                     style={{
