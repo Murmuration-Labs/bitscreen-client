@@ -28,6 +28,7 @@ export default function CidItemRender(props: CidItemProps) {
     tableKey: "",
     cid: "",
     isChecked: false,
+    isSaved: false,
   };
   const [cidItem, setCidItem] = useState<CidItem>(emptyCidItem);
   const [cidInputRef, setCidInputRef] = useState<RefObject<HTMLInputElement>>(
@@ -63,20 +64,6 @@ export default function CidItemRender(props: CidItemProps) {
     }
   }, [props.isOverrideFilter, props.cidItem.cid, props.filterList]);
 
-  const updateItemField = (
-    field: string,
-    value: string,
-    item: CidItem
-  ): CidItem => {
-    if (field === "cid") {
-      item.cid = value;
-    }
-    if (field == "refUrl") {
-      item.refUrl = value;
-    }
-    return item;
-  };
-
   const enterEdit = (): void => {
     if (cidItem != null) {
       cidItem.edit = true;
@@ -88,7 +75,11 @@ export default function CidItemRender(props: CidItemProps) {
   const handleSave = (e: any): void => {
     cidItem.cid = cidInputRef.current?.value ?? "";
     cidItem.refUrl = cidUrlInputRef.current?.value ?? "";
-    props.saveItem(cidItem, props.index);
+    if (cidItem.cid || cidItem.refUrl) {
+      props.saveItem(cidItem, props.index);
+    } else {
+      props.cancelEdit(cidItem, props.index);
+    }
   };
 
   const handleDelete = (): void => {

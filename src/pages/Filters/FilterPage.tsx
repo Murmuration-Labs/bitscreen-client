@@ -215,6 +215,7 @@ const FilterPage = (props) => {
         cid: "",
         edit: true,
         isChecked: false,
+        isSaved: false,
       },
     ];
     setFilterList({ ...filterList, cids });
@@ -249,7 +250,7 @@ const FilterPage = (props) => {
 
   const saveItem = (editItem: CidItem, idx: number) => {
     const items = filterList.cids.map((item: CidItem, _idx: number) => {
-      return idx === _idx ? { ...editItem, edit: false } : item;
+      return idx === _idx ? { ...editItem, edit: false, isSaved: true } : item;
     });
     const fl = {
       ...filterList,
@@ -261,39 +262,35 @@ const FilterPage = (props) => {
 
   const cancelEdit = (editItem: CidItem, index: number) => {
     const cids = [...filterList.cids];
-    console.log(cids.length);
-    console.log(cids);
 
-    // Not persisted case
-    if (typeof editItem.id === "undefined") {
-      console.log("1");
-      // This alters the array
+    if (typeof editItem.id === "undefined" && !editItem.isSaved) {
+      // Enter here when CID is not persisted to the database and never got saved locally
+      // Effect: CID will get deleted from the table
       cids.splice(index, 1);
-
-      return saveFilter({
+      saveFilter({
         ...filterList,
         cids,
       });
-    }
-
-    if (editItem.cid) {
-      console.log("2");
-      cids[index] = {
-        ...editItem,
-        edit: false,
-      };
-      updateIsAnyCidSelected(cids);
-
+    } else if (!editItem.cid && !editItem.refUrl) {
+      // Enter here when CID has empty cid and empty refUrl
+      // Effect: CID will get deleted from the table
+      cids.splice(index, 1);
       saveFilter({
         ...filterList,
         cids,
       });
     } else {
-      console.log(3);
+      // Enter here under normal conditions
+      // Effect: CID will stay in the table
+      cids[index] = {
+        ...editItem,
+        edit: false,
+      };
       saveFilter({
         ...filterList,
-        cids: cids.splice(index, 1),
+        cids,
       });
+      updateIsAnyCidSelected(cids);
     }
   };
 
@@ -306,6 +303,8 @@ const FilterPage = (props) => {
       tableKey: generateUniqueKey(),
       cid: element,
       edit: true,
+      isChecked: false,
+      isSaved: false,
     }));
 
     saveFilter({ ...filterList, cids: [...filterList.cids, ...cids] });

@@ -40,6 +40,7 @@ export interface CidItem {
   refUrl?: string;
   edit?: boolean;
   isChecked: boolean;
+  isSaved: boolean;
 }
 
 export interface CidItemProps {
