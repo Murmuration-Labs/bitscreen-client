@@ -42,33 +42,26 @@ export default function CidItemRender(props: CidItemProps) {
   const [localOverrideCid, setLocalOverrideCid] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
 
-  const checkIfIsOverrideExists = (): void => {
-    Promise.all([
-      ApiService.getCidOverride(props.cidItem.cid, props.filterList),
-      ApiService.getCidOverrideLocal(props.cidItem.cid, props.filterList),
-    ])
-      .then((res) => {
-        setOverrideCid(!!res[0]);
-        setLocalOverrideCid(!!res[1]);
-        setLoaded(true);
-      })
-      .catch((err) => {
-        setLoaded(true);
-      });
-  };
-
   useEffect(() => {
     setCidItem(props.cidItem);
     setLoaded(props.isOverrideFilter ? !props.isOverrideFilter : true);
     setIsOverrideFilter(props.isOverrideFilter ? props.isOverrideFilter : true);
     setIsEdit(props.isEdit);
-  });
+  }, [props.cidItem, props.isOverrideFilter, props.isEdit]);
 
   useEffect(() => {
     if (props.isOverrideFilter) {
-      checkIfIsOverrideExists();
+      ApiService.getCidOverride(props.cidItem.cid, props.filterList)
+        .then((res) => {
+          setOverrideCid(res.remote);
+          setLocalOverrideCid(res.local);
+          setLoaded(true);
+        })
+        .catch((err) => {
+          setLoaded(true);
+        });
     }
-  }, []);
+  }, [props.isOverrideFilter, props.cidItem.cid, props.filterList]);
 
   const updateItemField = (
     field: string,

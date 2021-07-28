@@ -157,21 +157,17 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getCidOverride: async (cid: string, fl: FilterList): Promise<FilterList> => {
-    const response = await axios.get(
-      `${serverUri()}/cid/is-override-remote/${fl.id}/${cid}`
-    );
-    return response.data as FilterList;
-  },
-
-  getCidOverrideLocal: async (
+  getCidOverride: async (
     cid: string,
     fl: FilterList
-  ): Promise<FilterList> => {
-    const response = await axios.get(
-      `${serverUri()}/cid/is-override-local/${fl.id}/${cid}`
+  ): Promise<{ remote: boolean; local: boolean }> => {
+    const query = `filterId=${encodeURIComponent(
+      fl.id
+    )}&cid=${cid}&providerId=${AuthService.getProviderId()}`;
+    const response = await axios.get<{ remote: boolean; local: boolean }>(
+      `${serverUri()}/cid/override?${query}`
     );
-    return response.data as FilterList;
+    return response.data;
   },
 
   getProvider: async (account: Account | string): Promise<Account | null> => {
