@@ -320,35 +320,30 @@ function Filters(): JSX.Element {
   }, [filterLists]);
 
   const beginBulkSetEnabled = (enabled: boolean): void => {
-    const selected = filterLists
-      .filter((x) => x.isBulkSelected)
-      .map((x) => ({
-        id: x.id,
-        enabled,
-      }));
+    const selectedFilters = filterLists.filter((x) => x.isBulkSelected);
 
     if (enabled) {
       setShowConfirmEnableBulkAction(true);
       setConfirmEnableBulkActionMessage(
-        `Are you sure you want to enable ${selected.length} items?`
+        `Are you sure you want to enable ${selectedFilters.length} items?`
       );
     } else {
       setShowConfirmDisableBulkAction(true);
       setConfirmDisableBulkActionMessage(
-        `Are you sure you want to disable ${selected.length} items?`
+        `Are you sure you want to disable ${selectedFilters.length} items?`
       );
     }
   };
 
   const bulkSetEnabled = async (enabled: boolean): Promise<void> => {
-    const selected = filterLists
+    const selectedFilters = filterLists
       .filter((x) => x.isBulkSelected)
       .map((x) => ({
-        id: x.id,
+        ...x,
         enabled,
       }));
 
-    await ApiService.updateFilter(selected as FilterList[]);
+    await ApiService.updateFilter(selectedFilters);
 
     // update in front as well
     for (let i = 0; i < filterLists.length; i++) {
