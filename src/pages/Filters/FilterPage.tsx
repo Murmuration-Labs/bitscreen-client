@@ -31,6 +31,7 @@ import {
   CidItem,
   FilterList,
   mapVisibilityString,
+  Visibility,
   VisibilityString,
   ViewTypes,
 } from "./Interfaces";
@@ -422,6 +423,14 @@ const FilterPage = (props) => {
   const toggleFilterOverride = () => {
     filterList.override = !filterList.override;
     setFilterOverride(filterList.override);
+
+    if (filterList.override) {
+      const fl = {
+        ...filterList,
+        visibility: Visibility.Private,
+      };
+      saveFilter(fl);
+    }
   };
 
   const closeModalCallback = () => {
@@ -614,7 +623,9 @@ const FilterPage = (props) => {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
-                          disabled={!!filterList.originId}
+                          disabled={
+                            !!filterList.originId || filterList.override
+                          }
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
