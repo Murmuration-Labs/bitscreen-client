@@ -711,6 +711,7 @@ const FilterPage = (props) => {
                         </Form.Label>
                         <OverlayTrigger
                           placement="right"
+                          show={filterList.override ? true : undefined}
                           delay={{ show: 150, hide: 300 }}
                           overlay={
                             <Tooltip id="button-tooltip">
