@@ -714,8 +714,9 @@ const FilterPage = (props) => {
                           delay={{ show: 150, hide: 300 }}
                           overlay={
                             <Tooltip id="button-tooltip">
-                              Override lists prevent CIDs on imported lists from
-                              being filtered
+                              {filterList.override
+                                ? "Override lists cannot be shared"
+                                : "Override lists prevent CIDs on imported lists from being filtered"}
                             </Tooltip>
                           }
                         >
