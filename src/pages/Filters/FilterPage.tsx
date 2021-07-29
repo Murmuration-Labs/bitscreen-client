@@ -1,5 +1,8 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExternalLinkAlt,
+  faQuestionCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
@@ -9,7 +12,9 @@ import {
   Form,
   FormCheck,
   ListGroup,
+  OverlayTrigger,
   Row,
+  Tooltip,
 } from "react-bootstrap";
 import { Prompt } from "react-router";
 import { useHistory, useLocation } from "react-router-dom";
@@ -693,6 +698,24 @@ const FilterPage = (props) => {
                         >
                           Override?
                         </Form.Label>
+                        <OverlayTrigger
+                          placement="right"
+                          delay={{ show: 150, hide: 300 }}
+                          overlay={
+                            <Tooltip id="button-tooltip">
+                              Override lists prevent CIDs on imported lists from
+                              being filtered
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faQuestionCircle as IconProp}
+                            color="#7393B3"
+                            style={{
+                              marginTop: 2,
+                            }}
+                          />
+                        </OverlayTrigger>
                       </div>
                     </Form.Row>
                   )}
