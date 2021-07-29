@@ -10,6 +10,7 @@ export default function AddCidBatchModal(
 ): JSX.Element {
   const [cidsInput, setCidsInput] = useState<string>("");
   const [cidsInputError, setCidsInputError] = useState<boolean>(false);
+  const [refUrl, setRefUrl] = useState<string>("");
 
   const renderCidsInputError = (): JSX.Element => {
     if (cidsInputError) {
@@ -34,7 +35,8 @@ export default function AddCidBatchModal(
         return element.trim();
       });
     setCidsInput("");
-    props.closeCallback(result);
+    props.closeCallback({ result, refUrl });
+    setRefUrl("");
   };
 
   return (
@@ -42,7 +44,8 @@ export default function AddCidBatchModal(
       show={props.show}
       onHide={() => {
         setCidsInput("");
-        props.closeCallback([]);
+        setRefUrl("");
+        props.closeCallback(null);
       }}
     >
       <Modal.Header closeButton>
@@ -68,6 +71,18 @@ export default function AddCidBatchModal(
                   {renderCidsInputError()}
                 </Col>
               </Form.Row>
+              <Form.Row>
+                <Col>
+                  <Form.Control
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      setRefUrl(event.target.value);
+                    }}
+                    title="Reference URL"
+                    placeholder="A reference URL to be assigned to all of the above CIDs."
+                    value={refUrl}
+                  />
+                </Col>
+              </Form.Row>
             </div>
           </Col>
         </Row>
@@ -77,7 +92,8 @@ export default function AddCidBatchModal(
           variant="secondary"
           onClick={() => {
             setCidsInput("");
-            props.closeCallback([]);
+            setRefUrl("");
+            props.closeCallback(null);
           }}
         >
           Cancel
@@ -86,7 +102,7 @@ export default function AddCidBatchModal(
         <Button
           variant="warning"
           onClick={() => addCids()}
-          disabled={!cidsInput}
+          disabled={!cidsInput || !refUrl}
         >
           Add CIDs
         </Button>

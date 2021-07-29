@@ -298,10 +298,11 @@ const FilterPage = (props) => {
     saveFilter(filterList);
   };
 
-  const onNewCidsBatch = (cidsBatch): void => {
-    const cids = cidsBatch.map((element: string) => ({
+  const onNewCidsBatch = (cidsBatch, refUrl): void => {
+    const cids: CidItem[] = cidsBatch.map((element: string) => ({
       tableKey: generateUniqueKey(),
       cid: element,
+      refUrl,
       edit: true,
       isChecked: false,
       isSaved: false,
@@ -798,10 +799,13 @@ const FilterPage = (props) => {
               show={showMoveModal}
             />
             <AddCidBatchModal
-              closeCallback={async (cidsBatch = []): Promise<void> => {
-                if (0 != cidsBatch.length) {
-                  onNewCidsBatch(cidsBatch);
+              closeCallback={async (data) => {
+                if (!data || !data.result || !data.result.length) {
+                  setAddCidBatchModal(false);
+                  return;
                 }
+
+                onNewCidsBatch(data.result, data.refUrl);
                 setAddCidBatchModal(false);
               }}
               show={addCidBatchModal}
