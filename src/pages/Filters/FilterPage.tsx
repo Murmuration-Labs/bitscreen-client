@@ -430,6 +430,12 @@ const FilterPage = (props) => {
         visibility: Visibility.Private,
       };
       saveFilter(fl);
+    } else {
+      const fl = {
+        ...filterList,
+        visibility: initialFilterList.visibility,
+      };
+      saveFilter(fl);
     }
   };
 
@@ -711,7 +717,7 @@ const FilterPage = (props) => {
                         </Form.Label>
                         <OverlayTrigger
                           placement="right"
-                          show={filterList.override ? true : undefined}
+                          // show={filterList.override ? true : undefined}
                           delay={{ show: 150, hide: 300 }}
                           overlay={
                             <Tooltip id="button-tooltip">
