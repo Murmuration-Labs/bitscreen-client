@@ -11,6 +11,7 @@ export default function AddCidBatchModal(
   const [cidsInput, setCidsInput] = useState<string>("");
   const [cidsInputError, setCidsInputError] = useState<boolean>(false);
   const [refUrl, setRefUrl] = useState<string>("");
+  const [isEdit] = useState(!!props.edit);
 
   const renderCidsInputError = (): JSX.Element => {
     if (cidsInputError) {
@@ -39,6 +40,11 @@ export default function AddCidBatchModal(
     setRefUrl("");
   };
 
+  const updateCids = (): void => {
+    props.closeCallback({ result: [], refUrl });
+    setRefUrl("");
+  };
+
   return (
     <Modal
       show={props.show}
@@ -55,22 +61,26 @@ export default function AddCidBatchModal(
         <Row>
           <Col>
             <div>
-              <Form.Row>
-                <Col>
-                  <Form.Control
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setCidsInput(event.target.value);
-                      if (cidsInputError) {
-                        setCidsInputError(false);
-                      }
-                    }}
-                    as="textarea"
-                    placeholder="You can paste here more CIDs separated by space, newline, comma or semicolon."
-                    value={cidsInput}
-                  />
-                  {renderCidsInputError()}
-                </Col>
-              </Form.Row>
+              {!isEdit && (
+                <Form.Row>
+                  <Col>
+                    <Form.Control
+                      onChange={(
+                        event: React.ChangeEvent<HTMLInputElement>
+                      ) => {
+                        setCidsInput(event.target.value);
+                        if (cidsInputError) {
+                          setCidsInputError(false);
+                        }
+                      }}
+                      as="textarea"
+                      placeholder="You can paste here more CIDs separated by space, newline, comma or semicolon."
+                      value={cidsInput}
+                    />
+                    {renderCidsInputError()}
+                  </Col>
+                </Form.Row>
+              )}
               <Form.Row>
                 <Col>
                   <Form.Control
@@ -78,7 +88,7 @@ export default function AddCidBatchModal(
                       setRefUrl(event.target.value);
                     }}
                     title="Reference URL"
-                    placeholder="A reference URL to be assigned to all of the above CIDs."
+                    placeholder="A reference URL to be assigned to all of the selected CIDs."
                     value={refUrl}
                   />
                 </Col>
@@ -101,10 +111,10 @@ export default function AddCidBatchModal(
 
         <Button
           variant="warning"
-          onClick={() => addCids()}
-          disabled={!cidsInput || !refUrl}
+          onClick={() => (isEdit ? updateCids() : addCids())}
+          disabled={isEdit ? !refUrl : !cidsInput || !refUrl}
         >
-          Add CIDs
+          {isEdit ? "Update CIDs" : "Add CIDs"}
         </Button>
       </Modal.Footer>
     </Modal>

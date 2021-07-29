@@ -79,6 +79,7 @@ export interface AddCidBatchCallbackPayload {
 
 export interface AddCidBatchModalProps {
   closeCallback: (data: AddCidBatchCallbackPayload | null) => Promise<void>;
+  edit?: boolean;
   show: boolean;
 }
 
