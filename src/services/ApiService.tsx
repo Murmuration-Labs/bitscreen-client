@@ -35,7 +35,6 @@ const ApiService = {
     )}&providerId=${encodeURIComponent(providerId)}`;
 
     const response = await axios.get(`${serverUri()}/filter/search?${query}`);
-    console.log(response);
     return response.data;
   },
 
@@ -159,10 +158,10 @@ const ApiService = {
 
   getCidOverride: async (
     cid: string,
-    fl: FilterList
+    filterId: number
   ): Promise<{ remote: boolean; local: boolean }> => {
     const query = `filterId=${encodeURIComponent(
-      fl.id
+      filterId
     )}&cid=${cid}&providerId=${AuthService.getProviderId()}`;
     const response = await axios.get<{ remote: boolean; local: boolean }>(
       `${serverUri()}/cid/override?${query}`
