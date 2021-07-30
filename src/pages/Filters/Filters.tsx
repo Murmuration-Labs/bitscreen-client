@@ -1,6 +1,5 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
-  faCheck,
   faEdit,
   faEye,
   faGlobe,
@@ -140,9 +139,12 @@ function Filters(): JSX.Element {
     };
 
     return (
-      <Badge variant={variantMapper[props.visibility]}>
-        {translateVisibility(props.visibility)}
-      </Badge>
+      <div>
+        <Badge variant={variantMapper[props.visibility]}>
+          {translateVisibility(props.visibility)}
+        </Badge>
+        {props.override ? <Badge variant="success">Override</Badge> : <></>}
+      </div>
     );
   };
 
@@ -168,7 +170,6 @@ function Filters(): JSX.Element {
                 <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
-                <th>Override?</th>
                 <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
@@ -198,14 +199,6 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <CIDFilterScope {...filterList} />
-                  </td>
-                  <td>
-                    {filterList.override && (
-                      <FontAwesomeIcon
-                        icon={faCheck as IconProp}
-                        color="#28a745"
-                      />
-                    )}
                   </td>
                   <td>
                     <CIDFilterShared {...filterList} />
