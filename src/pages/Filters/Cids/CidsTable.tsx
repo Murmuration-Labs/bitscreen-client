@@ -27,12 +27,13 @@ export interface HeadCell {
   pos: number;
   id: string;
   label: string;
+  align?: "inherit" | "left" | "center" | "right" | "justify";
 }
 
 const defaultHeadCells: HeadCell[] = [
   { pos: 0, id: "cid", label: "CID" },
   { pos: 1, id: "refUrl", label: "URL" },
-  { pos: 999, id: "actions", label: "Actions" },
+  { pos: 999, id: "actions", label: "", align: "right" },
 ];
 
 const overrideHeadCells: HeadCell[] = [
@@ -63,7 +64,7 @@ const CidsTable = ({
 
   return (
     <TableContainer>
-      <Table size={"small"}>
+      <Table size={"small"} stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
@@ -78,7 +79,7 @@ const CidsTable = ({
               />
             </TableCell>
             {headCells.map((headCell) => (
-              <TableCell key={headCell.id} align={"left"}>
+              <TableCell key={headCell.id} align={headCell.align || "left"}>
                 <TableSortLabel active={false} direction={"asc"}>
                   {headCell.label}
                 </TableSortLabel>

@@ -13,6 +13,7 @@ import {
   TableRow,
   Tooltip,
 } from "@material-ui/core";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
@@ -88,6 +89,8 @@ const CidsRow = ({
   const [remote, setRemote] = useState(false);
   const [local, setLocal] = useState(false);
 
+  const { enqueueSnackbar } = useSnackbar();
+
   useEffect(() => {
     if (filter.override) {
       ApiService.getCidOverride(cid.cid, filter.id)
@@ -127,7 +130,29 @@ const CidsRow = ({
         id={cid.tableKey}
         scope="row"
       >
-        {cid.cid}
+        {cid.cid.length > 10 ? (
+          <Tooltip title={cid.cid}>
+            <a
+              style={{ fontSize: "1rem", cursor: "pointer" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(cid.cid);
+                enqueueSnackbar("Copied to clipboard.", { variant: "success" });
+              }}
+            >{`${cid.cid.slice(0, 10)}...`}</a>
+          </Tooltip>
+        ) : (
+          <a
+            style={{ fontSize: "1rem", cursor: "pointer" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(cid.cid);
+              enqueueSnackbar("Copied to clipboard.", { variant: "success" });
+            }}
+          >
+            {cid.cid}
+          </a>
+        )}
       </TableCell>
       <TableCell align="left">
         {cid.refUrl && (
@@ -159,7 +184,7 @@ const CidsRow = ({
           </TableCell>
         </>
       )}
-      <TableCell>
+      <TableCell align="right">
         <Tooltip title="Edit">
           <IconButton
             aria-label="Edit CID"
