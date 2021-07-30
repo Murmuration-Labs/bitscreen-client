@@ -66,33 +66,34 @@ const FilterPage = (props) => {
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
-      ApiService.getFilters().then((filterLists: FilterList[]) => {
-        if (!mountedRef.current) return;
-        filterLists = filterLists.filter((fl: FilterList) => fl.id == id);
-        if (filterLists.length === 0) {
-          setInvalidFilterId(true);
-          return;
-        }
+      ApiService.getFilters({ filterId: id }).then(
+        (filterLists: FilterList[]) => {
+          if (!mountedRef.current) return;
+          if (filterLists.length === 0) {
+            setInvalidFilterId(true);
+            return;
+          }
 
-        const cidItems = filterLists[0].cids
-          ? filterLists[0].cids.map((cid: CidItem) => {
-              return { ...cid, tableKey: generateUniqueKey() };
-            })
-          : [];
-        const fl = {
-          ...filterLists[0],
-          cids: cidItems,
-        };
+          const cidItems = filterLists[0].cids
+            ? filterLists[0].cids.map((cid: CidItem) => {
+                return { ...cid, tableKey: generateUniqueKey() };
+              })
+            : [];
+          const fl = {
+            ...filterLists[0],
+            cids: cidItems,
+          };
 
-        if (fl.originId) {
-          setIsimported(true);
+          if (fl.originId) {
+            setIsimported(true);
+          }
+          setFilterList(fl);
+          setInitialFilterList({ ...fl });
+          setLoaded(true);
+          setFilterEnabled(fl.enabled);
+          setFilterOverride(fl.override);
         }
-        setFilterList(fl);
-        setInitialFilterList({ ...fl });
-        setLoaded(true);
-        setFilterEnabled(fl.enabled);
-        setFilterOverride(fl.override);
-      });
+      );
     } else {
       setLoaded(true);
     }
