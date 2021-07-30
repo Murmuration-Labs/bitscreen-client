@@ -137,7 +137,14 @@ const CidsRow = ({
               onClick={(e) => {
                 e.stopPropagation();
                 navigator.clipboard.writeText(cid.cid);
-                enqueueSnackbar("Copied to clipboard.", { variant: "success" });
+                enqueueSnackbar("Copied to clipboard.", {
+                  variant: "success",
+                  preventDuplicate: true,
+                  anchorOrigin: {
+                    horizontal: "right",
+                    vertical: "top",
+                  },
+                });
               }}
             >{`${cid.cid.slice(0, 10)}...`}</a>
           </Tooltip>
@@ -147,7 +154,14 @@ const CidsRow = ({
             onClick={(e) => {
               e.stopPropagation();
               navigator.clipboard.writeText(cid.cid);
-              enqueueSnackbar("Copied to clipboard.", { variant: "success" });
+              enqueueSnackbar("Copied to clipboard.", {
+                variant: "success",
+                preventDuplicate: true,
+                anchorOrigin: {
+                  horizontal: "right",
+                  vertical: "top",
+                },
+              });
             }}
           >
             {cid.cid}
