@@ -424,19 +424,13 @@ const FilterPage = (props) => {
     filterList.override = !filterList.override;
     setFilterOverride(filterList.override);
 
-    if (filterList.override) {
-      const fl = {
-        ...filterList,
-        visibility: Visibility.Private,
-      };
-      saveFilter(fl);
-    } else {
-      const fl = {
-        ...filterList,
-        visibility: initialFilterList.visibility,
-      };
-      saveFilter(fl);
-    }
+    const fl = {
+      ...filterList,
+      visibility: filterList.override
+        ? Visibility.Private
+        : initialFilterList.visibility,
+    };
+    saveFilter(fl);
   };
 
   const closeModalCallback = () => {
