@@ -1,5 +1,6 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
+  faCheck,
   faEdit,
   faEye,
   faGlobe,
@@ -63,15 +64,6 @@ function Filters(): JSX.Element {
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList], false);
-    await getFilters();
-  };
-
-  const toggleFilterOverride = async (
-    filterList: FilterList
-  ): Promise<void> => {
-    if (filterList.originId) return;
-    filterList.override = !filterList.override;
     await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
@@ -176,10 +168,10 @@ function Filters(): JSX.Element {
                 <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
+                <th>Override?</th>
                 <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
-                <th>Override?</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -206,6 +198,14 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <CIDFilterScope {...filterList} />
+                  </td>
+                  <td>
+                    {filterList.override && (
+                      <FontAwesomeIcon
+                        icon={faCheck as IconProp}
+                        color="#28a745"
+                      />
+                    )}
                   </td>
                   <td>
                     <CIDFilterShared {...filterList} />
@@ -252,19 +252,6 @@ function Filters(): JSX.Element {
                         checked={filterList.enabled}
                       />
                     </div>
-                  </td>
-                  <td>
-                    {!filterList.originId && (
-                      <div onClick={() => toggleFilterOverride(filterList)}>
-                        <FormCheck
-                          readOnly
-                          type="switch"
-                          checked={
-                            filterList.override ? filterList.override : false
-                          }
-                        />
-                      </div>
-                    )}
                   </td>
                   <td style={{ textAlign: "justify" }}>
                     <Link
