@@ -136,7 +136,24 @@ const CidsRow = ({
               style={{ fontSize: "1rem", cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
-                navigator.clipboard.writeText(cid.cid);
+                switch (true) {
+                  case !!navigator.clipboard:
+                    // eslint-disable-next-line no-case-declarations
+                    const selBox = document.createElement("textarea");
+                    selBox.style.position = "fixed";
+                    selBox.style.left = "0";
+                    selBox.style.top = "0";
+                    selBox.style.opacity = "0";
+                    selBox.value = cid.cid;
+                    document.body.appendChild(selBox);
+                    selBox.focus();
+                    selBox.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(selBox);
+                    break;
+                  default:
+                    navigator.clipboard.writeText(cid.cid);
+                }
                 enqueueSnackbar("Copied to clipboard.", {
                   variant: "success",
                   preventDuplicate: true,
@@ -172,7 +189,13 @@ const CidsRow = ({
         {cid.refUrl && (
           <a
             style={{ fontSize: "1rem" }}
-            href={cid.refUrl}
+            href={
+              cid.refUrl
+                ? cid.refUrl.toLowerCase().startsWith("http")
+                  ? cid.refUrl
+                  : `https://${cid.refUrl}`
+                : cid.refUrl
+            }
             target="_blank"
             onClick={(e) => e.stopPropagation()}
           >

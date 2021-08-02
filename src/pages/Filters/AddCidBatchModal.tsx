@@ -1,27 +1,33 @@
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@material-ui/core";
 import React, { useState } from "react";
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-
+import { Button } from "react-bootstrap";
 import "./Filters.css";
-
 import { AddCidBatchModalProps } from "./Interfaces";
 
-export default function AddCidBatchModal(
-  props: AddCidBatchModalProps
-): JSX.Element {
+export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [cidsInput, setCidsInput] = useState<string>("");
   const [cidsInputError, setCidsInputError] = useState<boolean>(false);
   const [refUrl, setRefUrl] = useState<string>("");
-  const [isEdit] = useState(!!props.edit);
+  const [edit] = useState(!!props.edit);
+  const [open] = useState(props.show);
 
-  const renderCidsInputError = (): JSX.Element => {
-    if (cidsInputError) {
-      return (
-        <span className="double-space-left text-danger">Invalid CIDs list</span>
-      );
-    }
+  console.log(props.show);
 
-    return <></>;
-  };
+  // const renderCidsInputError = (): JSX.Element => {
+  //   if (cidsInputError) {
+  //     return (
+  //       <span className="double-space-left text-danger">Invalid CIDs list</span>
+  //     );
+  //   }
+
+  //   return <></>;
+  // };
 
   const addCids = (): void => {
     const match = /\r|\n|,|;|\s/.exec(cidsInput);
@@ -46,77 +52,67 @@ export default function AddCidBatchModal(
   };
 
   return (
-    <Modal
-      show={props.show}
-      onHide={() => {
-        setCidsInput("");
-        setRefUrl("");
-        props.closeCallback(null);
-      }}
-    >
-      <Modal.Header closeButton>
-        <Modal.Title>Add Cid Batch</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Row>
-          <Col>
-            <div>
-              {!isEdit && (
-                <Form.Row>
-                  <Col>
-                    <Form.Control
-                      onChange={(
-                        event: React.ChangeEvent<HTMLInputElement>
-                      ) => {
-                        setCidsInput(event.target.value);
-                        if (cidsInputError) {
-                          setCidsInputError(false);
-                        }
-                      }}
-                      as="textarea"
-                      placeholder="You can paste here more CIDs separated by space, newline, comma or semicolon."
-                      value={cidsInput}
-                    />
-                    {renderCidsInputError()}
-                  </Col>
-                </Form.Row>
-              )}
-              <Form.Row>
-                <Col>
-                  <Form.Control
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setRefUrl(event.target.value);
-                    }}
-                    title="Reference URL"
-                    placeholder="A reference URL to be assigned to all of the selected CIDs."
-                    value={refUrl}
-                  />
-                </Col>
-              </Form.Row>
-            </div>
-          </Col>
-        </Row>
-      </Modal.Body>
-      <Modal.Footer>
+    <Dialog open={open}>
+      <DialogTitle>{edit ? "Update CIDs Batch" : "Add CIDs Batch"}</DialogTitle>
+      <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+        <form
+          style={{ minWidth: "400px" }}
+          onKeyPress={(e) =>
+            e.nativeEvent.code === "Enter" && (edit || cidsInput)
+              ? edit
+                ? updateCids()
+                : addCids()
+              : null
+          }
+        >
+          {!edit && (
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="cid"
+              label="CID_1, CID_2, CID_3 etc."
+              rows={2}
+              multiline
+              maxRows={6}
+              fullWidth
+              value={cidsInput}
+              onChange={(e) => {
+                setCidsInput(e.target.value);
+              }}
+            ></TextField>
+          )}
+          <TextField
+            variant="outlined"
+            margin="dense"
+            id="url"
+            label="URL"
+            fullWidth
+            value={refUrl}
+            onChange={(e) => {
+              setRefUrl(e.target.value);
+            }}
+          />
+        </form>
+      </DialogContent>
+      <DialogActions>
         <Button
-          variant="secondary"
-          onClick={() => {
-            setCidsInput("");
-            setRefUrl("");
-            props.closeCallback(null);
-          }}
+          color="primary"
+          disabled={!edit && !cidsInput}
+          onClick={() => (edit ? updateCids() : addCids())}
+        >
+          {edit ? "Update" : "Add"}
+        </Button>
+        <Button
+          color="primary"
+          title="Cancel"
+          onClick={() => props.closeCallback(null)}
         >
           Cancel
         </Button>
-
-        <Button
-          variant="warning"
-          onClick={() => (isEdit ? updateCids() : addCids())}
-          disabled={isEdit ? !refUrl : !cidsInput || !refUrl}
-        >
-          {isEdit ? "Update CIDs" : "Add CIDs"}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+      </DialogActions>
+    </Dialog>
   );
-}
+};
+
+export default AddCidBatchModal;

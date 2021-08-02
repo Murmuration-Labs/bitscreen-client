@@ -38,7 +38,13 @@ const AddCidModal = ({
     <Dialog open={open} onClose={() => handleClose()}>
       <DialogTitle>{edit ? "Update CID" : "Add CID"}</DialogTitle>
       <DialogContent style={{ display: "flex", flexDirection: "column" }}>
-        <form>
+        <form
+          onKeyPress={(e) =>
+            e.nativeEvent.code === "Enter" && cidClone.cid
+              ? handleClose(cidClone, index)
+              : null
+          }
+        >
           <TextField
             variant="outlined"
             autoFocus

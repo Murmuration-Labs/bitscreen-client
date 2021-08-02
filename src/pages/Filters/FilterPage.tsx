@@ -476,6 +476,8 @@ const FilterPage = (props): JSX.Element => {
     setMoveToFilterList(selectedFilter);
 
     filterList.cids = filterList.cids.filter((x) => !items.includes(x));
+
+    saveFilter({ ...filterList });
     toast.info("Don't forget to press Save to save the changes.");
   };
 
@@ -939,29 +941,35 @@ const FilterPage = (props): JSX.Element => {
               closeCallback={closeModalCallback}
               show={showMoveModal}
             />
-            <AddCidBatchModal
-              closeCallback={async (data) => {
-                setAddCidBatchModal(false);
-                if (!data || !data.result || !data.result.length) {
-                  return;
-                }
+            {addCidBatchModal && (
+              <AddCidBatchModal
+                closeCallback={async (data) => {
+                  console.log("CLOSE CALLBACK ADD BULK");
+                  setAddCidBatchModal(false);
+                  if (!data || !data.result || !data.result.length) {
+                    return;
+                  }
 
-                onNewCidsBatch(data.result, data.refUrl);
-              }}
-              show={addCidBatchModal}
-            />
-            <AddCidBatchModal
-              closeCallback={async (data) => {
-                setIsCidBulkEdit(false);
-                if (!data) {
-                  return;
-                }
+                  onNewCidsBatch(data.result, data.refUrl);
+                }}
+                show={addCidBatchModal}
+              />
+            )}
+            {isCidBulkEdit && (
+              <AddCidBatchModal
+                closeCallback={async (data) => {
+                  console.log("CLOSE CALLBACK EDIT BULK");
+                  setIsCidBulkEdit(false);
+                  if (!data) {
+                    return;
+                  }
 
-                onEditCidsBatch(data.refUrl);
-              }}
-              edit={true}
-              show={!!checkedCids && !!checkedCids.length && isCidBulkEdit}
-            />
+                  onEditCidsBatch(data.refUrl);
+                }}
+                edit={true}
+                show={!!checkedCids && !!checkedCids.length && isCidBulkEdit}
+              />
+            )}
             <Prompt
               when={filterListChanged}
               message="You have unsaved changes, are you sure you want to leave?"
