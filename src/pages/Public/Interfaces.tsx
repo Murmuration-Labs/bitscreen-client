@@ -9,6 +9,9 @@ export interface HeadCell {
 export interface Data {
   name: string;
   cids: CidItem[];
+  subs: number;
+  providerName: string;
+  providerCountry?: string;
   enabled: boolean;
   actions?: string;
   shareId?: string;
