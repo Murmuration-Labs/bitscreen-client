@@ -34,11 +34,11 @@ export default function ToggleSharedFilterModal(
       }}
     >
       <Modal.Header closeButton>
-        <Modal.Title>This filter is shared</Modal.Title>
+        <Modal.Title>This filter might be imported</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p> Do you want to change enablement for all the subscribers? </p>
-        <Form.Group controlId="visibility">
+        <Form.Group controlId="enablement">
           <Form.Control as="select" onChange={changeOption}>
             <option>Change enablement only for this filter</option>
             <option>
