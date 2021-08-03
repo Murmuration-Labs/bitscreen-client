@@ -27,8 +27,8 @@ export enum BulkSelectedType {
 
 export enum EnabledOption {
   None,
-  Global,
   Local,
+  Global,
 }
 
 export function mapVisibilityString(visibilityStr: string): Visibility {

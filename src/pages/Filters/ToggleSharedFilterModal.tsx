@@ -6,7 +6,7 @@ export default function ToggleSharedFilterModal(
   props: ToggleSharedFilterModalProps
 ): JSX.Element {
   const [selectedOption, setSelectedOption] = useState<EnabledOption>(
-    EnabledOption.None
+    EnabledOption.Local
   );
 
   const mapOptionString = (option: string): EnabledOption => {
@@ -30,6 +30,7 @@ export default function ToggleSharedFilterModal(
       show={props.show}
       onHide={() => {
         props.closeCallback();
+        setSelectedOption(EnabledOption.Local);
       }}
     >
       <Modal.Header closeButton>
@@ -51,6 +52,7 @@ export default function ToggleSharedFilterModal(
           variant="secondary"
           onClick={() => {
             props.closeCallback();
+            setSelectedOption(EnabledOption.Local);
           }}
         >
           Cancel
@@ -60,6 +62,7 @@ export default function ToggleSharedFilterModal(
           onClick={() => {
             props.callback(selectedOption);
             props.closeCallback();
+            setSelectedOption(EnabledOption.Local);
           }}
         >
           Submit

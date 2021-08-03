@@ -34,6 +34,7 @@ import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
   CidItem,
+  EnabledOption,
   FilterList,
   Visibility,
   VisibilityString,
@@ -100,7 +101,8 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
-  const toggleSharedFilterEnabled = (): void => {
+  const toggleSharedFilterEnabled = (option: EnabledOption): void => {
+    console.log(option);
     console.log("shared button was clicked");
   };
 
@@ -600,7 +602,7 @@ function Filters(): JSX.Element {
 
             <ToggleSharedFilterModal
               show={showConfirmSharedEnable}
-              callback={() => toggleSharedFilterEnabled()}
+              callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
                 setShowConfirmSharedEnable(false);
