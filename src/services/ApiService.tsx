@@ -126,11 +126,13 @@ const ApiService = {
     enabled: boolean
   ): Promise<void> => {
     const providerId = AuthService.getProviderId();
-    await axios.post(`${serverUri()}/provider-filter/shared/enabled`, {
-      filterId,
-      providerId,
-      enabled,
-    });
+    await axios.put(
+      `${serverUri()}/provider-filter/${filterId}/shared/enabled`,
+      {
+        providerId,
+        enabled,
+      }
+    );
   },
 
   deleteFilter: async (filter: FilterList): Promise<void> => {
