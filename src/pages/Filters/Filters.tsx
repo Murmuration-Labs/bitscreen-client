@@ -102,8 +102,11 @@ function Filters(): JSX.Element {
   );
 
   const toggleSharedFilterEnabled = (option: EnabledOption): void => {
-    console.log(option);
-    console.log("shared button was clicked");
+    if (option === EnabledOption.Local) {
+      toggleFilterEnabled(selectedFilterList);
+    } else if (option === EnabledOption.Global) {
+      console.log("todo");
+    }
   };
 
   const confirmDelete = (filterList: FilterList): void => {
