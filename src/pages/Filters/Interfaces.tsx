@@ -25,6 +25,12 @@ export enum BulkSelectedType {
   Imported,
 }
 
+export enum EnabledOption {
+  None,
+  Global,
+  Local,
+}
+
 export function mapVisibilityString(visibilityStr: string): Visibility {
   if (visibilityStr === "Private") return Visibility.Private;
   if (visibilityStr === "Public") return Visibility.Public;
@@ -70,6 +76,12 @@ export interface ImportFilterModalProps {
   filter?: FilterList;
   closeCallback: (refreshParent: boolean) => Promise<void>;
   show: boolean;
+}
+
+export interface ToggleSharedFilterModalProps {
+  show: boolean;
+  callback: (option: EnabledOption) => void;
+  closeCallback: () => void;
 }
 
 export interface AddCidBatchModalProps {

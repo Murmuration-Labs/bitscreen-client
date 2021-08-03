@@ -38,6 +38,7 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
+import ToggleSharedFilterModal from "./ToggleSharedFilterModal";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -92,6 +93,16 @@ function Filters(): JSX.Element {
     useState<boolean>(false);
   const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
     useState<string>("");
+
+  const [showConfirmSharedEnable, setShowConfirmSharedEnable] =
+    useState<boolean>(false);
+  const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
+
+  const toggleSharedFilterEnabled = (): void => {
+    console.log("shared button was clicked");
+  };
 
   const confirmDelete = (filterList: FilterList): void => {
     setShowConfirmDelete(true);
@@ -245,7 +256,12 @@ function Filters(): JSX.Element {
                     )}
                   </td>
                   <td>
-                    <div onClick={() => toggleFilterEnabled(filterList)}>
+                    <div
+                      onClick={() => {
+                        setSelectedFilterList(filterList);
+                        setShowConfirmSharedEnable(true);
+                      }}
+                    >
                       <FormCheck
                         readOnly
                         type="switch"
@@ -579,6 +595,15 @@ function Filters(): JSX.Element {
               closeCallback={() => {
                 setShowConfirmDisableBulkAction(false);
                 setConfirmDisableBulkActionMessage("");
+              }}
+            />
+
+            <ToggleSharedFilterModal
+              show={showConfirmSharedEnable}
+              callback={() => toggleSharedFilterEnabled()}
+              closeCallback={() => {
+                setSelectedFilterList(FilterService.emptyFilterList());
+                setShowConfirmSharedEnable(false);
               }}
             />
           </Container>
