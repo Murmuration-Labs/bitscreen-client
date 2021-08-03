@@ -101,11 +101,17 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
-  const toggleSharedFilterEnabled = (option: EnabledOption): void => {
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
     if (option === EnabledOption.Local) {
-      toggleFilterEnabled(selectedFilterList);
+      await toggleFilterEnabled(selectedFilterList);
     } else if (option === EnabledOption.Global) {
-      console.log("todo");
+      await ApiService.updateEnabledForSharedFilter(
+        selectedFilterList.id,
+        !selectedFilterList.enabled
+      );
+      await getFilters();
     }
   };
 
