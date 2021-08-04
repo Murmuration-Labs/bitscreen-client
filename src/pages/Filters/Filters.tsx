@@ -499,7 +499,7 @@ function Filters(): JSX.Element {
                   variant="primary"
                   onClick={() => history.push(`/filters/new`)}
                 >
-                  + new Filter
+                  New Filter
                 </Button>
 
                 <Button
