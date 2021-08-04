@@ -689,11 +689,10 @@ const FilterPage = (props): JSX.Element => {
                         flexDirection: "row",
                         justifyContent: "center",
                       }}
-                      onClick={() => isOwner && toggleFilterEnabled()}
+                      onClick={() => toggleFilterEnabled()}
                     >
                       <FormCheck
                         readOnly
-                        disabled={!isOwner}
                         type="switch"
                         checked={filterEnabled}
                       />
