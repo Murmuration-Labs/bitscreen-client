@@ -1,9 +1,9 @@
-import { EnabledOption, ToggleSharedFilterModalProps } from "./Interfaces";
+import { EnabledOption, ToggleEnabledFilterModalProps } from "./Interfaces";
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
-export default function ToggleSharedFilterModal(
-  props: ToggleSharedFilterModalProps
+export default function ToggleEnabledFilterModal(
+  props: ToggleEnabledFilterModalProps
 ): JSX.Element {
   const [selectedOption, setSelectedOption] = useState<EnabledOption>(
     EnabledOption.Local

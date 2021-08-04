@@ -126,7 +126,7 @@ const ApiService = {
   },
 
   updateEnabledForSharedFilters: async (
-    filterIds: [number],
+    filterIds: number[],
     enabled: boolean
   ): Promise<void> => {
     const providerId = AuthService.getProviderId();
