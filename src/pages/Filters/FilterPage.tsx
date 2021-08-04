@@ -1,5 +1,8 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faExternalLinkAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExternalLinkAlt,
+  faQuestionCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -10,7 +13,9 @@ import {
   Form,
   FormCheck,
   ListGroup,
+  OverlayTrigger,
   Row,
+  Tooltip,
 } from "react-bootstrap";
 import { Prompt } from "react-router";
 import { useHistory } from "react-router-dom";
@@ -26,8 +31,9 @@ import {
   CidItem,
   FilterList,
   mapVisibilityString,
-  ViewTypes,
+  Visibility,
   VisibilityString,
+  ViewTypes,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 
@@ -416,7 +422,16 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const toggleFilterOverride = () => {
-    saveFilter({ ...filterList, override: !filterList.override });
+    filterList.override = !filterList.override;
+    setFilterOverride(filterList.override);
+
+    const fl = {
+      ...filterList,
+      visibility: filterList.override
+        ? Visibility.Private
+        : initialFilterList.visibility,
+    };
+    saveFilter(fl);
   };
 
   const closeModalCallback = () => {
@@ -608,7 +623,9 @@ const FilterPage = (props): JSX.Element => {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
-                          disabled={!!filterList.originId}
+                          disabled={
+                            !!filterList.originId || filterList.override
+                          }
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
@@ -692,6 +709,26 @@ const FilterPage = (props): JSX.Element => {
                         >
                           Override?
                         </Form.Label>
+                        <OverlayTrigger
+                          placement="right"
+                          // show={filterList.override ? true : undefined}
+                          delay={{ show: 150, hide: 300 }}
+                          overlay={
+                            <Tooltip id="button-tooltip">
+                              {filterList.override
+                                ? "Override lists cannot be shared"
+                                : "Override lists prevent CIDs on imported lists from being filtered"}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faQuestionCircle as IconProp}
+                            color="#7393B3"
+                            style={{
+                              marginTop: 2,
+                            }}
+                          />
+                        </OverlayTrigger>
                       </div>
                     </Form.Row>
                   )}
