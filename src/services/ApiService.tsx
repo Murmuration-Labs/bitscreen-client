@@ -125,6 +125,20 @@ const ApiService = {
     return responses.map(({ data }) => data);
   },
 
+  updateEnabledForSharedFilter: async (
+    filterId: number,
+    enabled: boolean
+  ): Promise<void> => {
+    const providerId = AuthService.getProviderId();
+    await axios.put(
+      `${serverUri()}/provider-filter/${filterId}/shared/enabled`,
+      {
+        providerId,
+        enabled,
+      }
+    );
+  },
+
   deleteFilter: async (filter: FilterList): Promise<void> => {
     const currentProviderId = AuthService.getProviderId();
     await axios.delete(

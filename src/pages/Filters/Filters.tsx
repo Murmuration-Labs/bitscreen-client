@@ -34,10 +34,12 @@ import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
   CidItem,
+  EnabledOption,
   FilterList,
   Visibility,
   VisibilityString,
 } from "./Interfaces";
+import ToggleSharedFilterModal from "./ToggleSharedFilterModal";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -85,6 +87,26 @@ function Filters(): JSX.Element {
     useState<boolean>(false);
   const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
     useState<string>("");
+
+  const [showConfirmSharedEnable, setShowConfirmSharedEnable] =
+    useState<boolean>(false);
+  const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
+    FilterService.emptyFilterList()
+  );
+
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
+    if (option === EnabledOption.Local) {
+      await toggleFilterEnabled(selectedFilterList);
+    } else if (option === EnabledOption.Global) {
+      await ApiService.updateEnabledForSharedFilter(
+        selectedFilterList.id,
+        !selectedFilterList.enabled
+      );
+      await getFilters();
+    }
+  };
 
   const confirmDelete = (filterList: FilterList): void => {
     setShowConfirmDelete(true);
@@ -240,7 +262,12 @@ function Filters(): JSX.Element {
                     )}
                   </td>
                   <td>
-                    <div onClick={() => toggleFilterEnabled(filterList)}>
+                    <div
+                      onClick={() => {
+                        setSelectedFilterList(filterList);
+                        setShowConfirmSharedEnable(true);
+                      }}
+                    >
                       <FormCheck
                         readOnly
                         type="switch"
@@ -561,6 +588,15 @@ function Filters(): JSX.Element {
               closeCallback={() => {
                 setShowConfirmDisableBulkAction(false);
                 setConfirmDisableBulkActionMessage("");
+              }}
+            />
+
+            <ToggleSharedFilterModal
+              show={showConfirmSharedEnable}
+              callback={toggleSharedFilterEnabled}
+              closeCallback={() => {
+                setSelectedFilterList(FilterService.emptyFilterList());
+                setShowConfirmSharedEnable(false);
               }}
             />
           </Container>
