@@ -10,9 +10,9 @@ export default function ToggleEnabledFilterModal(
   );
 
   const mapOptionString = (option: string): EnabledOption => {
-    if (option === "No, enable/disable only this filter")
+    if (option === "No, enable/disable the filter only for myself")
       return EnabledOption.Local;
-    if (option === "Yes, enable/disable the filter for all the subscribers")
+    if (option === "Yes, enable/disable the filter for all the providers")
       return EnabledOption.Global;
 
     return EnabledOption.None;
@@ -39,15 +39,12 @@ export default function ToggleEnabledFilterModal(
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>
-          {" "}
-          Do you want to enable/disable the filter for all the subscribers?{" "}
-        </p>
+        <p> Do you want to enable/disable the filter for all the providers? </p>
         <Form.Group controlId="enablement">
           <Form.Control as="select" onChange={changeOption}>
-            <option>No, enable/disable only this filter</option>
+            <option>No, enable/disable the filter only for myself</option>
             <option>
-              Yes, enable/disable the filter for all the subscribers
+              Yes, enable/disable the filter for all the providers
             </option>
           </Form.Control>
         </Form.Group>
