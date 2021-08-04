@@ -33,18 +33,18 @@ function Navigation(): JSX.Element {
           Filters
         </NavLink>
       )}
-      <NavLink className="nav-link" activeClassName={"is-active"} to="/account">
-        Account
-      </NavLink>
       {provider && (
         <NavLink
           className="nav-link"
           activeClassName={"is-active"}
-          to="/public"
+          to="/directory"
         >
-          Public
+          ⤷&nbsp;Directory
         </NavLink>
       )}
+      <NavLink className="nav-link" activeClassName={"is-active"} to="/account">
+        Account
+      </NavLink>
     </nav>
   );
 }
