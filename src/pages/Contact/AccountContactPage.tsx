@@ -56,7 +56,6 @@ export default function AccountContactPage(): JSX.Element {
           })
           .catch((err) => {
             console.error(err);
-            console.log("Error");
 
             setAccount(null);
           });

@@ -25,7 +25,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     async function setInitialConfig() {
       const response = await axios.get(`${serverUri()}/config`);
       const config = response.data;
-      console.log("config", config);
 
       setLoaded(true);
       setConfiguration(config);
@@ -69,7 +68,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   };
 
   const toggleAdvancedFilter = async (filterName: string): Promise<void> => {
-    console.log(filterName);
     let list = configuration.advanced.list;
 
     if (list.includes(filterName)) {
