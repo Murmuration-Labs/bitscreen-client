@@ -18,6 +18,7 @@ import Filters from "./Filters/Filters";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
 import * as AuthService from "../services/AuthService";
+import FilterDetailsPage from "./Public/FilterDetailsPage";
 
 interface MatchParams {
   id: string;
@@ -81,6 +82,13 @@ function App(): JSX.Element {
               path="/public"
               exact
               component={provider ? PublicFilters : AccountContactPage}
+            >
+              {!provider && <Redirect to="/account" />}
+            </Route>
+            <Route
+              path="/public/details/:id?"
+              exact
+              component={provider ? FilterDetailsPage : AccountContactPage}
             >
               {!provider && <Redirect to="/account" />}
             </Route>

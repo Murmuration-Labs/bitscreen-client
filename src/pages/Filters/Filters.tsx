@@ -49,7 +49,9 @@ function Filters(): JSX.Element {
   };
 
   const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
+    const filterLists: FilterList[] = await ApiService.getFilters({
+      q: searchTerm,
+    });
 
     setFilterLists(filterLists);
 
