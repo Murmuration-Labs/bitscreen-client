@@ -72,7 +72,7 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
-  const [showConfirmEnable, setShowConfirmEnable] = useState<boolean>(false);
+  const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
@@ -264,7 +264,7 @@ function Filters(): JSX.Element {
                     <div
                       onClick={() => {
                         setSelectedFilterList(filterList);
-                        setShowConfirmEnable(true);
+                        setShowConfirmEnabled(true);
                       }}
                     >
                       <FormCheck
@@ -454,7 +454,7 @@ function Filters(): JSX.Element {
                       disabled={!isOneSelected}
                       onClick={() => {
                         setBulkEnabled(true);
-                        setShowConfirmEnable(true);
+                        setShowConfirmEnabled(true);
                       }}
                     >
                       Enable
@@ -465,7 +465,7 @@ function Filters(): JSX.Element {
                       disabled={!isOneSelected}
                       onClick={() => {
                         setBulkEnabled(false);
-                        setShowConfirmEnable(true);
+                        setShowConfirmEnabled(true);
                       }}
                     >
                       Disable
@@ -539,12 +539,12 @@ function Filters(): JSX.Element {
             />
 
             <ToggleEnabledFilterModal
-              show={showConfirmEnable}
+              show={showConfirmEnabled}
               callback={toggleFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
                 setBulkEnabled(null);
-                setShowConfirmEnable(false);
+                setShowConfirmEnabled(false);
               }}
             />
           </Container>
