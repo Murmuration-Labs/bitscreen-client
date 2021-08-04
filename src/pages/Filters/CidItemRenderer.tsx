@@ -1,52 +1,49 @@
-import React, { useEffect, useState } from "react";
-import { CidItem, CidItemProps } from "./Interfaces";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Col,
+  Container,
   Form,
   ListGroup,
-  Container,
-  Row,
   OverlayTrigger,
+  Row,
   Tooltip,
 } from "react-bootstrap";
-import { RefObject } from "react";
-import FilterService from "../../services/FilterService";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../services/ApiService";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import FilterService from "../../services/FilterService";
+import { CidItem, CidItemProps } from "./Interfaces";
 
 // function validateCid(cid: string): boolean{
 //     // :TODO: check length, check allowed characters
 //     return true;
 // }
 
-export default function CidItemRender(props: CidItemProps) {
+const CidItemRenderer = (props: CidItemProps): JSX.Element => {
   const emptyCidItem: CidItem = {
     tableKey: "",
     cid: "",
     isChecked: false,
     isSaved: false,
   };
+
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [cidItem, setCidItem] = useState<CidItem>(emptyCidItem);
-  const [cidInputRef, setCidInputRef] = useState<RefObject<HTMLInputElement>>(
-    React.createRef<HTMLInputElement>()
-  );
-  const [cidUrlInputRef, setCidUrlInputRef] = useState<
-    RefObject<HTMLInputElement>
-  >(React.createRef<HTMLInputElement>());
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [isOverrideFilter, setIsOverrideFilter] = useState<boolean>(false);
+
   const [overrideCid, setOverrideCid] = useState<boolean>(false);
   const [localOverrideCid, setLocalOverrideCid] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
+
+  // Refs
+  const cidInputRef = useRef<HTMLInputElement>();
+  const cidUrlInputRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
     setCidItem(props.cidItem);
     setLoaded(props.isOverrideFilter ? !props.isOverrideFilter : true);
-    setIsOverrideFilter(props.isOverrideFilter ? props.isOverrideFilter : true);
     setIsEdit(props.isEdit);
   }, [props.cidItem, props.isOverrideFilter, props.isEdit]);
 
@@ -65,11 +62,12 @@ export default function CidItemRender(props: CidItemProps) {
   }, [props.isOverrideFilter, props.cidItem.cid, props.filterList]);
 
   const enterEdit = (): void => {
-    if (cidItem != null) {
-      cidItem.edit = true;
-      cidItem.isChecked = false;
+    if (cidItem) {
+      props.updateCidItem(
+        { ...cidItem, edit: true, isChecked: false },
+        props.index
+      );
     }
-    props.updateCidItem(cidItem, props.index);
   };
 
   const handleSave = (e: any): void => {
@@ -95,8 +93,10 @@ export default function CidItemRender(props: CidItemProps) {
   };
 
   const handleSelectedCid = (): void => {
-    cidItem.isChecked = !cidItem.isChecked;
-    props.updateCidItem(cidItem, props.index);
+    props.updateCidItem(
+      { ...cidItem, isChecked: !cidItem.isChecked },
+      props.index
+    );
   };
 
   const renderOverride = (local = false): JSX.Element => {
@@ -206,14 +206,14 @@ export default function CidItemRender(props: CidItemProps) {
             <Form.Group controlId="cidItemEdit">
               <Form.Label style={{ marginRight: 3 }}>CID:</Form.Label>
               <Form.Control
-                ref={cidInputRef}
+                ref={(ref) => (cidInputRef.current = ref)}
                 type="text"
                 placeholder=""
                 defaultValue={cidItem.cid}
               />
               <Form.Label style={{ marginRight: 3 }}>URL:</Form.Label>
               <Form.Control
-                ref={cidUrlInputRef}
+                ref={(ref) => (cidUrlInputRef.current = ref)}
                 type="text"
                 placeholder=""
                 defaultValue={cidItem.refUrl ?? ""}
@@ -237,6 +237,7 @@ export default function CidItemRender(props: CidItemProps) {
               <Col sm={2} md={2} lg={1}>
                 <Form.Check
                   type="checkbox"
+                  checked={cidItem.isChecked}
                   disabled={props.isHashedCid}
                   onChange={handleSelectedCid}
                 />
@@ -282,6 +283,7 @@ export default function CidItemRender(props: CidItemProps) {
                   {cidItem.refUrl ? (
                     <a
                       href={cidItem.refUrl}
+                      target="_blank"
                       style={{
                         fontSize: 19,
                         fontWeight: "normal",
@@ -304,4 +306,6 @@ export default function CidItemRender(props: CidItemProps) {
       </ListGroup.Item>
     </div>
   );
-}
+};
+
+export default CidItemRenderer;
