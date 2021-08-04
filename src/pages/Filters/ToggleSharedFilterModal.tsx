@@ -10,9 +10,9 @@ export default function ToggleSharedFilterModal(
   );
 
   const mapOptionString = (option: string): EnabledOption => {
-    if (option === "Change enablement only for this filter")
+    if (option === "No, enable/disable only this filter")
       return EnabledOption.Local;
-    if (option === "Change enablement for all the subscribers of this filter")
+    if (option === "Yes, enable/disable the filter for all the subscribers")
       return EnabledOption.Global;
 
     return EnabledOption.None;
@@ -34,15 +34,20 @@ export default function ToggleSharedFilterModal(
       }}
     >
       <Modal.Header closeButton>
-        <Modal.Title>This filter might be imported</Modal.Title>
+        <Modal.Title>
+          The selected filter(s) might be imported by other providers
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p> Do you want to change enablement for all the subscribers? </p>
+        <p>
+          {" "}
+          Do you want to enable/disable the filter for all the subscribers?{" "}
+        </p>
         <Form.Group controlId="enablement">
           <Form.Control as="select" onChange={changeOption}>
-            <option>Change enablement only for this filter</option>
+            <option>No, enable/disable only this filter</option>
             <option>
-              Change enablement for all the subscribers of this filter
+              Yes, enable/disable the filter for all the subscribers
             </option>
           </Form.Control>
         </Form.Group>
