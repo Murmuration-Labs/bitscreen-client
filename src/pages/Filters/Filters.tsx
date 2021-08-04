@@ -100,8 +100,8 @@ function Filters(): JSX.Element {
     if (option === EnabledOption.Local) {
       await toggleFilterEnabled(selectedFilterList);
     } else if (option === EnabledOption.Global) {
-      await ApiService.updateEnabledForSharedFilter(
-        selectedFilterList.id,
+      await ApiService.updateEnabledForSharedFilters(
+        [selectedFilterList.id],
         !selectedFilterList.enabled
       );
       await getFilters();
