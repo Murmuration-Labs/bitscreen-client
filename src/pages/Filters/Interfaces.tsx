@@ -72,8 +72,14 @@ export interface ImportFilterModalProps {
   show: boolean;
 }
 
+export interface AddCidBatchCallbackPayload {
+  result: string[];
+  refUrl: string;
+}
+
 export interface AddCidBatchModalProps {
-  closeCallback: (cidsAddedBatch: Array<string>) => Promise<void>;
+  closeCallback: (data: AddCidBatchCallbackPayload | null) => Promise<void>;
+  edit?: boolean;
   show: boolean;
 }
 
