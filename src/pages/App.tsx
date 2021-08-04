@@ -79,14 +79,14 @@ function App(): JSX.Element {
             </Route>
             <Route path="/account" exact component={AccountContactPage} />
             <Route
-              path="/public"
+              path="/directory"
               exact
               component={provider ? PublicFilters : AccountContactPage}
             >
               {!provider && <Redirect to="/account" />}
             </Route>
             <Route
-              path="/public/details/:id?"
+              path="/directory/details/:id?"
               exact
               component={provider ? FilterDetailsPage : AccountContactPage}
             >
