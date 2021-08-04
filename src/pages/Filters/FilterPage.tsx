@@ -7,6 +7,7 @@ import {
   faPlusCircle,
   faShare,
   faTrash,
+  faQuestionCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -19,7 +20,9 @@ import {
   DropdownButton,
   Form,
   FormCheck,
+  OverlayTrigger,
   Row,
+  Tooltip,
 } from "react-bootstrap";
 import { Prompt } from "react-router";
 import { useHistory } from "react-router-dom";
@@ -35,8 +38,9 @@ import {
   CidItem,
   FilterList,
   mapVisibilityString,
-  ViewTypes,
+  Visibility,
   VisibilityString,
+  ViewTypes,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 
@@ -107,31 +111,34 @@ const FilterPage = (props): JSX.Element => {
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
-      ApiService.getFilters().then((filterLists: FilterList[]) => {
-        if (!mountedRef.current) return;
-        filterLists = filterLists.filter((fl: FilterList) => fl.id == id);
-        if (filterLists.length === 0) {
-          setInvalidFilterId(true);
-          return;
-        }
+      ApiService.getFilters({ filterId: id }).then(
+        (filterLists: FilterList[]) => {
+          if (!mountedRef.current) return;
+          if (filterLists.length === 0) {
+            setInvalidFilterId(true);
+            return;
+          }
 
-        const cidItems = filterLists[0].cids
-          ? filterLists[0].cids.map((cid: CidItem) => {
-              return { ...cid, tableKey: generateUniqueKey() };
-            })
-          : [];
-        const fl = {
-          ...filterLists[0],
-          cids: cidItems,
-        };
+          const cidItems = filterLists[0].cids
+            ? filterLists[0].cids.map((cid: CidItem) => {
+                return { ...cid, tableKey: generateUniqueKey() };
+              })
+            : [];
+          const fl = {
+            ...filterLists[0],
+            cids: cidItems,
+          };
 
-        if (fl.originId) {
-          setIsimported(true);
+          if (fl.originId) {
+            setIsimported(true);
+          }
+          setFilterList(fl);
+          setInitialFilterList({ ...fl });
+          setLoaded(true);
+          setFilterEnabled(fl.enabled);
+          setFilterOverride(fl.override);
         }
-        setFilterList(fl);
-        setInitialFilterList({ ...fl });
-        setLoaded(true);
-      });
+      );
     } else {
       setLoaded(true);
     }
@@ -461,7 +468,16 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const toggleFilterOverride = () => {
-    saveFilter({ ...filterList, override: !filterList.override });
+    filterList.override = !filterList.override;
+    setFilterOverride(filterList.override);
+
+    const fl = {
+      ...filterList,
+      visibility: filterList.override
+        ? Visibility.Private
+        : initialFilterList.visibility,
+    };
+    saveFilter(fl);
   };
 
   const closeModalCallback = () => {
@@ -655,7 +671,9 @@ const FilterPage = (props): JSX.Element => {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
-                          disabled={!!filterList.originId}
+                          disabled={
+                            !!filterList.originId || filterList.override
+                          }
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
@@ -739,6 +757,26 @@ const FilterPage = (props): JSX.Element => {
                         >
                           Override?
                         </Form.Label>
+                        <OverlayTrigger
+                          placement="right"
+                          // show={filterList.override ? true : undefined}
+                          delay={{ show: 150, hide: 300 }}
+                          overlay={
+                            <Tooltip id="button-tooltip">
+                              {filterList.override
+                                ? "Override lists cannot be shared"
+                                : "Override lists prevent CIDs on imported lists from being filtered"}
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faQuestionCircle as IconProp}
+                            color="#7393B3"
+                            style={{
+                              marginTop: 2,
+                            }}
+                          />
+                        </OverlayTrigger>
                       </div>
                     </Form.Row>
                   )}

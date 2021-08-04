@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
+import { Link } from "react-router-dom";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
 import { FilterList } from "../Filters/Interfaces";
@@ -182,7 +183,14 @@ export default function PublicFilters() {
               {publicFiltersData.map((row, index) => {
                 return (
                   <TableRow key={index}>
-                    <TableCell>{row.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/public/details/${row.id}`}
+                        style={{ fontSize: 14 }}
+                      >
+                        {row.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
                     <TableCell>{row.description}</TableCell>
                     <TableCell>

@@ -28,11 +28,16 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 };
 
 const ApiService = {
-  getFilters: async (searchTerm = ""): Promise<FilterList[]> => {
+  getFilters: async (criteria = {}): Promise<FilterList[]> => {
     const providerId = AuthService.getProviderId();
-    const query = `q=${encodeURIComponent(
-      searchTerm
-    )}&providerId=${encodeURIComponent(providerId)}`;
+
+    let query = `providerId=${encodeURIComponent(providerId)}`;
+    if (criteria["q"]) {
+      query += `&q=${encodeURIComponent(criteria["q"])}`;
+    }
+    if (criteria["filterId"]) {
+      query += `&filterId=${encodeURIComponent(criteria["filterId"])}`;
+    }
 
     const response = await axios.get(`${serverUri()}/filter/search?${query}`);
     return response.data;
@@ -128,6 +133,19 @@ const ApiService = {
     if (!filter.originId) {
       await axios.delete(`${serverUri()}/filter/${filter.id}`);
     }
+  },
+
+  getPublicFilterDetails: async (id: number): Promise<void> => {
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filter/public/details/${id}`,
+      {
+        params: {
+          providerId: AuthService.getProviderId(),
+        },
+      }
+    );
+
+    return response.data;
   },
 
   deleteCid: async (_cid: CidItem | CidItem[]) => {

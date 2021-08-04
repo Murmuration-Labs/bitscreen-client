@@ -49,7 +49,9 @@ function Filters(): JSX.Element {
   };
 
   const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
+    const filterLists: FilterList[] = await ApiService.getFilters({
+      q: searchTerm,
+    });
 
     setFilterLists(filterLists);
 
@@ -63,15 +65,6 @@ function Filters(): JSX.Element {
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList], false);
-    await getFilters();
-  };
-
-  const toggleFilterOverride = async (
-    filterList: FilterList
-  ): Promise<void> => {
-    if (filterList.originId) return;
-    filterList.override = !filterList.override;
     await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
@@ -148,9 +141,12 @@ function Filters(): JSX.Element {
     };
 
     return (
-      <Badge variant={variantMapper[props.visibility]}>
-        {translateVisibility(props.visibility)}
-      </Badge>
+      <div>
+        <Badge variant={variantMapper[props.visibility]}>
+          {translateVisibility(props.visibility)}
+        </Badge>
+        {props.override ? <Badge variant="success">Override</Badge> : <></>}
+      </div>
     );
   };
 
@@ -179,7 +175,6 @@ function Filters(): JSX.Element {
                 <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
-                <th>Override?</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -252,19 +247,6 @@ function Filters(): JSX.Element {
                         checked={filterList.enabled}
                       />
                     </div>
-                  </td>
-                  <td>
-                    {!filterList.originId && (
-                      <div onClick={() => toggleFilterOverride(filterList)}>
-                        <FormCheck
-                          readOnly
-                          type="switch"
-                          checked={
-                            filterList.override ? filterList.override : false
-                          }
-                        />
-                      </div>
-                    )}
                   </td>
                   <td style={{ textAlign: "justify" }}>
                     <Link
