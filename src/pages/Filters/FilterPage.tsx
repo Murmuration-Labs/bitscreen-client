@@ -1,13 +1,12 @@
-import AddCidModal from "./AddCidModal";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faEdit,
   faExternalLinkAlt,
   faFolderPlus,
   faPlusCircle,
+  faQuestionCircle,
   faShare,
   faTrash,
-  faQuestionCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -30,20 +29,21 @@ import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import AddCidBatchModal from "./AddCidBatchModal";
+import AddCidModal from "./AddCidModal";
 import CidsTable from "./Cids/CidsTable";
 import "./Filters.css";
 import {
   CidItem,
   FilterList,
   mapVisibilityString,
+  ViewTypes,
   Visibility,
   VisibilityString,
-  ViewTypes,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
-import * as AuthService from "../../services/AuthService";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -55,6 +55,7 @@ const FilterPage = (props): JSX.Element => {
   );
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     setCids(
@@ -104,6 +105,14 @@ const FilterPage = (props): JSX.Element => {
   const [filterListChanged, setFilterListChanged] = useState<boolean>(false);
   const history = useHistory();
 
+  useEffect(() => {
+    setIsOwner(
+      filterList &&
+        filterList.provider &&
+        filterList.provider.id === AuthService.getProviderId()
+    );
+  }, [filterList]);
+
   const generateUniqueKey = (): string => {
     // Math.random should be unique because of its seeding algorithm.
     // Convert it to base 36 (numbers + letters), and grab the first 9 characters
@@ -133,8 +142,7 @@ const FilterPage = (props): JSX.Element => {
           cids: cidItems,
         };
 
-        setIsimported(fl.provider.id !== AuthService.getProviderId());
-
+        setIsimported(!isOwner);
         setFilterList(fl);
         setInitialFilterList({ ...fl });
         setLoaded(true);
@@ -268,61 +276,6 @@ const FilterPage = (props): JSX.Element => {
     setEditingCidIndex(-1);
   };
 
-  const updateCidItem = (cidItem: CidItem, idx: number) => {
-    const items = filterList.cids.map((item: CidItem, _idx: number) => {
-      return idx === _idx ? cidItem : item;
-    });
-    const fl = {
-      ...filterList,
-      cids: items,
-    };
-    saveFilter(fl);
-  };
-
-  const saveItem = (editItem: CidItem, idx: number) => {
-    const items = filterList.cids.map((item: CidItem, _idx: number) => {
-      return idx === _idx ? { ...editItem, edit: false, isSaved: true } : item;
-    });
-    const fl = {
-      ...filterList,
-      cids: items,
-    };
-    saveFilter(fl);
-  };
-
-  const cancelEdit = (editItem: CidItem, index: number) => {
-    const cids = [...filterList.cids];
-
-    if (typeof editItem.id === "undefined" && !editItem.isSaved) {
-      // Enter here when CID is not persisted to the database and never got saved locally
-      // Effect: CID will get deleted from the table
-      cids.splice(index, 1);
-      saveFilter({
-        ...filterList,
-        cids,
-      });
-    } else if (!editItem.cid && !editItem.refUrl) {
-      // Enter here when CID has empty cid and empty refUrl
-      // Effect: CID will get deleted from the table
-      cids.splice(index, 1);
-      saveFilter({
-        ...filterList,
-        cids,
-      });
-    } else {
-      // Enter here under normal conditions
-      // Effect: CID will stay in the table
-      cids[index] = {
-        ...editItem,
-        edit: false,
-      };
-      saveFilter({
-        ...filterList,
-        cids,
-      });
-    }
-  };
-
   const onNewCidsBatch = (cidsBatch, refUrl): void => {
     const cids: CidItem[] = cidsBatch.map((element: string) => ({
       tableKey: generateUniqueKey(),
@@ -398,7 +351,7 @@ const FilterPage = (props): JSX.Element => {
 
     setMoveCidItems(moveItems);
     setMoveOptionFilters(
-      filterLists.filter((x) => x.id !== filterList.id && !x.originId)
+      filterLists.filter((x) => x.id !== filterList.id && isOwner)
     );
     setShowMoveModal(true);
   };
@@ -500,11 +453,11 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const checkViewType = (): ViewTypes => {
-    if (isEdit && filterList.originId) {
+    if (isEdit && !isOwner) {
       return ViewTypes.Imported;
     }
 
-    if (isEdit && !filterList.originId) {
+    if (isEdit && isOwner) {
       return ViewTypes.Edit;
     }
 
@@ -512,7 +465,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderTitle = (): JSX.Element => {
-    if (filterList.originId) {
+    if (!isOwner) {
       return <h2>View filter list</h2>;
     }
 
@@ -524,7 +477,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderOrigin = (): JSX.Element => {
-    if (!filterList.originId) {
+    if (isOwner) {
       return <></>;
     }
 
@@ -532,8 +485,14 @@ const FilterPage = (props): JSX.Element => {
       <Form.Row>
         <Col>
           <h4>Origin</h4>
-          <a href={filterList.originId} className="origin-link" target="_blank">
-            {filterList.originId}
+          <a
+            href={`${serverUri()}/filter/${
+              filterList.id
+            }?providerId=${AuthService.getProviderId()}`}
+            className="origin-link"
+            target="_blank"
+          >
+            {filterList.shareId}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
               className="space-left"
@@ -545,7 +504,17 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderNotes = (): JSX.Element => {
-    if (!filterList.originId) {
+    if (isOwner) {
+      return <></>;
+    }
+
+    const result = filterList.provider_Filters
+      ? filterList.provider_Filters.filter(
+          ({ provider }) => provider.id === AuthService.getProviderId()
+        )[0]
+      : null;
+
+    if (!result) {
       return <></>;
     }
 
@@ -556,14 +525,26 @@ const FilterPage = (props): JSX.Element => {
           <Form.Control
             role="notes"
             onChange={(ev: ChangeEvent<HTMLInputElement>) => {
+              if (!filterList.provider_Filters) {
+                return;
+              }
+
+              const provider_Filters = filterList.provider_Filters.filter(
+                (pf) => pf.id !== result.id
+              );
+
               saveFilter({
                 ...filterList,
                 notes: ev.target.value,
+                provider_Filters: [
+                  ...provider_Filters,
+                  { ...result, notes: ev.target.value },
+                ],
               });
             }}
             as="textarea"
             placeholder="Notes"
-            value={filterList.notes || ""}
+            value={result.notes || ""}
           />
         </Col>
       </Form.Row>
@@ -644,7 +625,7 @@ const FilterPage = (props): JSX.Element => {
                         type="text"
                         placeholder="List Name"
                         value={filterList.name}
-                        disabled={!!filterList.originId}
+                        disabled={!isOwner}
                       />
                     </Col>
                   </Form.Row>
@@ -663,7 +644,7 @@ const FilterPage = (props): JSX.Element => {
                         as="textarea"
                         placeholder="List Description"
                         value={filterList.description}
-                        disabled={!!filterList.originId}
+                        disabled={!isOwner}
                       />
                     </Col>
                   </Form.Row>
@@ -673,9 +654,7 @@ const FilterPage = (props): JSX.Element => {
                       <Form.Group controlId="visibility">
                         <Form.Control
                           as="select"
-                          disabled={
-                            !!filterList.originId || filterList.override
-                          }
+                          disabled={!isOwner}
                           onChange={changeVisibility}
                           value={VisibilityString[filterList.visibility]}
                         >
@@ -710,10 +689,11 @@ const FilterPage = (props): JSX.Element => {
                         flexDirection: "row",
                         justifyContent: "center",
                       }}
-                      onClick={() => toggleFilterEnabled()}
+                      onClick={() => isOwner && toggleFilterEnabled()}
                     >
                       <FormCheck
                         readOnly
+                        disabled={!isOwner}
                         type="switch"
                         checked={filterEnabled}
                       />
@@ -728,7 +708,7 @@ const FilterPage = (props): JSX.Element => {
                       </Form.Label>
                     </div>
                   </Form.Row>
-                  {!filterList.originId && (
+                  {isOwner && (
                     <Form.Row
                       style={{
                         marginLeft: 2,
@@ -817,7 +797,7 @@ const FilterPage = (props): JSX.Element => {
                                     width: "100%",
                                   }}
                                   onClick={onNewCid}
-                                  disabled={!!filterList.originId}
+                                  disabled={!isOwner}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPlusCircle as IconProp}
@@ -831,7 +811,7 @@ const FilterPage = (props): JSX.Element => {
                                   onClick={() => {
                                     setAddCidBatchModal(true);
                                   }}
-                                  disabled={!!filterList.originId}
+                                  disabled={!isOwner}
                                 >
                                   <FontAwesomeIcon
                                     icon={faFolderPlus as IconProp}
