@@ -38,7 +38,7 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import ToggleSharedFilterModal from "./ToggleSharedFilterModal";
+import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 
 function Filters(): JSX.Element {
   /**
@@ -171,12 +171,6 @@ function Filters(): JSX.Element {
     await getFilters();
   };
 
-  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList], false);
-    await getFilters();
-  };
-
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("false");
@@ -184,34 +178,39 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
-  const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
-    useState<boolean>(false);
-  const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
-    useState<string>("");
-
-  const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
-    useState<boolean>(false);
-  const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
-    useState<string>("");
-
-  const [showConfirmSharedEnable, setShowConfirmSharedEnable] =
-    useState<boolean>(false);
+  const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [bulkEnabled, setBulkEnabled] = useState<boolean | null>(null);
 
-  const toggleSharedFilterEnabled = async (
-    option: EnabledOption
-  ): Promise<void> => {
-    if (option === EnabledOption.Local) {
-      await toggleFilterEnabled(selectedFilterList);
-    } else if (option === EnabledOption.Global) {
-      await ApiService.updateEnabledForSharedFilter(
-        selectedFilterList.id,
-        !selectedFilterList.enabled
-      );
-      await getFilters();
+  const toggleFilterEnabled = async (option: EnabledOption): Promise<void> => {
+    let selectedFilters: FilterList[] = [];
+    if (bulkEnabled === null) {
+      const fl = {
+        ...selectedFilterList,
+        enabled: !selectedFilterList.enabled,
+      };
+      selectedFilters = [fl];
+    } else {
+      selectedFilters = filterLists
+        .filter((x) => x.isBulkSelected)
+        .map((x) => ({
+          ...x,
+          enabled: bulkEnabled,
+        }));
     }
+
+    if (option === EnabledOption.Local) {
+      await ApiService.updateFilter(selectedFilters, false);
+    } else if (option === EnabledOption.Global) {
+      const ids = selectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(
+        ids,
+        selectedFilters[0].enabled
+      );
+    }
+    await getFilters();
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -386,7 +385,6 @@ function Filters(): JSX.Element {
                       </div>
                     )}
                   </td>
-
                   <td style={{ textAlign: "justify" }}>
                     <Link
                       to={`/filters/edit/${filterList.id}`}
@@ -695,7 +693,8 @@ function Filters(): JSX.Element {
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
-                setShowConfirmSharedEnable(false);
+                setBulkEnabled(null);
+                setShowConfirmEnabled(false);
               }}
             />
           </Container>

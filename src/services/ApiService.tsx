@@ -129,17 +129,24 @@ const ApiService = {
     return responses.map(({ data }) => data);
   },
 
-  updateEnabledForSharedFilter: async (
-    filterId: number,
+  updateEnabledForSharedFilters: async (
+    filterIds: number[],
     enabled: boolean
   ): Promise<void> => {
     const providerId = AuthService.getProviderId();
-    await axios.put(
-      `${serverUri()}/provider-filter/${filterId}/shared/enabled`,
-      {
-        providerId,
-        enabled,
-      }
+
+    await Promise.all(
+      filterIds.map((filterId) => {
+        const response = axios.put(
+          `${serverUri()}/provider-filter/${filterId}/shared/enabled`,
+          {
+            providerId,
+            enabled,
+          }
+        );
+
+        return response;
+      })
     );
   },
 
