@@ -21,10 +21,14 @@ export enum Visibility {
 }
 
 export enum BulkSelectedType {
+  None,
   All,
   Public,
   Private,
+  Shared,
   Imported,
+  Override,
+  Orphan,
 }
 
 export enum EnabledOption {

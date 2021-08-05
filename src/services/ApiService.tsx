@@ -148,9 +148,6 @@ const ApiService = {
     await axios.delete(
       `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`
     );
-    if (!filter.originId) {
-      await axios.delete(`${serverUri()}/filter/${filter.id}`);
-    }
   },
 
   getPublicFilterDetails: async (id: number): Promise<void> => {

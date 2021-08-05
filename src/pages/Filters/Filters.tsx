@@ -2,11 +2,11 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faEdit,
   faEye,
-  faGlobe,
   faShare,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
 import debounce from "lodash.debounce";
 import React, { useEffect, useState } from "react";
 import {
@@ -17,23 +17,20 @@ import {
   Dropdown,
   Form,
   FormCheck,
-  OverlayTrigger,
   Row,
   Table,
-  Tooltip,
 } from "react-bootstrap";
-import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import "./Filters.css";
 import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
-  CidItem,
   EnabledOption,
   FilterList,
   Visibility,
@@ -43,6 +40,8 @@ import ToggleSharedFilterModal from "./ToggleSharedFilterModal";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
+  const [selectedConditional, setSelectedConditional] =
+    useState<BulkSelectedType | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
 
@@ -50,10 +49,72 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
+  useEffect(() => {
+    if (!filterLists || !filterLists.length) {
+      return;
+    }
+
+    let conditional = (x: FilterList) => false;
+
+    switch (selectedConditional) {
+      case BulkSelectedType.None:
+        break;
+      case BulkSelectedType.All:
+        conditional = () => true;
+        break;
+      case BulkSelectedType.Private:
+        conditional = (x: FilterList) => x.visibility === Visibility.Private;
+        break;
+      case BulkSelectedType.Public:
+        conditional = (x: FilterList) => x.visibility === Visibility.Public;
+        break;
+
+      case BulkSelectedType.Imported:
+        // this condition is enough,
+        // because the backend already verifies that
+        // provider_filter exists
+        conditional = (x: FilterList) =>
+          AuthService.getProviderId() !== x.provider.id;
+        break;
+
+      case BulkSelectedType.Shared:
+        conditional = (x: FilterList) =>
+          AuthService.getProviderId() === x.provider.id &&
+          !!x.provider_Filters &&
+          x.provider_Filters.length > 1;
+        break;
+
+      case BulkSelectedType.Orphan:
+        conditional = (x: FilterList) => {
+          return (
+            !!x.provider_Filters &&
+            !x.provider_Filters.some((pf) => pf.provider.id === x.provider.id)
+          );
+        };
+        break;
+
+      case BulkSelectedType.Override:
+        conditional = (x: FilterList) => x.override;
+        break;
+
+      default:
+        break;
+    }
+
+    const newFilterLists = filterLists.map((f) => ({
+      ...f,
+      isBulkSelected: conditional(f),
+    }));
+
+    if (_.isEqual(newFilterLists, filterLists)) {
+      return;
+    }
+
+    setFilterLists(newFilterLists);
+  }, [selectedConditional]);
+
   const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters({
-      q: searchTerm,
-    });
+    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
 
@@ -146,18 +207,6 @@ function Filters(): JSX.Element {
     setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
-  const CIDFilterShared = (filter: FilterList): JSX.Element => {
-    if (
-      filter.provider_Filters &&
-      filter.provider_Filters.length &&
-      filter.provider.id !== filter.provider_Filters[0].provider.id
-    ) {
-      return <FontAwesomeIcon icon={faGlobe as IconProp} />;
-    }
-
-    return <></>;
-  };
-
   const CIDFilterScope = (props: FilterList): JSX.Element => {
     const variantMapper = {
       [Visibility.None]: "secondary",
@@ -166,13 +215,49 @@ function Filters(): JSX.Element {
       [Visibility.ThirdParty]: "warning",
     };
 
+    const isShared =
+      props.provider_Filters &&
+      props.provider_Filters.length > 1 &&
+      props.provider.id === AuthService.getProviderId();
+
+    const isImported = props.provider.id !== AuthService.getProviderId();
+
+    const isOrphan =
+      props.provider_Filters &&
+      !props.provider_Filters.some(
+        (pf) => pf.provider.id === props.provider.id
+      );
+
+    const isOverride = props.override;
+
     return (
-      <div>
-        <Badge variant={variantMapper[props.visibility]}>
-          {translateVisibility(props.visibility)}
-        </Badge>
-        {props.override ? <Badge variant="success">Override</Badge> : <></>}
-      </div>
+      <Row style={{ display: "flex", flexDirection: "column" }}>
+        <Col>
+          <Badge variant={variantMapper[props.visibility]}>
+            {translateVisibility(props.visibility)}
+          </Badge>
+        </Col>
+        {isOverride && (
+          <Col>
+            <Badge variant="success">Override</Badge>
+          </Col>
+        )}
+        {isShared && (
+          <Col>
+            <Badge variant="info">Shared</Badge>
+          </Col>
+        )}
+        {isImported && (
+          <Col>
+            <Badge variant="dark">Imported</Badge>
+          </Col>
+        )}
+        {isOrphan && (
+          <Col>
+            <Badge variant="light">Orphan</Badge>
+          </Col>
+        )}
+      </Row>
     );
   };
 
@@ -198,7 +283,6 @@ function Filters(): JSX.Element {
                 <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
-                <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
                 <th>Actions</th>
@@ -227,9 +311,6 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <CIDFilterScope {...filterList} />
-                  </td>
-                  <td>
-                    <CIDFilterShared {...filterList} />
                   </td>
                   <td>
                     <span
@@ -352,34 +433,7 @@ function Filters(): JSX.Element {
     only = BulkSelectedType.All,
     futureValue = true
   ): void => {
-    let conditional = (x: FilterList) => true;
-
-    switch (only) {
-      case BulkSelectedType.Private:
-        conditional = (x: FilterList) => x.visibility === Visibility.Private;
-        break;
-
-      case BulkSelectedType.Public:
-        conditional = (x: FilterList) => x.visibility === Visibility.Public;
-        break;
-
-      case BulkSelectedType.Imported:
-        conditional = (x: FilterList) => !!x.originId;
-        break;
-
-      default:
-        break;
-    }
-
-    for (let i = 0; i < filterLists.length; i++) {
-      if (conditional(filterLists[i])) {
-        filterLists[i].isBulkSelected = futureValue;
-      } else {
-        filterLists[i].isBulkSelected = !futureValue;
-      }
-    }
-
-    setFilterLists([...filterLists]);
+    setSelectedConditional(only);
   };
 
   let isOneSelected = false;
@@ -433,7 +487,22 @@ function Filters(): JSX.Element {
                         variant="secondary"
                       />
                       <Dropdown.Menu>
-                        <Dropdown.Item
+                        {Object.keys(BulkSelectedType)
+                          .filter((key) => isNaN(parseInt(key)))
+                          .map((key, idx) => (
+                            <Dropdown.Item
+                              key={idx}
+                              href="#"
+                              onClick={() => {
+                                bulkModifySelectedFilters(
+                                  BulkSelectedType[key]
+                                );
+                              }}
+                            >
+                              {key}
+                            </Dropdown.Item>
+                          ))}
+                        {/* <Dropdown.Item
                           href="#"
                           onClick={() => {
                             bulkModifySelectedFilters();
@@ -466,7 +535,7 @@ function Filters(): JSX.Element {
                           }}
                         >
                           Imported
-                        </Dropdown.Item>
+                        </Dropdown.Item> */}
                       </Dropdown.Menu>
                     </Dropdown>
                   </Col>
