@@ -39,7 +39,7 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import ToggleSharedFilterModal from "./ToggleSharedFilterModal";
+import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 
 function Filters(): JSX.Element {
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
@@ -65,12 +65,6 @@ function Filters(): JSX.Element {
     await getFilters();
   };
 
-  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList], false);
-    await getFilters();
-  };
-
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [message, setMessage] = useState<string>("false");
@@ -78,34 +72,39 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
-  const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
-    useState<boolean>(false);
-  const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
-    useState<string>("");
-
-  const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
-    useState<boolean>(false);
-  const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
-    useState<string>("");
-
-  const [showConfirmSharedEnable, setShowConfirmSharedEnable] =
-    useState<boolean>(false);
+  const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [bulkEnabled, setBulkEnabled] = useState<boolean | null>(null);
 
-  const toggleSharedFilterEnabled = async (
-    option: EnabledOption
-  ): Promise<void> => {
-    if (option === EnabledOption.Local) {
-      await toggleFilterEnabled(selectedFilterList);
-    } else if (option === EnabledOption.Global) {
-      await ApiService.updateEnabledForSharedFilter(
-        selectedFilterList.id,
-        !selectedFilterList.enabled
-      );
-      await getFilters();
+  const toggleFilterEnabled = async (option: EnabledOption): Promise<void> => {
+    let selectedFilters: FilterList[] = [];
+    if (bulkEnabled === null) {
+      const fl = {
+        ...selectedFilterList,
+        enabled: !selectedFilterList.enabled,
+      };
+      selectedFilters = [fl];
+    } else {
+      selectedFilters = filterLists
+        .filter((x) => x.isBulkSelected)
+        .map((x) => ({
+          ...x,
+          enabled: bulkEnabled,
+        }));
     }
+
+    if (option === EnabledOption.Local) {
+      await ApiService.updateFilter(selectedFilters, false);
+    } else if (option === EnabledOption.Global) {
+      const ids = selectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(
+        ids,
+        selectedFilters[0].enabled
+      );
+    }
+    await getFilters();
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -265,7 +264,7 @@ function Filters(): JSX.Element {
                     <div
                       onClick={() => {
                         setSelectedFilterList(filterList);
-                        setShowConfirmSharedEnable(true);
+                        setShowConfirmEnabled(true);
                       }}
                     >
                       <FormCheck
@@ -327,43 +326,6 @@ function Filters(): JSX.Element {
 
     setIsAllLoaded(isAllLoadedNow);
   }, [filterLists]);
-
-  const beginBulkSetEnabled = (enabled: boolean): void => {
-    const selectedFilters = filterLists.filter((x) => x.isBulkSelected);
-
-    if (enabled) {
-      setShowConfirmEnableBulkAction(true);
-      setConfirmEnableBulkActionMessage(
-        `Are you sure you want to enable ${selectedFilters.length} items?`
-      );
-    } else {
-      setShowConfirmDisableBulkAction(true);
-      setConfirmDisableBulkActionMessage(
-        `Are you sure you want to disable ${selectedFilters.length} items?`
-      );
-    }
-  };
-
-  const bulkSetEnabled = async (enabled: boolean): Promise<void> => {
-    const selectedFilters = filterLists
-      .filter((x) => x.isBulkSelected)
-      .map((x) => ({
-        ...x,
-        enabled,
-      }));
-
-    await ApiService.updateFilter(selectedFilters, false);
-
-    // update in front as well
-    for (let i = 0; i < filterLists.length; i++) {
-      if (filterLists[i].isBulkSelected) {
-        filterLists[i].isBulkSelected = false;
-        filterLists[i].enabled = enabled;
-      }
-    }
-
-    setFilterLists([...filterLists]);
-  };
 
   const bulkModifySelectedFilters = (
     only = BulkSelectedType.All,
@@ -490,7 +452,10 @@ function Filters(): JSX.Element {
                   <Col>
                     <Button
                       disabled={!isOneSelected}
-                      onClick={() => beginBulkSetEnabled(true)}
+                      onClick={() => {
+                        setBulkEnabled(true);
+                        setShowConfirmEnabled(true);
+                      }}
                     >
                       Enable
                     </Button>
@@ -498,7 +463,10 @@ function Filters(): JSX.Element {
                   <Col>
                     <Button
                       disabled={!isOneSelected}
-                      onClick={() => beginBulkSetEnabled(false)}
+                      onClick={() => {
+                        setBulkEnabled(false);
+                        setShowConfirmEnabled(true);
+                      }}
                     >
                       Disable
                     </Button>
@@ -570,33 +538,13 @@ function Filters(): JSX.Element {
               show={showImportFilter}
             />
 
-            <ConfirmModal
-              show={showConfirmEnableBulkAction}
-              title={"Confirm bulk enable filters"}
-              message={confirmEnableBulkActionMessage}
-              callback={() => bulkSetEnabled(true)}
-              closeCallback={() => {
-                setShowConfirmEnableBulkAction(false);
-                setConfirmEnableBulkActionMessage("");
-              }}
-            />
-            <ConfirmModal
-              show={showConfirmDisableBulkAction}
-              title={"Confirm bulk disable filters"}
-              message={confirmDisableBulkActionMessage}
-              callback={() => bulkSetEnabled(false)}
-              closeCallback={() => {
-                setShowConfirmDisableBulkAction(false);
-                setConfirmDisableBulkActionMessage("");
-              }}
-            />
-
-            <ToggleSharedFilterModal
-              show={showConfirmSharedEnable}
-              callback={toggleSharedFilterEnabled}
+            <ToggleEnabledFilterModal
+              show={showConfirmEnabled}
+              callback={toggleFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
-                setShowConfirmSharedEnable(false);
+                setBulkEnabled(null);
+                setShowConfirmEnabled(false);
               }}
             />
           </Container>
