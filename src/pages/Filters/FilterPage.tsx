@@ -44,6 +44,7 @@ import {
   VisibilityString,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
+import { isOrphan } from "./utils";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -131,6 +132,7 @@ const FilterPage = (props): JSX.Element => {
           return;
         }
 
+        console.log(filterList);
         const cidItems =
           filterList.cids && filterList.cids.length
             ? filterList.cids.map((cid: CidItem) => {
@@ -689,11 +691,14 @@ const FilterPage = (props): JSX.Element => {
                         flexDirection: "row",
                         justifyContent: "center",
                       }}
-                      onClick={() => toggleFilterEnabled()}
+                      onClick={() =>
+                        !isOrphan(filterList) && toggleFilterEnabled()
+                      }
                     >
                       <FormCheck
                         readOnly
                         type="switch"
+                        disabled={isOrphan(filterList)}
                         checked={filterEnabled}
                       />
                       <Form.Label
