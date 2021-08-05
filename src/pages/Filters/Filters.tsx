@@ -339,6 +339,7 @@ function Filters(): JSX.Element {
                       />
                     </div>
                   </td>
+
                   <td style={{ textAlign: "justify" }}>
                     <Link
                       to={`/filters/edit/${filterList.id}`}
