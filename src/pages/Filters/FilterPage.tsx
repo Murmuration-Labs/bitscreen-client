@@ -108,8 +108,7 @@ const FilterPage = (props): JSX.Element => {
 
   useEffect(() => {
     setIsOwner(
-      filterList &&
-        filterList.provider &&
+      !filterList.provider ||
         filterList.provider.id === AuthService.getProviderId()
     );
   }, [filterList]);
@@ -132,7 +131,6 @@ const FilterPage = (props): JSX.Element => {
           return;
         }
 
-        console.log(filterList);
         const cidItems =
           filterList.cids && filterList.cids.length
             ? filterList.cids.map((cid: CidItem) => {
@@ -455,15 +453,17 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const checkViewType = (): ViewTypes => {
-    if (isEdit && !isOwner) {
-      return ViewTypes.Imported;
+    switch (true) {
+      case isEdit:
+        switch (true) {
+          case isOwner:
+            return ViewTypes.Edit;
+          default:
+            return ViewTypes.Imported;
+        }
+      default:
+        return ViewTypes.New;
     }
-
-    if (isEdit && isOwner) {
-      return ViewTypes.Edit;
-    }
-
-    return ViewTypes.New;
   };
 
   const renderTitle = (): JSX.Element => {
@@ -968,7 +968,6 @@ const FilterPage = (props): JSX.Element => {
             {addCidBatchModal && (
               <AddCidBatchModal
                 closeCallback={async (data) => {
-                  console.log("CLOSE CALLBACK ADD BULK");
                   setAddCidBatchModal(false);
                   if (!data || !data.result || !data.result.length) {
                     return;
@@ -982,7 +981,6 @@ const FilterPage = (props): JSX.Element => {
             {isCidBulkEdit && (
               <AddCidBatchModal
                 closeCallback={async (data) => {
-                  console.log("CLOSE CALLBACK EDIT BULK");
                   setIsCidBulkEdit(false);
                   if (!data) {
                     return;

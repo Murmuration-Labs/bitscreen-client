@@ -143,9 +143,9 @@ const ApiService = {
     );
   },
 
-  deleteFilter: async (filter: FilterList): Promise<void> => {
+  deleteFilter: (filter: FilterList): Promise<void> => {
     const currentProviderId = AuthService.getProviderId();
-    return await axios.delete(
+    return axios.delete(
       `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`
     );
   },
