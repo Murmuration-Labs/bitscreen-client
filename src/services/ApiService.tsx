@@ -28,18 +28,22 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 };
 
 const ApiService = {
-  getFilters: async (criteria = {}): Promise<FilterList[]> => {
+  getFilter: async (id: number): Promise<FilterList> => {
+    const providerId = AuthService.getProviderId();
+    const query = `providerId=${encodeURIComponent(providerId)}`;
+
+    const response = await axios.get(`${serverUri()}/filter/${id}?${query}`);
+    return response.data;
+  },
+
+  getFilters: async (searchTerm = ""): Promise<FilterList[]> => {
     const providerId = AuthService.getProviderId();
 
-    let query = `providerId=${encodeURIComponent(providerId)}`;
-    if (criteria["q"]) {
-      query += `&q=${encodeURIComponent(criteria["q"])}`;
-    }
-    if (criteria["filterId"]) {
-      query += `&filterId=${encodeURIComponent(criteria["filterId"])}`;
-    }
+    const query = `q=${encodeURIComponent(
+      searchTerm
+    )}&providerId=${encodeURIComponent(providerId)}`;
 
-    const response = await axios.get(`${serverUri()}/filter/search?${query}`);
+    const response = await axios.get(`${serverUri()}/filter?${query}`);
     return response.data;
   },
 

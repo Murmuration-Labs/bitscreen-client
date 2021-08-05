@@ -146,8 +146,12 @@ function Filters(): JSX.Element {
     setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
-  const CIDFilterShared = (props: FilterList): JSX.Element => {
-    if (props.originId) {
+  const CIDFilterShared = (filter: FilterList): JSX.Element => {
+    if (
+      filter.provider_Filters &&
+      filter.provider_Filters.length &&
+      filter.provider.id !== filter.provider_Filters[0].provider.id
+    ) {
       return <FontAwesomeIcon icon={faGlobe as IconProp} />;
     }
 
@@ -186,7 +190,7 @@ function Filters(): JSX.Element {
         <div className={"card-container"}>
           <p>
             {filterLists ? filterLists.length : "0"} result
-            {filterLists.length === 1 ? "" : "s"} found
+            {filterLists && filterLists.length === 1 ? "" : "s"} found
           </p>
           <Table>
             <thead>
@@ -228,38 +232,17 @@ function Filters(): JSX.Element {
                     <CIDFilterShared {...filterList} />
                   </td>
                   <td>
-                    {filterList.cids && filterList.cids.length ? (
-                      <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 150, hide: 500 }}
-                        transition={false}
-                        overlay={(props: OverlayInjectedProps): JSX.Element => (
-                          <Tooltip id="button-tooltip" {...props}>
-                            {filterList.cids.map(
-                              (cidItem: CidItem, index: number) => (
-                                <p key={`cid-${filterList.id}-${index}`}>
-                                  {filterList.originId
-                                    ? FilterService.renderHashedCid(cidItem)
-                                    : cidItem.cid}
-                                </p>
-                              )
-                            )}
-                          </Tooltip>
-                        )}
-                      >
-                        <span
-                          style={{
-                            textAlign: "center",
-                            color: "blue",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {filterList.cids ? filterList.cids.length : 0}
-                        </span>
-                      </OverlayTrigger>
-                    ) : (
-                      0
-                    )}
+                    <span
+                      style={{
+                        textAlign: "center",
+                        color: "blue",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {filterList.cids && filterList.cids.length
+                        ? filterList.cids.length
+                        : filterList.cidsCount || 0}
+                    </span>
                   </td>
                   <td>
                     <div

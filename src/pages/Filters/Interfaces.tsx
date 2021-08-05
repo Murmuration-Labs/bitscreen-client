@@ -1,3 +1,5 @@
+import { Provider } from "../Contact/Interfaces";
+
 export const VisibilityString: string[] = [
   "None",
   "Private",
@@ -114,10 +116,18 @@ export interface FilterState {
   filterList: FilterList;
 }
 
+export interface Provider_Filter {
+  id: number;
+  provider: Provider;
+  filter: FilterList;
+  active: boolean;
+  notes?: string;
+}
 export interface FilterList {
   id: number;
   name: string;
   cids: CidItem[];
+  cidsCount?: number;
   visibility: Visibility;
   enabled: boolean;
   override: boolean;
@@ -128,6 +138,7 @@ export interface FilterList {
   description?: string;
   providerId: number;
   provider?: any;
+  provider_Filters?: Provider_Filter[];
   notes?: string;
 }
 

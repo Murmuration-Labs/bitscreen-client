@@ -43,6 +43,7 @@ import {
   ViewTypes,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
+import * as AuthService from "../../services/AuthService";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -57,7 +58,10 @@ const FilterPage = (props): JSX.Element => {
 
   useEffect(() => {
     setCids(
-      filterList && filterList.cids && filterList.cids.length
+      filterList &&
+        filterList.cids &&
+        typeof filterList.cids !== "number" &&
+        filterList.cids.length
         ? filterList.cids.sort((a, b) => {
             if (a.id && b.id) {
               return a.id - b.id;
@@ -111,34 +115,32 @@ const FilterPage = (props): JSX.Element => {
   const initFilter = (id: number): void => {
     if (id) {
       setIsEdit(true);
-      ApiService.getFilters({ filterId: id }).then(
-        (filterLists: FilterList[]) => {
-          if (!mountedRef.current) return;
-          if (filterLists.length === 0) {
-            setInvalidFilterId(true);
-            return;
-          }
+      ApiService.getFilter(id).then((filterList: FilterList) => {
+        if (!mountedRef.current) return;
+        if (!filterList) {
+          setInvalidFilterId(true);
+          return;
+        }
 
-          const cidItems = filterLists[0].cids
-            ? filterLists[0].cids.map((cid: CidItem) => {
+        const cidItems =
+          filterList.cids && filterList.cids.length
+            ? filterList.cids.map((cid: CidItem) => {
                 return { ...cid, tableKey: generateUniqueKey() };
               })
             : [];
-          const fl = {
-            ...filterLists[0],
-            cids: cidItems,
-          };
+        const fl = {
+          ...filterList,
+          cids: cidItems,
+        };
 
-          if (fl.originId) {
-            setIsimported(true);
-          }
-          setFilterList(fl);
-          setInitialFilterList({ ...fl });
-          setLoaded(true);
-          setFilterEnabled(fl.enabled);
-          setFilterOverride(fl.override);
-        }
-      );
+        setIsimported(fl.provider.id !== AuthService.getProviderId());
+
+        setFilterList(fl);
+        setInitialFilterList({ ...fl });
+        setLoaded(true);
+        setFilterEnabled(fl.enabled);
+        setFilterOverride(fl.override);
+      });
     } else {
       setLoaded(true);
     }
