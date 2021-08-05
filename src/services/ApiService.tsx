@@ -1,6 +1,6 @@
 import axios from "axios";
 import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account } from "../pages/Contact/Interfaces";
+import { Account, Provider } from "../pages/Contact/Interfaces";
 import {
   CidItem,
   FilterList,
@@ -246,7 +246,11 @@ const ApiService = {
     mySort: string,
     searchedValue: string
   ): Promise<{
-    data: FilterList[];
+    data: (FilterList & {
+      providerName?: string;
+      providerCountry?: string;
+      subs: number;
+    })[];
     sort: any;
     page: number;
     per_page: number;

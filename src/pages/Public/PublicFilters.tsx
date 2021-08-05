@@ -35,6 +35,9 @@ type Order = "asc" | "desc";
 const headCells: HeadCell[] = [
   { id: "name", numeric: false, label: "Filter Name" },
   { id: "cids", numeric: true, label: "# of CIDs" },
+  { id: "subs", numeric: true, label: "# of Subs" },
+  { id: "providerName", numeric: true, label: "Provider Name" },
+  { id: "providerCountry", numeric: true, label: "Provider Country" },
   { id: "description", numeric: false, label: "Description" },
   { id: "actions", numeric: false, label: "Actions" },
   // { id: "enabled", numeric: false, label: "Enabled" },
@@ -128,7 +131,7 @@ export default function PublicFilters() {
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
-    if (property === "cids" || property == "actions") return;
+    if (property == "actions") return;
 
     setMySort(mySort === "asc" ? "desc" : "asc");
     setOrder(mySort === "asc" ? "desc" : "asc");
@@ -191,7 +194,10 @@ export default function PublicFilters() {
                         {row.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{row.cids ? row.cids.length : 0}</TableCell>
+                    <TableCell>{row.cids}</TableCell>
+                    <TableCell>{row.subs - 1}</TableCell>
+                    <TableCell>{row.providerName}</TableCell>
+                    <TableCell>{row.providerCountry}</TableCell>
                     <TableCell>{row.description}</TableCell>
                     <TableCell>
                       <Button
@@ -201,7 +207,7 @@ export default function PublicFilters() {
                           //     row.shareId
                           //   }`
                           // );
-                          setToBeImportedFilter(row as FilterList);
+                          setToBeImportedFilter(row as any);
                         }}
                         variant="primary"
                       >
