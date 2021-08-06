@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
+  Badge,
   Button,
   Col,
   Container,
@@ -39,6 +40,7 @@ import {
   CidItem,
   FilterList,
   mapVisibilityString,
+  Provider_Filter,
   ViewTypes,
   Visibility,
   VisibilityString,
@@ -54,6 +56,8 @@ const FilterPage = (props): JSX.Element => {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [providerFilter, setProviderFilter] =
+    useState<Provider_Filter | null>(null);
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const [isOwner, setIsOwner] = useState(false);
@@ -114,6 +118,28 @@ const FilterPage = (props): JSX.Element => {
         filterList.provider.id === AuthService.getProviderId()
     );
   }, [filterList]);
+
+  useEffect(() => {
+    if (!filterList.provider_Filters) {
+      return;
+    }
+
+    const result = filterList.provider_Filters
+      ? filterList.provider_Filters.filter(
+          ({ provider }) => provider.id === AuthService.getProviderId()
+        )[0]
+      : null;
+
+    setProviderFilter(result);
+  }, [filterList]);
+
+  useEffect(() => {
+    if (_.isEqual(filterList.notes, providerFilter?.notes)) {
+      return;
+    }
+
+    setFilterList({ ...filterList, notes: providerFilter?.notes });
+  }, [filterList, providerFilter]);
 
   const generateUniqueKey = (): string => {
     // Math.random should be unique because of its seeding algorithm.
@@ -470,7 +496,11 @@ const FilterPage = (props): JSX.Element => {
 
   const renderTitle = (): JSX.Element => {
     if (!isOwner) {
-      return <h2>View filter list</h2>;
+      return (
+        <h2>
+          View Filter List &nbsp;<Badge variant="dark">Imported</Badge>
+        </h2>
+      );
     }
 
     if (isEdit) {
@@ -508,24 +538,14 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderNotes = (): JSX.Element => {
-    if (isOwner) {
-      return <></>;
-    }
-
-    const result = filterList.provider_Filters
-      ? filterList.provider_Filters.filter(
-          ({ provider }) => provider.id === AuthService.getProviderId()
-        )[0]
-      : null;
-
-    if (!result) {
+    if (isOwner || !providerFilter) {
       return <></>;
     }
 
     return (
       <Form.Row>
         <Col>
-          <h4>Notes</h4>
+          <h4>Notes (local)</h4>
           <Form.Control
             role="notes"
             onChange={(ev: ChangeEvent<HTMLInputElement>) => {
@@ -534,7 +554,7 @@ const FilterPage = (props): JSX.Element => {
               }
 
               const provider_Filters = filterList.provider_Filters.filter(
-                (pf) => pf.id !== result.id
+                (pf) => pf.id !== providerFilter.id
               );
 
               saveFilter({
@@ -542,13 +562,13 @@ const FilterPage = (props): JSX.Element => {
                 notes: ev.target.value,
                 provider_Filters: [
                   ...provider_Filters,
-                  { ...result, notes: ev.target.value },
+                  { ...providerFilter, notes: ev.target.value },
                 ],
               });
             }}
             as="textarea"
-            placeholder="Notes"
-            value={result.notes || ""}
+            placeholder="This note can only be seen by you."
+            value={providerFilter.notes || ""}
           />
         </Col>
       </Form.Row>
@@ -591,9 +611,7 @@ const FilterPage = (props): JSX.Element => {
         <Button
           variant="primary"
           style={{ marginBottom: 5 }}
-          disabled={
-            checkViewType() === ViewTypes.Imported && !filterListChanged
-          }
+          disabled={!filterListChanged}
           onClick={save}
         >
           Save
@@ -653,21 +671,22 @@ const FilterPage = (props): JSX.Element => {
                     </Col>
                   </Form.Row>
                   <Form.Row>
-                    <Col xs={"auto"}>
-                      <Form.Group controlId="visibility">
-                        <Form.Control
-                          as="select"
-                          disabled={!isOwner}
-                          onChange={changeVisibility}
-                          value={VisibilityString[filterList.visibility]}
-                        >
-                          <option>Public</option>
-                          <option>Private</option>
-                        </Form.Control>
-                      </Form.Group>
-                    </Col>
-                    <Col>
-                      {checkViewType() === ViewTypes.Edit && (
+                    {isOwner && (
+                      <Col xs={"auto"}>
+                        <Form.Group controlId="visibility">
+                          <Form.Control
+                            as="select"
+                            onChange={changeVisibility}
+                            value={VisibilityString[filterList.visibility]}
+                          >
+                            <option>Public</option>
+                            <option>Private</option>
+                          </Form.Control>
+                        </Form.Group>
+                      </Col>
+                    )}
+                    {isOwner && checkViewType() === ViewTypes.Edit && (
+                      <Col>
                         <Button
                           variant="primary"
                           onClick={() => {
@@ -676,8 +695,8 @@ const FilterPage = (props): JSX.Element => {
                         >
                           Direct share
                         </Button>
-                      )}
-                    </Col>
+                      </Col>
+                    )}
                   </Form.Row>
                   <Form.Row
                     style={{

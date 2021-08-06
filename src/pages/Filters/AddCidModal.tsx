@@ -63,6 +63,7 @@ const AddCidModal = ({
             margin="dense"
             id="url"
             label="URL"
+            placeholder="Public Complaint URL (Optional)"
             fullWidth
             value={cidClone.refUrl}
             onChange={(e) => {

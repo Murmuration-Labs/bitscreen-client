@@ -71,7 +71,8 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
               autoFocus
               margin="dense"
               id="cid"
-              label="CID_1, CID_2, CID_3 etc."
+              label="CIDs"
+              placeholder="CID_1,CID_2,CID_3"
               rows={2}
               multiline
               maxRows={6}
@@ -87,6 +88,7 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
             margin="dense"
             id="url"
             label="URL"
+            placeholder="Public Complaint URL (Optional)"
             fullWidth
             value={refUrl}
             onChange={(e) => {
