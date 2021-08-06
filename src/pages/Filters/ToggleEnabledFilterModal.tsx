@@ -35,7 +35,7 @@ export default function ToggleEnabledFilterModal(
     >
       <Modal.Header closeButton>
         <Modal.Title>
-          The selected filter(s) might be imported by other providers
+          The selected filter is imported by other providers
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
