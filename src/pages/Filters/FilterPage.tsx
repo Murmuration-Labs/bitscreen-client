@@ -567,7 +567,7 @@ const FilterPage = (props): JSX.Element => {
               });
             }}
             as="textarea"
-            placeholder="These note can only be seen by you."
+            placeholder="This note can only be seen by you."
             value={providerFilter.notes || ""}
           />
         </Col>
