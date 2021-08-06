@@ -278,7 +278,7 @@ function Filters(): JSX.Element {
         </Col>
         {isOverride && (
           <Col>
-            <Badge variant="success">Override</Badge>
+            <Badge variant="primary">Override</Badge>
           </Col>
         )}
         {isShared && (
