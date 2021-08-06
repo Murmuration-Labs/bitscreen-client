@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
+  Badge,
   Button,
   Col,
   Container,
@@ -495,7 +496,11 @@ const FilterPage = (props): JSX.Element => {
 
   const renderTitle = (): JSX.Element => {
     if (!isOwner) {
-      return <h2>View filter list</h2>;
+      return (
+        <h2>
+          View Filter List &nbsp;<Badge variant="dark">Imported</Badge>
+        </h2>
+      );
     }
 
     if (isEdit) {
