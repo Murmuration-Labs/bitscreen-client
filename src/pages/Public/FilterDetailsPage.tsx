@@ -8,12 +8,6 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 
-const useStyles = makeStyles({
-  table: {
-    minWidth: 650,
-  },
-});
-
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [filterDetails, setFilterDetails] = useState([{}]);
@@ -38,7 +32,10 @@ const FilterDetailsPage = (props) => {
         { columnName: "Provider website:", columnValue: data.provider.website },
         { columnName: "Provider email:", columnValue: data.provider.email },
         { columnName: "Provider address:", columnValue: data.provider.address },
-        { columnName: "Date last updated:", columnValue: data.filter.updated },
+        {
+          columnName: "Date last updated:",
+          columnValue: data.filter.updated ?? "No data",
+        },
       ];
       setFilterDetails(details);
       setLoaded(true);
@@ -49,20 +46,21 @@ const FilterDetailsPage = (props) => {
     loadFilter(props.match.params.id as number);
   }, [props.match.params.id]);
 
-  const classes = useStyles();
-
   return (
     <>
       {loaded ? (
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="simple table">
+        <TableContainer
+          style={{ wordBreak: "break-all", margin: "auto" }}
+          component={Paper}
+        >
+          <Table aria-label="simple table">
             <TableBody>
               {filterDetails.map((row: any) => (
                 <TableRow key={row.columnName}>
-                  <TableCell style={{ fontWeight: "bold" }} align="right">
-                    {row.columnName}
+                  <TableCell align="left">
+                    <div style={{ fontWeight: "bold" }}> {row.columnName} </div>{" "}
+                    {row.columnValue}
                   </TableCell>
-                  <TableCell align="left">{row.columnValue}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
