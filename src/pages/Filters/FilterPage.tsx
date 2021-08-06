@@ -89,8 +89,9 @@ const FilterPage = (props): JSX.Element => {
 
   const [editingCid, setEditingCid] = useState<CidItem | null>(null);
   const [editingCidIndex, setEditingCidIndex] = useState<number>(-1);
-  const [editingCidType, setEditingCidType] =
-    useState<"EDIT" | "ADD" | null>(null);
+  const [editingCidType, setEditingCidType] = useState<"EDIT" | "ADD" | null>(
+    null
+  );
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isImported, setIsimported] = useState<boolean>(false);
@@ -98,8 +99,9 @@ const FilterPage = (props): JSX.Element => {
 
   const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
 
-  const [moveToFilterList, setMoveToFilterList] =
-    useState<FilterList | undefined>(undefined);
+  const [moveToFilterList, setMoveToFilterList] = useState<
+    FilterList | undefined
+  >(undefined);
   const [initialFilterList, setInitialFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
