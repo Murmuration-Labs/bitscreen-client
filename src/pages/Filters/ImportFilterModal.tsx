@@ -21,6 +21,7 @@ import FilterService from "../../services/FilterService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { serverUri } from "../../config";
 
 const overrideLoaderCss = css`
   display: block;
@@ -42,6 +43,22 @@ export default function ImportFilterModal(
 
   const [isSavingFetchedFilter, setIsSavingFetchedFilter] =
     useState<boolean>(false);
+
+  useEffect(() => {
+    setRemoteFilterUri(
+      fetchedFilterList
+        ? `${serverUri()}/filter/share/${fetchedFilterList?.shareId}`
+        : ""
+    );
+  }, [fetchedFilterList]);
+
+  useEffect(() => {
+    if (!props.filter) {
+      return;
+    }
+
+    ApiService.getFilter(props.filter.id).then((f) => setFetchedFilterList(f));
+  }, [props.filter]);
 
   const renderFilterError = (): JSX.Element => {
     if (remoteFilterError) {

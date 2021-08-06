@@ -1,3 +1,5 @@
+import { Provider } from "../Contact/Interfaces";
+
 export const VisibilityString: string[] = [
   "None",
   "Private",
@@ -19,10 +21,14 @@ export enum Visibility {
 }
 
 export enum BulkSelectedType {
+  None,
   All,
   Public,
   Private,
+  Shared,
   Imported,
+  Override,
+  Orphan,
 }
 
 export enum EnabledOption {
@@ -114,10 +120,18 @@ export interface FilterState {
   filterList: FilterList;
 }
 
+export interface Provider_Filter {
+  id: number;
+  provider: Provider;
+  filter: FilterList;
+  active: boolean;
+  notes?: string;
+}
 export interface FilterList {
   id: number;
   name: string;
   cids: CidItem[];
+  cidsCount?: number;
   visibility: Visibility;
   enabled: boolean;
   override: boolean;
@@ -128,6 +142,7 @@ export interface FilterList {
   description?: string;
   providerId: number;
   provider?: any;
+  provider_Filters?: Provider_Filter[];
   notes?: string;
 }
 

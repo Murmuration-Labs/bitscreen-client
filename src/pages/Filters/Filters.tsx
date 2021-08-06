@@ -2,12 +2,14 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faEdit,
   faEye,
-  faGlobe,
   faShare,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
+import { isOrphan, isEnabled, isDisabled } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
 import debounce from "lodash.debounce";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import {
   Badge,
@@ -17,23 +19,20 @@ import {
   Dropdown,
   Form,
   FormCheck,
-  OverlayTrigger,
   Row,
   Table,
-  Tooltip,
 } from "react-bootstrap";
-import { OverlayInjectedProps } from "react-bootstrap/Overlay";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import "./Filters.css";
 import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
-  CidItem,
   EnabledOption,
   FilterList,
   Visibility,
@@ -42,26 +41,139 @@ import {
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 
 function Filters(): JSX.Element {
+  /**
+   * UTILS
+   */
+
+  const [enabledFilters, setEnabledFilters] = useState<FilterList[]>([]);
+  const [disabledFilters, setDisabledFilters] = useState<FilterList[]>([]);
+  const [orphanFilters, setOrphanFilters] = useState<FilterList[]>([]);
+
+  const [enabledSelectedFilters, setEnabledSelectedFilters] = useState<
+    FilterList[]
+  >([]);
+  const [disabledSelectedFilters, setDisabledSelectedFilters] = useState<
+    FilterList[]
+  >([]);
+  const [orphanSelectedFilters, setOrphanSelectedFilters] = useState<
+    FilterList[]
+  >([]);
+
+  const { enqueueSnackbar } = useSnackbar();
+
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
+  const [selectedConditional, setSelectedConditional] =
+    useState<BulkSelectedType>(BulkSelectedType.None);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
-
+  const [showConfirmDiscardBulkAction, setShowConfirmDiscardBulkAction] =
+    useState(false);
+  const [confirmDiscardBulkActionMessage, setConfirmDiscardBulkActionMessage] =
+    useState("");
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
   };
 
+  useEffect(() => {
+    setEnabledSelectedFilters(
+      enabledFilters.filter(({ isBulkSelected }) => isBulkSelected)
+    );
+  }, [enabledFilters]);
+
+  useEffect(() => {
+    setDisabledSelectedFilters(
+      disabledFilters.filter(({ isBulkSelected }) => isBulkSelected)
+    );
+  }, [disabledFilters]);
+
+  useEffect(() => {
+    setOrphanSelectedFilters(
+      orphanFilters.filter(({ isBulkSelected }) => isBulkSelected)
+    );
+  }, [orphanFilters]);
+
+  useEffect(() => {
+    if (!filterLists || !filterLists.length) {
+      return;
+    }
+
+    let conditional = (x: FilterList) => false;
+
+    switch (selectedConditional) {
+      case BulkSelectedType.None:
+        conditional = () => false;
+        break;
+      case BulkSelectedType.All:
+        conditional = () => true;
+        break;
+      case BulkSelectedType.Private:
+        conditional = (x: FilterList) => x.visibility === Visibility.Private;
+        break;
+      case BulkSelectedType.Public:
+        conditional = (x: FilterList) => x.visibility === Visibility.Public;
+        break;
+
+      case BulkSelectedType.Imported:
+        // this condition is enough,
+        // because the backend already verifies that
+        // provider_filter exists
+        conditional = (x: FilterList) =>
+          AuthService.getProviderId() !== x.provider.id;
+        break;
+
+      case BulkSelectedType.Shared:
+        conditional = (x: FilterList) =>
+          AuthService.getProviderId() === x.provider.id &&
+          !!x.provider_Filters &&
+          x.provider_Filters.length > 1;
+        break;
+
+      case BulkSelectedType.Orphan:
+        conditional = (x: FilterList) => {
+          return (
+            !!x.provider_Filters &&
+            !x.provider_Filters.some((pf) => pf.provider.id === x.provider.id)
+          );
+        };
+        break;
+
+      case BulkSelectedType.Override:
+        conditional = (x: FilterList) => x.override;
+        break;
+
+      default:
+        break;
+    }
+
+    const newFilterLists = filterLists.map((f) => ({
+      ...f,
+      isBulkSelected: conditional(f),
+    }));
+
+    if (_.isEqual(newFilterLists, filterLists)) {
+      return;
+    }
+
+    setFilterLists(newFilterLists);
+  }, [selectedConditional]);
+
   const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters({
-      q: searchTerm,
-    });
+    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
 
     setFilterLists(filterLists);
+    setSelectedConditional(BulkSelectedType.None);
 
     setLoaded(true);
   };
 
   const deleteFilter = async (filter: FilterList) => {
     await ApiService.deleteFilter(filter);
+    await getFilters();
+  };
+
+  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
+    filterList.enabled = !filterList.enabled;
+    await ApiService.updateFilter([filterList], false);
     await getFilters();
   };
 
@@ -72,39 +184,33 @@ function Filters(): JSX.Element {
     FilterService.emptyFilterList()
   );
 
+  const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
+    useState<boolean>(false);
+  const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
+    useState<string>("");
+
+  const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
+    useState<boolean>(false);
+  const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
+    useState<string>("");
+
   const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-  const [bulkEnabled, setBulkEnabled] = useState<boolean | null>(null);
 
-  const toggleFilterEnabled = async (option: EnabledOption): Promise<void> => {
-    let selectedFilters: FilterList[] = [];
-    if (bulkEnabled === null) {
-      const fl = {
-        ...selectedFilterList,
-        enabled: !selectedFilterList.enabled,
-      };
-      selectedFilters = [fl];
-    } else {
-      selectedFilters = filterLists
-        .filter((x) => x.isBulkSelected)
-        .map((x) => ({
-          ...x,
-          enabled: bulkEnabled,
-        }));
-    }
-
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
     if (option === EnabledOption.Local) {
-      await ApiService.updateFilter(selectedFilters, false);
+      await toggleFilterEnabled(selectedFilterList);
     } else if (option === EnabledOption.Global) {
-      const ids = selectedFilters.map((x) => x.id);
       await ApiService.updateEnabledForSharedFilters(
-        ids,
-        selectedFilters[0].enabled
+        [selectedFilterList.id],
+        !selectedFilterList.enabled
       );
+      await getFilters();
     }
-    await getFilters();
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -119,7 +225,6 @@ function Filters(): JSX.Element {
   };
 
   const clipboardCopy = (cryptId) => {
-    console.log(serverUri(), cryptId);
     const selBox = document.createElement("textarea");
     selBox.style.position = "fixed";
     selBox.style.left = "0";
@@ -145,14 +250,6 @@ function Filters(): JSX.Element {
     setMessage(message);
   }, [showConfirmDelete, deletedFilterList]);
 
-  const CIDFilterShared = (props: FilterList): JSX.Element => {
-    if (props.originId) {
-      return <FontAwesomeIcon icon={faGlobe as IconProp} />;
-    }
-
-    return <></>;
-  };
-
   const CIDFilterScope = (props: FilterList): JSX.Element => {
     const variantMapper = {
       [Visibility.None]: "secondary",
@@ -161,13 +258,45 @@ function Filters(): JSX.Element {
       [Visibility.ThirdParty]: "warning",
     };
 
+    const isShared =
+      props.provider_Filters &&
+      props.provider_Filters.length > 1 &&
+      props.provider.id === AuthService.getProviderId();
+
+    const isImported = props.provider.id !== AuthService.getProviderId();
+
+    const orphan = isOrphan(props);
+
+    const isOverride = props.override;
+
     return (
-      <div>
-        <Badge variant={variantMapper[props.visibility]}>
-          {translateVisibility(props.visibility)}
-        </Badge>
-        {props.override ? <Badge variant="success">Override</Badge> : <></>}
-      </div>
+      <Row style={{ display: "flex", flexDirection: "column" }}>
+        <Col>
+          <Badge variant={variantMapper[props.visibility]}>
+            {translateVisibility(props.visibility)}
+          </Badge>
+        </Col>
+        {isOverride && (
+          <Col>
+            <Badge variant="success">Override</Badge>
+          </Col>
+        )}
+        {isShared && (
+          <Col>
+            <Badge variant="info">Shared</Badge>
+          </Col>
+        )}
+        {isImported && (
+          <Col>
+            <Badge variant="dark">Imported</Badge>
+          </Col>
+        )}
+        {orphan && (
+          <Col>
+            <Badge variant="light">Orphan</Badge>
+          </Col>
+        )}
+      </Row>
     );
   };
 
@@ -185,7 +314,7 @@ function Filters(): JSX.Element {
         <div className={"card-container"}>
           <p>
             {filterLists ? filterLists.length : "0"} result
-            {filterLists.length === 1 ? "" : "s"} found
+            {filterLists && filterLists.length === 1 ? "" : "s"} found
           </p>
           <Table>
             <thead>
@@ -193,7 +322,6 @@ function Filters(): JSX.Element {
                 <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
-                <th>Shared?</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
                 <th>Actions</th>
@@ -224,56 +352,40 @@ function Filters(): JSX.Element {
                     <CIDFilterScope {...filterList} />
                   </td>
                   <td>
-                    <CIDFilterShared {...filterList} />
-                  </td>
-                  <td>
-                    {filterList.cids && filterList.cids.length ? (
-                      <OverlayTrigger
-                        placement="right"
-                        delay={{ show: 150, hide: 500 }}
-                        transition={false}
-                        overlay={(props: OverlayInjectedProps): JSX.Element => (
-                          <Tooltip id="button-tooltip" {...props}>
-                            {filterList.cids.map(
-                              (cidItem: CidItem, index: number) => (
-                                <p key={`cid-${filterList.id}-${index}`}>
-                                  {filterList.originId
-                                    ? FilterService.renderHashedCid(cidItem)
-                                    : cidItem.cid}
-                                </p>
-                              )
-                            )}
-                          </Tooltip>
-                        )}
-                      >
-                        <span
-                          style={{
-                            textAlign: "center",
-                            color: "blue",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {filterList.cids ? filterList.cids.length : 0}
-                        </span>
-                      </OverlayTrigger>
-                    ) : (
-                      0
-                    )}
-                  </td>
-                  <td>
-                    <div
-                      onClick={() => {
-                        setSelectedFilterList(filterList);
-                        setShowConfirmEnabled(true);
+                    <span
+                      style={{
+                        textAlign: "center",
+                        color: "blue",
+                        fontWeight: "bold",
                       }}
                     >
-                      <FormCheck
-                        readOnly
-                        type="switch"
-                        checked={filterList.enabled}
-                      />
-                    </div>
+                      {filterList.cids && filterList.cids.length
+                        ? filterList.cids.length
+                        : filterList.cidsCount || 0}
+                    </span>
                   </td>
+                  <td>
+                    {!(
+                      filterList.provider_Filters &&
+                      !filterList.provider_Filters.some(
+                        (pf) => pf.provider.id === filterList.provider.id
+                      )
+                    ) && (
+                      <div
+                        onClick={() => {
+                          setSelectedFilterList(filterList);
+                          setShowConfirmEnabled(true);
+                        }}
+                      >
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={filterList.enabled}
+                        />
+                      </div>
+                    )}
+                  </td>
+
                   <td style={{ textAlign: "justify" }}>
                     <Link
                       to={`/filters/edit/${filterList.id}`}
@@ -325,49 +437,72 @@ function Filters(): JSX.Element {
     ) as boolean;
 
     setIsAllLoaded(isAllLoadedNow);
+
+    setEnabledFilters(filterLists.filter((f) => isEnabled(f)));
+    setDisabledFilters(filterLists.filter((f) => isDisabled(f)));
+    setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
   }, [filterLists]);
 
-  const bulkModifySelectedFilters = (
-    only = BulkSelectedType.All,
-    futureValue = true
-  ): void => {
-    let conditional = (x: FilterList) => true;
+  const beginBulkSetEnabled = (val: boolean): void => {
+    const disabled = disabledFilters.filter((x) => x.isBulkSelected);
+    const enabled = enabledFilters.filter((x) => x.isBulkSelected);
 
-    switch (only) {
-      case BulkSelectedType.Private:
-        conditional = (x: FilterList) => x.visibility === Visibility.Private;
-        break;
-
-      case BulkSelectedType.Public:
-        conditional = (x: FilterList) => x.visibility === Visibility.Public;
-        break;
-
-      case BulkSelectedType.Imported:
-        conditional = (x: FilterList) => !!x.originId;
-        break;
-
-      default:
-        break;
+    if (val) {
+      setShowConfirmEnableBulkAction(true);
+      setConfirmEnableBulkActionMessage(
+        `Are you sure you want to enable ${disabled.length} items?`
+      );
+    } else {
+      setShowConfirmDisableBulkAction(true);
+      setConfirmDisableBulkActionMessage(
+        `Are you sure you want to disable ${enabled.length} items?`
+      );
     }
-
-    for (let i = 0; i < filterLists.length; i++) {
-      if (conditional(filterLists[i])) {
-        filterLists[i].isBulkSelected = futureValue;
-      } else {
-        filterLists[i].isBulkSelected = !futureValue;
-      }
-    }
-
-    setFilterLists([...filterLists]);
   };
 
-  let isOneSelected = false;
-  for (let i = 0; i < filterLists.length; i++) {
-    if (filterLists[i].isBulkSelected) {
-      isOneSelected = true;
-      break;
-    }
-  }
+  const beginBulkDiscardOrphans = () => {
+    setShowConfirmDiscardBulkAction(true);
+    setConfirmDiscardBulkActionMessage(
+      `Are you sure you want to discard ${orphanSelectedFilters.length} items?`
+    );
+  };
+
+  const bulkDiscardOrphans = () => {
+    Promise.all(orphanSelectedFilters.map((f) => ApiService.deleteFilter(f)))
+      .then(() => {
+        enqueueSnackbar("Successfully discarded all.", {
+          variant: "success",
+          preventDuplicate: true,
+          anchorOrigin: {
+            horizontal: "right",
+            vertical: "top",
+          },
+        });
+      })
+      .catch(() => {
+        enqueueSnackbar("One or more filters could not be discarded.", {
+          variant: "error",
+          preventDuplicate: true,
+          anchorOrigin: {
+            horizontal: "right",
+            vertical: "top",
+          },
+        });
+      })
+      .finally(() => getFilters());
+  };
+
+  const bulkSetEnabled = async (enabled: boolean) => {
+    await ApiService.updateFilter(
+      (enabled ? disabledSelectedFilters : enabledSelectedFilters).map((x) => ({
+        ...x,
+        enabled,
+      })),
+      false
+    );
+
+    getFilters();
+  };
 
   return (
     <div>
@@ -377,8 +512,8 @@ function Filters(): JSX.Element {
             <h2>Filters</h2>
             <Row style={{ marginBottom: 12 }}>
               <Col>
-                <Row>
-                  <Col className="d-flex flex-row align-items-center">
+                <Row className="d-flex flex-row justify-content-start">
+                  <Col className="d-flex flex-row">
                     <Form.Group
                       controlId="selectAll"
                       className="d-flex align-items-center"
@@ -391,12 +526,13 @@ function Filters(): JSX.Element {
                       <Form.Check
                         type="checkbox"
                         checked={isAllLoaded}
-                        onChange={() => {
-                          bulkModifySelectedFilters(
-                            BulkSelectedType.All,
-                            !isAllLoaded
-                          );
-                        }}
+                        onChange={() =>
+                          setSelectedConditional(
+                            isAllLoaded
+                              ? BulkSelectedType.None
+                              : BulkSelectedType.All
+                          )
+                        }
                       />
                     </Form.Group>
                     <Dropdown>
@@ -412,82 +548,46 @@ function Filters(): JSX.Element {
                         variant="secondary"
                       />
                       <Dropdown.Menu>
-                        <Dropdown.Item
-                          href="#"
-                          onClick={() => {
-                            bulkModifySelectedFilters();
-                          }}
-                        >
-                          All
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          href="#"
-                          onClick={() => {
-                            bulkModifySelectedFilters(BulkSelectedType.Public);
-                          }}
-                        >
-                          Public
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          href="#"
-                          onClick={() => {
-                            bulkModifySelectedFilters(BulkSelectedType.Private);
-                          }}
-                        >
-                          Private
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          href="#"
-                          onClick={() => {
-                            bulkModifySelectedFilters(
-                              BulkSelectedType.Imported
-                            );
-                          }}
-                        >
-                          Imported
-                        </Dropdown.Item>
+                        {Object.keys(BulkSelectedType)
+                          .filter((key) => isNaN(parseInt(key)))
+                          .map((key, idx) => (
+                            <Dropdown.Item
+                              key={idx}
+                              href="#"
+                              onClick={() =>
+                                setSelectedConditional(BulkSelectedType[key])
+                              }
+                            >
+                              {key}
+                            </Dropdown.Item>
+                          ))}
                       </Dropdown.Menu>
                     </Dropdown>
                   </Col>
-                  <Col>
-                    <Button
-                      disabled={!isOneSelected}
-                      onClick={() => {
-                        setBulkEnabled(true);
-                        setShowConfirmEnabled(true);
-                      }}
-                    >
-                      Enable
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      disabled={!isOneSelected}
-                      onClick={() => {
-                        setBulkEnabled(false);
-                        setShowConfirmEnabled(true);
-                      }}
-                    >
-                      Disable
-                    </Button>
-                  </Col>
+                  {!!disabledSelectedFilters.length && (
+                    <Col>
+                      <Button onClick={() => beginBulkSetEnabled(true)}>
+                        Enable {disabledSelectedFilters.length}
+                      </Button>
+                    </Col>
+                  )}
+
+                  {!!enabledSelectedFilters.length && (
+                    <Col>
+                      <Button onClick={() => beginBulkSetEnabled(false)}>
+                        Disable {enabledSelectedFilters.length}
+                      </Button>
+                    </Col>
+                  )}
+
+                  {!!orphanSelectedFilters.length && (
+                    <Col>
+                      <Button onClick={() => beginBulkDiscardOrphans()}>
+                        Discard {orphanSelectedFilters.length}
+                      </Button>
+                    </Col>
+                  )}
                 </Row>
-              </Col>
-              <Col>
-                <Form.Group controlId="search">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search CID or Filter Name"
-                    onChange={searchFilters}
-                    onKeyDown={(
-                      event: React.KeyboardEvent<HTMLInputElement>
-                    ) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                      }
-                    }}
-                  />
-                </Form.Group>
               </Col>
               <Col className="text-right">
                 <Button
@@ -506,6 +606,25 @@ function Filters(): JSX.Element {
                 >
                   Import Filter
                 </Button>
+              </Col>
+            </Row>
+
+            <Row>
+              <Col>
+                <Form.Group controlId="search">
+                  <Form.Control
+                    type="text"
+                    placeholder="Search CID or Filter Name"
+                    onChange={searchFilters}
+                    onKeyDown={(
+                      event: React.KeyboardEvent<HTMLInputElement>
+                    ) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Form.Group>
               </Col>
             </Row>
 
@@ -538,12 +657,43 @@ function Filters(): JSX.Element {
               show={showImportFilter}
             />
 
+            <ConfirmModal
+              show={showConfirmEnableBulkAction}
+              title={"Confirm bulk enable filters"}
+              message={confirmEnableBulkActionMessage}
+              callback={() => bulkSetEnabled(true)}
+              closeCallback={() => {
+                setShowConfirmEnableBulkAction(false);
+                setConfirmEnableBulkActionMessage("");
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmDisableBulkAction}
+              title={"Confirm bulk disable filters"}
+              message={confirmDisableBulkActionMessage}
+              callback={() => bulkSetEnabled(false)}
+              closeCallback={() => {
+                setShowConfirmDisableBulkAction(false);
+                setConfirmDisableBulkActionMessage("");
+              }}
+            />
+
+            <ConfirmModal
+              show={showConfirmDiscardBulkAction}
+              title={"Confirm bulk discard filters"}
+              message={confirmDiscardBulkActionMessage}
+              callback={() => bulkDiscardOrphans()}
+              closeCallback={() => {
+                setShowConfirmDiscardBulkAction(false);
+                setConfirmDiscardBulkActionMessage("");
+              }}
+            />
+
             <ToggleEnabledFilterModal
               show={showConfirmEnabled}
-              callback={toggleFilterEnabled}
+              callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
-                setBulkEnabled(null);
                 setShowConfirmEnabled(false);
               }}
             />
