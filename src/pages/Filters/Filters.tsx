@@ -5,7 +5,7 @@ import {
   faShare,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { isOrphan, isEnabled, isDisabled } from "./utils";
+import { isOrphan, isEnabled, isDisabled, isShared } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import debounce from "lodash.debounce";
@@ -258,11 +258,6 @@ function Filters(): JSX.Element {
       [Visibility.ThirdParty]: "warning",
     };
 
-    const isShared =
-      props.provider_Filters &&
-      props.provider_Filters.length > 1 &&
-      props.provider.id === AuthService.getProviderId();
-
     const isImported = props.provider.id !== AuthService.getProviderId();
 
     const orphan = isOrphan(props);
@@ -281,7 +276,7 @@ function Filters(): JSX.Element {
             <Badge variant="primary">Override</Badge>
           </Col>
         )}
-        {isShared && (
+        {isShared(props) && (
           <Col>
             <Badge variant="info">Shared</Badge>
           </Col>
@@ -373,8 +368,12 @@ function Filters(): JSX.Element {
                     ) && (
                       <div
                         onClick={() => {
-                          setSelectedFilterList(filterList);
-                          setShowConfirmEnabled(true);
+                          if (isShared(filterList)) {
+                            setSelectedFilterList(filterList);
+                            setShowConfirmEnabled(true);
+                          } else {
+                            toggleFilterEnabled(filterList);
+                          }
                         }}
                       >
                         <FormCheck
