@@ -652,7 +652,6 @@ const FilterPage = (props): JSX.Element => {
                       />
                     </Col>
                   </Form.Row>
-
                   <Form.Row>
                     <Col xs={"auto"}>
                       <Form.Group controlId="visibility">
@@ -751,9 +750,8 @@ const FilterPage = (props): JSX.Element => {
                           delay={{ show: 150, hide: 300 }}
                           overlay={
                             <Tooltip id="button-tooltip">
-                              {filterList.override
-                                ? "Override lists cannot be shared"
-                                : "Override lists prevent CIDs on imported lists from being filtered"}
+                              Override lists prevent CIDs on imported lists from
+                              being filtered
                             </Tooltip>
                           }
                         >
@@ -768,7 +766,16 @@ const FilterPage = (props): JSX.Element => {
                       </div>
                     </Form.Row>
                   )}
-                  <Form.Row style={{ marginTop: -20 }}>
+                  {filterList.override && (
+                    <Form.Row style={{ marginTop: -40, marginLeft: -2 }}>
+                      <Col>
+                        <Form.Label className={"text-dim"}>
+                          Override lists cannot be shared
+                        </Form.Label>
+                      </Col>
+                    </Form.Row>
+                  )}
+                  <Form.Row style={{ marginTop: -10, marginLeft: -2 }}>
                     <Col>
                       <Form.Label className={"text-dim"}>
                         Shared lists will be accessible to other nodes if they
