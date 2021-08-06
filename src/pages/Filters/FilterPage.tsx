@@ -56,8 +56,9 @@ const FilterPage = (props): JSX.Element => {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-  const [providerFilter, setProviderFilter] =
-    useState<Provider_Filter | null>(null);
+  const [providerFilter, setProviderFilter] = useState<Provider_Filter | null>(
+    null
+  );
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const [isOwner, setIsOwner] = useState(false);
