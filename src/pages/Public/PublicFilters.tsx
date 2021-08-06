@@ -177,6 +177,9 @@ export default function PublicFilters() {
           onChange={handlerInputChange}
         />
       </InputGroup>
+      <p className="ml-1">
+        {dataCount} result{dataCount === 1 ? "" : "s"} found
+      </p>
       <Paper>
         <TableContainer>
           <Table aria-label="enhanced table">
@@ -244,7 +247,6 @@ export default function PublicFilters() {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
       {toBeImportedFilter && (
         <ImportFilterModal
           closeCallback={async (_needsRefresh = false): Promise<void> => {
