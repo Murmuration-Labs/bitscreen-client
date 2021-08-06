@@ -188,7 +188,7 @@ export default function PublicFilters() {
                   <TableRow key={index}>
                     <TableCell>
                       <Link
-                        to={`/public/details/${row.id}`}
+                        to={`/directory/details/${row.id}`}
                         style={{ fontSize: 14 }}
                       >
                         {row.name}
