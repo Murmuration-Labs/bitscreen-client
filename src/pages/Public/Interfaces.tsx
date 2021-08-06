@@ -16,6 +16,7 @@ export interface Data {
   actions?: string;
   shareId?: string;
   description?: string;
+  updated?: string;
   id?: number;
 }
 export interface FilterList {

@@ -39,6 +39,7 @@ const headCells: HeadCell[] = [
   { id: "providerName", numeric: true, label: "Provider Name" },
   { id: "providerCountry", numeric: true, label: "Provider Country" },
   { id: "description", numeric: false, label: "Description" },
+  { id: "updated", numeric: false, label: "Last Updated" },
   { id: "actions", numeric: false, label: "Actions" },
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
@@ -154,6 +155,13 @@ export default function PublicFilters() {
     setSearchedValue(event.target.value);
   };
 
+  const formatDate = (date: string | undefined): string => {
+    if (date) {
+      return new Date(date).toLocaleString("en-US");
+    }
+    return "No data";
+  };
+
   const emptyRows =
     rowsPerPage -
     Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
@@ -199,6 +207,7 @@ export default function PublicFilters() {
                     <TableCell>{row.providerName}</TableCell>
                     <TableCell>{row.providerCountry}</TableCell>
                     <TableCell>{row.description}</TableCell>
+                    <TableCell>{formatDate(row.updated)}</TableCell>
                     <TableCell>
                       <Button
                         onClick={() => {
