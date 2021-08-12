@@ -442,22 +442,21 @@ function Filters(): JSX.Element {
     setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
   }, [filterLists]);
 
-  const beginBulkSetEnabled = (val: boolean): void => {
-    const disabled = disabledFilters.filter((x) => x.isBulkSelected);
-    const enabled = enabledFilters.filter((x) => x.isBulkSelected);
-
+  const beginLocalBulkSetEnabled = (val: boolean): void => {
     if (val) {
       setShowConfirmEnableBulkAction(true);
       setConfirmEnableBulkActionMessage(
-        `Are you sure you want to enable ${disabled.length} items?`
+        `Are you sure you want to enable ${disabledSelectedFilters.length} items?`
       );
     } else {
       setShowConfirmDisableBulkAction(true);
       setConfirmDisableBulkActionMessage(
-        `Are you sure you want to disable ${enabled.length} items?`
+        `Are you sure you want to disable ${enabledSelectedFilters.length} items?`
       );
     }
   };
+
+  const beginGlobalBulkSetEnabled = (val: boolean): void => {};
 
   const beginBulkDiscardOrphans = () => {
     setShowConfirmDiscardBulkAction(true);
@@ -565,7 +564,18 @@ function Filters(): JSX.Element {
                   </Col>
                   {!!disabledSelectedFilters.length && (
                     <Col>
-                      <Button onClick={() => beginBulkSetEnabled(true)}>
+                      <Button
+                        onClick={() => {
+                          const sharedFilters = disabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(true);
+                          } else {
+                            beginLocalBulkSetEnabled(true);
+                          }
+                        }}
+                      >
                         Enable {disabledSelectedFilters.length}
                       </Button>
                     </Col>
@@ -573,7 +583,18 @@ function Filters(): JSX.Element {
 
                   {!!enabledSelectedFilters.length && (
                     <Col>
-                      <Button onClick={() => beginBulkSetEnabled(false)}>
+                      <Button
+                        onClick={() => {
+                          const sharedFilters = enabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(false);
+                          } else {
+                            beginLocalBulkSetEnabled(false);
+                          }
+                        }}
+                      >
                         Disable {enabledSelectedFilters.length}
                       </Button>
                     </Col>
