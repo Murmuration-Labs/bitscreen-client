@@ -25,7 +25,6 @@ export interface FilterList {
   cids: string[];
   enabled: boolean;
   override: boolean;
-  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
   notes?: string;

@@ -5,7 +5,7 @@ import {
   faShare,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { isOrphan, isEnabled, isDisabled, isShared } from "./utils";
+import { isOrphan, isEnabled, isDisabled, isShared, isImported } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import debounce from "lodash.debounce";
@@ -242,7 +242,7 @@ function Filters(): JSX.Element {
   useEffect(() => {
     let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
     let title = `Delete filter ${deletedFilterList.id}`;
-    if (deletedFilterList.originId) {
+    if (isImported(deletedFilterList)) {
       message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
       title = `Discard filter ${deletedFilterList.id}`;
     }
@@ -296,7 +296,7 @@ function Filters(): JSX.Element {
   };
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
-    if (props.originId) {
+    if (isImported(props)) {
       return <FontAwesomeIcon icon={faEye as IconProp} />;
     }
 
@@ -399,7 +399,7 @@ function Filters(): JSX.Element {
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    {!filterList.originId && (
+                    {!isImported(filterList) && (
                       <Link
                         to="#"
                         onClick={() => clipboardCopy(filterList.shareId)}

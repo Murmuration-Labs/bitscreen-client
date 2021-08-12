@@ -10,3 +10,5 @@ export const isShared = (f: FilterList) =>
   f.provider_Filters &&
   f.provider_Filters.length > 1 &&
   f.provider.id === AuthService.getProviderId();
+export const isImported = (f: FilterList) =>
+  f.provider.id !== AuthService.getProviderId();
