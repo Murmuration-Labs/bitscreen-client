@@ -194,23 +194,64 @@ function Filters(): JSX.Element {
   const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
     useState<string>("");
 
+  const [bulkEnabled, setBulkEnabled] = useState<boolean | undefined>(
+    undefined
+  );
   const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
 
-  const toggleSharedFilterEnabled = async (
-    option: EnabledOption
-  ): Promise<void> => {
-    if (option === EnabledOption.Local) {
-      await toggleFilterEnabled(selectedFilterList);
-    } else if (option === EnabledOption.Global) {
+  const toggleLocalFilterEnabled = async (): Promise<void> => {
+    if (bulkEnabled === true) {
+      const fls = disabledSelectedFilters.map((x) => {
+        return {
+          ...x,
+          enabled: true,
+        };
+      });
+      await ApiService.updateFilter(fls, false);
+    } else if (bulkEnabled === false) {
+      const fls = enabledSelectedFilters.map((x) => {
+        return {
+          ...x,
+          enabled: false,
+        };
+      });
+      await ApiService.updateFilter(fls, false);
+    } else {
+      const fl = {
+        ...selectedFilterList,
+        enabled: !selectedFilterList.enabled,
+      };
+      await ApiService.updateFilter([fl], false);
+    }
+  };
+
+  const toggleGlobalFilterEnabled = async (): Promise<void> => {
+    if (bulkEnabled === true) {
+      const ids = disabledSelectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(ids, true);
+    } else if (bulkEnabled === false) {
+      const ids = enabledSelectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(ids, false);
+    } else {
       await ApiService.updateEnabledForSharedFilters(
         [selectedFilterList.id],
         !selectedFilterList.enabled
       );
-      await getFilters();
     }
+  };
+
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
+    if (option === EnabledOption.Local) {
+      await toggleLocalFilterEnabled();
+    } else if (option === EnabledOption.Global) {
+      await toggleGlobalFilterEnabled();
+    }
+    await getFilters();
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -456,7 +497,10 @@ function Filters(): JSX.Element {
     }
   };
 
-  const beginGlobalBulkSetEnabled = (val: boolean): void => {};
+  const beginGlobalBulkSetEnabled = (val: boolean): void => {
+    setBulkEnabled(val);
+    setShowConfirmEnabled(true);
+  };
 
   const beginBulkDiscardOrphans = () => {
     setShowConfirmDiscardBulkAction(true);
@@ -714,6 +758,7 @@ function Filters(): JSX.Element {
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
+                setBulkEnabled(undefined);
                 setShowConfirmEnabled(false);
               }}
             />
