@@ -755,6 +755,11 @@ function Filters(): JSX.Element {
 
             <ToggleEnabledFilterModal
               show={showConfirmEnabled}
+              title={
+                bulkEnabled === undefined
+                  ? "The selected filter is imported by other providers"
+                  : "One or more filters are imported by other providers"
+              }
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
