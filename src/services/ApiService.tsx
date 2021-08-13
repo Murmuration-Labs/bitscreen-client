@@ -7,6 +7,7 @@ import {
   ProviderFilter,
 } from "../pages/Filters/Interfaces";
 import * as AuthService from "./AuthService";
+import { isImported } from "../pages/Filters/utils";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -79,7 +80,7 @@ const ApiService = {
 
     filters.forEach((filter) => {
       // check for both undefined and null
-      if (filter.originId == null) {
+      if (!isImported(filter)) {
         regularFilters.push(filter);
       } else {
         importedFilters.push(filter);

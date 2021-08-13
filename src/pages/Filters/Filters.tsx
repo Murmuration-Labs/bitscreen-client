@@ -1,6 +1,6 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { isOrphan, isEnabled, isDisabled, isShared } from "./utils";
+import { isOrphan, isEnabled, isDisabled, isShared, isImported } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import debounce from "lodash.debounce";
@@ -189,23 +189,64 @@ function Filters(): JSX.Element {
   const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
     useState<string>("");
 
+  const [bulkEnabled, setBulkEnabled] = useState<boolean | undefined>(
+    undefined
+  );
   const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
   const [selectedFilterList, setSelectedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
 
-  const toggleSharedFilterEnabled = async (
-    option: EnabledOption
-  ): Promise<void> => {
-    if (option === EnabledOption.Local) {
-      await toggleFilterEnabled(selectedFilterList);
-    } else if (option === EnabledOption.Global) {
+  const toggleLocalFilterEnabled = async (): Promise<void> => {
+    if (bulkEnabled === true) {
+      const fls = disabledSelectedFilters.map((x) => {
+        return {
+          ...x,
+          enabled: true,
+        };
+      });
+      await ApiService.updateFilter(fls, false);
+    } else if (bulkEnabled === false) {
+      const fls = enabledSelectedFilters.map((x) => {
+        return {
+          ...x,
+          enabled: false,
+        };
+      });
+      await ApiService.updateFilter(fls, false);
+    } else {
+      const fl = {
+        ...selectedFilterList,
+        enabled: !selectedFilterList.enabled,
+      };
+      await ApiService.updateFilter([fl], false);
+    }
+  };
+
+  const toggleGlobalFilterEnabled = async (): Promise<void> => {
+    if (bulkEnabled === true) {
+      const ids = disabledSelectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(ids, true);
+    } else if (bulkEnabled === false) {
+      const ids = enabledSelectedFilters.map((x) => x.id);
+      await ApiService.updateEnabledForSharedFilters(ids, false);
+    } else {
       await ApiService.updateEnabledForSharedFilters(
         [selectedFilterList.id],
         !selectedFilterList.enabled
       );
-      await getFilters();
     }
+  };
+
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
+    if (option === EnabledOption.Local) {
+      await toggleLocalFilterEnabled();
+    } else if (option === EnabledOption.Global) {
+      await toggleGlobalFilterEnabled();
+    }
+    await getFilters();
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -237,7 +278,7 @@ function Filters(): JSX.Element {
   useEffect(() => {
     let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
     let title = `Delete filter ${deletedFilterList.id}`;
-    if (deletedFilterList.originId) {
+    if (isImported(deletedFilterList)) {
       message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
       title = `Discard filter ${deletedFilterList.id}`;
     }
@@ -291,7 +332,7 @@ function Filters(): JSX.Element {
   };
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
-    if (props.originId) {
+    if (isImported(props)) {
       return <FontAwesomeIcon icon={faEye as IconProp} />;
     }
 
@@ -428,21 +469,23 @@ function Filters(): JSX.Element {
     setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
   }, [filterLists]);
 
-  const beginBulkSetEnabled = (val: boolean): void => {
-    const disabled = disabledFilters.filter((x) => x.isBulkSelected);
-    const enabled = enabledFilters.filter((x) => x.isBulkSelected);
-
+  const beginLocalBulkSetEnabled = (val: boolean): void => {
     if (val) {
       setShowConfirmEnableBulkAction(true);
       setConfirmEnableBulkActionMessage(
-        `Are you sure you want to enable ${disabled.length} items?`
+        `Are you sure you want to enable ${disabledSelectedFilters.length} items?`
       );
     } else {
       setShowConfirmDisableBulkAction(true);
       setConfirmDisableBulkActionMessage(
-        `Are you sure you want to disable ${enabled.length} items?`
+        `Are you sure you want to disable ${enabledSelectedFilters.length} items?`
       );
     }
+  };
+
+  const beginGlobalBulkSetEnabled = (val: boolean): void => {
+    setBulkEnabled(val);
+    setShowConfirmEnabled(true);
   };
 
   const beginBulkDiscardOrphans = () => {
@@ -551,7 +594,18 @@ function Filters(): JSX.Element {
                   </Col>
                   {!!disabledSelectedFilters.length && (
                     <Col>
-                      <Button onClick={() => beginBulkSetEnabled(true)}>
+                      <Button
+                        onClick={() => {
+                          const sharedFilters = disabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(true);
+                          } else {
+                            beginLocalBulkSetEnabled(true);
+                          }
+                        }}
+                      >
                         Enable {disabledSelectedFilters.length}
                       </Button>
                     </Col>
@@ -559,7 +613,18 @@ function Filters(): JSX.Element {
 
                   {!!enabledSelectedFilters.length && (
                     <Col>
-                      <Button onClick={() => beginBulkSetEnabled(false)}>
+                      <Button
+                        onClick={() => {
+                          const sharedFilters = enabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(false);
+                          } else {
+                            beginLocalBulkSetEnabled(false);
+                          }
+                        }}
+                      >
                         Disable {enabledSelectedFilters.length}
                       </Button>
                     </Col>
@@ -676,9 +741,15 @@ function Filters(): JSX.Element {
 
             <ToggleEnabledFilterModal
               show={showConfirmEnabled}
+              title={
+                bulkEnabled === undefined
+                  ? "The selected filter is imported by other providers"
+                  : "One or more filters are imported by other providers"
+              }
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
                 setSelectedFilterList(FilterService.emptyFilterList());
+                setBulkEnabled(undefined);
                 setShowConfirmEnabled(false);
               }}
             />

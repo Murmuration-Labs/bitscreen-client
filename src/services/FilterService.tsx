@@ -11,6 +11,7 @@ const FilterService = {
       enabled: true,
       override: false,
       providerId: 0,
+      provider: { id: 0 },
       description: "",
     };
   },

@@ -86,6 +86,7 @@ export interface ImportFilterModalProps {
 
 export interface ToggleEnabledFilterModalProps {
   show: boolean;
+  title: string;
   callback: (option: EnabledOption) => void;
   closeCallback: () => void;
 }
@@ -137,7 +138,6 @@ export interface FilterList {
   override: boolean;
   shareId?: string;
   shared?: boolean;
-  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
   providerId: number;
