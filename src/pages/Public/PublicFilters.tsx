@@ -212,19 +212,30 @@ export default function PublicFilters() {
                     <TableCell>{row.description}</TableCell>
                     <TableCell>{formatDate(row.updated)}</TableCell>
                     <TableCell>
-                      <Button
-                        onClick={() => {
-                          // setPrefetch(
-                          //   `${remoteMarketplaceUri()}/filter/share/${
-                          //     row.shareId
-                          //   }`
-                          // );
-                          setToBeImportedFilter(row as any);
-                        }}
-                        variant="primary"
-                      >
-                        Import
-                      </Button>
+                      {row.isImported ? (
+                        <Button
+                          style={{ marginLeft: -15 }}
+                          disabled={true}
+                          variant="danger"
+                        >
+                          Imported
+                        </Button>
+                      ) : (
+                        <Button
+                          style={{ marginLeft: -5 }}
+                          onClick={() => {
+                            // setPrefetch(
+                            //   `${remoteMarketplaceUri()}/filter/share/${
+                            //     row.shareId
+                            //   }`
+                            // );
+                            setToBeImportedFilter(row as any);
+                          }}
+                          variant="primary"
+                        >
+                          Import
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
