@@ -527,7 +527,7 @@ const FilterPage = (props): JSX.Element => {
             className="origin-link"
             target="_blank"
           >
-            {filterList.shareId}
+            {serverUri()}/filter/share/{filterList.shareId}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
               className="space-left"

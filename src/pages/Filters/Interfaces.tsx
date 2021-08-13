@@ -138,7 +138,6 @@ export interface FilterList {
   override: boolean;
   shareId?: string;
   shared?: boolean;
-  originId?: string;
   isBulkSelected?: boolean;
   description?: string;
   providerId: number;
