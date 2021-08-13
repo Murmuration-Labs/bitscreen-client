@@ -421,7 +421,11 @@ const FilterPage = (props): JSX.Element => {
 
   const deleteCurrentFilter = async (): Promise<void> => {
     ApiService.deleteFilter(filterList).then(() => {
-      toast.success("Filter list deleted successfully");
+      toast.success(
+        isImported
+          ? "Filter list discarded successfully"
+          : "Filter list deleted successfully"
+      );
       history.push("/filters");
     });
   };
