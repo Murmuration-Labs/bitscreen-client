@@ -114,13 +114,6 @@ const FilterPage = (props): JSX.Element => {
   const history = useHistory();
 
   useEffect(() => {
-    setIsOwner(
-      !filterList.provider ||
-        filterList.provider.id === AuthService.getProviderId()
-    );
-  }, [filterList]);
-
-  useEffect(() => {
     if (!filterList.provider_Filters) {
       return;
     }
@@ -168,7 +161,10 @@ const FilterPage = (props): JSX.Element => {
           cids: cidItems,
         };
 
-        setIsimported(!isOwner);
+        const owner =
+          !fl.provider || fl.provider.id === AuthService.getProviderId();
+        setIsOwner(owner);
+        setIsimported(!owner);
         setFilterList(fl);
         setInitialFilterList({ ...fl });
         setLoaded(true);
