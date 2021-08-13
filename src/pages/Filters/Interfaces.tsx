@@ -86,6 +86,7 @@ export interface ImportFilterModalProps {
 
 export interface ToggleEnabledFilterModalProps {
   show: boolean;
+  title: string;
   callback: (option: EnabledOption) => void;
   closeCallback: () => void;
 }
