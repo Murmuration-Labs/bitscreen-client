@@ -108,7 +108,9 @@ const FilterDetailsPage = (props) => {
             <ImportFilterModal
               closeCallback={async (_needsRefresh = false): Promise<void> => {
                 setToBeImportedFilter(undefined);
-                loadFilter(filterId);
+                if (_needsRefresh) {
+                  loadFilter(filterId);
+                }
               }}
               filter={toBeImportedFilter}
               show={showImportFilter}
