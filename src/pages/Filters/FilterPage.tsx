@@ -40,7 +40,6 @@ import {
   CidItem,
   FilterList,
   mapVisibilityString,
-  Provider_Filter,
   ViewTypes,
   Visibility,
   VisibilityString,
@@ -56,12 +55,13 @@ const FilterPage = (props): JSX.Element => {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
-  const [providerFilter, setProviderFilter] = useState<Provider_Filter | null>(
-    null
-  );
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const [isOwner, setIsOwner] = useState(false);
+  const [filterNotes, setFilterNotes] = useState<string | undefined>(undefined);
+  const [initialFilterNotes, setInitialFilterNotes] = useState<
+    string | undefined
+  >(undefined);
 
   useEffect(() => {
     setCids(
@@ -114,13 +114,6 @@ const FilterPage = (props): JSX.Element => {
   const history = useHistory();
 
   useEffect(() => {
-    setIsOwner(
-      !filterList.provider ||
-        filterList.provider.id === AuthService.getProviderId()
-    );
-  }, [filterList]);
-
-  useEffect(() => {
     if (!filterList.provider_Filters) {
       return;
     }
@@ -131,16 +124,13 @@ const FilterPage = (props): JSX.Element => {
         )[0]
       : null;
 
-    setProviderFilter(result);
-  }, [filterList]);
+    setFilterNotes(result?.notes);
+    setInitialFilterNotes(result?.notes);
+  }, [loaded]);
 
   useEffect(() => {
-    if (_.isEqual(filterList.notes, providerFilter?.notes)) {
-      return;
-    }
-
-    setFilterList({ ...filterList, notes: providerFilter?.notes });
-  }, [filterList, providerFilter]);
+    setFilterListChanged(!_.isEqual(filterNotes, initialFilterNotes));
+  }, [filterNotes, initialFilterNotes]);
 
   const generateUniqueKey = (): string => {
     // Math.random should be unique because of its seeding algorithm.
@@ -171,7 +161,10 @@ const FilterPage = (props): JSX.Element => {
           cids: cidItems,
         };
 
-        setIsimported(!isOwner);
+        const owner =
+          !fl.provider || fl.provider.id === AuthService.getProviderId();
+        setIsOwner(owner);
+        setIsimported(!owner);
         setFilterList(fl);
         setInitialFilterList({ ...fl });
         setLoaded(true);
@@ -206,9 +199,10 @@ const FilterPage = (props): JSX.Element => {
   const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
 
   const save = (): void => {
+    const fl: FilterList = { ...filterList, notes: filterNotes };
     if (isEdit) {
       setLoaded(true);
-      const filtersToUpdate = [filterList];
+      const filtersToUpdate = [fl];
       if (moveToFilterList) {
         filtersToUpdate.push(moveToFilterList);
       }
@@ -231,7 +225,7 @@ const FilterPage = (props): JSX.Element => {
           setLoaded(false);
         });
     } else {
-      ApiService.addFilter(filterList)
+      ApiService.addFilter(fl)
         .then(() => {
           setFilterListChanged(false); // To prevent unsaved data prompt.
           history.push(`/filters`);
@@ -427,7 +421,11 @@ const FilterPage = (props): JSX.Element => {
 
   const deleteCurrentFilter = async (): Promise<void> => {
     ApiService.deleteFilter(filterList).then(() => {
-      toast.success("Filter list deleted successfully");
+      toast.success(
+        isImported
+          ? "Filter list discarded successfully"
+          : "Filter list deleted successfully"
+      );
       history.push("/filters");
     });
   };
@@ -539,7 +537,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderNotes = (): JSX.Element => {
-    if (isOwner || !providerFilter) {
+    if (isOwner) {
       return <></>;
     }
 
@@ -550,26 +548,11 @@ const FilterPage = (props): JSX.Element => {
           <Form.Control
             role="notes"
             onChange={(ev: ChangeEvent<HTMLInputElement>) => {
-              if (!filterList.provider_Filters) {
-                return;
-              }
-
-              const provider_Filters = filterList.provider_Filters.filter(
-                (pf) => pf.id !== providerFilter.id
-              );
-
-              saveFilter({
-                ...filterList,
-                notes: ev.target.value,
-                provider_Filters: [
-                  ...provider_Filters,
-                  { ...providerFilter, notes: ev.target.value },
-                ],
-              });
+              setFilterNotes(ev.target.value);
             }}
             as="textarea"
             placeholder="This note can only be seen by you."
-            value={providerFilter.notes || ""}
+            value={filterNotes || ""}
           />
         </Col>
       </Form.Row>

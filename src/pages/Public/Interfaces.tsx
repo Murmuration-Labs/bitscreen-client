@@ -8,6 +8,7 @@ export interface HeadCell {
 
 export interface Data {
   name: string;
+  isImported: boolean;
   cids: CidItem[];
   subs: number;
   providerName: string;

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { Button, Container } from "react-bootstrap";
 import ApiService from "../../services/ApiService";
-import { makeStyles } from "@material-ui/core/styles";
+import ImportFilterModal from "../Filters/ImportFilterModal";
+import { FilterList } from "../Filters/Interfaces";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -10,10 +12,22 @@ import Paper from "@material-ui/core/Paper";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [filterId, setFilterId] = useState<number>(0);
   const [filterDetails, setFilterDetails] = useState([{}]);
+  const [isImported, setIsImported] = useState<boolean>(false);
+  const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
+  const [toBeImportedFilter, setToBeImportedFilter] = useState<
+    FilterList | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setShowImportFilter(!!toBeImportedFilter);
+  }, [toBeImportedFilter]);
 
   const loadFilter = (id: number): void => {
+    setFilterId(id);
     ApiService.getPublicFilterDetails(id).then((data: any) => {
+      setIsImported(data.isImported);
       const details = [
         { columnName: "Name of list:", columnValue: data.filter.name },
         {
@@ -49,23 +63,61 @@ const FilterDetailsPage = (props) => {
   return (
     <>
       {loaded ? (
-        <TableContainer
-          style={{ wordBreak: "break-all", margin: "auto" }}
-          component={Paper}
-        >
-          <Table aria-label="simple table">
-            <TableBody>
-              {filterDetails.map((row: any) => (
-                <TableRow key={row.columnName}>
-                  <TableCell align="left">
-                    <div style={{ fontWeight: "bold" }}> {row.columnName} </div>{" "}
-                    {row.columnValue}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Container>
+          <Paper>
+            <TableContainer
+              style={{ wordBreak: "break-all", margin: "auto" }}
+              component={Paper}
+            >
+              <Table aria-label="simple table">
+                <TableBody>
+                  {filterDetails.map((row: any) => (
+                    <TableRow key={row.columnName}>
+                      <TableCell align="left">
+                        <div style={{ fontWeight: "bold" }}>
+                          {" "}
+                          {row.columnName}{" "}
+                        </div>{" "}
+                        {row.columnValue}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow>
+                    <TableCell>
+                      {isImported ? (
+                        <Button disabled={true} variant="danger">
+                          Imported
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setToBeImportedFilter({ id: filterId } as any);
+                          }}
+                          variant="primary"
+                        >
+                          Import
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+          {toBeImportedFilter && (
+            <ImportFilterModal
+              closeCallback={async (_needsRefresh = false): Promise<void> => {
+                setToBeImportedFilter(undefined);
+                if (_needsRefresh) {
+                  loadFilter(filterId);
+                }
+              }}
+              filter={toBeImportedFilter}
+              show={showImportFilter}
+              prefetch=""
+            />
+          )}
+        </Container>
       ) : null}
     </>
   );
