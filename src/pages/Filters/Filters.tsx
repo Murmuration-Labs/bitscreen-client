@@ -1,10 +1,5 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faEdit,
-  faEye,
-  faShare,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { isOrphan, isEnabled, isDisabled, isShared } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -399,15 +394,6 @@ function Filters(): JSX.Element {
                     >
                       <FontAwesomeIcon icon={faTrash as IconProp} />
                     </Link>
-                    {!filterList.originId && (
-                      <Link
-                        to="#"
-                        onClick={() => clipboardCopy(filterList.shareId)}
-                        className="double-space-left"
-                      >
-                        <FontAwesomeIcon icon={faShare as IconProp} />
-                      </Link>
-                    )}
                   </td>
                 </tr>
               ))}
