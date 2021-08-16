@@ -494,7 +494,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderTitle = (): JSX.Element => {
-    if (!isOwner) {
+    if (isImported) {
       return (
         <h2>
           View Filter List &nbsp;<Badge variant="dark">Imported</Badge>
@@ -510,7 +510,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderOrigin = (): JSX.Element => {
-    if (isOwner) {
+    if (isOwner || !isImported) {
       return <></>;
     }
 
@@ -537,7 +537,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const renderNotes = (): JSX.Element => {
-    if (isOwner) {
+    if (isOwner || !isImported) {
       return <></>;
     }
 
@@ -631,7 +631,7 @@ const FilterPage = (props): JSX.Element => {
                         type="text"
                         placeholder="List Name"
                         value={filterList.name}
-                        disabled={!isOwner}
+                        disabled={isImported}
                       />
                     </Col>
                   </Form.Row>
@@ -650,12 +650,12 @@ const FilterPage = (props): JSX.Element => {
                         as="textarea"
                         placeholder="List Description"
                         value={filterList.description}
-                        disabled={!isOwner}
+                        disabled={isImported}
                       />
                     </Col>
                   </Form.Row>
                   <Form.Row>
-                    {isOwner && (
+                    {(isOwner || !isImported) && (
                       <Col xs={"auto"}>
                         <Form.Group controlId="visibility">
                           <Form.Control
@@ -669,18 +669,19 @@ const FilterPage = (props): JSX.Element => {
                         </Form.Group>
                       </Col>
                     )}
-                    {isOwner && checkViewType() === ViewTypes.Edit && (
-                      <Col>
-                        <Button
-                          variant="primary"
-                          onClick={() => {
-                            clipboardCopy(filterList.shareId);
-                          }}
-                        >
-                          Direct share
-                        </Button>
-                      </Col>
-                    )}
+                    {(isOwner || !isImported) &&
+                      checkViewType() === ViewTypes.Edit && (
+                        <Col>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              clipboardCopy(filterList.shareId);
+                            }}
+                          >
+                            Direct share
+                          </Button>
+                        </Col>
+                      )}
                   </Form.Row>
                   <Form.Row
                     style={{
@@ -716,7 +717,7 @@ const FilterPage = (props): JSX.Element => {
                       </Form.Label>
                     </div>
                   </Form.Row>
-                  {isOwner && (
+                  {(isOwner || !isImported) && (
                     <Form.Row
                       style={{
                         marginLeft: 2,
@@ -813,7 +814,7 @@ const FilterPage = (props): JSX.Element => {
                                     width: "100%",
                                   }}
                                   onClick={onNewCid}
-                                  disabled={!isOwner}
+                                  disabled={isImported}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPlusCircle as IconProp}
@@ -827,7 +828,7 @@ const FilterPage = (props): JSX.Element => {
                                   onClick={() => {
                                     setAddCidBatchModal(true);
                                   }}
-                                  disabled={!isOwner}
+                                  disabled={isImported}
                                 >
                                   <FontAwesomeIcon
                                     icon={faFolderPlus as IconProp}
