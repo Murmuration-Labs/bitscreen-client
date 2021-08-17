@@ -343,10 +343,12 @@ function Filters(): JSX.Element {
     return (
       <div className={"card"}>
         <div className={"card-container"}>
-          <p>
-            {filterLists ? filterLists.length : "0"} result
-            {filterLists && filterLists.length === 1 ? "" : "s"} found
-          </p>
+          {searchTerm && (
+            <p>
+              {filterLists ? filterLists.length : "0"} result
+              {filterLists && filterLists.length === 1 ? "" : "s"} found
+            </p>
+          )}
           <Table>
             <thead>
               <tr>
