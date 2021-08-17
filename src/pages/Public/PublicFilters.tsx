@@ -177,9 +177,11 @@ export default function PublicFilters() {
           onChange={handlerInputChange}
         />
       </InputGroup>
-      <p className="ml-1">
-        {dataCount} result{dataCount === 1 ? "" : "s"} found
-      </p>
+      {searchedValue && (
+        <p className="ml-1">
+          {dataCount} result{dataCount === 1 ? "" : "s"} found
+        </p>
+      )}
       <Paper>
         <TableContainer>
           <Table aria-label="enhanced table">
