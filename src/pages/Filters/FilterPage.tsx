@@ -660,6 +660,7 @@ const FilterPage = (props): JSX.Element => {
                         <Form.Group controlId="visibility">
                           <Form.Control
                             as="select"
+                            disabled={filterOverride}
                             onChange={changeVisibility}
                             value={VisibilityString[filterList.visibility]}
                           >
