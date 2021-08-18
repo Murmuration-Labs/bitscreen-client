@@ -186,6 +186,10 @@ function Filters(): JSX.Element {
     setLoaded(true);
   };
 
+  useEffect(() => {
+    getFilters();
+  }, [rowsPerPage, page]);
+
   const deleteFilter = async (filter: FilterList) => {
     await ApiService.deleteFilter(filter);
     await getFilters();
