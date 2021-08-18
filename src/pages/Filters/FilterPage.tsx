@@ -370,7 +370,10 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const prepareCidMoveModal = async (moveItems: CidItem[]): Promise<void> => {
-    const filterLists: FilterList[] = await ApiService.getFilters();
+    const data = await ApiService.getFilters({
+      isPaged: false,
+    });
+    const filterLists: FilterList[] = data.filters;
 
     setMoveCidItems(moveItems);
     setMoveOptionFilters(
