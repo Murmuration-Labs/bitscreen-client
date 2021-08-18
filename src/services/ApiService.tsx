@@ -37,14 +37,22 @@ const ApiService = {
     return response.data;
   },
 
-  getFilters: async (searchTerm = ""): Promise<FilterList[]> => {
-    const providerId = AuthService.getProviderId();
+  getFilters: async ({
+    searchTerm = "",
+    isPaged = true,
+    page = 0,
+    perPage = 5,
+  }): Promise<{ filters: FilterList[]; count: number }> => {
+    const response: any = await axios.get(`${serverUri()}/filter`, {
+      params: {
+        isPaged,
+        page,
+        perPage,
+        q: searchTerm,
+        providerId: AuthService.getProviderId(),
+      },
+    });
 
-    const query = `q=${encodeURIComponent(
-      searchTerm
-    )}&providerId=${encodeURIComponent(providerId)}`;
-
-    const response = await axios.get(`${serverUri()}/filter?${query}`);
     return response.data;
   },
 

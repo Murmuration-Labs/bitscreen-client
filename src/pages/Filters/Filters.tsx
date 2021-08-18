@@ -17,6 +17,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
+import { Paper, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
@@ -39,6 +40,12 @@ function Filters(): JSX.Element {
   /**
    * UTILS
    */
+
+  // ----------------------- PAGINATION -----------------------
+  const [dataCount, setDataCount] = React.useState<number>(0);
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  // ----------------------- PAGINATION -----------------------
 
   const [enabledFilters, setEnabledFilters] = useState<FilterList[]>([]);
   const [disabledFilters, setDisabledFilters] = useState<FilterList[]>([]);
@@ -152,10 +159,28 @@ function Filters(): JSX.Element {
     setFilterLists(newFilterLists);
   }, [selectedConditional]);
 
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const getFilters = async () => {
-    const filterLists: FilterList[] = await ApiService.getFilters(searchTerm);
+    const data = await ApiService.getFilters({
+      isPaged: true,
+      page,
+      perPage: rowsPerPage,
+      searchTerm,
+    });
+    const filterLists: FilterList[] = data.filters;
 
     setFilterLists(filterLists);
+    setDataCount(data.count);
     setSelectedConditional(BulkSelectedType.None);
 
     setLoaded(true);
@@ -341,12 +366,12 @@ function Filters(): JSX.Element {
 
   const CIDFilter = (): JSX.Element => {
     return (
-      <div className={"card"}>
-        <div className={"card-container"}>
-          <p>
-            {filterLists ? filterLists.length : "0"} result
-            {filterLists && filterLists.length === 1 ? "" : "s"} found
-          </p>
+      <Container>
+        <p>
+          {filterLists ? filterLists.length : "0"} result
+          {filterLists && filterLists.length === 1 ? "" : "s"} found
+        </p>
+        <Paper>
           <Table>
             <thead>
               <tr>
@@ -440,8 +465,17 @@ function Filters(): JSX.Element {
               ))}
             </tbody>
           </Table>
-        </div>
-      </div>
+        </Paper>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={dataCount}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Container>
     );
   };
 
