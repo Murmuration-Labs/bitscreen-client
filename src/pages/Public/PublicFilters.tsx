@@ -182,75 +182,73 @@ export default function PublicFilters() {
           {dataCount} result{dataCount === 1 ? "" : "s"} found
         </p>
       )}
-      <Paper>
-        <TableContainer>
-          <Table aria-label="enhanced table">
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              mySort={mySort}
-              mySortBy={mySortBy}
-              onRequestSort={handleRequestSort}
-              rowCount={dataCount}
-            />
-            <TableBody>
-              {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
+      <TableContainer>
+        <Table aria-label="enhanced table">
+          <EnhancedTableHead
+            order={order}
+            orderBy={orderBy}
+            mySort={mySort}
+            mySortBy={mySortBy}
+            onRequestSort={handleRequestSort}
+            rowCount={dataCount}
+          />
+          <TableBody>
+            {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-              {publicFiltersData.map((row, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <Link
-                        to={`/directory/details/${row.id}`}
-                        style={{ fontSize: 14 }}
+            {publicFiltersData.map((row, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Link
+                      to={`/directory/details/${row.id}`}
+                      style={{ fontSize: 14 }}
+                    >
+                      {row.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{row.cids}</TableCell>
+                  <TableCell>{row.subs - 1}</TableCell>
+                  <TableCell>{row.providerName}</TableCell>
+                  <TableCell>{row.providerCountry}</TableCell>
+                  <TableCell>{row.description}</TableCell>
+                  <TableCell>{formatDate(row.updated)}</TableCell>
+                  <TableCell>
+                    {row.isImported ? (
+                      <Button
+                        style={{ marginLeft: -15 }}
+                        disabled={true}
+                        variant="danger"
                       >
-                        {row.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{row.cids}</TableCell>
-                    <TableCell>{row.subs - 1}</TableCell>
-                    <TableCell>{row.providerName}</TableCell>
-                    <TableCell>{row.providerCountry}</TableCell>
-                    <TableCell>{row.description}</TableCell>
-                    <TableCell>{formatDate(row.updated)}</TableCell>
-                    <TableCell>
-                      {row.isImported ? (
-                        <Button
-                          style={{ marginLeft: -15 }}
-                          disabled={true}
-                          variant="danger"
-                        >
-                          Imported
-                        </Button>
-                      ) : (
-                        <Button
-                          style={{ marginLeft: -5 }}
-                          onClick={() => {
-                            // setPrefetch(
-                            //   `${remoteMarketplaceUri()}/filter/share/${
-                            //     row.shareId
-                            //   }`
-                            // );
-                            setToBeImportedFilter(row as any);
-                          }}
-                          variant="primary"
-                        >
-                          Import
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} />
+                        Imported
+                      </Button>
+                    ) : (
+                      <Button
+                        style={{ marginLeft: -5 }}
+                        onClick={() => {
+                          // setPrefetch(
+                          //   `${remoteMarketplaceUri()}/filter/share/${
+                          //     row.shareId
+                          //   }`
+                          // );
+                          setToBeImportedFilter(row as any);
+                        }}
+                        variant="primary"
+                      >
+                        Import
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+              );
+            })}
+            {emptyRows === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"

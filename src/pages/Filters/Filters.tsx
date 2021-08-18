@@ -366,120 +366,117 @@ function Filters(): JSX.Element {
 
   const CIDFilter = (): JSX.Element => {
     return (
-      <div className={"card"}>
-        <div className={"card-container"}>
-          {searchTerm && (
-            <p>
-              {filterLists ? filterLists.length : "0"} result
-              {filterLists && filterLists.length === 1 ? "" : "s"} found
-            </p>
-          )}
-          <Paper>
-            <Table>
-              <thead>
-                <tr>
-                  <th>Bulk</th>
-                  <th>Filter name</th>
-                  <th>Scope</th>
-                  <th># of CIDs</th>
-                  <th>Enabled?</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filterLists.map((filterList) => (
-                  <tr key={`filterList-${filterList.id}`}>
-                    <td>
-                      <Form.Check
-                        type="checkbox"
-                        checked={filterList.isBulkSelected}
-                        onChange={() => {
-                          filterList.isBulkSelected =
-                            !filterList.isBulkSelected;
-                          setFilterLists([...filterLists]);
+      <div className={"card-container"}>
+        {searchTerm && (
+          <p>
+            {filterLists ? filterLists.length : "0"} result
+            {filterLists && filterLists.length === 1 ? "" : "s"} found
+          </p>
+        )}
+        <TableContainer>
+          <Table>
+            <thead>
+              <tr>
+                <th>Bulk</th>
+                <th>Filter name</th>
+                <th>Scope</th>
+                <th># of CIDs</th>
+                <th>Enabled?</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filterLists.map((filterList) => (
+                <tr key={`filterList-${filterList.id}`}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={filterList.isBulkSelected}
+                      onChange={() => {
+                        filterList.isBulkSelected = !filterList.isBulkSelected;
+                        setFilterLists([...filterLists]);
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <Link
+                      to={`/filters/edit/${filterList.id}`}
+                      className="double-space-left"
+                    >
+                      {filterList.name}
+                    </Link>
+                  </td>
+                  <td>
+                    <CIDFilterScope {...filterList} />
+                  </td>
+                  <td>
+                    <span
+                      style={{
+                        textAlign: "center",
+                        color: "blue",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {filterList.cids && filterList.cids.length
+                        ? filterList.cids.length
+                        : filterList.cidsCount || 0}
+                    </span>
+                  </td>
+                  <td>
+                    {!(
+                      filterList.provider_Filters &&
+                      !filterList.provider_Filters.some(
+                        (pf) => pf.provider.id === filterList.provider.id
+                      )
+                    ) && (
+                      <div
+                        onClick={() => {
+                          if (isShared(filterList)) {
+                            setSelectedFilterList(filterList);
+                            setShowConfirmEnabled(true);
+                          } else {
+                            toggleFilterEnabled(filterList);
+                          }
                         }}
-                      />
-                    </td>
-                    <td>
-                      <Link
-                        to={`/filters/edit/${filterList.id}`}
-                        className="double-space-left"
                       >
-                        {filterList.name}
-                      </Link>
-                    </td>
-                    <td>
-                      <CIDFilterScope {...filterList} />
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          textAlign: "center",
-                          color: "blue",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {filterList.cids && filterList.cids.length
-                          ? filterList.cids.length
-                          : filterList.cidsCount || 0}
-                      </span>
-                    </td>
-                    <td>
-                      {!(
-                        filterList.provider_Filters &&
-                        !filterList.provider_Filters.some(
-                          (pf) => pf.provider.id === filterList.provider.id
-                        )
-                      ) && (
-                        <div
-                          onClick={() => {
-                            if (isShared(filterList)) {
-                              setSelectedFilterList(filterList);
-                              setShowConfirmEnabled(true);
-                            } else {
-                              toggleFilterEnabled(filterList);
-                            }
-                          }}
-                        >
-                          <FormCheck
-                            readOnly
-                            type="switch"
-                            checked={filterList.enabled}
-                          />
-                        </div>
-                      )}
-                    </td>
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={filterList.enabled}
+                        />
+                      </div>
+                    )}
+                  </td>
 
-                    <td style={{ textAlign: "justify" }}>
-                      <Link
-                        to={`/filters/edit/${filterList.id}`}
-                        className="double-space-left"
-                      >
-                        {editOrEyeIcon(filterList)}
-                      </Link>
-                      <Link
-                        to="#"
-                        onClick={() => confirmDelete(filterList)}
-                        className="double-space-left"
-                      >
-                        <FontAwesomeIcon icon={faTrash as IconProp} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Paper>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={dataCount}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </div>
+                  <td style={{ textAlign: "justify" }}>
+                    <Link
+                      to={`/filters/edit/${filterList.id}`}
+                      className="double-space-left"
+                    >
+                      {editOrEyeIcon(filterList)}
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={() => confirmDelete(filterList)}
+                      className="double-space-left"
+                    >
+                      <FontAwesomeIcon icon={faTrash as IconProp} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={dataCount}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </div>
     );
   };
