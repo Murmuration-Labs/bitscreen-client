@@ -17,7 +17,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { Paper, TablePagination } from "@material-ui/core";
+import { Paper, TableContainer, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
@@ -374,99 +374,102 @@ function Filters(): JSX.Element {
           </p>
         )}
         <Paper>
-          <Table>
-            <thead>
-              <tr>
-                <th>Bulk</th>
-                <th>Filter name</th>
-                <th>Scope</th>
-                <th># of CIDs</th>
-                <th>Enabled?</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filterLists.map((filterList) => (
-                <tr key={`filterList-${filterList.id}`}>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={filterList.isBulkSelected}
-                      onChange={() => {
-                        filterList.isBulkSelected = !filterList.isBulkSelected;
-                        setFilterLists([...filterLists]);
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <Link
-                      to={`/filters/edit/${filterList.id}`}
-                      className="double-space-left"
-                    >
-                      {filterList.name}
-                    </Link>
-                  </td>
-                  <td>
-                    <CIDFilterScope {...filterList} />
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        textAlign: "center",
-                        color: "blue",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {filterList.cids && filterList.cids.length
-                        ? filterList.cids.length
-                        : filterList.cidsCount || 0}
-                    </span>
-                  </td>
-                  <td>
-                    {!(
-                      filterList.provider_Filters &&
-                      !filterList.provider_Filters.some(
-                        (pf) => pf.provider.id === filterList.provider.id
-                      )
-                    ) && (
-                      <div
-                        onClick={() => {
-                          if (isShared(filterList)) {
-                            setSelectedFilterList(filterList);
-                            setShowConfirmEnabled(true);
-                          } else {
-                            toggleFilterEnabled(filterList);
-                          }
+          <TableContainer>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Bulk</th>
+                  <th>Filter name</th>
+                  <th>Scope</th>
+                  <th># of CIDs</th>
+                  <th>Enabled?</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filterLists.map((filterList) => (
+                  <tr key={`filterList-${filterList.id}`}>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={filterList.isBulkSelected}
+                        onChange={() => {
+                          filterList.isBulkSelected =
+                            !filterList.isBulkSelected;
+                          setFilterLists([...filterLists]);
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <Link
+                        to={`/filters/edit/${filterList.id}`}
+                        className="double-space-left"
+                      >
+                        {filterList.name}
+                      </Link>
+                    </td>
+                    <td>
+                      <CIDFilterScope {...filterList} />
+                    </td>
+                    <td>
+                      <span
+                        style={{
+                          textAlign: "center",
+                          color: "blue",
+                          fontWeight: "bold",
                         }}
                       >
-                        <FormCheck
-                          readOnly
-                          type="switch"
-                          checked={filterList.enabled}
-                        />
-                      </div>
-                    )}
-                  </td>
+                        {filterList.cids && filterList.cids.length
+                          ? filterList.cids.length
+                          : filterList.cidsCount || 0}
+                      </span>
+                    </td>
+                    <td>
+                      {!(
+                        filterList.provider_Filters &&
+                        !filterList.provider_Filters.some(
+                          (pf) => pf.provider.id === filterList.provider.id
+                        )
+                      ) && (
+                        <div
+                          onClick={() => {
+                            if (isShared(filterList)) {
+                              setSelectedFilterList(filterList);
+                              setShowConfirmEnabled(true);
+                            } else {
+                              toggleFilterEnabled(filterList);
+                            }
+                          }}
+                        >
+                          <FormCheck
+                            readOnly
+                            type="switch"
+                            checked={filterList.enabled}
+                          />
+                        </div>
+                      )}
+                    </td>
 
-                  <td style={{ textAlign: "justify" }}>
-                    <Link
-                      to={`/filters/edit/${filterList.id}`}
-                      className="double-space-left"
-                    >
-                      {editOrEyeIcon(filterList)}
-                    </Link>
-                    <Link
-                      to="#"
-                      onClick={() => confirmDelete(filterList)}
-                      className="double-space-left"
-                    >
-                      <FontAwesomeIcon icon={faTrash as IconProp} />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                    <td style={{ textAlign: "justify" }}>
+                      <Link
+                        to={`/filters/edit/${filterList.id}`}
+                        className="double-space-left"
+                      >
+                        {editOrEyeIcon(filterList)}
+                      </Link>
+                      <Link
+                        to="#"
+                        onClick={() => confirmDelete(filterList)}
+                        className="double-space-left"
+                      >
+                        <FontAwesomeIcon icon={faTrash as IconProp} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableContainer>
         </Paper>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
