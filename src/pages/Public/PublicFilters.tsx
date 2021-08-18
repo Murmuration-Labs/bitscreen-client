@@ -10,9 +10,7 @@ import {
   TableSortLabel,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { Button, Container } from "react-bootstrap";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
+import { Button, Container, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
@@ -169,86 +167,90 @@ export default function PublicFilters() {
   return (
     <Container>
       <h2>Public Filters</h2>
-      <InputGroup size="lg">
-        <FormControl
-          aria-label="Large"
-          aria-describedby="inputGroup-sizing-sm"
+      <Form.Group controlId="search">
+        <Form.Control
+          type="text"
           placeholder="Search..."
           onChange={handlerInputChange}
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+            }
+          }}
         />
-      </InputGroup>
-      <p className="ml-1">
-        {dataCount} result{dataCount === 1 ? "" : "s"} found
-      </p>
-      <Paper>
-        <TableContainer>
-          <Table aria-label="enhanced table">
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              mySort={mySort}
-              mySortBy={mySortBy}
-              onRequestSort={handleRequestSort}
-              rowCount={dataCount}
-            />
-            <TableBody>
-              {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
+      </Form.Group>
+      {searchedValue && (
+        <p className="ml-1">
+          {dataCount} result{dataCount === 1 ? "" : "s"} found
+        </p>
+      )}
+      <TableContainer>
+        <Table aria-label="enhanced table">
+          <EnhancedTableHead
+            order={order}
+            orderBy={orderBy}
+            mySort={mySort}
+            mySortBy={mySortBy}
+            onRequestSort={handleRequestSort}
+            rowCount={dataCount}
+          />
+          <TableBody>
+            {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-              {publicFiltersData.map((row, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell>
-                      <Link
-                        to={`/directory/details/${row.id}`}
-                        style={{ fontSize: 14 }}
+            {publicFiltersData.map((row, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Link
+                      to={`/directory/details/${row.id}`}
+                      style={{ fontSize: 14 }}
+                    >
+                      {row.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{row.cids}</TableCell>
+                  <TableCell>{row.subs - 1}</TableCell>
+                  <TableCell>{row.providerName}</TableCell>
+                  <TableCell>{row.providerCountry}</TableCell>
+                  <TableCell>{row.description}</TableCell>
+                  <TableCell>{formatDate(row.updated)}</TableCell>
+                  <TableCell>
+                    {row.isImported ? (
+                      <Button
+                        style={{ marginLeft: -15 }}
+                        disabled={true}
+                        variant="danger"
                       >
-                        {row.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{row.cids}</TableCell>
-                    <TableCell>{row.subs - 1}</TableCell>
-                    <TableCell>{row.providerName}</TableCell>
-                    <TableCell>{row.providerCountry}</TableCell>
-                    <TableCell>{row.description}</TableCell>
-                    <TableCell>{formatDate(row.updated)}</TableCell>
-                    <TableCell>
-                      {row.isImported ? (
-                        <Button
-                          style={{ marginLeft: -15 }}
-                          disabled={true}
-                          variant="danger"
-                        >
-                          Imported
-                        </Button>
-                      ) : (
-                        <Button
-                          style={{ marginLeft: -5 }}
-                          onClick={() => {
-                            // setPrefetch(
-                            //   `${remoteMarketplaceUri()}/filter/share/${
-                            //     row.shareId
-                            //   }`
-                            // );
-                            setToBeImportedFilter(row as any);
-                          }}
-                          variant="primary"
-                        >
-                          Import
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} />
+                        Imported
+                      </Button>
+                    ) : (
+                      <Button
+                        style={{ marginLeft: -5 }}
+                        onClick={() => {
+                          // setPrefetch(
+                          //   `${remoteMarketplaceUri()}/filter/share/${
+                          //     row.shareId
+                          //   }`
+                          // );
+                          setToBeImportedFilter(row as any);
+                        }}
+                        variant="primary"
+                      >
+                        Import
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+              );
+            })}
+            {emptyRows === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
