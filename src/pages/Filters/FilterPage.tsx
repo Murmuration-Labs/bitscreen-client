@@ -206,10 +206,6 @@ const FilterPage = (props): JSX.Element => {
     };
   };
 
-  window.onload = () => {
-    initBeforeUnLoad(filterListChanged);
-  };
-
   useEffect(() => {
     initBeforeUnLoad(filterListChanged);
   }, [filterListChanged]);
