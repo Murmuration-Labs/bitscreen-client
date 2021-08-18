@@ -137,6 +137,14 @@ export default function AccountContactPage(): JSX.Element {
                   setPlainWallet(ev.target.value);
                   handleFieldChange("walletAddress", ev);
                 }}
+                onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!loggingIn) {
+                      logIn();
+                    }
+                  }
+                }}
               />
             </Col>
             {plainWallet && !loggedIn && (
