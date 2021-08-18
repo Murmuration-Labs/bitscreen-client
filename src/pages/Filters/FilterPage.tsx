@@ -38,14 +38,16 @@ import CidsTable from "./Cids/CidsTable";
 import "./Filters.css";
 import {
   CidItem,
+  EnabledOption,
   FilterList,
   mapVisibilityString,
   ViewTypes,
   Visibility,
   VisibilityString,
 } from "./Interfaces";
+import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import MoveCIDModal from "./MoveCIDModal";
-import { isOrphan } from "./utils";
+import { isOrphan, isShared } from "./utils";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -55,6 +57,9 @@ const FilterPage = (props): JSX.Element => {
   const [filterList, setFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+  const [showConfirmEnabled, setShowConfirmEnabled] = useState<boolean>(false);
+  const [deferGlobalFilterEnabled, setDeferGlobalFilterEnabled] =
+    useState<boolean>(false);
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
   const [filterOverride, setFilterOverride] = useState(filterList.override);
   const [isOwner, setIsOwner] = useState(false);
@@ -188,6 +193,23 @@ const FilterPage = (props): JSX.Element => {
     setFilterListChanged(!_.isEqual(filterList, initialFilterList));
   }, [filterList, initialFilterList]);
 
+  const initBeforeUnLoad = (confirmReload) => {
+    window.onbeforeunload = (event) => {
+      if (confirmReload) {
+        const e = event || window.event;
+        e.preventDefault();
+        if (e) {
+          e.returnValue = "";
+        }
+        return "";
+      }
+    };
+  };
+
+  useEffect(() => {
+    initBeforeUnLoad(filterListChanged);
+  }, [filterListChanged]);
+
   const saveFilter = (fl?: FilterList) => {
     if (!fl) {
       fl = filterList;
@@ -197,6 +219,13 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
+
+  const updateGlobalFilterEnabled = (): void => {
+    ApiService.updateEnabledForSharedFilters(
+      [filterList.id],
+      filterList.enabled
+    );
+  };
 
   const save = (): void => {
     const fl: FilterList = { ...filterList, notes: filterNotes };
@@ -210,6 +239,9 @@ const FilterPage = (props): JSX.Element => {
         .then(() => {
           ApiService.deleteCid(deleteCidItems)
             .then(() => {
+              if (deferGlobalFilterEnabled) {
+                updateGlobalFilterEnabled();
+              }
               setFilterListChanged(false); // To prevent unsaved data prompt.
               history.push(`/filters`);
               toast.success("Filter list updated successfully");
@@ -264,7 +296,8 @@ const FilterPage = (props): JSX.Element => {
       });
   };
 
-  const cancel = (): void => {
+  const cancel = async (): Promise<void> => {
+    await setFilterListChanged(false);
     history.push(`/filters`);
   };
 
@@ -450,6 +483,17 @@ const FilterPage = (props): JSX.Element => {
 
   const toggleFilterEnabled = () => {
     saveFilter({ ...filterList, enabled: !filterList.enabled });
+  };
+
+  const toggleSharedFilterEnabled = async (
+    option: EnabledOption
+  ): Promise<void> => {
+    if (option === EnabledOption.Global) {
+      setDeferGlobalFilterEnabled(true);
+      toggleFilterEnabled();
+    } else if (option === EnabledOption.Local) {
+      toggleFilterEnabled();
+    }
   };
 
   const toggleFilterOverride = () => {
@@ -700,9 +744,15 @@ const FilterPage = (props): JSX.Element => {
                         flexDirection: "row",
                         justifyContent: "center",
                       }}
-                      onClick={() =>
-                        !isOrphan(filterList) && toggleFilterEnabled()
-                      }
+                      onClick={() => {
+                        if (!isOrphan(filterList)) {
+                          if (isShared(filterList)) {
+                            setShowConfirmEnabled(true);
+                          } else {
+                            toggleFilterEnabled();
+                          }
+                        }
+                      }}
                     >
                       <FormCheck
                         readOnly
@@ -1042,6 +1092,15 @@ const FilterPage = (props): JSX.Element => {
               callback={save}
               closeCallback={() => {
                 setShowOverrideCids(false);
+              }}
+            />
+
+            <ToggleEnabledFilterModal
+              show={showConfirmEnabled}
+              title="The selected filter is imported by other providers"
+              callback={toggleSharedFilterEnabled}
+              closeCallback={() => {
+                setShowConfirmEnabled(false);
               }}
             />
           </Container>
