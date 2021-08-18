@@ -10,9 +10,7 @@ import {
   TableSortLabel,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { Button, Container } from "react-bootstrap";
-import FormControl from "react-bootstrap/FormControl";
-import InputGroup from "react-bootstrap/InputGroup";
+import { Button, Container, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
@@ -169,14 +167,18 @@ export default function PublicFilters() {
   return (
     <Container>
       <h2>Public Filters</h2>
-      <InputGroup size="lg">
-        <FormControl
-          aria-label="Large"
-          aria-describedby="inputGroup-sizing-sm"
+      <Form.Group controlId="search">
+        <Form.Control
+          type="text"
           placeholder="Search..."
           onChange={handlerInputChange}
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+            }
+          }}
         />
-      </InputGroup>
+      </Form.Group>
       {searchedValue && (
         <p className="ml-1">
           {dataCount} result{dataCount === 1 ? "" : "s"} found

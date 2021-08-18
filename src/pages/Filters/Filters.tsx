@@ -17,7 +17,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { Paper, TableContainer, TablePagination } from "@material-ui/core";
+import { TableContainer, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
