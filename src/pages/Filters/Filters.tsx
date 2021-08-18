@@ -366,15 +366,15 @@ function Filters(): JSX.Element {
 
   const CIDFilter = (): JSX.Element => {
     return (
-      <Container>
-        {searchTerm && (
-          <p>
-            {filterLists ? filterLists.length : "0"} result
-            {filterLists && filterLists.length === 1 ? "" : "s"} found
-          </p>
-        )}
-        <Paper>
-          <TableContainer>
+      <div className={"card"}>
+        <div className={"card-container"}>
+          {searchTerm && (
+            <p>
+              {filterLists ? filterLists.length : "0"} result
+              {filterLists && filterLists.length === 1 ? "" : "s"} found
+            </p>
+          )}
+          <Paper>
             <Table>
               <thead>
                 <tr>
@@ -469,18 +469,18 @@ function Filters(): JSX.Element {
                 ))}
               </tbody>
             </Table>
-          </TableContainer>
-        </Paper>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={dataCount}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Container>
+          </Paper>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={dataCount}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </div>
+      </div>
     );
   };
 
