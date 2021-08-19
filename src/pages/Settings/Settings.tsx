@@ -2,26 +2,20 @@ import React, { ChangeEvent, ComponentType, useEffect, useState } from "react";
 import axios from "axios";
 
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
+import { Typeahead } from "react-bootstrap-typeahead";
 import "./Settings.css";
 import { serverUri } from "../../config";
 import { Config, SettingsProps } from "../Filters/Interfaces";
 import * as AuthService from "../../services/AuthService";
 import ApiService from "../../services/ApiService";
+import { countries } from "countries-list";
 
 export default function Settings(props: ComponentType<SettingsProps>) {
   const [configLoaded, setConfigLoaded] = useState<boolean>(false);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
-    share: false,
-    advanced: {
-      enabled: false,
-      list: [],
-    },
-    filters: {
-      external: false,
-      internal: false,
-    },
+    import: false,
   });
 
   useEffect(() => {
@@ -44,6 +38,15 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     const newConfig = {
       ...configuration,
       bitscreen: !configuration.bitscreen,
+    };
+    setConfiguration(newConfig);
+    putConfig(newConfig);
+  };
+
+  const toggleImportingLists = async (): Promise<void> => {
+    const newConfig = {
+      ...configuration,
+      import: !configuration.import,
     };
     setConfiguration(newConfig);
     putConfig(newConfig);
@@ -129,6 +132,8 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       });
   };
 
+  const countryNames = Object.values(countries);
+
   return (
     <Container>
       {configLoaded ? (
@@ -208,6 +213,50 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Button onClick={() => setAccount(null)}>Clear</Button>
                 </Col>
               </Row>
+            </Form>
+          )}
+
+          <Row className={"settings-block"} style={{ marginTop: 25 }}>
+            <Col>
+              <FormCheck
+                type="switch"
+                id="import-switch"
+                label="Activate Importing Lists"
+                checked={configuration.import}
+                onChange={() => toggleImportingLists()}
+              />
+              <p className="text-dim">
+                Importing lists from other users is an optional feature that
+                requires adding country information, which is used for
+                statistical purposes.
+              </p>
+            </Col>
+          </Row>
+          {account && configuration.import && (
+            <Form style={{ marginLeft: 12 }}>
+              <Form.Group>
+                <Form.Label>Country</Form.Label>
+                <Typeahead
+                  id="typeahead-autocomplete"
+                  labelKey="name"
+                  defaultSelected={
+                    account.country
+                      ? countryNames.filter((x) => x.name === account.country)
+                      : []
+                  }
+                  options={countryNames}
+                  onChange={(selected) => {
+                    if (selected.length === 0) {
+                      account.country = "";
+                    } else {
+                      account.country = selected[0].name;
+                    }
+
+                    setAccount({ ...account });
+                  }}
+                  clearButton
+                />
+              </Form.Group>
             </Form>
           )}
         </>
