@@ -624,7 +624,7 @@ const FilterPage = (props): JSX.Element => {
     return (
       <Col>
         <Button
-          variant="warning"
+          variant="danger"
           onClick={() => {
             confirmDelete();
           }}

@@ -1,5 +1,4 @@
 import {
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -11,12 +10,13 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Button, Container, Form } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
 import { FilterList } from "../Filters/Interfaces";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
+import * as AuthService from "../../services/AuthService";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -104,6 +104,8 @@ export default function PublicFilters() {
     useState<FilterList | null>(null);
   const [needsRefresh, setNeedsRefresh] = useState(true);
 
+  const history = useHistory();
+
   useEffect(() => {
     setShowImportFilter(!!prefetch || !!toBeImportedFilter);
   }, [prefetch, toBeImportedFilter]);
@@ -163,6 +165,7 @@ export default function PublicFilters() {
   const emptyRows =
     rowsPerPage -
     Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
+  const providerId = AuthService.getProviderId();
 
   return (
     <Container>
@@ -219,24 +222,29 @@ export default function PublicFilters() {
                       <Button
                         style={{ marginLeft: -15 }}
                         disabled={true}
-                        variant="danger"
+                        variant="muted"
                       >
                         Imported
+                      </Button>
+                    ) : row.providerId != providerId ? (
+                      <Button
+                        style={{ marginLeft: -5 }}
+                        onClick={() => {
+                          setToBeImportedFilter(row as any);
+                        }}
+                        variant="outline-primary"
+                      >
+                        Import
                       </Button>
                     ) : (
                       <Button
                         style={{ marginLeft: -5 }}
                         onClick={() => {
-                          // setPrefetch(
-                          //   `${remoteMarketplaceUri()}/filter/share/${
-                          //     row.shareId
-                          //   }`
-                          // );
-                          setToBeImportedFilter(row as any);
+                          history.push(`/filters/edit/${row.id}`);
                         }}
-                        variant="primary"
+                        variant="outline-dark"
                       >
-                        Import
+                        Edit
                       </Button>
                     )}
                   </TableCell>

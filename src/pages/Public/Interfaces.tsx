@@ -11,6 +11,7 @@ export interface Data {
   isImported: boolean;
   cids: CidItem[];
   subs: number;
+  providerId: number;
   providerName: string;
   providerCountry?: string;
   enabled: boolean;
