@@ -688,7 +688,7 @@ function Filters(): JSX.Element {
                 </Button>
 
                 <Button
-                  variant="secondary"
+                  variant="outline-primary"
                   onClick={() => {
                     setShowImportFilter(true);
                   }}

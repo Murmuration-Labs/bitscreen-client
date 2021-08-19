@@ -9,10 +9,13 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import * as AuthService from "../../services/AuthService";
+import { useHistory } from "react-router";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [filterId, setFilterId] = useState<number>(0);
+  const [filterProviderId, setFilterProviderId] = useState<number>(-1);
   const [filterDetails, setFilterDetails] = useState([{}]);
   const [isImported, setIsImported] = useState<boolean>(false);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
@@ -52,6 +55,7 @@ const FilterDetailsPage = (props) => {
         },
       ];
       setFilterDetails(details);
+      setFilterProviderId(data.provider.id);
       setLoaded(true);
     });
   };
@@ -59,6 +63,9 @@ const FilterDetailsPage = (props) => {
   useEffect(() => {
     loadFilter(props.match.params.id as number);
   }, [props.match.params.id]);
+
+  const history = useHistory();
+  const providerId = AuthService.getProviderId();
 
   return (
     <>
@@ -85,17 +92,26 @@ const FilterDetailsPage = (props) => {
                   <TableRow>
                     <TableCell>
                       {isImported ? (
-                        <Button disabled={true} variant="danger">
+                        <Button disabled={true} variant="muted">
                           Imported
                         </Button>
-                      ) : (
+                      ) : filterProviderId != providerId ? (
                         <Button
                           onClick={() => {
                             setToBeImportedFilter({ id: filterId } as any);
                           }}
-                          variant="primary"
+                          variant="outline-primary"
                         >
                           Import
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            history.push(`/filters/edit/${filterId}`);
+                          }}
+                          variant="outline-dark"
+                        >
+                          Edit
                         </Button>
                       )}
                     </TableCell>

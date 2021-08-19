@@ -265,6 +265,7 @@ const ApiService = {
   ): Promise<{
     data: (FilterList & {
       isImported: boolean;
+      providerId?: string;
       providerName?: string;
       providerCountry?: string;
       subs: number;
