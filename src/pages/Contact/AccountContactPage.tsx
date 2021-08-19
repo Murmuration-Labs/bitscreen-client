@@ -1,27 +1,17 @@
-import { countries } from "countries-list";
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { Typeahead } from "react-bootstrap-typeahead";
-import { useHistory } from "react-router-dom";
 import PuffLoader from "react-spinners/PuffLoader";
-import validator from "validator";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 
-const API_MESSAGES_TIME = 1500;
-
 export default function AccountContactPage(): JSX.Element {
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [canSubmit, setCanSubmit] = useState<boolean>(true);
-  const [displaySuccess, setDisplaySuccess] = useState<boolean>(false);
-  const [displayError, setDisplayError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const [account, setAccount] = useState(AuthService.getAccount());
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
   const [loggingIn, setLoggingIn] = useState(false);
-  const history = useHistory();
 
   useEffect(() => {
     setLoggedIn(!!account);
@@ -36,16 +26,6 @@ export default function AccountContactPage(): JSX.Element {
         setPlainWallet(account?.walletAddress || "");
     }
   }, [account]);
-
-  const showError = (message: string) => {
-    setErrorMessage(message);
-    setDisplayError(true);
-
-    setTimeout(() => {
-      setErrorMessage("");
-      setDisplayError(false);
-    }, API_MESSAGES_TIME);
-  };
 
   useEffect(() => {
     if (!loaded && plainWallet) {
@@ -81,8 +61,6 @@ export default function AccountContactPage(): JSX.Element {
     });
   };
 
-  const countryNames = Object.values(countries);
-
   const logIn = async () => {
     if (loggingIn || !plainWallet) {
       return;
@@ -98,7 +76,6 @@ export default function AccountContactPage(): JSX.Element {
     if (provider) {
       setAccount(provider);
       AuthService.updateAccount(provider);
-      history.push(`/settings`);
       return;
     }
 
@@ -165,138 +142,7 @@ export default function AccountContactPage(): JSX.Element {
             )}
           </Row>
         </Form.Group>
-        {account && (
-          <>
-            <Form.Group>
-              <Form.Label>Business name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Business name"
-                value={account.businessName || ""}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                  handleFieldChange("businessName", ev)
-                }
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Website</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Website"
-                value={account.website || ""}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                  handleFieldChange("website", ev)
-                }
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Email"
-                value={account.email || ""}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                  handleFieldChange("email", ev)
-                }
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Contact person</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Contact person"
-                value={account.contactPerson || ""}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                  handleFieldChange("contactPerson", ev)
-                }
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Address</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Address"
-                value={account.address || ""}
-                onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                  handleFieldChange("address", ev)
-                }
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Country</Form.Label>
-              <Typeahead
-                id="typeahead-autocomplete"
-                labelKey="name"
-                defaultSelected={
-                  account.country
-                    ? countryNames.filter((x) => x.name === account.country)
-                    : []
-                }
-                options={countryNames}
-                onChange={(selected) => {
-                  if (selected.length === 0) {
-                    account.country = "";
-                  } else {
-                    account.country = selected[0].name;
-                  }
-
-                  setAccount({ ...account });
-                }}
-                clearButton
-              />
-            </Form.Group>
-          </>
-        )}
-        {account && (
-          <Row>
-            <Col>
-              <Button
-                variant="primary"
-                type="button"
-                disabled={!canSubmit}
-                onClick={(ev: MouseEvent<HTMLElement>) => {
-                  ev.preventDefault();
-
-                  // validations here
-                  if (account?.email && !validator.isEmail(account?.email)) {
-                    showError("Email is not valid");
-                    return;
-                  }
-
-                  if (account?.website && !validator.isURL(account?.website)) {
-                    showError("Website is not a valid URL");
-                    return;
-                  }
-
-                  setCanSubmit(false);
-                  ApiService.updateProvider(account).then(() => {
-                    setCanSubmit(true);
-                    setDisplaySuccess(true);
-
-                    setLoaded(false);
-
-                    setTimeout(() => {
-                      setDisplaySuccess(false);
-                    }, API_MESSAGES_TIME);
-                  });
-                }}
-              >
-                Update account info
-              </Button>
-            </Col>
-            <Col md="auto">
-              <Button onClick={() => setAccount(null)}>Log out</Button>
-            </Col>
-          </Row>
-        )}
-        {displaySuccess && (
-          <span style={{ color: "green", marginLeft: 8 }}>
-            Successfully updated contact info
-          </span>
-        )}
-        {displayError && (
-          <span style={{ color: "red", marginLeft: 8 }}>{errorMessage}</span>
-        )}
+        <span style={{ color: "red", marginLeft: 8 }}>{errorMessage}</span>
       </Form>
     );
   };
