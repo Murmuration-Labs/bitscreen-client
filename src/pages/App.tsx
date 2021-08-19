@@ -77,7 +77,13 @@ function App(): JSX.Element {
             >
               {!provider && <Redirect to="/account" />}
             </Route>
-            <Route path="/account" exact component={AccountContactPage} />
+            <Route
+              path="/account"
+              exact
+              component={!provider ? AccountContactPage : Settings}
+            >
+              {provider && <Redirect to="/settings" />}
+            </Route>
             <Route
               path="/directory"
               exact

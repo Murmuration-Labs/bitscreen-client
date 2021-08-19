@@ -2,11 +2,11 @@ import { countries } from "countries-list";
 import React, { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { useHistory } from "react-router-dom";
 import PuffLoader from "react-spinners/PuffLoader";
 import validator from "validator";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
-import { Account } from "./Interfaces";
 
 const API_MESSAGES_TIME = 1500;
 
@@ -21,6 +21,7 @@ export default function AccountContactPage(): JSX.Element {
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
   const [loggingIn, setLoggingIn] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     setLoggedIn(!!account);
@@ -97,6 +98,7 @@ export default function AccountContactPage(): JSX.Element {
     if (provider) {
       setAccount(provider);
       AuthService.updateAccount(provider);
+      history.push(`/settings`);
       return;
     }
 

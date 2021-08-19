@@ -42,9 +42,15 @@ function Navigation(): JSX.Element {
           ⤷&nbsp;Directory
         </NavLink>
       )}
-      <NavLink className="nav-link" activeClassName={"is-active"} to="/account">
-        Account
-      </NavLink>
+      {!provider && (
+        <NavLink
+          className="nav-link"
+          activeClassName={"is-active"}
+          to="/account"
+        >
+          Account
+        </NavLink>
+      )}
     </nav>
   );
 }
