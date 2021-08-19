@@ -170,7 +170,13 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               />
               <p className="text-dim">
                 Filtering enables a node operator to decline storage and
-                retrieval deals for known CIDs.
+                retrieval deals for known CIDs.{" "}
+                <a
+                  className="text-dim"
+                  href="https://github.com/Murmuration-Labs/bitscreen"
+                >
+                  (Find out more)
+                </a>
               </p>
             </Col>
           </Row>
@@ -186,40 +192,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               <Row>
                 <Col>
                   <Form.Control
-                    disabled={loggedIn}
+                    disabled={true}
                     type="text"
                     placeholder="FIL address"
                     value={account?.walletAddress || plainWallet}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) => {
-                      setPlainWallet(ev.target.value);
-                      handleFieldChange("walletAddress", ev);
-                    }}
-                    onKeyDown={(
-                      event: React.KeyboardEvent<HTMLInputElement>
-                    ) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        if (!loggingIn) {
-                          logIn();
-                        }
-                      }
-                    }}
                   />
                 </Col>
-                {plainWallet && !loggedIn && (
-                  <Col md="auto">
-                    <Button
-                      disabled={loggingIn}
-                      onClick={(e) => {
-                        if (!loggingIn) {
-                          logIn();
-                        }
-                      }}
-                    >
-                      {!loggingIn ? "Login" : "Loading..."}
-                    </Button>
-                  </Col>
-                )}
               </Row>
             </Form.Group>
             <Button
@@ -229,6 +207,63 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             >
               Log out
             </Button>
+            <Row className={"settings-block"}>
+              <Col>
+                <FormCheck
+                  type="switch"
+                  id="bitscreen-switch"
+                  label="Activate Importing Lists"
+                  checked={configuration.bitscreen}
+                  onChange={() => toggleBitScreen()}
+                />
+                <p className="text-dim">
+                  Importing lists from other users is an optional feature that
+                  requires adding country information, which is used for
+                  statistical purposes.
+                </p>
+              </Col>
+            </Row>
+            {account && (
+              <Form.Group>
+                <Form.Label>Country</Form.Label>
+                <Typeahead
+                  id="typeahead-autocomplete"
+                  labelKey="name"
+                  defaultSelected={
+                    account.country
+                      ? countryNames.filter((x) => x.name === account.country)
+                      : []
+                  }
+                  options={countryNames}
+                  onChange={(selected) => {
+                    if (selected.length === 0) {
+                      account.country = "";
+                    } else {
+                      account.country = selected[0].name;
+                    }
+
+                    setAccount({ ...account });
+                  }}
+                  clearButton
+                />
+              </Form.Group>
+            )}
+            <Row className={"settings-block"}>
+              <Col>
+                <FormCheck
+                  type="switch"
+                  id="bitscreen-switch"
+                  label="Activate Sharing Lists"
+                  checked={configuration.bitscreen}
+                  onChange={() => toggleBitScreen()}
+                />
+                <p className="text-dim">
+                  Sharing lists with other users is an optional feature that
+                  requires adding list provider data, which is made public to
+                  other users when you share lists.
+                </p>
+              </Col>
+            </Row>
             {account && (
               <>
                 <Form.Group>
@@ -284,29 +319,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     onChange={(ev: ChangeEvent<HTMLInputElement>) =>
                       handleFieldChange("address", ev)
                     }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Country</Form.Label>
-                  <Typeahead
-                    id="typeahead-autocomplete"
-                    labelKey="name"
-                    defaultSelected={
-                      account.country
-                        ? countryNames.filter((x) => x.name === account.country)
-                        : []
-                    }
-                    options={countryNames}
-                    onChange={(selected) => {
-                      if (selected.length === 0) {
-                        account.country = "";
-                      } else {
-                        account.country = selected[0].name;
-                      }
-
-                      setAccount({ ...account });
-                    }}
-                    clearButton
                   />
                 </Form.Group>
               </>
