@@ -204,6 +204,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     Save
                   </Button>
                 </Col>
+                <Col md="auto">
+                  <Button onClick={() => setAccount(null)}>Clear</Button>
+                </Col>
               </Row>
             </Form>
           )}
