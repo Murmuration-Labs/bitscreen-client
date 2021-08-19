@@ -1,22 +1,13 @@
 import React, {
   ChangeEvent,
   ComponentType,
-  FormEvent,
   useEffect,
   useState,
   MouseEvent,
 } from "react";
 import axios from "axios";
 
-import {
-  Button,
-  Col,
-  Container,
-  Form,
-  FormCheck,
-  FormGroup,
-  Row,
-} from "react-bootstrap";
+import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "./Settings.css";
 import { serverUri } from "../../config";
@@ -66,59 +57,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     };
     setConfiguration(newConfig);
     putConfig(newConfig);
-  };
-
-  const toggleShare = async (): Promise<void> => {
-    const newConfig = {
-      ...configuration,
-      share: !configuration.share,
-    };
-    setConfiguration(newConfig);
-    putConfig(newConfig);
-  };
-
-  const toggleAdvanced = async (): Promise<void> => {
-    const newConfig = {
-      ...configuration,
-      advanced: {
-        ...configuration.advanced,
-        enabled: !configuration.advanced.enabled,
-      },
-    };
-    setConfiguration(newConfig);
-    putConfig(newConfig);
-  };
-
-  const toggleAdvancedFilter = async (filterName: string): Promise<void> => {
-    let list = configuration.advanced.list;
-
-    if (list.includes(filterName)) {
-      list = list.filter((e) => e !== filterName);
-    } else {
-      list.push(filterName);
-    }
-
-    const newConfig = {
-      ...configuration,
-      advanced: {
-        ...configuration.advanced,
-        list: list,
-      },
-    };
-
-    setConfiguration(newConfig);
-    putConfig(newConfig);
-  };
-
-  const setFilter = async (filterName: string): Promise<void> => {
-    setConfiguration({
-      ...configuration,
-      filters: {
-        ...configuration.filters,
-        [filterName]: !configuration.filters[filterName],
-      },
-    });
-    putConfig(configuration);
   };
 
   const [displaySuccess, setDisplaySuccess] = useState<boolean>(false);
@@ -240,6 +178,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           <Form>
             <Form.Group>
               <Form.Label>FIL wallet address</Form.Label>
+              <p className="text-dim">
+                Linking a wallet address is required to activate BitScreen. Your
+                wallet address is used to access your lists, and is stored
+                hashed for statistical purposes.
+              </p>
               <Row>
                 <Col>
                   <Form.Control
@@ -279,6 +222,13 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                 )}
               </Row>
             </Form.Group>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={() => setAccount(null)}
+            >
+              Log out
+            </Button>
             {account && (
               <>
                 <Form.Group>
@@ -404,9 +354,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     Update account info
                   </Button>
                 </Col>
-                <Col md="auto">
-                  <Button onClick={() => setAccount(null)}>Log out</Button>
-                </Col>
               </Row>
             )}
             {displaySuccess && (
@@ -420,96 +367,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               </span>
             )}
           </Form>
-
-          {configuration.bitscreen ? (
-            <>
-              <Row className={"settings-block"}>
-                <Col>
-                  <h4>Filter CIDs</h4>
-                  <FormGroup controlId={"external"}>
-                    <FormCheck
-                      checked={configuration.filters.external}
-                      onChange={(evt: FormEvent<HTMLDivElement>) =>
-                        setFilter("external")
-                      }
-                      type="checkbox"
-                      label="blocked by any node"
-                    />
-                  </FormGroup>
-                  <FormGroup controlId={"internal"}>
-                    <FormCheck
-                      checked={configuration.filters.internal}
-                      onChange={(evt: FormEvent<HTMLDivElement>) =>
-                        setFilter("internal")
-                      }
-                      type="checkbox"
-                      label="on my custom lists"
-                    />
-                  </FormGroup>
-                </Col>
-              </Row>
-
-              <Row className={"settings-block"}>
-                <Col>
-                  <FormCheck
-                    type="switch"
-                    id="share-lists"
-                    label="Share contents of my filter lists with other nodes"
-                    checked={configuration.share}
-                    onChange={() => toggleShare()}
-                  />
-                  <p className="text-dim">
-                    (Private lists will not be affected)
-                  </p>
-                </Col>
-              </Row>
-
-              <Row className={"settings-block"}>
-                <Col>
-                  <FormCheck
-                    type="switch"
-                    id="enhanced-filtering"
-                    label="Use enhanced filtering"
-                    checked={configuration.advanced.enabled}
-                    onChange={() => toggleAdvanced()}
-                  />
-                  <p className="text-dim">
-                    BitScreen can auto-filter hashes found in third party
-                    databases
-                  </p>
-
-                  {configuration.advanced.enabled ? (
-                    <>
-                      <FormCheck
-                        type="checkbox"
-                        label="Audible Magic (Copyrighted Music)"
-                        checked={configuration.advanced.list.includes(
-                          "audibleMagic"
-                        )}
-                        onChange={() => toggleAdvancedFilter("audibleMagic")}
-                      />
-
-                      <FormCheck
-                        type="checkbox"
-                        label="PhotoDNA (CSAM)"
-                        checked={configuration.advanced.list.includes(
-                          "photoDNA"
-                        )}
-                        onChange={() => toggleAdvancedFilter("photoDNA")}
-                      />
-
-                      <FormCheck
-                        type="checkbox"
-                        label="GIFCT (Terrorist Content)"
-                        checked={configuration.advanced.list.includes("GIFCT")}
-                        onChange={() => toggleAdvancedFilter("GIFCT")}
-                      />
-                    </>
-                  ) : null}
-                </Col>
-              </Row>
-            </>
-          ) : null}
         </>
       ) : null}
     </Container>
