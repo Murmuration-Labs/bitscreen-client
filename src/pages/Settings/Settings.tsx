@@ -1,4 +1,10 @@
-import React, { ChangeEvent, ComponentType, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  ComponentType,
+  useEffect,
+  useState,
+  MouseEvent,
+} from "react";
 import axios from "axios";
 
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
@@ -257,6 +263,20 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   clearButton
                 />
               </Form.Group>
+              <Row>
+                <Col>
+                  <Button
+                    variant="primary"
+                    type="button"
+                    onClick={async (ev: MouseEvent<HTMLElement>) => {
+                      ev.preventDefault();
+                      await ApiService.updateProvider(account);
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Col>
+              </Row>
             </Form>
           )}
         </>
