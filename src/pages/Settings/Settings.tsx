@@ -81,7 +81,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [account, setAccount] = useState(AuthService.getAccount());
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
-  const [loggingIn, setLoggingIn] = useState(false);
   const [disableImport, setDisableImport] = useState(false);
   const [disableShare, setDisableShare] = useState(false);
   const [isCountryAdded, setIsCountryAdded] = useState(
@@ -94,7 +93,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       case !account:
         AuthService.removeAccount();
         setPlainWallet("");
-        setLoggingIn(false);
         setLoaded(false);
         break;
       default:
@@ -137,14 +135,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   };
 
   const logIn = async () => {
-    if (loggingIn || !plainWallet) {
+    if (loggedIn || !plainWallet) {
       return;
     }
 
-    setLoggingIn(true);
-
     const provider = await ApiService.getProvider(plainWallet).catch((_err) => {
-      setLoggingIn(false);
       setErrorMessage("Error Logging In");
     });
 
@@ -157,7 +152,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     await ApiService.createProvider(plainWallet)
       .then(logIn)
       .catch((_err) => {
-        setLoggingIn(false);
         setErrorMessage("Error Logging In");
       });
   };
@@ -224,7 +218,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                       ) => {
                         if (event.key === "Enter") {
                           event.preventDefault();
-                          if (!loggingIn) {
+                          if (!loggedIn) {
                             logIn();
                           }
                         }
@@ -236,9 +230,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               <Row>
                 <Col>
                   <Button
-                    disabled={loggingIn}
+                    disabled={loggedIn}
                     onClick={(e) => {
-                      if (!loggingIn) {
+                      if (!loggedIn) {
                         logIn();
                       }
                     }}
@@ -247,7 +241,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </Button>
                 </Col>
                 <Col md="auto">
-                  <Button onClick={() => setAccount(null)}>Log out</Button>
+                  <Button disabled={!loggedIn} onClick={() => setAccount(null)}>
+                    Log out
+                  </Button>
                 </Col>
               </Row>
             </Form>
