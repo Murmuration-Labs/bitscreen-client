@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
-import { FilterList } from "../Filters/Interfaces";
+import { Config, FilterList } from "../Filters/Interfaces";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -11,6 +11,8 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import * as AuthService from "../../services/AuthService";
 import { useHistory } from "react-router";
+import { serverUri } from "../../config";
+import axios from "axios";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -22,6 +24,30 @@ const FilterDetailsPage = (props) => {
   const [toBeImportedFilter, setToBeImportedFilter] = useState<
     FilterList | undefined
   >(undefined);
+
+  const [account, setAccount] = useState(AuthService.getAccount());
+  const [configuration, setConfiguration] = useState<Config>({
+    bitscreen: false,
+    import: false,
+    share: false,
+  });
+
+  const isImportEnabled = (): boolean => {
+    return (
+      configuration.bitscreen && configuration.import && !!account?.country
+    );
+  };
+
+  useEffect(() => {
+    async function setInitialConfig() {
+      const response = await axios.get(`${serverUri()}/config`);
+      const config = response.data;
+
+      setConfiguration(config);
+    }
+
+    setInitialConfig();
+  }, []);
 
   useEffect(() => {
     setShowImportFilter(!!toBeImportedFilter);
@@ -97,6 +123,7 @@ const FilterDetailsPage = (props) => {
                         </Button>
                       ) : filterProviderId != providerId ? (
                         <Button
+                          disabled={!isImportEnabled()}
                           onClick={() => {
                             setToBeImportedFilter({ id: filterId } as any);
                           }}
