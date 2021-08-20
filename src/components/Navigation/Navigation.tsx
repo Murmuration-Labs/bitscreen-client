@@ -15,15 +15,13 @@ function Navigation(): JSX.Element {
 
   return (
     <nav>
-      {provider && (
-        <NavLink
-          className="nav-link"
-          activeClassName={"is-active"}
-          to="/settings"
-        >
-          Settings
-        </NavLink>
-      )}
+      <NavLink
+        className="nav-link"
+        activeClassName={"is-active"}
+        to="/settings"
+      >
+        Settings
+      </NavLink>
       {provider && (
         <NavLink
           className="nav-link"
@@ -42,9 +40,6 @@ function Navigation(): JSX.Element {
           ⤷&nbsp;Directory
         </NavLink>
       )}
-      <NavLink className="nav-link" activeClassName={"is-active"} to="/account">
-        Account
-      </NavLink>
     </nav>
   );
 }

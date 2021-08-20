@@ -247,7 +247,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </Button>
                 </Col>
                 <Col md="auto">
-                  <Button onClick={() => setAccount(null)}>Clear</Button>
+                  <Button onClick={() => setAccount(null)}>Log out</Button>
                 </Col>
               </Row>
             </Form>
