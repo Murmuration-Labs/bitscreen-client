@@ -593,7 +593,9 @@ function Filters(): JSX.Element {
   };
 
   const isImportEnabled = (): boolean => {
-    return configuration.import && !!account?.country;
+    return (
+      configuration.bitscreen && configuration.import && !!account?.country
+    );
   };
 
   return (

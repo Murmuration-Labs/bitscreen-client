@@ -188,7 +188,9 @@ export default function PublicFilters() {
   const providerId = AuthService.getProviderId();
 
   const isImportEnabled = (): boolean => {
-    return configuration.import && !!account?.country;
+    return (
+      configuration.bitscreen && configuration.import && !!account?.country
+    );
   };
 
   return (
