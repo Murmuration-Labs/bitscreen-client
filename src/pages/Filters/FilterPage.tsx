@@ -98,6 +98,15 @@ const FilterPage = (props): JSX.Element => {
       : false;
   };
 
+  const isShareEnabled = (): boolean => {
+    return (
+      configuration.import &&
+      !!account?.country &&
+      configuration.share &&
+      isAccountInfoValid()
+    );
+  };
+
   useEffect(() => {
     setCids(
       filterList &&
@@ -741,9 +750,7 @@ const FilterPage = (props): JSX.Element => {
                             onChange={changeVisibility}
                             value={VisibilityString[filterList.visibility]}
                           >
-                            {configuration.share && isAccountInfoValid() && (
-                              <option>Public</option>
-                            )}
+                            {isShareEnabled() && <option>Public</option>}
                             <option>Private</option>
                           </Form.Control>
                         </Form.Group>
@@ -754,9 +761,7 @@ const FilterPage = (props): JSX.Element => {
                         <Col>
                           <Button
                             variant="primary"
-                            disabled={
-                              !configuration.share || !isAccountInfoValid()
-                            }
+                            disabled={!isShareEnabled()}
                             onClick={() => {
                               clipboardCopy(filterList.shareId);
                             }}
@@ -868,7 +873,7 @@ const FilterPage = (props): JSX.Element => {
                       </Col>
                     </Form.Row>
                   )}
-                  {(!configuration.share || !isAccountInfoValid()) && (
+                  {!isShareEnabled() && (
                     <Form.Row style={{ marginTop: -10, marginLeft: -2 }}>
                       <Col>
                         <Form.Label className={"text-dim"}>
