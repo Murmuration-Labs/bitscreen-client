@@ -73,6 +73,8 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
   const [loggingIn, setLoggingIn] = useState(false);
+  const [disableImport, setDisableImport] = useState(false);
+  const [disableShare, setDisableShare] = useState(false);
   const [isCountryAdded, setIsCountryAdded] = useState(
     account?.country ? true : false
   );
@@ -283,9 +285,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Button
                     variant="primary"
                     type="button"
+                    disabled={disableImport}
                     onClick={(ev: MouseEvent<HTMLElement>) => {
                       ev.preventDefault();
+                      setDisableImport(true);
                       ApiService.updateProvider(account).then(() => {
+                        setDisableImport(false);
                         AuthService.updateAccount(account);
                         if (account.country) {
                           setIsCountryAdded(true);
@@ -390,9 +395,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     <Button
                       variant="primary"
                       type="button"
+                      disabled={disableShare}
                       onClick={(ev: MouseEvent<HTMLElement>) => {
                         ev.preventDefault();
+                        setDisableShare(true);
                         ApiService.updateProvider(account).then(() => {
+                          setDisableShare(false);
                           AuthService.updateAccount(account);
                         });
                       }}
