@@ -268,9 +268,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Button
                     variant="primary"
                     type="button"
-                    onClick={async (ev: MouseEvent<HTMLElement>) => {
+                    onClick={(ev: MouseEvent<HTMLElement>) => {
                       ev.preventDefault();
-                      await ApiService.updateProvider(account);
+                      ApiService.updateProvider(account).then(() => {
+                        AuthService.updateAccount(account);
+                      });
                     }}
                   >
                     Save
