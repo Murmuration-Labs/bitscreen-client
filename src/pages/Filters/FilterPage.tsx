@@ -100,6 +100,7 @@ const FilterPage = (props): JSX.Element => {
 
   const isShareEnabled = (): boolean => {
     return (
+      configuration.bitscreen &&
       configuration.import &&
       !!account?.country &&
       configuration.share &&
