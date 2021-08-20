@@ -167,4 +167,5 @@ export interface DataProps {
 export interface Config {
   bitscreen: boolean;
   import: boolean;
+  share: boolean;
 }

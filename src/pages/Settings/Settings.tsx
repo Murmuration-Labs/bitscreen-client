@@ -22,6 +22,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
+    share: false,
   });
 
   useEffect(() => {
@@ -53,6 +54,15 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     const newConfig = {
       ...configuration,
       import: !configuration.import,
+    };
+    setConfiguration(newConfig);
+    putConfig(newConfig);
+  };
+
+  const toggleSharingLists = async (): Promise<void> => {
+    const newConfig = {
+      ...configuration,
+      share: !configuration.share,
     };
     setConfiguration(newConfig);
     putConfig(newConfig);
@@ -281,6 +291,23 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               </Row>
             </Form>
           )}
+
+          <Row className={"settings-block"} style={{ marginTop: 25 }}>
+            <Col>
+              <FormCheck
+                type="switch"
+                id="share-switch"
+                label="Activate Sharing Lists"
+                checked={configuration.share}
+                onChange={() => toggleSharingLists()}
+              />
+              <p className="text-dim">
+                Sharing lists with other users is an optional feature that
+                requires adding list provider data, which is made public to
+                other users when you share lists.
+              </p>
+            </Col>
+          </Row>
         </>
       ) : null}
     </Container>
