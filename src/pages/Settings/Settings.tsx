@@ -366,6 +366,22 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   }
                 />
               </Form.Group>
+              <Row>
+                <Col>
+                  <Button
+                    variant="primary"
+                    type="button"
+                    onClick={(ev: MouseEvent<HTMLElement>) => {
+                      ev.preventDefault();
+                      ApiService.updateProvider(account).then(() => {
+                        AuthService.updateAccount(account);
+                      });
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Col>
+              </Row>
             </Form>
           )}
         </>
