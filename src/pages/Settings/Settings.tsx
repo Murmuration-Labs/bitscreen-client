@@ -308,6 +308,66 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               </p>
             </Col>
           </Row>
+
+          {account && configuration.share && (
+            <Form style={{ marginLeft: 12 }}>
+              <Form.Group>
+                <Form.Label>Business name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Business name"
+                  value={account.businessName || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("businessName", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Website</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Website"
+                  value={account.website || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("website", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Email"
+                  value={account.email || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("email", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Contact person</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Contact person"
+                  value={account.contactPerson || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("contactPerson", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Address"
+                  value={account.address || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("address", ev)
+                  }
+                />
+              </Form.Group>
+            </Form>
+          )}
         </>
       ) : null}
     </Container>
