@@ -13,10 +13,12 @@ import { Button, Container, Form } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import ApiService from "../../services/ApiService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
-import { FilterList } from "../Filters/Interfaces";
+import { Config, FilterList } from "../Filters/Interfaces";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
 import * as AuthService from "../../services/AuthService";
+import { serverUri } from "../../config";
+import axios from "axios";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -106,6 +108,24 @@ export default function PublicFilters() {
 
   const history = useHistory();
 
+  const [account, setAccount] = useState(AuthService.getAccount());
+  const [configuration, setConfiguration] = useState<Config>({
+    bitscreen: false,
+    import: false,
+    share: false,
+  });
+
+  useEffect(() => {
+    async function setInitialConfig() {
+      const response = await axios.get(`${serverUri()}/config`);
+      const config = response.data;
+
+      setConfiguration(config);
+    }
+
+    setInitialConfig();
+  }, []);
+
   useEffect(() => {
     setShowImportFilter(!!prefetch || !!toBeImportedFilter);
   }, [prefetch, toBeImportedFilter]);
@@ -170,6 +190,15 @@ export default function PublicFilters() {
   return (
     <Container>
       <h2>Public Filters</h2>
+      {(!configuration.import || !account?.country) && (
+        <p className="text-dim">
+          To activate importing, go to{" "}
+          <a style={{ fontSize: 12 }} href="/settings">
+            Settings
+          </a>{" "}
+          and add country data.
+        </p>
+      )}
       <Form.Group controlId="search">
         <Form.Control
           type="text"
@@ -229,6 +258,7 @@ export default function PublicFilters() {
                     ) : row.providerId != providerId ? (
                       <Button
                         style={{ marginLeft: -5 }}
+                        disabled={!configuration.import || !account?.country}
                         onClick={() => {
                           setToBeImportedFilter(row as any);
                         }}

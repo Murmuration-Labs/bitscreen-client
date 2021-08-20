@@ -19,6 +19,14 @@
   margin-left: 8px;
 }
 
+.import-btn ~ .hidden-tip {
+  visibility: hidden;
+}
+
+.import-btn:hover ~ .hidden-tip {
+  visibility: visible;
+}
+
 .mono-hashes {
   font-family: "Courier New", sans-serif;
 }

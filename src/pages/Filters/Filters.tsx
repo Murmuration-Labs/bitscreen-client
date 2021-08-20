@@ -78,6 +78,7 @@ function Filters(): JSX.Element {
     return VisibilityString[visibility];
   };
 
+  const [account, setAccount] = useState(AuthService.getAccount());
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
@@ -710,13 +711,20 @@ function Filters(): JSX.Element {
 
                   <Button
                     variant="outline-primary"
+                    disabled={!configuration.import || !account?.country}
                     onClick={() => {
                       setShowImportFilter(true);
                     }}
-                    className="double-space-left"
+                    className="double-space-left import-btn"
                   >
                     Import Filter
                   </Button>
+                  {(!configuration.import || !account?.country) && (
+                    <p className="text-dim hidden-tip">
+                      To activate importing, go to Settings and add country
+                      data.
+                    </p>
+                  )}
                 </Col>
               </Row>
 
