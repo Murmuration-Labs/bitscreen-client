@@ -16,6 +16,8 @@ import * as AuthService from "../../services/AuthService";
 import ApiService from "../../services/ApiService";
 import { countries } from "countries-list";
 
+const API_MESSAGES_TIME = 1500;
+
 export default function Settings(props: ComponentType<SettingsProps>) {
   const [configLoaded, setConfigLoaded] = useState<boolean>(false);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -68,6 +70,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     putConfig(newConfig);
   };
 
+  const [displayCountrySuccess, setDisplayCountrySuccess] =
+    useState<boolean>(false);
+  const [displayCountryError, setDisplayCountryError] =
+    useState<boolean>(false);
+  const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
+  const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [account, setAccount] = useState(AuthService.getAccount());
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
@@ -281,7 +289,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                 />
               </Form.Group>
               <Row>
-                <Col>
+                <Col xs="auto">
                   <Button
                     variant="primary"
                     type="button"
@@ -289,19 +297,42 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     onClick={(ev: MouseEvent<HTMLElement>) => {
                       ev.preventDefault();
                       setDisableImport(true);
-                      ApiService.updateProvider(account).then(() => {
-                        setDisableImport(false);
-                        AuthService.updateAccount(account);
-                        if (account.country) {
-                          setIsCountryAdded(true);
-                        } else {
-                          setIsCountryAdded(false);
-                        }
-                      });
+                      ApiService.updateProvider(account)
+                        .then(() => {
+                          AuthService.updateAccount(account);
+                          if (account.country) {
+                            setIsCountryAdded(true);
+                          } else {
+                            setIsCountryAdded(false);
+                          }
+
+                          setDisplayCountrySuccess(true);
+                          setTimeout(() => {
+                            setDisplayCountrySuccess(false);
+                          }, API_MESSAGES_TIME);
+                          setDisableImport(false);
+                        })
+                        .catch(() => {
+                          setDisplayCountryError(true);
+                          setTimeout(() => {
+                            setDisplayCountryError(false);
+                          }, API_MESSAGES_TIME);
+                          setDisableImport(false);
+                        });
                     }}
                   >
                     Save
                   </Button>
+                </Col>
+                <Col style={{ marginLeft: -20, marginTop: 5 }}>
+                  {displayCountrySuccess && (
+                    <span style={{ color: "green" }}>
+                      Successfully updated country
+                    </span>
+                  )}
+                  {displayCountryError && (
+                    <span style={{ color: "red" }}>Something went wrong</span>
+                  )}
                 </Col>
               </Row>
             </Form>
@@ -391,7 +422,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   />
                 </Form.Group>
                 <Row>
-                  <Col>
+                  <Col xs="auto">
                     <Button
                       variant="primary"
                       type="button"
@@ -399,18 +430,41 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                       onClick={(ev: MouseEvent<HTMLElement>) => {
                         ev.preventDefault();
                         setDisableShare(true);
-                        ApiService.updateProvider(account).then(() => {
-                          setDisableShare(false);
-                          AuthService.updateAccount(account);
-                        });
+                        ApiService.updateProvider(account)
+                          .then(() => {
+                            AuthService.updateAccount(account);
+                            setDisplayInfoSuccess(true);
+                            setTimeout(() => {
+                              setDisplayInfoSuccess(false);
+                            }, API_MESSAGES_TIME);
+                            setDisableShare(false);
+                          })
+                          .catch(() => {
+                            setDisplayInfoError(true);
+                            setTimeout(() => {
+                              setDisplayInfoError(false);
+                            }, API_MESSAGES_TIME);
+                            setDisableShare(false);
+                          });
                       }}
                     >
                       Save
                     </Button>
                   </Col>
+                  <Col style={{ marginLeft: -20, marginTop: 5 }}>
+                    {displayInfoSuccess && (
+                      <span style={{ color: "green" }}>
+                        Successfully updated contact info
+                      </span>
+                    )}
+                    {displayInfoError && (
+                      <span style={{ color: "red" }}>Something went wrong</span>
+                    )}
+                  </Col>
                 </Row>
               </Form>
             )}
+          <div style={{ marginTop: 50 }} />
         </>
       ) : null}
     </Container>
