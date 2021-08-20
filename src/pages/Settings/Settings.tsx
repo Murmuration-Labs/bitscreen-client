@@ -21,7 +21,7 @@ const API_MESSAGES_TIME = 1500;
 
 export default function Settings(props: ComponentType<SettingsProps>) {
   const [configLoaded, setConfigLoaded] = useState<boolean>(false);
-  const [loaded, setLoaded] = useState<boolean>(false);
+  const [accountLoaded, setAccountLoaded] = useState<boolean>(false);
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
@@ -93,7 +93,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       case !account:
         AuthService.removeAccount();
         setPlainWallet("");
-        setLoaded(false);
+        setAccountLoaded(false);
         break;
       default:
         setPlainWallet(account?.walletAddress || "");
@@ -101,11 +101,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   }, [account]);
 
   useEffect(() => {
-    if (!loaded && plainWallet) {
+    if (!accountLoaded && plainWallet) {
       (async () => {
         await ApiService.getProvider(plainWallet)
           .then((loadedAccount) => {
-            setLoaded(true);
+            setAccountLoaded(true);
             setAccount(loadedAccount);
           })
           .catch((err) => {
@@ -115,9 +115,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           });
       })();
     } else {
-      setLoaded(true);
+      setAccountLoaded(true);
     }
-  }, [loaded, account]);
+  }, [accountLoaded, account]);
 
   const handleFieldChange = (
     key: string,
