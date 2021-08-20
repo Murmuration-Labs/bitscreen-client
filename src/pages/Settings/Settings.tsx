@@ -15,6 +15,7 @@ import { Config, SettingsProps } from "../Filters/Interfaces";
 import * as AuthService from "../../services/AuthService";
 import ApiService from "../../services/ApiService";
 import { countries } from "countries-list";
+import validator from "validator";
 
 const API_MESSAGES_TIME = 1500;
 
@@ -159,6 +160,13 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         setLoggingIn(false);
         setErrorMessage("Error Logging In");
       });
+  };
+
+  const showInfoError = () => {
+    setDisplayInfoError(true);
+    setTimeout(() => {
+      setDisplayInfoError(false);
+    }, API_MESSAGES_TIME);
   };
 
   const countryNames = Object.values(countries);
@@ -429,6 +437,24 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                       disabled={disableShare}
                       onClick={(ev: MouseEvent<HTMLElement>) => {
                         ev.preventDefault();
+
+                        // validations here
+                        if (
+                          account.email &&
+                          !validator.isEmail(account.email)
+                        ) {
+                          showInfoError();
+                          return;
+                        }
+
+                        if (
+                          account.website &&
+                          !validator.isURL(account.website)
+                        ) {
+                          showInfoError();
+                          return;
+                        }
+
                         setDisableShare(true);
                         ApiService.updateProvider(account)
                           .then(() => {
@@ -440,10 +466,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             setDisableShare(false);
                           })
                           .catch(() => {
-                            setDisplayInfoError(true);
-                            setTimeout(() => {
-                              setDisplayInfoError(false);
-                            }, API_MESSAGES_TIME);
+                            showInfoError();
                             setDisableShare(false);
                           });
                       }}
