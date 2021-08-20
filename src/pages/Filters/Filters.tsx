@@ -29,12 +29,14 @@ import "./Filters.css";
 import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
+  Config,
   EnabledOption,
   FilterList,
   Visibility,
   VisibilityString,
 } from "./Interfaces";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
+import axios from "axios";
 
 function Filters(): JSX.Element {
   /**
@@ -75,6 +77,23 @@ function Filters(): JSX.Element {
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
   };
+
+  const [configuration, setConfiguration] = useState<Config>({
+    bitscreen: false,
+    import: false,
+    share: false,
+  });
+
+  useEffect(() => {
+    async function setInitialConfig() {
+      const response = await axios.get(`${serverUri()}/config`);
+      const config = response.data;
+
+      setConfiguration(config);
+    }
+
+    setInitialConfig();
+  }, []);
 
   useEffect(() => {
     setEnabledSelectedFilters(
@@ -575,226 +594,237 @@ function Filters(): JSX.Element {
   return (
     <div>
       {loaded ? (
-        <div>
-          <Container>
-            <h2>Filters</h2>
-            <Row style={{ marginBottom: 12 }}>
-              <Col>
-                <Row className="d-flex flex-row justify-content-start">
-                  <Col className="d-flex flex-row">
-                    <Form.Group
-                      controlId="selectAll"
-                      className="d-flex align-items-center"
-                      style={{
-                        height: "100%",
-                        paddingLeft: "28px",
-                        marginBottom: 0,
-                      }}
-                    >
-                      <Form.Check
-                        type="checkbox"
-                        checked={isAllLoaded}
-                        onChange={() =>
-                          setSelectedConditional(
-                            isAllLoaded
-                              ? BulkSelectedType.None
-                              : BulkSelectedType.All
-                          )
-                        }
-                      />
-                    </Form.Group>
-                    <Dropdown>
-                      <Dropdown.Toggle
+        configuration.bitscreen ? (
+          <div>
+            <Container>
+              <h2>Filters</h2>
+              <Row style={{ marginBottom: 12 }}>
+                <Col>
+                  <Row className="d-flex flex-row justify-content-start">
+                    <Col className="d-flex flex-row">
+                      <Form.Group
+                        controlId="selectAll"
+                        className="d-flex align-items-center"
                         style={{
-                          display: "flex",
-                          height: "20px",
-                          alignItems: "center",
-                          borderRadius: "0.5",
-                        }}
-                        id="dropdown-select-all"
-                        className="custom-dropdown-filters"
-                        variant="secondary"
-                      />
-                      <Dropdown.Menu>
-                        {Object.keys(BulkSelectedType)
-                          .filter((key) => isNaN(parseInt(key)))
-                          .map((key, idx) => (
-                            <Dropdown.Item
-                              key={idx}
-                              href="#"
-                              onClick={() =>
-                                setSelectedConditional(BulkSelectedType[key])
-                              }
-                            >
-                              {key}
-                            </Dropdown.Item>
-                          ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Col>
-                  {!!disabledSelectedFilters.length && (
-                    <Col>
-                      <Button
-                        onClick={() => {
-                          const sharedFilters = disabledSelectedFilters.filter(
-                            (x) => isShared(x)
-                          );
-                          if (sharedFilters.length > 0) {
-                            beginGlobalBulkSetEnabled(true);
-                          } else {
-                            beginLocalBulkSetEnabled(true);
-                          }
+                          height: "100%",
+                          paddingLeft: "28px",
+                          marginBottom: 0,
                         }}
                       >
-                        Enable {disabledSelectedFilters.length}
-                      </Button>
-                    </Col>
-                  )}
-
-                  {!!enabledSelectedFilters.length && (
-                    <Col>
-                      <Button
-                        onClick={() => {
-                          const sharedFilters = enabledSelectedFilters.filter(
-                            (x) => isShared(x)
-                          );
-                          if (sharedFilters.length > 0) {
-                            beginGlobalBulkSetEnabled(false);
-                          } else {
-                            beginLocalBulkSetEnabled(false);
+                        <Form.Check
+                          type="checkbox"
+                          checked={isAllLoaded}
+                          onChange={() =>
+                            setSelectedConditional(
+                              isAllLoaded
+                                ? BulkSelectedType.None
+                                : BulkSelectedType.All
+                            )
                           }
-                        }}
-                      >
-                        Disable {enabledSelectedFilters.length}
-                      </Button>
+                        />
+                      </Form.Group>
+                      <Dropdown>
+                        <Dropdown.Toggle
+                          style={{
+                            display: "flex",
+                            height: "20px",
+                            alignItems: "center",
+                            borderRadius: "0.5",
+                          }}
+                          id="dropdown-select-all"
+                          className="custom-dropdown-filters"
+                          variant="secondary"
+                        />
+                        <Dropdown.Menu>
+                          {Object.keys(BulkSelectedType)
+                            .filter((key) => isNaN(parseInt(key)))
+                            .map((key, idx) => (
+                              <Dropdown.Item
+                                key={idx}
+                                href="#"
+                                onClick={() =>
+                                  setSelectedConditional(BulkSelectedType[key])
+                                }
+                              >
+                                {key}
+                              </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                      </Dropdown>
                     </Col>
-                  )}
+                    {!!disabledSelectedFilters.length && (
+                      <Col>
+                        <Button
+                          onClick={() => {
+                            const sharedFilters =
+                              disabledSelectedFilters.filter((x) =>
+                                isShared(x)
+                              );
+                            if (sharedFilters.length > 0) {
+                              beginGlobalBulkSetEnabled(true);
+                            } else {
+                              beginLocalBulkSetEnabled(true);
+                            }
+                          }}
+                        >
+                          Enable {disabledSelectedFilters.length}
+                        </Button>
+                      </Col>
+                    )}
 
-                  {!!orphanSelectedFilters.length && (
-                    <Col>
-                      <Button onClick={() => beginBulkDiscardOrphans()}>
-                        Discard {orphanSelectedFilters.length}
-                      </Button>
-                    </Col>
-                  )}
-                </Row>
-              </Col>
-              <Col className="text-right">
-                <Button
-                  variant="primary"
-                  onClick={() => history.push(`/filters/new`)}
-                >
-                  New Filter
-                </Button>
+                    {!!enabledSelectedFilters.length && (
+                      <Col>
+                        <Button
+                          onClick={() => {
+                            const sharedFilters = enabledSelectedFilters.filter(
+                              (x) => isShared(x)
+                            );
+                            if (sharedFilters.length > 0) {
+                              beginGlobalBulkSetEnabled(false);
+                            } else {
+                              beginLocalBulkSetEnabled(false);
+                            }
+                          }}
+                        >
+                          Disable {enabledSelectedFilters.length}
+                        </Button>
+                      </Col>
+                    )}
 
-                <Button
-                  variant="outline-primary"
-                  onClick={() => {
-                    setShowImportFilter(true);
-                  }}
-                  className="double-space-left"
-                >
-                  Import Filter
-                </Button>
-              </Col>
-            </Row>
+                    {!!orphanSelectedFilters.length && (
+                      <Col>
+                        <Button onClick={() => beginBulkDiscardOrphans()}>
+                          Discard {orphanSelectedFilters.length}
+                        </Button>
+                      </Col>
+                    )}
+                  </Row>
+                </Col>
+                <Col className="text-right">
+                  <Button
+                    variant="primary"
+                    onClick={() => history.push(`/filters/new`)}
+                  >
+                    New Filter
+                  </Button>
 
-            <Row>
-              <Col>
-                <Form.Group controlId="search">
-                  <Form.Control
-                    type="text"
-                    placeholder="Search CID or Filter Name"
-                    onChange={searchFilters}
-                    onKeyDown={(
-                      event: React.KeyboardEvent<HTMLInputElement>
-                    ) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                      }
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => {
+                      setShowImportFilter(true);
                     }}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+                    className="double-space-left"
+                  >
+                    Import Filter
+                  </Button>
+                </Col>
+              </Row>
 
-            <Row>
-              <Col>
-                <CIDFilter />
-              </Col>
-            </Row>
+              <Row>
+                <Col>
+                  <Form.Group controlId="search">
+                    <Form.Control
+                      type="text"
+                      placeholder="Search CID or Filter Name"
+                      onChange={searchFilters}
+                      onKeyDown={(
+                        event: React.KeyboardEvent<HTMLInputElement>
+                      ) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                        }
+                      }}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
 
-            <ConfirmModal
-              show={showConfirmDelete}
-              title={title}
-              message={message}
-              callback={() => {
-                deleteFilter(deletedFilterList);
-              }}
-              closeCallback={() => {
-                setDeletedFilterList(FilterService.emptyFilterList());
-                setShowConfirmDelete(false);
-              }}
-            />
+              <Row>
+                <Col>
+                  <CIDFilter />
+                </Col>
+              </Row>
 
-            <ImportFilterModal
-              closeCallback={async (refreshParent = false): Promise<void> => {
-                setShowImportFilter(false);
-                if (refreshParent) {
-                  await getFilters();
+              <ConfirmModal
+                show={showConfirmDelete}
+                title={title}
+                message={message}
+                callback={() => {
+                  deleteFilter(deletedFilterList);
+                }}
+                closeCallback={() => {
+                  setDeletedFilterList(FilterService.emptyFilterList());
+                  setShowConfirmDelete(false);
+                }}
+              />
+
+              <ImportFilterModal
+                closeCallback={async (refreshParent = false): Promise<void> => {
+                  setShowImportFilter(false);
+                  if (refreshParent) {
+                    await getFilters();
+                  }
+                }}
+                show={showImportFilter}
+              />
+
+              <ConfirmModal
+                show={showConfirmEnableBulkAction}
+                title={"Confirm bulk enable filters"}
+                message={confirmEnableBulkActionMessage}
+                callback={() => bulkSetEnabled(true)}
+                closeCallback={() => {
+                  setShowConfirmEnableBulkAction(false);
+                  setConfirmEnableBulkActionMessage("");
+                }}
+              />
+              <ConfirmModal
+                show={showConfirmDisableBulkAction}
+                title={"Confirm bulk disable filters"}
+                message={confirmDisableBulkActionMessage}
+                callback={() => bulkSetEnabled(false)}
+                closeCallback={() => {
+                  setShowConfirmDisableBulkAction(false);
+                  setConfirmDisableBulkActionMessage("");
+                }}
+              />
+
+              <ConfirmModal
+                show={showConfirmDiscardBulkAction}
+                title={"Confirm bulk discard filters"}
+                message={confirmDiscardBulkActionMessage}
+                callback={() => bulkDiscardOrphans()}
+                closeCallback={() => {
+                  setShowConfirmDiscardBulkAction(false);
+                  setConfirmDiscardBulkActionMessage("");
+                }}
+              />
+
+              <ToggleEnabledFilterModal
+                show={showConfirmEnabled}
+                title={
+                  bulkEnabled === undefined
+                    ? "The selected filter is imported by other providers"
+                    : "One or more filters are imported by other providers"
                 }
-              }}
-              show={showImportFilter}
-            />
-
-            <ConfirmModal
-              show={showConfirmEnableBulkAction}
-              title={"Confirm bulk enable filters"}
-              message={confirmEnableBulkActionMessage}
-              callback={() => bulkSetEnabled(true)}
-              closeCallback={() => {
-                setShowConfirmEnableBulkAction(false);
-                setConfirmEnableBulkActionMessage("");
-              }}
-            />
-            <ConfirmModal
-              show={showConfirmDisableBulkAction}
-              title={"Confirm bulk disable filters"}
-              message={confirmDisableBulkActionMessage}
-              callback={() => bulkSetEnabled(false)}
-              closeCallback={() => {
-                setShowConfirmDisableBulkAction(false);
-                setConfirmDisableBulkActionMessage("");
-              }}
-            />
-
-            <ConfirmModal
-              show={showConfirmDiscardBulkAction}
-              title={"Confirm bulk discard filters"}
-              message={confirmDiscardBulkActionMessage}
-              callback={() => bulkDiscardOrphans()}
-              closeCallback={() => {
-                setShowConfirmDiscardBulkAction(false);
-                setConfirmDiscardBulkActionMessage("");
-              }}
-            />
-
-            <ToggleEnabledFilterModal
-              show={showConfirmEnabled}
-              title={
-                bulkEnabled === undefined
-                  ? "The selected filter is imported by other providers"
-                  : "One or more filters are imported by other providers"
-              }
-              callback={toggleSharedFilterEnabled}
-              closeCallback={() => {
-                setSelectedFilterList(FilterService.emptyFilterList());
-                setBulkEnabled(undefined);
-                setShowConfirmEnabled(false);
-              }}
-            />
-          </Container>
-        </div>
+                callback={toggleSharedFilterEnabled}
+                closeCallback={() => {
+                  setSelectedFilterList(FilterService.emptyFilterList());
+                  setBulkEnabled(undefined);
+                  setShowConfirmEnabled(false);
+                }}
+              />
+            </Container>
+          </div>
+        ) : (
+          <div>
+            To activate filtering, go to{" "}
+            <a style={{ fontSize: 16 }} href="/settings">
+              Settings
+            </a>{" "}
+            and add a wallet.
+          </div>
+        )
       ) : null}
     </div>
   );
