@@ -179,7 +179,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           </Row>
 
           {configuration.bitscreen && (
-            <Form style={{ marginLeft: 12 }}>
+            <Form style={{ marginLeft: 12, marginTop: -20 }}>
               <Form.Group>
                 <Form.Label>FIL wallet address</Form.Label>
                 <p className="text-dim">
@@ -232,7 +232,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          <Row className={"settings-block"} style={{ marginTop: 25 }}>
+          <Row className={"settings-block"} style={{ marginTop: 30 }}>
             <Col>
               <FormCheck
                 type="switch"
@@ -249,7 +249,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Col>
           </Row>
           {account && configuration.import && (
-            <Form style={{ marginLeft: 12 }}>
+            <Form style={{ marginLeft: 12, marginTop: -20 }}>
               <Form.Group>
                 <Form.Label>Country</Form.Label>
                 <Typeahead
@@ -292,7 +292,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          <Row className={"settings-block"} style={{ marginTop: 25 }}>
+          <Row className={"settings-block"} style={{ marginTop: 30 }}>
             <Col>
               <FormCheck
                 type="switch"
@@ -310,7 +310,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           </Row>
 
           {account && configuration.share && (
-            <Form style={{ marginLeft: 12 }}>
+            <Form style={{ marginLeft: 12, marginTop: -20 }}>
               <Form.Group>
                 <Form.Label>Business name</Form.Label>
                 <Form.Control
