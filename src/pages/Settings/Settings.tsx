@@ -73,6 +73,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
   const [loggingIn, setLoggingIn] = useState(false);
+  const [isCountryAdded, setIsCountryAdded] = useState(
+    account?.country ? true : false
+  );
 
   useEffect(() => {
     setLoggedIn(!!account);
@@ -232,23 +235,25 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          <Row className={"settings-block"} style={{ marginTop: 30 }}>
-            <Col>
-              <FormCheck
-                type="switch"
-                id="import-switch"
-                label="Activate Importing Lists"
-                checked={configuration.import}
-                onChange={() => toggleImportingLists()}
-              />
-              <p className="text-dim">
-                Importing lists from other users is an optional feature that
-                requires adding country information, which is used for
-                statistical purposes.
-              </p>
-            </Col>
-          </Row>
-          {account && configuration.import && (
+          {configuration.bitscreen && account && (
+            <Row className={"settings-block"} style={{ marginTop: 30 }}>
+              <Col>
+                <FormCheck
+                  type="switch"
+                  id="import-switch"
+                  label="Activate Importing Lists"
+                  checked={configuration.import}
+                  onChange={() => toggleImportingLists()}
+                />
+                <p className="text-dim">
+                  Importing lists from other users is an optional feature that
+                  requires adding country information, which is used for
+                  statistical purposes.
+                </p>
+              </Col>
+            </Row>
+          )}
+          {configuration.bitscreen && account && configuration.import && (
             <Form style={{ marginLeft: 12, marginTop: -20 }}>
               <Form.Group>
                 <Form.Label>Country</Form.Label>
@@ -282,6 +287,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                       ev.preventDefault();
                       ApiService.updateProvider(account).then(() => {
                         AuthService.updateAccount(account);
+                        if (account.country) {
+                          setIsCountryAdded(true);
+                        } else {
+                          setIsCountryAdded(false);
+                        }
                       });
                     }}
                   >
@@ -292,98 +302,107 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          <Row className={"settings-block"} style={{ marginTop: 30 }}>
-            <Col>
-              <FormCheck
-                type="switch"
-                id="share-switch"
-                label="Activate Sharing Lists"
-                checked={configuration.share}
-                onChange={() => toggleSharingLists()}
-              />
-              <p className="text-dim">
-                Sharing lists with other users is an optional feature that
-                requires adding list provider data, which is made public to
-                other users when you share lists.
-              </p>
-            </Col>
-          </Row>
-
-          {account && configuration.share && (
-            <Form style={{ marginLeft: 12, marginTop: -20 }}>
-              <Form.Group>
-                <Form.Label>Business name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Business name"
-                  value={account.businessName || ""}
-                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                    handleFieldChange("businessName", ev)
-                  }
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Website</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Website"
-                  value={account.website || ""}
-                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                    handleFieldChange("website", ev)
-                  }
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  placeholder="Email"
-                  value={account.email || ""}
-                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                    handleFieldChange("email", ev)
-                  }
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Contact person</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Contact person"
-                  value={account.contactPerson || ""}
-                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                    handleFieldChange("contactPerson", ev)
-                  }
-                />
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Address</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Address"
-                  value={account.address || ""}
-                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                    handleFieldChange("address", ev)
-                  }
-                />
-              </Form.Group>
-              <Row>
+          {configuration.bitscreen &&
+            account &&
+            configuration.import &&
+            isCountryAdded && (
+              <Row className={"settings-block"} style={{ marginTop: 30 }}>
                 <Col>
-                  <Button
-                    variant="primary"
-                    type="button"
-                    onClick={(ev: MouseEvent<HTMLElement>) => {
-                      ev.preventDefault();
-                      ApiService.updateProvider(account).then(() => {
-                        AuthService.updateAccount(account);
-                      });
-                    }}
-                  >
-                    Save
-                  </Button>
+                  <FormCheck
+                    type="switch"
+                    id="share-switch"
+                    label="Activate Sharing Lists"
+                    checked={configuration.share}
+                    onChange={() => toggleSharingLists()}
+                  />
+                  <p className="text-dim">
+                    Sharing lists with other users is an optional feature that
+                    requires adding list provider data, which is made public to
+                    other users when you share lists.
+                  </p>
                 </Col>
               </Row>
-            </Form>
-          )}
+            )}
+
+          {configuration.bitscreen &&
+            account &&
+            configuration.import &&
+            isCountryAdded &&
+            configuration.share && (
+              <Form style={{ marginLeft: 12, marginTop: -20 }}>
+                <Form.Group>
+                  <Form.Label>Business name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Business name"
+                    value={account.businessName || ""}
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                      handleFieldChange("businessName", ev)
+                    }
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Website</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Website"
+                    value={account.website || ""}
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                      handleFieldChange("website", ev)
+                    }
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="Email"
+                    value={account.email || ""}
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                      handleFieldChange("email", ev)
+                    }
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Contact person</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Contact person"
+                    value={account.contactPerson || ""}
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                      handleFieldChange("contactPerson", ev)
+                    }
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Address"
+                    value={account.address || ""}
+                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                      handleFieldChange("address", ev)
+                    }
+                  />
+                </Form.Group>
+                <Row>
+                  <Col>
+                    <Button
+                      variant="primary"
+                      type="button"
+                      onClick={(ev: MouseEvent<HTMLElement>) => {
+                        ev.preventDefault();
+                        ApiService.updateProvider(account).then(() => {
+                          AuthService.updateAccount(account);
+                        });
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            )}
         </>
       ) : null}
     </Container>
