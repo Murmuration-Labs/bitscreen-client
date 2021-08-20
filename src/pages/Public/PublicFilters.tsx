@@ -187,10 +187,14 @@ export default function PublicFilters() {
     Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
   const providerId = AuthService.getProviderId();
 
+  const isImportEnabled = (): boolean => {
+    return configuration.import && !!account?.country;
+  };
+
   return (
     <Container>
       <h2>Public Filters</h2>
-      {(!configuration.import || !account?.country) && (
+      {!isImportEnabled() && (
         <p className="text-dim">
           To activate importing, go to{" "}
           <a style={{ fontSize: 12 }} href="/settings">
@@ -258,7 +262,7 @@ export default function PublicFilters() {
                     ) : row.providerId != providerId ? (
                       <Button
                         style={{ marginLeft: -5 }}
-                        disabled={!configuration.import || !account?.country}
+                        disabled={!isImportEnabled()}
                         onClick={() => {
                           setToBeImportedFilter(row as any);
                         }}

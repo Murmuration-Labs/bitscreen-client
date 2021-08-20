@@ -592,6 +592,10 @@ function Filters(): JSX.Element {
     getFilters();
   };
 
+  const isImportEnabled = (): boolean => {
+    return configuration.import && !!account?.country;
+  };
+
   return (
     <div>
       {loaded ? (
@@ -711,7 +715,7 @@ function Filters(): JSX.Element {
 
                   <Button
                     variant="outline-primary"
-                    disabled={!configuration.import || !account?.country}
+                    disabled={!isImportEnabled()}
                     onClick={() => {
                       setShowImportFilter(true);
                     }}
@@ -719,7 +723,7 @@ function Filters(): JSX.Element {
                   >
                     Import Filter
                   </Button>
-                  {(!configuration.import || !account?.country) && (
+                  {!isImportEnabled() && (
                     <p className="text-dim hidden-tip">
                       To activate importing, go to Settings and add country
                       data.
