@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
 import "./App.css";
-import AccountContactPage from "./Contact/AccountContactPage";
 import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
 import PublicFilters from "./Public/PublicFilters";
@@ -50,50 +49,43 @@ function App(): JSX.Element {
           </Col>
           <Col md={10} sm={9} className={"stage"}>
             <Route
-              path="/settings"
-              exact
-              component={provider ? Settings : AccountContactPage}
-            >
-              {!provider && <Redirect to="/account" />}
-            </Route>
-            <Route
               path="/filters"
               exact
-              component={provider ? Filters : AccountContactPage}
+              component={provider ? Filters : Settings}
             >
-              {!provider && <Redirect to="/account" />}
+              {!provider && <Redirect to="/settings" />}
             </Route>
             <Route
               path="/filters/edit/:id?"
               exact
-              component={provider ? FilterPage : AccountContactPage}
+              component={provider ? FilterPage : Settings}
             >
-              {!provider && <Redirect to="/account" />}
+              {!provider && <Redirect to="/settings" />}
             </Route>
             <Route
               path="/filters/new"
               exact
-              component={provider ? FilterPage : AccountContactPage}
+              component={provider ? FilterPage : Settings}
             >
-              {!provider && <Redirect to="/account" />}
+              {!provider && <Redirect to="/settings" />}
             </Route>
-            <Route path="/account" exact component={AccountContactPage} />
+            <Route path="/settings" exact component={Settings} />
             <Route
               path="/directory"
               exact
-              component={provider ? PublicFilters : AccountContactPage}
+              component={provider ? PublicFilters : Settings}
             >
-              {!provider && <Redirect to="/account" />}
+              {!provider && <Redirect to="/settings" />}
             </Route>
             <Route
               path="/directory/details/:id?"
               exact
-              component={provider ? FilterDetailsPage : AccountContactPage}
+              component={provider ? FilterDetailsPage : Settings}
             >
-              {!provider && <Redirect to="/account" />}
+              {!provider && <Redirect to="/settings" />}
             </Route>
             <Route exact path="/">
-              <Redirect to="/account" />
+              <Redirect to="/settings" />
             </Route>
           </Col>
         </Row>

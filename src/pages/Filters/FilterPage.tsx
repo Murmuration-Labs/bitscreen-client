@@ -38,6 +38,7 @@ import CidsTable from "./Cids/CidsTable";
 import "./Filters.css";
 import {
   CidItem,
+  Config,
   EnabledOption,
   FilterList,
   mapVisibilityString,
@@ -48,6 +49,7 @@ import {
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import MoveCIDModal from "./MoveCIDModal";
 import { isOrphan, isShared } from "./utils";
+import axios from "axios";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -67,6 +69,44 @@ const FilterPage = (props): JSX.Element => {
   const [initialFilterNotes, setInitialFilterNotes] = useState<
     string | undefined
   >(undefined);
+
+  const [account, setAccount] = useState(AuthService.getAccount());
+  const [configuration, setConfiguration] = useState<Config>({
+    bitscreen: false,
+    import: false,
+    share: false,
+  });
+
+  useEffect(() => {
+    async function setInitialConfig() {
+      const response = await axios.get(`${serverUri()}/config`);
+      const config = response.data;
+
+      setConfiguration(config);
+    }
+
+    setInitialConfig();
+  }, []);
+
+  const isAccountInfoValid = (): boolean => {
+    return account
+      ? !!account.address &&
+          !!account.businessName &&
+          !!account.contactPerson &&
+          !!account.email &&
+          !!account.website
+      : false;
+  };
+
+  const isShareEnabled = (): boolean => {
+    return (
+      configuration.bitscreen &&
+      configuration.import &&
+      !!account?.country &&
+      configuration.share &&
+      isAccountInfoValid()
+    );
+  };
 
   useEffect(() => {
     setCids(
@@ -711,7 +751,7 @@ const FilterPage = (props): JSX.Element => {
                             onChange={changeVisibility}
                             value={VisibilityString[filterList.visibility]}
                           >
-                            <option>Public</option>
+                            {isShareEnabled() && <option>Public</option>}
                             <option>Private</option>
                           </Form.Control>
                         </Form.Group>
@@ -722,6 +762,7 @@ const FilterPage = (props): JSX.Element => {
                         <Col>
                           <Button
                             variant="primary"
+                            disabled={!isShareEnabled()}
                             onClick={() => {
                               clipboardCopy(filterList.shareId);
                             }}
@@ -829,6 +870,19 @@ const FilterPage = (props): JSX.Element => {
                       <Col>
                         <Form.Label className={"text-dim"}>
                           Override lists cannot be shared
+                        </Form.Label>
+                      </Col>
+                    </Form.Row>
+                  )}
+                  {!isShareEnabled() && (
+                    <Form.Row style={{ marginTop: -10, marginLeft: -2 }}>
+                      <Col>
+                        <Form.Label className={"text-dim"}>
+                          To activate sharing, go to{" "}
+                          <a style={{ fontSize: 12 }} href="/settings">
+                            Settings
+                          </a>{" "}
+                          and add list provider data.
                         </Form.Label>
                       </Col>
                     </Form.Row>

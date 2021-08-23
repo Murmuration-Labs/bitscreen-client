@@ -164,19 +164,8 @@ export interface DataProps {
   data: [];
 }
 
-export interface Filters {
-  internal: boolean;
-  external: boolean;
-}
-
-export interface AdvancedFilters {
-  enabled: boolean;
-  list: string[];
-}
-
 export interface Config {
   bitscreen: boolean;
+  import: boolean;
   share: boolean;
-  advanced: AdvancedFilters;
-  filters: Filters;
 }
