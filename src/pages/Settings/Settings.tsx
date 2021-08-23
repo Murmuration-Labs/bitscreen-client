@@ -140,6 +140,21 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     return !_.isEqual(account, AuthService.getAccount());
   };
 
+  const clearInputInfo = () => {
+    if (!account) {
+      return;
+    }
+
+    setAccount({
+      ...account,
+      businessName: "",
+      website: "",
+      email: "",
+      contactPerson: "",
+      address: "",
+    });
+  };
+
   const logIn = async () => {
     if (loggedIn || !plainWallet) {
       return;
@@ -485,6 +500,16 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     {displayInfoError && (
                       <span style={{ color: "red" }}>Something went wrong</span>
                     )}
+                  </Col>
+                  <Col>
+                    <Button
+                      style={{ float: "right" }}
+                      onClick={() => {
+                        clearInputInfo();
+                      }}
+                    >
+                      Clear
+                    </Button>
                   </Col>
                 </Row>
               </Form>

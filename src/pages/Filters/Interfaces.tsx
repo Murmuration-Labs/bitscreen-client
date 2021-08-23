@@ -23,9 +23,9 @@ export enum Visibility {
 export enum BulkSelectedType {
   None,
   All,
-  Public,
   Private,
   Shared,
+  Public,
   Imported,
   Override,
   Orphan,
