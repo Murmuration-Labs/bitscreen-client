@@ -322,10 +322,16 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     onClick={(ev: MouseEvent<HTMLElement>) => {
                       ev.preventDefault();
                       setDisableImport(true);
-                      ApiService.updateProvider(account)
+
+                      let updatedAccount = AuthService.getAccount() ?? account;
+                      updatedAccount = {
+                        ...updatedAccount,
+                        country: account.country,
+                      };
+                      ApiService.updateProvider(updatedAccount)
                         .then(() => {
-                          AuthService.updateAccount(account);
-                          if (account.country) {
+                          AuthService.updateAccount(updatedAccount);
+                          if (updatedAccount.country) {
                             setIsCountryAdded(true);
                           } else {
                             setIsCountryAdded(false);
@@ -473,9 +479,20 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                         }
 
                         setDisableShare(true);
-                        ApiService.updateProvider(account)
+
+                        let updatedAccount =
+                          AuthService.getAccount() ?? account;
+                        updatedAccount = {
+                          ...updatedAccount,
+                          businessName: account.businessName,
+                          website: account.website,
+                          email: account.email,
+                          contactPerson: account.contactPerson,
+                          address: account.address,
+                        };
+                        ApiService.updateProvider(updatedAccount)
                           .then(() => {
-                            AuthService.updateAccount(account);
+                            AuthService.updateAccount(updatedAccount);
                             setDisplayInfoSuccess(true);
                             setTimeout(() => {
                               setDisplayInfoSuccess(false);
