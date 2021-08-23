@@ -8,6 +8,7 @@ import React, {
 import axios from "axios";
 
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
+import { Prompt } from "react-router";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "./Settings.css";
 import { serverUri } from "../../config";
@@ -16,6 +17,7 @@ import * as AuthService from "../../services/AuthService";
 import ApiService from "../../services/ApiService";
 import { countries } from "countries-list";
 import validator from "validator";
+import _ from "lodash";
 
 const API_MESSAGES_TIME = 1500;
 
@@ -132,6 +134,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       ...account,
       [key]: ev.target.value,
     });
+  };
+
+  const unsavedChanges = () => {
+    return !_.isEqual(account, AuthService.getAccount());
   };
 
   const logIn = async () => {
@@ -486,6 +492,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           <div style={{ marginTop: 50 }} />
         </>
       ) : null}
+      <Prompt
+        when={unsavedChanges()}
+        message="You have unsaved changes, are you sure you want to leave?"
+      />
     </Container>
   );
 }
