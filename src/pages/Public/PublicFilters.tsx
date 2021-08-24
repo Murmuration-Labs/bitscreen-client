@@ -240,7 +240,7 @@ export default function PublicFilters() {
                 <TableRow key={index}>
                   <TableCell>
                     <Link
-                      to={`/directory/details/${row.id}`}
+                      to={`/directory/details/${row.shareId}`}
                       style={{ fontSize: 14 }}
                     >
                       {row.name}

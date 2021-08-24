@@ -166,9 +166,9 @@ const ApiService = {
     );
   },
 
-  getPublicFilterDetails: async (id: number): Promise<void> => {
+  getPublicFilterDetails: async (shareId: string): Promise<void> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/public/details/${id}`,
+      `${remoteMarketplaceUri()}/filter/public/details/${shareId}`,
       {
         params: {
           providerId: AuthService.getProviderId(),
