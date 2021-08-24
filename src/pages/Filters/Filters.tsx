@@ -309,21 +309,6 @@ function Filters(): JSX.Element {
     setSearchTerm(event.target.value);
   };
 
-  const clipboardCopy = (cryptId) => {
-    const selBox = document.createElement("textarea");
-    selBox.style.position = "fixed";
-    selBox.style.left = "0";
-    selBox.style.top = "0";
-    selBox.style.opacity = "0";
-    selBox.value = serverUri() + "/filter/share/" + cryptId;
-    document.body.appendChild(selBox);
-    selBox.focus();
-    selBox.select();
-    document.execCommand("copy");
-    document.body.removeChild(selBox);
-    toast.success("Shared link was copied succesfully");
-  };
-
   useEffect(() => {
     let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
     let title = `Delete filter ${deletedFilterList.id}`;

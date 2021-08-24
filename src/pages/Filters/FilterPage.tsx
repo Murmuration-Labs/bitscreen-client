@@ -606,13 +606,12 @@ const FilterPage = (props): JSX.Element => {
         <Col>
           <h4>Origin</h4>
           <a
-            href={`${serverUri()}/filter/${
-              filterList.id
-            }?providerId=${AuthService.getProviderId()}`}
+            href={`/directory/details/${filterList.shareId}`}
             className="origin-link"
             target="_blank"
           >
-            {serverUri()}/filter/share/{filterList.shareId}
+            {window.location.protocol}//
+            {window.location.host}/directory/details/{filterList.shareId}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
               className="space-left"
