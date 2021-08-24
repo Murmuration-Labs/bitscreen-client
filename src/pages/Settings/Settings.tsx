@@ -140,6 +140,19 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     return !_.isEqual(account, AuthService.getAccount());
   };
 
+  const uncompletedInfo = () => {
+    const missingBitscreenData = configuration.bitscreen && !account;
+    const missingImportData = configuration.import && !account?.country;
+    const missingShareData =
+      configuration.share &&
+      (!account?.businessName ||
+        !account?.website ||
+        !account?.contactPerson ||
+        !account?.email ||
+        !account?.address);
+    return missingBitscreenData || missingImportData || missingShareData;
+  };
+
   const clearInputInfo = () => {
     if (!account) {
       return;
@@ -535,8 +548,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         </>
       ) : null}
       <Prompt
-        when={unsavedChanges()}
-        message="You have unsaved changes, are you sure you want to leave?"
+        when={unsavedChanges() || uncompletedInfo()}
+        message={
+          unsavedChanges()
+            ? "You have unsaved changes, are you sure you want to leave?"
+            : "You have activated a toggle but did not enter relevant data, are you sure you want to leave?"
+        }
       />
     </Container>
   );
