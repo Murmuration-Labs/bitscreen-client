@@ -56,7 +56,7 @@ function App(): JSX.Element {
               {!provider && <Redirect to="/settings" />}
             </Route>
             <Route
-              path="/filters/edit/:id?"
+              path="/filters/edit/:shareId?"
               exact
               component={provider ? FilterPage : Settings}
             >

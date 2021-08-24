@@ -16,7 +16,6 @@ import axios from "axios";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [filterId, setFilterId] = useState<number>(0);
   const [filterShareId, setFilterShareId] = useState<string>("");
   const [filterProviderId, setFilterProviderId] = useState<number>(-1);
   const [filterDetails, setFilterDetails] = useState([{}]);
@@ -82,7 +81,6 @@ const FilterDetailsPage = (props) => {
         },
       ];
       setFilterDetails(details);
-      setFilterId(data.filter.id);
       setFilterProviderId(data.provider.id);
       setLoaded(true);
     });
@@ -127,7 +125,9 @@ const FilterDetailsPage = (props) => {
                         <Button
                           disabled={!isImportEnabled()}
                           onClick={() => {
-                            setToBeImportedFilter({ id: filterId } as any);
+                            setToBeImportedFilter({
+                              shareId: filterShareId,
+                            } as any);
                           }}
                           variant="outline-primary"
                         >
@@ -136,7 +136,7 @@ const FilterDetailsPage = (props) => {
                       ) : (
                         <Button
                           onClick={() => {
-                            history.push(`/filters/edit/${filterId}`);
+                            history.push(`/filters/edit/${filterShareId}`);
                           }}
                           variant="outline-dark"
                         >

@@ -29,11 +29,13 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 };
 
 const ApiService = {
-  getFilter: async (id: number): Promise<FilterList> => {
+  getFilter: async (shareId: string): Promise<FilterList> => {
     const providerId = AuthService.getProviderId();
     const query = `providerId=${encodeURIComponent(providerId)}`;
 
-    const response = await axios.get(`${serverUri()}/filter/${id}?${query}`);
+    const response = await axios.get(
+      `${serverUri()}/filter/${shareId}?${query}`
+    );
     return response.data;
   },
 

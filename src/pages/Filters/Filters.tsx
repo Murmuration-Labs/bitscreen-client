@@ -425,7 +425,7 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <Link
-                      to={`/filters/edit/${filterList.id}`}
+                      to={`/filters/edit/${filterList.shareId}`}
                       className="double-space-left"
                     >
                       {filterList.name}
@@ -482,7 +482,7 @@ function Filters(): JSX.Element {
 
                   <td style={{ textAlign: "justify" }}>
                     <Link
-                      to={`/filters/edit/${filterList.id}`}
+                      to={`/filters/edit/${filterList.shareId}`}
                       className="double-space-left"
                     >
                       {editOrEyeIcon(filterList)}

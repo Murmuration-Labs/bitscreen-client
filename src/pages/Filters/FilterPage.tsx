@@ -185,10 +185,10 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const mountedRef = useRef(true);
-  const initFilter = (id: number): void => {
-    if (id) {
+  const initFilter = (shareId: string): void => {
+    if (shareId) {
       setIsEdit(true);
-      ApiService.getFilter(id).then((filterList: FilterList) => {
+      ApiService.getFilter(shareId).then((filterList: FilterList) => {
         if (!mountedRef.current) return;
         if (!filterList) {
           setInvalidFilterId(true);
@@ -222,12 +222,12 @@ const FilterPage = (props): JSX.Element => {
   };
 
   useEffect(() => {
-    void initFilter(props.match.params.id as number);
+    void initFilter(props.match.params.shareId as string);
 
     return () => {
       mountedRef.current = false;
     };
-  }, [props.match.params.id]);
+  }, [props.match.params.shareId]);
 
   useEffect(() => {
     setFilterListChanged(!_.isEqual(filterList, initialFilterList));

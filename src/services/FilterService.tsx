@@ -13,6 +13,7 @@ const FilterService = {
       providerId: 0,
       provider: { id: 0 },
       description: "",
+      shareId: "",
     };
   },
   renderHashedCid: ({ cid }: CidItem, short = true): JSX.Element => {
