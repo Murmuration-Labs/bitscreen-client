@@ -80,6 +80,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
   const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [infoErrorMessage, setInfoErrorMessage] = useState<string>("");
   const [account, setAccount] = useState(AuthService.getAccount());
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
@@ -190,9 +191,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       });
   };
 
-  const showInfoError = () => {
+  const showInfoError = (message: string) => {
+    setInfoErrorMessage(message);
     setDisplayInfoError(true);
+
     setTimeout(() => {
+      setInfoErrorMessage("");
       setDisplayInfoError(false);
     }, API_MESSAGES_TIME);
   };
@@ -479,7 +483,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                           account.email &&
                           !validator.isEmail(account.email)
                         ) {
-                          showInfoError();
+                          showInfoError("Email is not valid");
                           return;
                         }
 
@@ -487,7 +491,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                           account.website &&
                           !validator.isURL(account.website)
                         ) {
-                          showInfoError();
+                          showInfoError("Website is not a valid URL");
                           return;
                         }
 
@@ -513,7 +517,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             setDisableShare(false);
                           })
                           .catch(() => {
-                            showInfoError();
+                            showInfoError("Something went wrong");
                             setDisableShare(false);
                           });
                       }}
@@ -528,7 +532,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                       </span>
                     )}
                     {displayInfoError && (
-                      <span style={{ color: "red" }}>Something went wrong</span>
+                      <span style={{ color: "red" }}>{infoErrorMessage}</span>
                     )}
                   </Col>
                   <Col>
