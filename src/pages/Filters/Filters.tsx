@@ -404,6 +404,7 @@ function Filters(): JSX.Element {
                 <th>Bulk</th>
                 <th>Filter name</th>
                 <th>Scope</th>
+                <th>Subscribers</th>
                 <th># of CIDs</th>
                 <th>Enabled?</th>
                 <th>Actions</th>
@@ -432,6 +433,13 @@ function Filters(): JSX.Element {
                   </td>
                   <td>
                     <CIDFilterScope {...filterList} />
+                  </td>
+                  <td>
+                    {isImported(filterList) ||
+                    isOrphan(filterList) ||
+                    filterList.visibility !== Visibility.Public
+                      ? "-"
+                      : (filterList.provider_Filters || []).length - 1}
                   </td>
                   <td>
                     <span
