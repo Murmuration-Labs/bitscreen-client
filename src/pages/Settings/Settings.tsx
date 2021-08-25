@@ -422,6 +422,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
                         // validations here
                         if (
+                          configuration.share &&
                           account.email &&
                           !validator.isEmail(account.email)
                         ) {
@@ -430,6 +431,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                         }
 
                         if (
+                          configuration.share &&
                           account.website &&
                           !validator.isURL(account.website)
                         ) {
@@ -439,9 +441,17 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
                         setDisableButton(true);
 
-                        ApiService.updateProvider(account)
+                        let updatedAccount = account;
+                        const fetchedAccount = AuthService.getAccount();
+                        if (!configuration.share && fetchedAccount) {
+                          updatedAccount = {
+                            ...fetchedAccount,
+                            country: account.country,
+                          };
+                        }
+                        ApiService.updateProvider(updatedAccount)
                           .then(() => {
-                            AuthService.updateAccount(account);
+                            AuthService.updateAccount(updatedAccount);
                             setDisplayInfoSuccess(true);
                             setTimeout(() => {
                               setDisplayInfoSuccess(false);
