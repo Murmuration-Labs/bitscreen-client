@@ -57,7 +57,9 @@ export default function ImportFilterModal(
       return;
     }
 
-    ApiService.getFilter(props.filter.id).then((f) => setFetchedFilterList(f));
+    ApiService.getFilter(props.filter.shareId).then((f) =>
+      setFetchedFilterList(f)
+    );
   }, [props.filter]);
 
   const renderFilterError = (): JSX.Element => {

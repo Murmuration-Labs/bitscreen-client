@@ -240,7 +240,7 @@ export default function PublicFilters() {
                 <TableRow key={index}>
                   <TableCell>
                     <Link
-                      to={`/directory/details/${row.id}`}
+                      to={`/directory/details/${row.shareId}`}
                       style={{ fontSize: 14 }}
                     >
                       {row.name}
@@ -276,7 +276,7 @@ export default function PublicFilters() {
                       <Button
                         style={{ marginLeft: -5 }}
                         onClick={() => {
-                          history.push(`/filters/edit/${row.id}`);
+                          history.push(`/filters/edit/${row.shareId}`);
                         }}
                         variant="outline-dark"
                       >

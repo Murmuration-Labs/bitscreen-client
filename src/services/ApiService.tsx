@@ -29,11 +29,13 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 };
 
 const ApiService = {
-  getFilter: async (id: number): Promise<FilterList> => {
+  getFilter: async (shareId: string): Promise<FilterList> => {
     const providerId = AuthService.getProviderId();
     const query = `providerId=${encodeURIComponent(providerId)}`;
 
-    const response = await axios.get(`${serverUri()}/filter/${id}?${query}`);
+    const response = await axios.get(
+      `${serverUri()}/filter/${shareId}?${query}`
+    );
     return response.data;
   },
 
@@ -166,9 +168,9 @@ const ApiService = {
     );
   },
 
-  getPublicFilterDetails: async (id: number): Promise<void> => {
+  getPublicFilterDetails: async (shareId: string): Promise<void> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/public/details/${id}`,
+      `${remoteMarketplaceUri()}/filter/public/details/${shareId}`,
       {
         params: {
           providerId: AuthService.getProviderId(),

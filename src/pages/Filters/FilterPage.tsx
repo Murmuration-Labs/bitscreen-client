@@ -185,10 +185,10 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const mountedRef = useRef(true);
-  const initFilter = (id: number): void => {
-    if (id) {
+  const initFilter = (shareId: string): void => {
+    if (shareId) {
       setIsEdit(true);
-      ApiService.getFilter(id).then((filterList: FilterList) => {
+      ApiService.getFilter(shareId).then((filterList: FilterList) => {
         if (!mountedRef.current) return;
         if (!filterList) {
           setInvalidFilterId(true);
@@ -222,12 +222,12 @@ const FilterPage = (props): JSX.Element => {
   };
 
   useEffect(() => {
-    void initFilter(props.match.params.id as number);
+    void initFilter(props.match.params.shareId as string);
 
     return () => {
       mountedRef.current = false;
     };
-  }, [props.match.params.id]);
+  }, [props.match.params.shareId]);
 
   useEffect(() => {
     setFilterListChanged(!_.isEqual(filterList, initialFilterList));
@@ -606,13 +606,12 @@ const FilterPage = (props): JSX.Element => {
         <Col>
           <h4>Origin</h4>
           <a
-            href={`${serverUri()}/filter/${
-              filterList.id
-            }?providerId=${AuthService.getProviderId()}`}
+            href={`/directory/details/${filterList.shareId}`}
             className="origin-link"
             target="_blank"
           >
-            {serverUri()}/filter/share/{filterList.shareId}
+            {window.location.protocol}//
+            {window.location.host}/directory/details/{filterList.shareId}
             <FontAwesomeIcon
               icon={faExternalLinkAlt as IconProp}
               className="space-left"

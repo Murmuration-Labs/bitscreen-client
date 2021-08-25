@@ -16,7 +16,7 @@ import axios from "axios";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [filterId, setFilterId] = useState<number>(0);
+  const [filterShareId, setFilterShareId] = useState<string>("");
   const [filterProviderId, setFilterProviderId] = useState<number>(-1);
   const [filterDetails, setFilterDetails] = useState([{}]);
   const [isImported, setIsImported] = useState<boolean>(false);
@@ -53,9 +53,9 @@ const FilterDetailsPage = (props) => {
     setShowImportFilter(!!toBeImportedFilter);
   }, [toBeImportedFilter]);
 
-  const loadFilter = (id: number): void => {
-    setFilterId(id);
-    ApiService.getPublicFilterDetails(id).then((data: any) => {
+  const loadFilter = (shareId: string): void => {
+    setFilterShareId(shareId);
+    ApiService.getPublicFilterDetails(shareId).then((data: any) => {
       setIsImported(data.isImported);
       const details = [
         { columnName: "Name of list:", columnValue: data.filter.name },
@@ -87,8 +87,8 @@ const FilterDetailsPage = (props) => {
   };
 
   useEffect(() => {
-    loadFilter(props.match.params.id as number);
-  }, [props.match.params.id]);
+    loadFilter(props.match.params.shareId as string);
+  }, [props.match.params.shareId]);
 
   const history = useHistory();
   const providerId = AuthService.getProviderId();
@@ -125,7 +125,9 @@ const FilterDetailsPage = (props) => {
                         <Button
                           disabled={!isImportEnabled()}
                           onClick={() => {
-                            setToBeImportedFilter({ id: filterId } as any);
+                            setToBeImportedFilter({
+                              shareId: filterShareId,
+                            } as any);
                           }}
                           variant="outline-primary"
                         >
@@ -134,7 +136,7 @@ const FilterDetailsPage = (props) => {
                       ) : (
                         <Button
                           onClick={() => {
-                            history.push(`/filters/edit/${filterId}`);
+                            history.push(`/filters/edit/${filterShareId}`);
                           }}
                           variant="outline-dark"
                         >
@@ -152,7 +154,7 @@ const FilterDetailsPage = (props) => {
               closeCallback={async (_needsRefresh = false): Promise<void> => {
                 setToBeImportedFilter(undefined);
                 if (_needsRefresh) {
-                  loadFilter(filterId);
+                  loadFilter(filterShareId);
                 }
               }}
               filter={toBeImportedFilter}
