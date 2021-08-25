@@ -73,10 +73,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     putConfig(newConfig);
   };
 
-  const [displayCountrySuccess, setDisplayCountrySuccess] =
-    useState<boolean>(false);
-  const [displayCountryError, setDisplayCountryError] =
-    useState<boolean>(false);
   const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
   const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -84,11 +80,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [account, setAccount] = useState(AuthService.getAccount());
   const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
   const [loggedIn, setLoggedIn] = useState(!!account);
-  const [disableImport, setDisableImport] = useState(false);
-  const [disableShare, setDisableShare] = useState(false);
-  const [isCountryAdded, setIsCountryAdded] = useState(
-    account?.country ? true : false
-  );
+  const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
     setLoggedIn(!!account);
@@ -288,7 +280,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           )}
 
           {configuration.bitscreen && account && (
-            <Row className={"settings-block"} style={{ marginTop: 30 }}>
+            <Row className={"settings-block"} style={{ marginTop: 25 }}>
               <Col>
                 <FormCheck
                   type="switch"
@@ -305,176 +297,126 @@ export default function Settings(props: ComponentType<SettingsProps>) {
               </Col>
             </Row>
           )}
-          {configuration.bitscreen && account && configuration.import && (
-            <Form style={{ marginLeft: 12, marginTop: -20 }}>
-              <Form.Group>
-                <Form.Label>Country</Form.Label>
-                <Typeahead
-                  id="typeahead-autocomplete"
-                  labelKey="name"
-                  defaultSelected={
-                    account.country
-                      ? countryNames.filter((x) => x.name === account.country)
-                      : []
-                  }
-                  options={countryNames}
-                  onChange={(selected) => {
-                    if (selected.length === 0) {
-                      account.country = "";
-                    } else {
-                      account.country = selected[0].name;
-                    }
 
-                    setAccount({ ...account });
-                  }}
-                  clearButton
+          {configuration.bitscreen && account && (
+            <Row className={"settings-block"}>
+              <Col>
+                <FormCheck
+                  type="switch"
+                  id="share-switch"
+                  label="Activate Sharing Lists"
+                  checked={configuration.share}
+                  onChange={() => toggleSharingLists()}
+                />
+                <p className="text-dim">
+                  Sharing lists with other users is an optional feature that
+                  requires adding list provider data, which is made public to
+                  other users when you share lists.
+                </p>
+              </Col>
+            </Row>
+          )}
+
+          {configuration.bitscreen &&
+            account &&
+            (configuration.import || configuration.share) && (
+              <Form style={{ marginLeft: 12, marginTop: -15 }}>
+                <Form.Group>
+                  <Form.Label>Country</Form.Label>
+                  <Typeahead
+                    id="typeahead-autocomplete"
+                    labelKey="name"
+                    defaultSelected={
+                      account.country
+                        ? countryNames.filter((x) => x.name === account.country)
+                        : []
+                    }
+                    options={countryNames}
+                    onChange={(selected) => {
+                      if (selected.length === 0) {
+                        account.country = "";
+                      } else {
+                        account.country = selected[0].name;
+                      }
+
+                      setAccount({ ...account });
+                    }}
+                    clearButton
+                  />
+                </Form.Group>
+              </Form>
+            )}
+
+          {configuration.bitscreen && account && configuration.share && (
+            <Form style={{ marginLeft: 12 }}>
+              <Form.Group>
+                <Form.Label>Business name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Business name"
+                  value={account.businessName || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("businessName", ev)
+                  }
                 />
               </Form.Group>
-              <Row>
-                <Col xs="auto">
-                  <Button
-                    variant="primary"
-                    type="button"
-                    disabled={disableImport}
-                    onClick={(ev: MouseEvent<HTMLElement>) => {
-                      ev.preventDefault();
-                      setDisableImport(true);
-
-                      let updatedAccount = AuthService.getAccount() ?? account;
-                      updatedAccount = {
-                        ...updatedAccount,
-                        country: account.country,
-                      };
-                      ApiService.updateProvider(updatedAccount)
-                        .then(() => {
-                          AuthService.updateAccount(updatedAccount);
-                          if (updatedAccount.country) {
-                            setIsCountryAdded(true);
-                          } else {
-                            setIsCountryAdded(false);
-                          }
-
-                          setDisplayCountrySuccess(true);
-                          setTimeout(() => {
-                            setDisplayCountrySuccess(false);
-                          }, API_MESSAGES_TIME);
-                          setDisableImport(false);
-                        })
-                        .catch(() => {
-                          setDisplayCountryError(true);
-                          setTimeout(() => {
-                            setDisplayCountryError(false);
-                          }, API_MESSAGES_TIME);
-                          setDisableImport(false);
-                        });
-                    }}
-                  >
-                    Save
-                  </Button>
-                </Col>
-                <Col style={{ marginLeft: -20, marginTop: 5 }}>
-                  {displayCountrySuccess && (
-                    <span style={{ color: "green" }}>
-                      Successfully updated country
-                    </span>
-                  )}
-                  {displayCountryError && (
-                    <span style={{ color: "red" }}>Something went wrong</span>
-                  )}
-                </Col>
-              </Row>
+              <Form.Group>
+                <Form.Label>Website</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Website"
+                  value={account.website || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("website", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Email"
+                  value={account.email || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("email", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Contact person</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Contact person"
+                  value={account.contactPerson || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("contactPerson", ev)
+                  }
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Address</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Address"
+                  value={account.address || ""}
+                  onChange={(ev: ChangeEvent<HTMLInputElement>) =>
+                    handleFieldChange("address", ev)
+                  }
+                />
+              </Form.Group>
             </Form>
           )}
 
           {configuration.bitscreen &&
             account &&
-            configuration.import &&
-            isCountryAdded && (
-              <Row className={"settings-block"} style={{ marginTop: 30 }}>
-                <Col>
-                  <FormCheck
-                    type="switch"
-                    id="share-switch"
-                    label="Activate Sharing Lists"
-                    checked={configuration.share}
-                    onChange={() => toggleSharingLists()}
-                  />
-                  <p className="text-dim">
-                    Sharing lists with other users is an optional feature that
-                    requires adding list provider data, which is made public to
-                    other users when you share lists.
-                  </p>
-                </Col>
-              </Row>
-            )}
-
-          {configuration.bitscreen &&
-            account &&
-            configuration.import &&
-            isCountryAdded &&
-            configuration.share && (
-              <Form style={{ marginLeft: 12, marginTop: -20 }}>
-                <Form.Group>
-                  <Form.Label>Business name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Business name"
-                    value={account.businessName || ""}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                      handleFieldChange("businessName", ev)
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Website</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Website"
-                    value={account.website || ""}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                      handleFieldChange("website", ev)
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Email"
-                    value={account.email || ""}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                      handleFieldChange("email", ev)
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Contact person</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Contact person"
-                    value={account.contactPerson || ""}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                      handleFieldChange("contactPerson", ev)
-                    }
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Address</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Address"
-                    value={account.address || ""}
-                    onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                      handleFieldChange("address", ev)
-                    }
-                  />
-                </Form.Group>
+            (configuration.import || configuration.share) && (
+              <Form style={{ marginLeft: 12 }}>
                 <Row>
                   <Col xs="auto">
                     <Button
                       variant="primary"
                       type="button"
-                      disabled={disableShare}
+                      disabled={disableButton}
                       onClick={(ev: MouseEvent<HTMLElement>) => {
                         ev.preventDefault();
 
@@ -495,30 +437,20 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                           return;
                         }
 
-                        setDisableShare(true);
+                        setDisableButton(true);
 
-                        let updatedAccount =
-                          AuthService.getAccount() ?? account;
-                        updatedAccount = {
-                          ...updatedAccount,
-                          businessName: account.businessName,
-                          website: account.website,
-                          email: account.email,
-                          contactPerson: account.contactPerson,
-                          address: account.address,
-                        };
-                        ApiService.updateProvider(updatedAccount)
+                        ApiService.updateProvider(account)
                           .then(() => {
-                            AuthService.updateAccount(updatedAccount);
+                            AuthService.updateAccount(account);
                             setDisplayInfoSuccess(true);
                             setTimeout(() => {
                               setDisplayInfoSuccess(false);
                             }, API_MESSAGES_TIME);
-                            setDisableShare(false);
+                            setDisableButton(false);
                           })
                           .catch(() => {
                             showInfoError("Something went wrong");
-                            setDisableShare(false);
+                            setDisableButton(false);
                           });
                       }}
                     >
@@ -528,23 +460,25 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Col style={{ marginLeft: -20, marginTop: 5 }}>
                     {displayInfoSuccess && (
                       <span style={{ color: "green" }}>
-                        Successfully updated contact info
+                        Successfully updated info
                       </span>
                     )}
                     {displayInfoError && (
                       <span style={{ color: "red" }}>{infoErrorMessage}</span>
                     )}
                   </Col>
-                  <Col>
-                    <Button
-                      style={{ float: "right" }}
-                      onClick={() => {
-                        clearInputInfo();
-                      }}
-                    >
-                      Clear
-                    </Button>
-                  </Col>
+                  {configuration.share && (
+                    <Col>
+                      <Button
+                        style={{ float: "right" }}
+                        onClick={() => {
+                          clearInputInfo();
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    </Col>
+                  )}
                 </Row>
               </Form>
             )}
