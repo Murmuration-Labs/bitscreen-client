@@ -94,17 +94,14 @@ const FilterPage = (props): JSX.Element => {
           !!account.businessName &&
           !!account.contactPerson &&
           !!account.email &&
-          !!account.website
+          !!account.website &&
+          !!account.country
       : false;
   };
 
   const isShareEnabled = (): boolean => {
     return (
-      configuration.bitscreen &&
-      configuration.import &&
-      !!account?.country &&
-      configuration.share &&
-      isAccountInfoValid()
+      configuration.bitscreen && configuration.share && isAccountInfoValid()
     );
   };
 
