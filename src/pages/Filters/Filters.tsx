@@ -391,7 +391,7 @@ function Filters(): JSX.Element {
                 <th>Scope</th>
                 <th>Subscribers</th>
                 <th># of CIDs</th>
-                <th>Enabled?</th>
+                <th>Active</th>
                 <th>Actions</th>
               </tr>
             </thead>

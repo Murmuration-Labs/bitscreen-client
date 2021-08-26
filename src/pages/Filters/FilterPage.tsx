@@ -804,7 +804,7 @@ const FilterPage = (props): JSX.Element => {
                         }}
                         className={"text-dim"}
                       >
-                        Enabled?
+                        Active
                       </Form.Label>
                     </div>
                   </Form.Row>
