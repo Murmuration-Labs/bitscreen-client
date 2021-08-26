@@ -773,6 +773,7 @@ const FilterPage = (props): JSX.Element => {
                       marginLeft: 2,
                       marginTop: -20,
                       marginBottom: 20,
+                      width: "auto",
                     }}
                   >
                     <div
@@ -804,7 +805,25 @@ const FilterPage = (props): JSX.Element => {
                         }}
                         className={"text-dim"}
                       >
-                        Active
+                        Active{" "}
+                        <OverlayTrigger
+                          placement="right"
+                          delay={{ show: 150, hide: 300 }}
+                          overlay={
+                            <Tooltip id="button-tooltip">
+                              Active filter lists prevent deals with included
+                              CIDs
+                            </Tooltip>
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faQuestionCircle as IconProp}
+                            color="#7393B3"
+                            style={{
+                              marginTop: 2,
+                            }}
+                          />
+                        </OverlayTrigger>
                       </Form.Label>
                     </div>
                   </Form.Row>
@@ -837,27 +856,26 @@ const FilterPage = (props): JSX.Element => {
                           }}
                           className={"text-dim"}
                         >
-                          Override?
+                          Override?{" "}
+                          <OverlayTrigger
+                            placement="right"
+                            delay={{ show: 150, hide: 300 }}
+                            overlay={
+                              <Tooltip id="button-tooltip">
+                                Override lists prevent CIDs on imported lists
+                                from being filtered
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon
+                              icon={faQuestionCircle as IconProp}
+                              color="#7393B3"
+                              style={{
+                                marginTop: 2,
+                              }}
+                            />
+                          </OverlayTrigger>
                         </Form.Label>
-                        <OverlayTrigger
-                          placement="right"
-                          // show={filterList.override ? true : undefined}
-                          delay={{ show: 150, hide: 300 }}
-                          overlay={
-                            <Tooltip id="button-tooltip">
-                              Override lists prevent CIDs on imported lists from
-                              being filtered
-                            </Tooltip>
-                          }
-                        >
-                          <FontAwesomeIcon
-                            icon={faQuestionCircle as IconProp}
-                            color="#7393B3"
-                            style={{
-                              marginTop: 2,
-                            }}
-                          />
-                        </OverlayTrigger>
                       </div>
                     </Form.Row>
                   )}

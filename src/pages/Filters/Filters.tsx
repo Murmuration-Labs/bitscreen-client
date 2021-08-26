@@ -1,5 +1,10 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faEye,
+  faTrash,
+  faQuestionCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { isOrphan, isEnabled, isDisabled, isShared, isImported } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -14,8 +19,10 @@ import {
   Dropdown,
   Form,
   FormCheck,
+  OverlayTrigger,
   Row,
   Table,
+  Tooltip,
 } from "react-bootstrap";
 import { TableContainer, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
@@ -391,7 +398,26 @@ function Filters(): JSX.Element {
                 <th>Scope</th>
                 <th>Subscribers</th>
                 <th># of CIDs</th>
-                <th>Active</th>
+                <th>
+                  Active{" "}
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 150, hide: 300 }}
+                    overlay={
+                      <Tooltip id="button-tooltip">
+                        Active filter lists prevent deals with included CIDs
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faQuestionCircle as IconProp}
+                      color="#7393B3"
+                      style={{
+                        marginTop: 2,
+                      }}
+                    />
+                  </OverlayTrigger>
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
