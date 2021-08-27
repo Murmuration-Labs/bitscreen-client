@@ -437,7 +437,11 @@ function Filters(): JSX.Element {
                   <td>
                     <Link
                       to={`/filters/edit/${filterList.shareId}`}
-                      className="double-space-left"
+                      className={
+                        filterList.enabled
+                          ? "double-space-left"
+                          : "double-space-left grey-clr"
+                      }
                     >
                       {filterList.name}
                     </Link>
