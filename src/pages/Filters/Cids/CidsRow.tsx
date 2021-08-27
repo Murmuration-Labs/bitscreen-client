@@ -112,6 +112,20 @@ const CidsRow = ({
   const handleMove = (): void => onMoveClick();
   const handleDelete = (): void => onDeleteClick();
 
+  const formatDate = (date: string | undefined): string => {
+    if (date) {
+      const dateObj = new Date(date);
+      return (
+        dateObj.getFullYear() +
+        "-" +
+        (dateObj.getMonth() + 1) +
+        "-" +
+        dateObj.getDate()
+      );
+    }
+    return "No data";
+  };
+
   return (
     <TableRow
       hover
@@ -204,6 +218,16 @@ const CidsRow = ({
               : cid.refUrl}
           </a>
         )}
+      </TableCell>
+      <TableCell align="left">
+        <a
+          style={{ fontSize: "1rem" }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {formatDate(cid.created)}
+        </a>
       </TableCell>
       {filter.override && (
         <>

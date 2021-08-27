@@ -47,6 +47,7 @@ export function mapVisibilityString(visibilityStr: string): Visibility {
 
 export interface CidItem {
   id?: number;
+  created?: string;
   tableKey: string;
   cid: string;
   refUrl?: string;
