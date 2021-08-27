@@ -12,3 +12,17 @@ export const isShared = (f: FilterList) =>
   f.provider.id === AuthService.getProviderId();
 export const isImported = (f: FilterList) =>
   f.provider.id !== AuthService.getProviderId();
+
+export const formatDate = (date: string | undefined): string => {
+  if (date) {
+    const dateObj = new Date(date);
+    return (
+      dateObj.getFullYear() +
+      "-" +
+      (dateObj.getMonth() + 1) +
+      "-" +
+      dateObj.getDate()
+    );
+  }
+  return "No data";
+};

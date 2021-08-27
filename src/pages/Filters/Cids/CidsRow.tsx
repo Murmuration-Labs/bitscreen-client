@@ -18,6 +18,7 @@ import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
 import { CidItem, FilterList } from "../Interfaces";
+import { formatDate } from "../utils";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -111,20 +112,6 @@ const CidsRow = ({
   const handleEdit = (): void => onEditClick();
   const handleMove = (): void => onMoveClick();
   const handleDelete = (): void => onDeleteClick();
-
-  const formatDate = (date: string | undefined): string => {
-    if (date) {
-      const dateObj = new Date(date);
-      return (
-        dateObj.getFullYear() +
-        "-" +
-        (dateObj.getMonth() + 1) +
-        "-" +
-        dateObj.getDate()
-      );
-    }
-    return "No data";
-  };
 
   return (
     <TableRow

@@ -19,6 +19,7 @@ import "./PublicFilters.css";
 import * as AuthService from "../../services/AuthService";
 import { serverUri } from "../../config";
 import axios from "axios";
+import { formatDate } from "../Filters/utils";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -173,20 +174,6 @@ export default function PublicFilters() {
 
   const handlerInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchedValue(event.target.value);
-  };
-
-  const formatDate = (date: string | undefined): string => {
-    if (date) {
-      const dateObj = new Date(date);
-      return (
-        dateObj.getFullYear() +
-        "-" +
-        (dateObj.getMonth() + 1) +
-        "-" +
-        dateObj.getDate()
-      );
-    }
-    return "No data";
   };
 
   const emptyRows =
