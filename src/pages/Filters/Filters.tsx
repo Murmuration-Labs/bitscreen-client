@@ -1,5 +1,10 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faEye,
+  faTrash,
+  faQuestionCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { isOrphan, isEnabled, isDisabled, isShared, isImported } from "./utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
@@ -14,8 +19,10 @@ import {
   Dropdown,
   Form,
   FormCheck,
+  OverlayTrigger,
   Row,
   Table,
+  Tooltip,
 } from "react-bootstrap";
 import { TableContainer, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
@@ -391,7 +398,26 @@ function Filters(): JSX.Element {
                 <th>Scope</th>
                 <th>Subscribers</th>
                 <th># of CIDs</th>
-                <th>Enabled?</th>
+                <th>
+                  Active{" "}
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 150, hide: 300 }}
+                    overlay={
+                      <Tooltip id="button-tooltip">
+                        Active filter lists prevent deals with included CIDs
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faQuestionCircle as IconProp}
+                      color="#7393B3"
+                      style={{
+                        marginTop: 2,
+                      }}
+                    />
+                  </OverlayTrigger>
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -411,7 +437,11 @@ function Filters(): JSX.Element {
                   <td>
                     <Link
                       to={`/filters/edit/${filterList.shareId}`}
-                      className="double-space-left"
+                      className={
+                        filterList.enabled
+                          ? "double-space-left"
+                          : "double-space-left grey-clr"
+                      }
                     >
                       {filterList.name}
                     </Link>
@@ -611,8 +641,12 @@ function Filters(): JSX.Element {
                           marginBottom: 0,
                         }}
                       >
+                        <Form.Label style={{ marginTop: 6 }}>
+                          Select:
+                        </Form.Label>
                         <Form.Check
                           type="checkbox"
+                          style={{ marginLeft: 10 }}
                           checked={isAllLoaded}
                           onChange={() =>
                             setSelectedConditional(
@@ -651,53 +685,75 @@ function Filters(): JSX.Element {
                             ))}
                         </Dropdown.Menu>
                       </Dropdown>
+
+                      <Form.Group
+                        controlId="actionButtons"
+                        className="d-flex align-items-center"
+                        style={{
+                          height: "100%",
+                          paddingLeft: "28px",
+                          marginBottom: 0,
+                        }}
+                      >
+                        {(!!disabledSelectedFilters.length ||
+                          !!enabledSelectedFilters.length ||
+                          !!orphanSelectedFilters.length) && (
+                          <Form.Label style={{ marginTop: 6 }}>
+                            Actions:
+                          </Form.Label>
+                        )}
+
+                        {!!disabledSelectedFilters.length && (
+                          <Button
+                            variant="primary"
+                            style={{ marginLeft: 15 }}
+                            onClick={() => {
+                              const sharedFilters =
+                                disabledSelectedFilters.filter((x) =>
+                                  isShared(x)
+                                );
+                              if (sharedFilters.length > 0) {
+                                beginGlobalBulkSetEnabled(true);
+                              } else {
+                                beginLocalBulkSetEnabled(true);
+                              }
+                            }}
+                          >
+                            Enable ({disabledSelectedFilters.length})
+                          </Button>
+                        )}
+
+                        {!!enabledSelectedFilters.length && (
+                          <Button
+                            variant="danger"
+                            style={{ marginLeft: 15 }}
+                            onClick={() => {
+                              const sharedFilters =
+                                enabledSelectedFilters.filter((x) =>
+                                  isShared(x)
+                                );
+                              if (sharedFilters.length > 0) {
+                                beginGlobalBulkSetEnabled(false);
+                              } else {
+                                beginLocalBulkSetEnabled(false);
+                              }
+                            }}
+                          >
+                            Disable ({enabledSelectedFilters.length})
+                          </Button>
+                        )}
+
+                        {!!orphanSelectedFilters.length && (
+                          <Button
+                            variant="danger"
+                            style={{ marginLeft: 15 }}
+                            onClick={() => beginBulkDiscardOrphans()}
+                          >
+                            Discard ({orphanSelectedFilters.length})
+                          </Button>
+                        )}
+                      </Form.Group>
                     </Col>
-                    {!!disabledSelectedFilters.length && (
-                      <Col>
-                        <Button
-                          onClick={() => {
-                            const sharedFilters =
-                              disabledSelectedFilters.filter((x) =>
-                                isShared(x)
-                              );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(true);
-                            } else {
-                              beginLocalBulkSetEnabled(true);
-                            }
-                          }}
-                        >
-                          Enable {disabledSelectedFilters.length}
-                        </Button>
-                      </Col>
-                    )}
-
-                    {!!enabledSelectedFilters.length && (
-                      <Col>
-                        <Button
-                          onClick={() => {
-                            const sharedFilters = enabledSelectedFilters.filter(
-                              (x) => isShared(x)
-                            );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(false);
-                            } else {
-                              beginLocalBulkSetEnabled(false);
-                            }
-                          }}
-                        >
-                          Disable {enabledSelectedFilters.length}
-                        </Button>
-                      </Col>
-                    )}
-
-                    {!!orphanSelectedFilters.length && (
-                      <Col>
-                        <Button onClick={() => beginBulkDiscardOrphans()}>
-                          Discard {orphanSelectedFilters.length}
-                        </Button>
-                      </Col>
-                    )}
                   </Row>
                 </Col>
                 <Col className="text-right">

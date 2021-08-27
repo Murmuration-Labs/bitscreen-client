@@ -177,7 +177,14 @@ export default function PublicFilters() {
 
   const formatDate = (date: string | undefined): string => {
     if (date) {
-      return new Date(date).toLocaleString("en-US");
+      const dateObj = new Date(date);
+      return (
+        dateObj.getFullYear() +
+        "-" +
+        (dateObj.getMonth() + 1) +
+        "-" +
+        dateObj.getDate()
+      );
     }
     return "No data";
   };
