@@ -33,12 +33,13 @@ export interface HeadCell {
 const defaultHeadCells: HeadCell[] = [
   { pos: 0, id: "cid", label: "CID" },
   { pos: 1, id: "refUrl", label: "URL" },
+  { pos: 2, id: "created", label: "Added" },
   { pos: 999, id: "actions", label: "", align: "right" },
 ];
 
 const overrideHeadCells: HeadCell[] = [
-  { pos: 2, id: "remote", label: "Remote" },
-  { pos: 3, id: "local", label: "Local" },
+  { pos: 3, id: "remote", label: "Remote" },
+  { pos: 4, id: "local", label: "Local" },
 ];
 
 const CidsTable = ({

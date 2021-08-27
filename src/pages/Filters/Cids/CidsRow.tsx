@@ -18,6 +18,7 @@ import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
 import { CidItem, FilterList } from "../Interfaces";
+import { formatDate } from "../utils";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -204,6 +205,16 @@ const CidsRow = ({
               : cid.refUrl}
           </a>
         )}
+      </TableCell>
+      <TableCell align="left">
+        <a
+          style={{ fontSize: "1rem" }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          {formatDate(cid.created)}
+        </a>
       </TableCell>
       {filter.override && (
         <>

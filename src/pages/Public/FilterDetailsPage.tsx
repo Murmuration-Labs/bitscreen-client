@@ -13,6 +13,7 @@ import * as AuthService from "../../services/AuthService";
 import { useHistory } from "react-router";
 import { serverUri } from "../../config";
 import axios from "axios";
+import { formatDate } from "../Filters/utils";
 
 const FilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -52,20 +53,6 @@ const FilterDetailsPage = (props) => {
   useEffect(() => {
     setShowImportFilter(!!toBeImportedFilter);
   }, [toBeImportedFilter]);
-
-  const formatDate = (date: string | undefined): string => {
-    if (date) {
-      const dateObj = new Date(date);
-      return (
-        dateObj.getFullYear() +
-        "-" +
-        (dateObj.getMonth() + 1) +
-        "-" +
-        dateObj.getDate()
-      );
-    }
-    return "No data";
-  };
 
   const loadFilter = (shareId: string): void => {
     setFilterShareId(shareId);
