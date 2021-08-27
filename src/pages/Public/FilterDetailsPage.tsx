@@ -53,10 +53,25 @@ const FilterDetailsPage = (props) => {
     setShowImportFilter(!!toBeImportedFilter);
   }, [toBeImportedFilter]);
 
+  const formatDate = (date: string | undefined): string => {
+    if (date) {
+      const dateObj = new Date(date);
+      return (
+        dateObj.getFullYear() +
+        "-" +
+        (dateObj.getMonth() + 1) +
+        "-" +
+        dateObj.getDate()
+      );
+    }
+    return "No data";
+  };
+
   const loadFilter = (shareId: string): void => {
     setFilterShareId(shareId);
     ApiService.getPublicFilterDetails(shareId).then((data: any) => {
       setIsImported(data.isImported);
+      console.log(data.filter);
       const details = [
         { columnName: "Name of list:", columnValue: data.filter.name },
         {
@@ -76,8 +91,12 @@ const FilterDetailsPage = (props) => {
         { columnName: "Provider email:", columnValue: data.provider.email },
         { columnName: "Provider address:", columnValue: data.provider.address },
         {
-          columnName: "Date last updated:",
-          columnValue: data.filter.updated ?? "No data",
+          columnName: "Created:",
+          columnValue: formatDate(data.filter.created),
+        },
+        {
+          columnName: "Updated:",
+          columnValue: formatDate(data.filter.updated),
         },
       ];
       setFilterDetails(details);
