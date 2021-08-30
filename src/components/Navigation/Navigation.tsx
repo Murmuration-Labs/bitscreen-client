@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import * as AuthService from "../../services/AuthService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCog,
+  faFile,
+  faFolder,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import "./Navigation.css";
 
 function Navigation(): JSX.Element {
@@ -26,7 +31,7 @@ function Navigation(): JSX.Element {
           activeClassName={"is-active"}
           to="/settings"
         >
-          Settings
+          <FontAwesomeIcon size="sm" icon={faCog} /> Settings
         </NavLink>
         {provider && (
           <NavLink
@@ -34,7 +39,7 @@ function Navigation(): JSX.Element {
             activeClassName={"is-active"}
             to="/filters"
           >
-            Filters
+            <FontAwesomeIcon size="sm" icon={faFile} /> Filters
           </NavLink>
         )}
         {provider && (
@@ -43,7 +48,7 @@ function Navigation(): JSX.Element {
             activeClassName={"is-active"}
             to="/directory"
           >
-            ⤷&nbsp;Directory
+            <FontAwesomeIcon size="sm" icon={faFolder} /> Directory
           </NavLink>
         )}
       </div>
