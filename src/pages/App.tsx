@@ -41,7 +41,6 @@ function App(): JSX.Element {
 
   return (
     <Router>
-      <Header />
       <Container fluid={true}>
         <Row className="fill-height">
           <Col md={2} sm={3} className="left-bar fill-height">
