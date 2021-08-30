@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import * as AuthService from "../../services/AuthService";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCog,
+  faFile,
+  faFolderOpen,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import "./Navigation.css";
 
 function Navigation(): JSX.Element {
@@ -14,32 +21,37 @@ function Navigation(): JSX.Element {
   }, []);
 
   return (
-    <nav>
-      <NavLink
-        className="nav-link"
-        activeClassName={"is-active"}
-        to="/settings"
-      >
-        Settings
+    <nav className="navbar">
+      <NavLink className="nav-logo" to="/">
+        <FontAwesomeIcon icon={faSearch} /> BitScreen
       </NavLink>
-      {provider && (
+      <div className="nav-container">
         <NavLink
           className="nav-link"
           activeClassName={"is-active"}
-          to="/filters"
+          to="/settings"
         >
-          Filters
+          <FontAwesomeIcon size="sm" icon={faCog} /> Settings
         </NavLink>
-      )}
-      {provider && (
-        <NavLink
-          className="nav-link"
-          activeClassName={"is-active"}
-          to="/directory"
-        >
-          ⤷&nbsp;Directory
-        </NavLink>
-      )}
+        {provider && (
+          <NavLink
+            className="nav-link"
+            activeClassName={"is-active"}
+            to="/filters"
+          >
+            <FontAwesomeIcon size="sm" icon={faFile} /> Filters
+          </NavLink>
+        )}
+        {provider && (
+          <NavLink
+            className="nav-link"
+            activeClassName={"is-active"}
+            to="/directory"
+          >
+            <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
+          </NavLink>
+        )}
+      </div>
     </nav>
   );
 }

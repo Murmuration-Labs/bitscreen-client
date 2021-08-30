@@ -41,13 +41,10 @@ function App(): JSX.Element {
 
   return (
     <Router>
-      <Header />
+      <Navigation />
       <Container fluid={true}>
         <Row className="fill-height">
-          <Col md={2} sm={3} className="left-bar fill-height">
-            <Navigation />
-          </Col>
-          <Col md={10} sm={9} className={"stage"}>
+          <Col className={"stage"}>
             <Route
               path="/filters"
               exact
