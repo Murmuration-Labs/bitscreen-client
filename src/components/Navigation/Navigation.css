@@ -10,14 +10,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 58%;
-  height: 80px;
+  width: 55%;
+  height: 90px;
   max-width: 1500px;
 }
 
 .nav-logo {
   margin-left: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
   font-size: 32px;
   flex-grow: 1;
 }
