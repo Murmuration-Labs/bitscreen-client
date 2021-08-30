@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog,
   faFile,
-  faFolder,
+  faFolderOpen,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import "./Navigation.css";
@@ -22,10 +22,10 @@ function Navigation(): JSX.Element {
 
   return (
     <nav className="navbar">
+      <NavLink className="nav-logo" to="/">
+        <FontAwesomeIcon icon={faSearch} /> BitScreen
+      </NavLink>
       <div className="nav-container">
-        <NavLink className="nav-logo" to="/">
-          <FontAwesomeIcon icon={faSearch} /> BitScreen
-        </NavLink>
         <NavLink
           className="nav-link"
           activeClassName={"is-active"}
@@ -48,7 +48,7 @@ function Navigation(): JSX.Element {
             activeClassName={"is-active"}
             to="/directory"
           >
-            <FontAwesomeIcon size="sm" icon={faFolder} /> Directory
+            <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
           </NavLink>
         )}
       </div>
