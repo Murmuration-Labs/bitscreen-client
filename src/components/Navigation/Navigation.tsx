@@ -16,35 +16,37 @@ function Navigation(): JSX.Element {
   }, []);
 
   return (
-    <nav>
-      <NavLink className="nav-link" to="/">
-        <FontAwesomeIcon icon={faSearch} /> Bit<strong>Screen</strong>
-      </NavLink>
-      <NavLink
-        className="nav-link"
-        activeClassName={"is-active"}
-        to="/settings"
-      >
-        Settings
-      </NavLink>
-      {provider && (
+    <nav className="navbar">
+      <div className="nav-container">
+        <NavLink className="nav-logo" to="/">
+          <FontAwesomeIcon icon={faSearch} /> BitScreen
+        </NavLink>
         <NavLink
           className="nav-link"
           activeClassName={"is-active"}
-          to="/filters"
+          to="/settings"
         >
-          Filters
+          Settings
         </NavLink>
-      )}
-      {provider && (
-        <NavLink
-          className="nav-link"
-          activeClassName={"is-active"}
-          to="/directory"
-        >
-          ⤷&nbsp;Directory
-        </NavLink>
-      )}
+        {provider && (
+          <NavLink
+            className="nav-link"
+            activeClassName={"is-active"}
+            to="/filters"
+          >
+            Filters
+          </NavLink>
+        )}
+        {provider && (
+          <NavLink
+            className="nav-link"
+            activeClassName={"is-active"}
+            to="/directory"
+          >
+            ⤷&nbsp;Directory
+          </NavLink>
+        )}
+      </div>
     </nav>
   );
 }
