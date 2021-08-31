@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { NavDropdown } from "react-bootstrap";
 import * as AuthService from "../../services/AuthService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -19,6 +20,12 @@ function Navigation(): JSX.Element {
       unsubscribe();
     };
   }, []);
+
+  const shortenAddress = (address: string): string => {
+    return address.length > 8
+      ? address.substr(0, 4) + "..." + address.substr(-4)
+      : address;
+  };
 
   return (
     <nav className="navbar">
@@ -50,6 +57,22 @@ function Navigation(): JSX.Element {
           >
             <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
           </NavLink>
+        )}
+        {provider && (
+          <NavDropdown
+            id="nav-dropdown-wallet-address"
+            title={shortenAddress(provider.walletAddressHashed ?? "")}
+          >
+            <NavDropdown.Item
+              href="/settings"
+              onClick={() => {
+                setProvider(null);
+                AuthService.removeAccount();
+              }}
+            >
+              Disconnect wallet?
+            </NavDropdown.Item>
+          </NavDropdown>
         )}
       </div>
     </nav>
