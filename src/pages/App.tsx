@@ -28,69 +28,78 @@ export type RouterProps = RouteComponentProps<MatchParams>;
 function App(): JSX.Element {
   const [provider, setProvider] = useState(AuthService.getAccount());
 
-  useEffect(() => {
-    const unsubscribe = AuthService.subscribe((acc) => setProvider(acc));
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const authHandler = (transition) => {
-    console.log(transition);
-  };
+  useEffect(() => AuthService.subscribe(setProvider), []);
 
   return (
-    <MetamaskProvider>
-      <Router>
-        <Navigation />
-        <Container fluid={true}>
-          <Row className="fill-height">
-            <Col className={"stage"}>
-              <Route
-                path="/filters"
-                exact
-                component={provider ? Filters : Settings}
-              >
-                {!provider && <Redirect to="/settings" />}
-              </Route>
-              <Route
-                path="/filters/edit/:shareId?"
-                exact
-                component={provider ? FilterPage : Settings}
-              >
-                {!provider && <Redirect to="/settings" />}
-              </Route>
-              <Route
-                path="/filters/new"
-                exact
-                component={provider ? FilterPage : Settings}
-              >
-                {!provider && <Redirect to="/settings" />}
-              </Route>
-              <Route path="/settings" exact component={Settings} />
-              <Route
-                path="/directory"
-                exact
-                component={provider ? PublicFilters : Settings}
-              >
-                {!provider && <Redirect to="/settings" />}
-              </Route>
-              <Route
-                path="/directory/details/:shareId?"
-                exact
-                component={provider ? FilterDetailsPage : Settings}
-              >
-                {!provider && <Redirect to="/settings" />}
-              </Route>
-              <Route exact path="/">
+    // <MetamaskProvider>
+    <Router>
+      <Navigation />
+      <Container fluid={true}>
+        <Row className="fill-height">
+          <Col className={"stage"}>
+            <Route
+              path="/filters"
+              exact
+              component={provider && provider.accessToken ? Filters : Settings}
+            >
+              {(!provider || !provider.accessToken) && (
                 <Redirect to="/settings" />
-              </Route>
-            </Col>
-          </Row>
-          <ToastContainer />
-        </Container>
-      </Router>
-    </MetamaskProvider>
+              )}
+            </Route>
+            <Route
+              path="/filters/edit/:shareId?"
+              exact
+              component={
+                provider && provider.accessToken ? FilterPage : Settings
+              }
+            >
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
+            </Route>
+            <Route
+              path="/filters/new"
+              exact
+              component={
+                provider && provider.accessToken ? FilterPage : Settings
+              }
+            >
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
+            </Route>
+            <Route path="/settings" exact component={Settings} />
+            <Route
+              path="/directory"
+              exact
+              component={
+                provider && provider.accessToken ? PublicFilters : Settings
+              }
+            >
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
+            </Route>
+            <Route
+              path="/directory/details/:shareId?"
+              exact
+              component={
+                provider && provider.accessToken ? FilterDetailsPage : Settings
+              }
+            >
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/settings" />
+            </Route>
+          </Col>
+        </Row>
+        <ToastContainer />
+      </Container>
+    </Router>
+    // </MetamaskProvider>
   );
 }
 

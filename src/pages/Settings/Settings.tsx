@@ -67,15 +67,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   };
 
   useEffect(() => {
-    async function setInitialConfig() {
-      const response = await axios.get(`${serverUri()}/config`);
+    axios.get(`${serverUri()}/config`).then((response) => {
       const config = response.data;
 
       setConfigLoaded(true);
       setConfiguration(config);
-    }
-
-    setInitialConfig();
+    });
   }, []);
 
   const putConfig = async (config: Config): Promise<void> => {
@@ -114,7 +111,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       return;
     }
 
-    if (!account || !account.walletAddress || account.accessToken) {
+    if (account?.accessToken) {
+      setLoggedIn(true);
+      return;
+    }
+
+    if (!account || !account.walletAddress) {
       return;
     }
 
@@ -125,8 +127,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     ApiService.getProvider(wallet)
       .then(async (provider) => {
         if (provider) {
-          AuthService.updateAccount(provider);
-          ApiService.authenticateProvider().then((acc) => {
+          ApiService.authenticateProvider(provider).then((acc) => {
             setLoggedIn(true);
             AuthService.updateAccount(acc);
           });
@@ -135,9 +136,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
         await ApiService.createProvider(wallet)
           .then((_provider) => {
-            setLoggedIn(true);
-            AuthService.updateAccount(_provider);
-            ApiService.authenticateProvider().then((acc) => {
+            ApiService.authenticateProvider(_provider).then((acc) => {
               setLoggedIn(true);
               AuthService.updateAccount(acc);
             });
@@ -267,8 +266,8 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Button
                     disabled={!loggedIn}
                     onClick={() => {
-                      AuthService.removeAccount();
                       setLoggedIn(false);
+                      AuthService.removeAccount();
                     }}
                   >
                     Log out
@@ -278,7 +277,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          {configuration.bitscreen && account && (
+          {configuration.bitscreen && loggedIn && (
             <Row className={"settings-block"} style={{ marginTop: 25 }}>
               <Col>
                 <FormCheck

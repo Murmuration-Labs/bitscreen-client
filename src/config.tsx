@@ -1,7 +1,22 @@
 // process.env.NODE_ENV is automatically set by react-scripts from package.json
 // react-scripts start -> process.env.NODE_ENV = "development"
-// react-scripts build -> process.env.NODE_ENV = "production"
+
+import axios, { AxiosRequestConfig } from "axios";
+import * as AuthService from "./services/AuthService";
+
 const environment = process.env.NODE_ENV;
+
+axios.interceptors.request.use((config: AxiosRequestConfig) => {
+  const account = AuthService.getAccount();
+
+  if (!account) {
+    return config;
+  }
+
+  config.headers.Authorization = account.accessToken;
+
+  return config;
+});
 
 export const serverUri = (): string => {
   switch (environment) {

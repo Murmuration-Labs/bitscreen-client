@@ -1,17 +1,15 @@
+import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
+import Web3 from "web3";
 import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account, Provider } from "../pages/Contact/Interfaces";
+import { Account } from "../pages/Contact/Interfaces";
 import {
   CidItem,
   FilterList,
   ProviderFilter,
 } from "../pages/Filters/Interfaces";
-import * as AuthService from "./AuthService";
 import { isImported } from "../pages/Filters/utils";
-import detectEthereumProvider from "@metamask/detect-provider";
-import Web3 from "web3";
-import * as sigUtil from "eth-sig-util";
-import * as ethUtil from "ethereumjs-util";
+import * as AuthService from "./AuthService";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -242,7 +240,7 @@ const ApiService = {
     };
   },
 
-  authenticateProvider: async (): Promise<Account> => {
+  authenticateProvider: async (account: Account): Promise<Account> => {
     const provider: any = await detectEthereumProvider({
       mustBeMetaMask: true,
     });
@@ -251,8 +249,6 @@ const ApiService = {
       console.error();
       throw new Error("Please install metamask.");
     }
-
-    const account = AuthService.getAccount();
 
     if (!account || !account.walletAddress || !account.nonce) {
       throw new Error("Please login with metamask.");
