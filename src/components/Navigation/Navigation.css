@@ -6,8 +6,8 @@
 
 .nav-container {
   display: flex;
+  justify-content: center;
   align-items: center;
-  margin-left: 70px;
   height: 115px;
   max-width: 1500px;
 }
@@ -51,6 +51,7 @@
 
 #nav-dropdown-wallet-address {
   margin-left: 545px;
+  margin-right: 200px;
   background-color: white;
   color: #1b2738;
   border-radius: 16px;

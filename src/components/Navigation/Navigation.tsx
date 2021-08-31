@@ -33,6 +33,7 @@ function Navigation(): JSX.Element {
       <NavLink className="nav-logo" to="/">
         <FontAwesomeIcon icon={faSearch} /> BitScreen
       </NavLink>
+      <div style={{ flexGrow: 1 }} />
       <div className="nav-container">
         <NavLink
           className="nav-link"
@@ -81,6 +82,7 @@ function Navigation(): JSX.Element {
           </NavDropdown>
         )}
       </div>
+      <div style={{ flexGrow: 1 }} />
     </nav>
   );
 }
