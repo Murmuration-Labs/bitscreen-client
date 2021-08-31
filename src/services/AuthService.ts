@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Account } from "../pages/Contact/Interfaces";
 
 const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";
@@ -25,6 +26,10 @@ export const updateAccount = (account: Account): void => {
   account.walletAddress = account.walletAddress
     ? account.walletAddress.toLowerCase()
     : account.walletAddress;
+
+  if (_.isEqual(account, getAccount())) {
+    return;
+  }
 
   localStorage.setItem(AUTH_KEY, JSON.stringify(account));
   update(account);

@@ -125,9 +125,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     ApiService.getProvider(wallet)
       .then(async (provider) => {
         if (provider) {
-          setLoggedIn(true);
           AuthService.updateAccount(provider);
-          ApiService.authenticateProvider().then(AuthService.updateAccount);
+          ApiService.authenticateProvider().then((acc) => {
+            setLoggedIn(true);
+            AuthService.updateAccount(acc);
+          });
           return;
         }
 
@@ -135,7 +137,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
           .then((_provider) => {
             setLoggedIn(true);
             AuthService.updateAccount(_provider);
-            ApiService.authenticateProvider().then(AuthService.updateAccount);
+            ApiService.authenticateProvider().then((acc) => {
+              setLoggedIn(true);
+              AuthService.updateAccount(acc);
+            });
             return;
           })
           .catch((_e) => {
