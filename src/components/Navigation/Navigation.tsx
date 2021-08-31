@@ -35,13 +35,15 @@ function Navigation(): JSX.Element {
       </NavLink>
       <div style={{ flexGrow: 1 }} />
       <div className="nav-container">
-        <NavLink
-          className="nav-link"
-          activeClassName={"is-active"}
-          to="/settings"
-        >
-          <FontAwesomeIcon size="sm" icon={faCog} /> Settings
-        </NavLink>
+        {provider && (
+          <NavLink
+            className="nav-link"
+            activeClassName={"is-active"}
+            to="/settings"
+          >
+            <FontAwesomeIcon size="sm" icon={faCog} /> Settings
+          </NavLink>
+        )}
         {provider && (
           <NavLink
             className="nav-link"
