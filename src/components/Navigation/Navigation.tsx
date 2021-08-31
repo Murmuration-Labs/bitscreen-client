@@ -8,6 +8,7 @@ import {
   faFile,
   faFolderOpen,
   faSearch,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import "./Navigation.css";
 
@@ -61,7 +62,12 @@ function Navigation(): JSX.Element {
         {provider && (
           <NavDropdown
             id="nav-dropdown-wallet-address"
-            title={shortenAddress(provider.walletAddressHashed ?? "")}
+            title={
+              <span>
+                <FontAwesomeIcon size="sm" icon={faUser} />{" "}
+                {shortenAddress(provider.walletAddressHashed ?? "")}
+              </span>
+            }
           >
             <NavDropdown.Item
               href="/settings"
