@@ -7,7 +7,7 @@
 .nav-container {
   display: flex;
   align-items: center;
-  margin-left: 75px;
+  margin-left: 70px;
   height: 115px;
   max-width: 1500px;
 }
@@ -16,6 +16,7 @@
   margin-left: 15px;
   margin-bottom: 70px;
   font-size: 32px;
+  color: white;
 }
 
 .nav-logo:hover {
@@ -29,6 +30,8 @@
   padding-left: 10px;
   padding-right: 10px;
   margin-right: 10px;
+  color: white;
+  font-weight: normal;
 }
 
 .nav-link:hover {
