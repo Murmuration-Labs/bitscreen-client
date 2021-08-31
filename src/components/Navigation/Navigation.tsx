@@ -56,7 +56,7 @@ function Navigation(): JSX.Element {
             activeClassName={"is-active"}
             to="/directory"
           >
-            <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
+            <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Public Filters
           </NavLink>
         )}
         {provider && (
