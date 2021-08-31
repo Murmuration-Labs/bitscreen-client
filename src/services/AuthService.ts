@@ -7,16 +7,6 @@ const update = (account: Account | null) => {
   subscribers.forEach((s) => s(account));
 };
 
-export const updateAccount = (account: Account): void => {
-  localStorage.setItem(AUTH_KEY, JSON.stringify(account));
-  update(account);
-};
-
-export const removeAccount = (): void => {
-  localStorage.removeItem(AUTH_KEY);
-  update(null);
-};
-
 export const getAccount = (): Account | null => {
   const accountStringified = localStorage.getItem(AUTH_KEY);
   if (!accountStringified) {
@@ -29,6 +19,20 @@ export const getAccount = (): Account | null => {
   }
 
   return account;
+};
+
+export const updateAccount = (account: Account): void => {
+  account.walletAddress = account.walletAddress
+    ? account.walletAddress.toLowerCase()
+    : account.walletAddress;
+
+  localStorage.setItem(AUTH_KEY, JSON.stringify(account));
+  update(account);
+};
+
+export const removeAccount = (): void => {
+  localStorage.removeItem(AUTH_KEY);
+  update(null);
 };
 
 export const subscribe = (

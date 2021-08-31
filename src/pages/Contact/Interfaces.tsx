@@ -7,8 +7,10 @@ export interface Provider {
   email?: string;
   contactPerson?: string;
   address?: string;
+  nonce?: string;
 }
 
 export interface Account extends Provider {
   walletAddress?: string;
+  accessToken?: string;
 }
