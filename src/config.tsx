@@ -13,7 +13,7 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
     return config;
   }
 
-  config.headers.Authorization = account.accessToken;
+  config.headers.Authorization = `Bearer ${account.accessToken}`;
 
   return config;
 });
