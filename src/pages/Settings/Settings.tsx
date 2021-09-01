@@ -324,11 +324,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Typeahead
                     id="typeahead-autocomplete"
                     labelKey="name"
-                    defaultSelected={
-                      account.country
-                        ? countryNames.filter((x) => x.name === account.country)
-                        : []
-                    }
+                    selected={countryNames.filter(
+                      (x) => x.name === account.country
+                    )}
                     options={countryNames}
                     onChange={(selected) => {
                       if (selected.length === 0) {
