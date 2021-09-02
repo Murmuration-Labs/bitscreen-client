@@ -127,9 +127,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     ApiService.getProvider(wallet)
       .then(async (provider) => {
         if (provider) {
-          console.log("GET PROVIDER", provider);
           ApiService.authenticateProvider(provider).then((acc) => {
-            console.log("AUTH CREATED PROVIDER", acc);
             setLoggedIn(true);
             AuthService.updateAccount(acc);
           });
@@ -138,7 +136,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
         await ApiService.createProvider(wallet)
           .then((_provider) => {
-            console.log("CREATE PROVIDER", _provider);
             ApiService.authenticateProvider(_provider).then((acc) => {
               setLoggedIn(true);
               AuthService.updateAccount(acc);
