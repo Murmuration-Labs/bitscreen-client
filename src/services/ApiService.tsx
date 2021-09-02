@@ -260,9 +260,12 @@ const ApiService = {
     const signature = await web3.eth.personal.sign(nonce, walletAddress, "");
 
     return (
-      await axios.post<Account>(`/provider/auth/${walletAddress}`, {
-        signature,
-      })
+      await axios.post<Account>(
+        `${serverUri()}/provider/auth/${walletAddress}`,
+        {
+          signature,
+        }
+      )
     ).data;
   },
 
