@@ -334,7 +334,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const cancel = async (): Promise<void> => {
-    await setFilterListChanged(false);
+    setFilterListChanged(false);
     history.push(`/filters`);
   };
 
@@ -587,7 +587,26 @@ const FilterPage = (props): JSX.Element => {
     }
 
     if (isEdit) {
-      return <h2>Edit filter list</h2>;
+      return (
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            flexWrap: "nowrap",
+            flexDirection: "row",
+          }}
+        >
+          <h2>Edit filter list</h2>
+          &nbsp; &nbsp;
+          {filterList.provider_Filters && (
+            <h4 style={{ color: "grey" }}>
+              [{filterList.provider_Filters?.length} subs]
+            </h4>
+          )}
+        </div>
+      );
     }
 
     return <h2>New filter list</h2>;
