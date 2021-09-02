@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Account } from "../pages/Contact/Interfaces";
 
 const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";
@@ -5,16 +6,6 @@ let subscribers: any[] = [];
 
 const update = (account: Account | null) => {
   subscribers.forEach((s) => s(account));
-};
-
-export const updateAccount = (account: Account): void => {
-  localStorage.setItem(AUTH_KEY, JSON.stringify(account));
-  update(account);
-};
-
-export const removeAccount = (): void => {
-  localStorage.removeItem(AUTH_KEY);
-  update(null);
 };
 
 export const getAccount = (): Account | null => {
@@ -29,6 +20,24 @@ export const getAccount = (): Account | null => {
   }
 
   return account;
+};
+
+export const updateAccount = (account: Account): void => {
+  account.walletAddress = account.walletAddress
+    ? account.walletAddress.toLowerCase()
+    : account.walletAddress;
+
+  if (_.isEqual(account, getAccount())) {
+    return;
+  }
+
+  localStorage.setItem(AUTH_KEY, JSON.stringify(account));
+  update(account);
+};
+
+export const removeAccount = (): void => {
+  localStorage.removeItem(AUTH_KEY);
+  update(null);
 };
 
 export const subscribe = (

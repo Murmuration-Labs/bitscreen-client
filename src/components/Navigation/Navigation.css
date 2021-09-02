@@ -1,19 +1,16 @@
 .navbar {
   background-color: #1b2738;
-  height: 85px;
   justify-content: left;
+  padding-bottom: 0;
+  display: block;
 }
 
 .nav-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-  max-width: 1500px;
 }
 
 .nav-logo {
-  margin-left: 15px;
-  margin-bottom: 70px;
   font-size: 32px;
   color: white;
 }
@@ -49,9 +46,7 @@
 }
 
 #nav-dropdown-wallet-address {
-  margin-left: 545px;
-  margin-right: 200px;
-  margin-bottom: 40px;
+  width: fit-content;
   background-color: white;
   color: #1b2738;
   border-radius: 16px;

@@ -18,28 +18,61 @@ import ApiService from "../../services/ApiService";
 import { countries } from "countries-list";
 import validator from "validator";
 import _ from "lodash";
+import detectEthereumProvider from "@metamask/detect-provider";
 
 const API_MESSAGES_TIME = 1500;
 
 export default function Settings(props: ComponentType<SettingsProps>) {
   const [configLoaded, setConfigLoaded] = useState<boolean>(false);
-  const [accountLoaded, setAccountLoaded] = useState<boolean>(false);
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
     share: false,
   });
 
+  const [loading, setLoading] = useState(false);
+
+  const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
+  const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [infoErrorMessage, setInfoErrorMessage] = useState<string>("");
+  const [account, setAccount] = useState(AuthService.getAccount());
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [disableButton, setDisableButton] = useState(false);
+
+  const connectWithMetamask = async (e) => {
+    const provider: any = await detectEthereumProvider({
+      mustBeMetaMask: true,
+    });
+
+    if (!provider) {
+      return window.open("https://metamask.io/", "_blank");
+    }
+
+    if (parseInt(provider.chainId) !== 1) {
+      return alert(`Please switch to Mainnet.`);
+    }
+
+    provider
+      .request({ method: "eth_requestAccounts" })
+      .then((_wallets: string[]) =>
+        AuthService.updateAccount({
+          ...AuthService.getAccount(),
+          walletAddress: _wallets[0],
+        })
+      )
+      .catch((error: any) =>
+        console.error("Permission to wallets required", error)
+      );
+  };
+
   useEffect(() => {
-    async function setInitialConfig() {
-      const response = await axios.get(`${serverUri()}/config`);
+    axios.get(`${serverUri()}/config`).then((response) => {
       const config = response.data;
 
       setConfigLoaded(true);
       setConfiguration(config);
-    }
-
-    setInitialConfig();
+    });
   }, []);
 
   const putConfig = async (config: Config): Promise<void> => {
@@ -73,46 +106,54 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     putConfig(newConfig);
   };
 
-  const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
-  const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [infoErrorMessage, setInfoErrorMessage] = useState<string>("");
-  const [account, setAccount] = useState(AuthService.getAccount());
-  const [plainWallet, setPlainWallet] = useState(account?.walletAddress || "");
-  const [loggedIn, setLoggedIn] = useState(!!account);
-  const [disableButton, setDisableButton] = useState(false);
-
   useEffect(() => {
-    setLoggedIn(!!account);
-    switch (true) {
-      case !account:
-        AuthService.removeAccount();
-        setPlainWallet("");
-        setAccountLoaded(false);
-        break;
-      default:
-        setPlainWallet(account?.walletAddress || "");
+    if (loggedIn) {
+      return;
     }
-  }, [account]);
 
-  useEffect(() => {
-    if (!accountLoaded && plainWallet) {
-      (async () => {
-        await ApiService.getProvider(plainWallet)
-          .then((loadedAccount) => {
-            setAccountLoaded(true);
-            setAccount(loadedAccount);
-          })
-          .catch((err) => {
-            console.error(err);
+    if (account?.accessToken) {
+      setLoggedIn(true);
+      return;
+    }
 
-            setAccount(null);
+    if (!account || !account.walletAddress) {
+      return;
+    }
+
+    const wallet = account.walletAddress;
+
+    setLoading(true);
+
+    ApiService.getProvider(wallet)
+      .then(async (provider) => {
+        if (provider) {
+          ApiService.authenticateProvider(provider).then((acc) => {
+            setLoggedIn(true);
+            AuthService.updateAccount(acc);
           });
-      })();
-    } else {
-      setAccountLoaded(true);
-    }
-  }, [accountLoaded, account]);
+          return;
+        }
+
+        await ApiService.createProvider(wallet)
+          .then((_provider) => {
+            ApiService.authenticateProvider(_provider).then((acc) => {
+              setLoggedIn(true);
+              AuthService.updateAccount(acc);
+            });
+            return;
+          })
+          .catch((_e) => {
+            setLoggedIn(false);
+            setErrorMessage("Error Logging In");
+          });
+      })
+      .catch((_e) => {
+        setLoggedIn(false);
+        setErrorMessage("Error Logging In");
+      });
+  }, [account, loggedIn]);
+
+  useEffect(() => AuthService.subscribe(setAccount), []);
 
   const handleFieldChange = (
     key: string,
@@ -161,28 +202,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     });
   };
 
-  const logIn = async () => {
-    if (loggedIn || !plainWallet) {
-      return;
-    }
-
-    const provider = await ApiService.getProvider(plainWallet).catch((_err) => {
-      setErrorMessage("Error Logging In");
-    });
-
-    if (provider) {
-      setAccount(provider);
-      AuthService.updateAccount(provider);
-      return;
-    }
-
-    await ApiService.createProvider(plainWallet)
-      .then(logIn)
-      .catch((_err) => {
-        setErrorMessage("Error Logging In");
-      });
-  };
-
   const showInfoError = (message: string) => {
     setInfoErrorMessage(message);
     setDisplayInfoError(true);
@@ -227,51 +246,30 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             <Form style={{ marginLeft: 12, marginTop: -20 }}>
               <Form.Group>
                 <Form.Label>FIL wallet address</Form.Label>
+                <br />
+                {account && account.walletAddress && (
+                  <p className="text-dim">{account.walletAddress}</p>
+                )}
                 <p className="text-dim">
                   Linking a wallet address is required to activate BitScreen.
                   Your wallet address is used to access your lists, and is
                   stored hashed for statistical purposes.
                 </p>
-                <Row>
-                  <Col>
-                    <Form.Control
-                      disabled={loggedIn}
-                      type="text"
-                      placeholder="FIL address"
-                      value={account?.walletAddress || plainWallet}
-                      onChange={(ev: ChangeEvent<HTMLInputElement>) => {
-                        setPlainWallet(ev.target.value);
-                        handleFieldChange("walletAddress", ev);
-                      }}
-                      onKeyDown={(
-                        event: React.KeyboardEvent<HTMLInputElement>
-                      ) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          if (!loggedIn) {
-                            logIn();
-                          }
-                        }
-                      }}
-                    />
-                  </Col>
-                </Row>
               </Form.Group>
               <Row>
                 <Col>
-                  <Button
-                    disabled={loggedIn}
-                    onClick={(e) => {
-                      if (!loggedIn) {
-                        logIn();
-                      }
-                    }}
-                  >
-                    Save
+                  <Button disabled={loggedIn} onClick={connectWithMetamask}>
+                    Connect with Metamask
                   </Button>
                 </Col>
                 <Col md="auto">
-                  <Button disabled={!loggedIn} onClick={() => setAccount(null)}>
+                  <Button
+                    disabled={!loggedIn}
+                    onClick={() => {
+                      setLoggedIn(false);
+                      AuthService.removeAccount();
+                    }}
+                  >
                     Log out
                   </Button>
                 </Col>
@@ -279,7 +277,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
             </Form>
           )}
 
-          {configuration.bitscreen && account && (
+          {configuration.bitscreen && loggedIn && (
             <Row className={"settings-block"} style={{ marginTop: 25 }}>
               <Col>
                 <FormCheck
@@ -326,11 +324,9 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Typeahead
                     id="typeahead-autocomplete"
                     labelKey="name"
-                    defaultSelected={
-                      account.country
-                        ? countryNames.filter((x) => x.name === account.country)
-                        : []
-                    }
+                    selected={countryNames.filter(
+                      (x) => x.name === account.country
+                    )}
                     options={countryNames}
                     onChange={(selected) => {
                       if (selected.length === 0) {

@@ -1,13 +1,15 @@
+import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
+import Web3 from "web3";
 import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account, Provider } from "../pages/Contact/Interfaces";
+import { Account } from "../pages/Contact/Interfaces";
 import {
   CidItem,
   FilterList,
   ProviderFilter,
 } from "../pages/Filters/Interfaces";
-import * as AuthService from "./AuthService";
 import { isImported } from "../pages/Filters/utils";
+import * as AuthService from "./AuthService";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -238,8 +240,35 @@ const ApiService = {
     };
   },
 
+  authenticateProvider: async (account: Account): Promise<Account> => {
+    const provider: any = await detectEthereumProvider({
+      mustBeMetaMask: true,
+    });
+
+    if (!provider) {
+      console.error();
+      throw new Error("Please install metamask.");
+    }
+
+    if (!account || !account.walletAddress || !account.nonce) {
+      throw new Error("Please login with metamask.");
+    }
+
+    const { walletAddress, nonce } = account;
+
+    const web3 = new Web3(provider);
+    const signature = await web3.eth.personal.sign(nonce, walletAddress, "");
+
+    return (
+      await axios.post<Account>(`/provider/auth/${walletAddress}`, {
+        signature,
+      })
+    ).data;
+  },
+
   createProvider: async (wallet: string): Promise<Account> => {
-    return axios.post(`${serverUri()}/provider/${wallet}`);
+    return (await axios.post(`${serverUri()}/provider/${wallet.toLowerCase()}`))
+      .data;
   },
 
   updateProvider: async (account: Account): Promise<Account> => {

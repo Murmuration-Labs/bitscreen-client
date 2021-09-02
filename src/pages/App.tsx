@@ -9,15 +9,15 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Header from "../components/Header/Header";
 import Navigation from "../components/Navigation/Navigation";
+import * as AuthService from "../services/AuthService";
 import "./App.css";
 import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
+import FilterDetailsPage from "./Public/FilterDetailsPage";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
-import * as AuthService from "../services/AuthService";
-import FilterDetailsPage from "./Public/FilterDetailsPage";
+import MetamaskProvider from "../providers/MetamaskProvider";
 
 interface MatchParams {
   id: string;
@@ -28,18 +28,10 @@ export type RouterProps = RouteComponentProps<MatchParams>;
 function App(): JSX.Element {
   const [provider, setProvider] = useState(AuthService.getAccount());
 
-  useEffect(() => {
-    const unsubscribe = AuthService.subscribe((acc) => setProvider(acc));
-    return () => {
-      unsubscribe();
-    };
-  }, []);
-
-  const authHandler = (transition) => {
-    console.log(transition);
-  };
+  useEffect(() => AuthService.subscribe(setProvider), []);
 
   return (
+    // <MetamaskProvider>
     <Router>
       <Navigation />
       <Container fluid={true}>
@@ -48,38 +40,56 @@ function App(): JSX.Element {
             <Route
               path="/filters"
               exact
-              component={provider ? Filters : Settings}
+              component={provider && provider.accessToken ? Filters : Settings}
             >
-              {!provider && <Redirect to="/settings" />}
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
             </Route>
             <Route
               path="/filters/edit/:shareId?"
               exact
-              component={provider ? FilterPage : Settings}
+              component={
+                provider && provider.accessToken ? FilterPage : Settings
+              }
             >
-              {!provider && <Redirect to="/settings" />}
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
             </Route>
             <Route
               path="/filters/new"
               exact
-              component={provider ? FilterPage : Settings}
+              component={
+                provider && provider.accessToken ? FilterPage : Settings
+              }
             >
-              {!provider && <Redirect to="/settings" />}
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
             </Route>
             <Route path="/settings" exact component={Settings} />
             <Route
               path="/directory"
               exact
-              component={provider ? PublicFilters : Settings}
+              component={
+                provider && provider.accessToken ? PublicFilters : Settings
+              }
             >
-              {!provider && <Redirect to="/settings" />}
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
             </Route>
             <Route
               path="/directory/details/:shareId?"
               exact
-              component={provider ? FilterDetailsPage : Settings}
+              component={
+                provider && provider.accessToken ? FilterDetailsPage : Settings
+              }
             >
-              {!provider && <Redirect to="/settings" />}
+              {(!provider || !provider.accessToken) && (
+                <Redirect to="/settings" />
+              )}
             </Route>
             <Route exact path="/">
               <Redirect to="/settings" />
@@ -89,6 +99,7 @@ function App(): JSX.Element {
         <ToastContainer />
       </Container>
     </Router>
+    // </MetamaskProvider>
   );
 }
 
