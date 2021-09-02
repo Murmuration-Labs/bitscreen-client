@@ -94,7 +94,8 @@ function Filters(): JSX.Element {
 
   useEffect(() => {
     async function setInitialConfig() {
-      const response = await axios.get(`${serverUri()}/config`);
+      const providerId = AuthService.getProviderId();
+      const response = await axios.get(`${serverUri()}/config/${providerId}`);
       const config = response.data;
 
       setConfiguration(config);
