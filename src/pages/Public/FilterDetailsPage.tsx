@@ -124,7 +124,12 @@ const FilterDetailsPage = (props) => {
                   <TableRow>
                     <TableCell>
                       {isImported ? (
-                        <Button disabled={true} variant="muted">
+                        <Button
+                          onClick={() => {
+                            history.push(`/filters/edit/${filterShareId}`);
+                          }}
+                          variant="outline-dark"
+                        >
                           Imported
                         </Button>
                       ) : filterProviderId != providerId ? (
