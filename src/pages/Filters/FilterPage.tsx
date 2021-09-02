@@ -105,6 +105,16 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
+  const visibilityHelpText = (): string => {
+    if (filterList.visibility === Visibility.Private)
+      return "Private lists are only visible to you.";
+    if (filterList.visibility === Visibility.Public)
+      return "Public lists are visible to all in the directory and can be imported by any user.";
+    if (filterList.visibility === Visibility.Shared)
+      return "Shared lists can only be imported by other nodes if they have the shareable URL.";
+    return "";
+  };
+
   useEffect(() => {
     setCids(
       filterList &&
@@ -748,6 +758,7 @@ const FilterPage = (props): JSX.Element => {
                             value={VisibilityString[filterList.visibility]}
                           >
                             {isShareEnabled() && <option>Public</option>}
+                            <option>Shared</option>
                             <option>Private</option>
                           </Form.Control>
                         </Form.Group>
@@ -767,6 +778,15 @@ const FilterPage = (props): JSX.Element => {
                           </Button>
                         </Col>
                       )}
+                  </Form.Row>
+                  <Form.Row
+                    style={{ marginTop: -20, marginBottom: 10, marginLeft: -2 }}
+                  >
+                    <Col>
+                      <Form.Label className={"text-dim"}>
+                        {visibilityHelpText()}
+                      </Form.Label>
+                    </Col>
                   </Form.Row>
                   <Form.Row
                     style={{
@@ -880,7 +900,7 @@ const FilterPage = (props): JSX.Element => {
                     </Form.Row>
                   )}
                   {filterList.override && (
-                    <Form.Row style={{ marginTop: -40, marginLeft: -2 }}>
+                    <Form.Row style={{ marginTop: -32, marginLeft: -2 }}>
                       <Col>
                         <Form.Label className={"text-dim"}>
                           Override lists cannot be shared
@@ -901,14 +921,6 @@ const FilterPage = (props): JSX.Element => {
                       </Col>
                     </Form.Row>
                   )}
-                  <Form.Row style={{ marginTop: -10, marginLeft: -2 }}>
-                    <Col>
-                      <Form.Label className={"text-dim"}>
-                        Shared lists will be accessible to other nodes if they
-                        have imported the shareable URL.
-                      </Form.Label>
-                    </Col>
-                  </Form.Row>
                   {renderOrigin()}
                   {renderNotes()}
                   {checkViewType() !== ViewTypes.Imported && (

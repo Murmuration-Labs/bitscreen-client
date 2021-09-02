@@ -332,7 +332,7 @@ function Filters(): JSX.Element {
       [Visibility.None]: "secondary",
       [Visibility.Private]: "danger",
       [Visibility.Public]: "success",
-      [Visibility.ThirdParty]: "warning",
+      [Visibility.Shared]: "warning",
     };
 
     const isImported = props.provider.id !== AuthService.getProviderId();

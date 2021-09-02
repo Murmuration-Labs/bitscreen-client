@@ -4,7 +4,7 @@ export const VisibilityString: string[] = [
   "None",
   "Private",
   "Public",
-  "ThirdParty",
+  "Shared",
 ];
 
 export enum ViewTypes {
@@ -17,7 +17,7 @@ export enum Visibility {
   None,
   Private,
   Public,
-  ThirdParty,
+  Shared,
 }
 
 export enum BulkSelectedType {
@@ -40,7 +40,7 @@ export enum EnabledOption {
 export function mapVisibilityString(visibilityStr: string): Visibility {
   if (visibilityStr === "Private") return Visibility.Private;
   if (visibilityStr === "Public") return Visibility.Public;
-  if (visibilityStr === "ThirdParty") return Visibility.ThirdParty;
+  if (visibilityStr === "Shared") return Visibility.Shared;
 
   return Visibility.None;
 }
