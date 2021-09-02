@@ -250,8 +250,10 @@ export default function PublicFilters() {
                     {row.isImported ? (
                       <Button
                         style={{ marginLeft: -15 }}
-                        disabled={true}
-                        variant="muted"
+                        onClick={() => {
+                          history.push(`/filters/edit/${row.shareId}`);
+                        }}
+                        variant="outline-dark"
                       >
                         Imported
                       </Button>
