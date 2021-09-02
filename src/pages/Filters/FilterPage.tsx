@@ -154,7 +154,7 @@ const FilterPage = (props): JSX.Element => {
       <Button
         size="sm"
         className={"text-dim"}
-        style={{ marginBottom: 2, paddingLeft: 3 }}
+        style={{ paddingLeft: 3 }}
         onClick={() => {
           clipboardCopy(generatedLink);
         }}
@@ -807,8 +807,8 @@ const FilterPage = (props): JSX.Element => {
                     <Col>
                       <Form.Label className={"text-dim"}>
                         {visibilityHelpText()}
-                        {visibilityGenerateLink()}
                       </Form.Label>
+                      {visibilityGenerateLink()}
                     </Col>
                   </Form.Row>
                   <Form.Row
