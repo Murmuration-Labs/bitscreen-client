@@ -143,7 +143,7 @@ const FilterPage = (props): JSX.Element => {
     let buttonText = "";
 
     if (filterList.visibility === Visibility.Public) {
-      generatedLink = serverUri() + "/directory/details/" + filterList.shareId;
+      generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
       buttonText = "Copy Directory Link ";
     } else if (filterList.visibility === Visibility.Shareable) {
       generatedLink = serverUri() + "/filter/share/" + filterList.shareId;
