@@ -265,6 +265,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                 disabled={!loggedIn}
                 onClick={() => {
                   setLoggedIn(false);
+                  setAccount(null);
                   AuthService.removeAccount();
                 }}
               >
@@ -275,7 +276,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         </Form>
       )}
 
-      {configuration.bitscreen && loggedIn && (
+      {configuration.bitscreen && account && (
         <Row className={"settings-block"} style={{ marginTop: 25 }}>
           <Col>
             <FormCheck
