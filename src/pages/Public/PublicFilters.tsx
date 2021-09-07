@@ -3,37 +3,24 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TablePagination,
   TableRow,
-  TableSortLabel,
 } from "@material-ui/core";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
+import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
 import ImportFilterModal from "../Filters/ImportFilterModal";
-import { Config, FilterList } from "../Filters/Interfaces";
+import { Config, FilterList, Order } from "../Filters/Interfaces";
+import { formatDate } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
-import * as AuthService from "../../services/AuthService";
-import { serverUri } from "../../config";
-import axios from "axios";
-import { formatDate } from "../Filters/utils";
+import EnhancedTableHead from "../Filters/EnhancedTableHead";
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-type Order = "asc" | "desc";
-
-const headCells: HeadCell[] = [
+const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name" },
   { id: "cids", numeric: true, label: "# of CIDs" },
   { id: "subs", numeric: true, label: "# of Subs" },
@@ -44,52 +31,6 @@ const headCells: HeadCell[] = [
   { id: "actions", numeric: false, label: "Actions" },
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
-
-interface EnhancedTableProps {
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: keyof Data
-  ) => void;
-  order: Order;
-  orderBy: string;
-  rowCount: number;
-  mySort: string;
-  mySortBy: string;
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const { order, orderBy, rowCount, onRequestSort, mySort, mySortBy } = props;
-  const createSortHandler =
-    (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property);
-    };
-
-  return (
-    <TableHead>
-      <TableRow>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span style={{ display: "none" }}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </span>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-  );
-}
 
 export default function PublicFilters() {
   const [order, setOrder] = React.useState<Order>("asc");
@@ -220,6 +161,7 @@ export default function PublicFilters() {
       <TableContainer>
         <Table aria-label="enhanced table">
           <EnhancedTableHead
+            headCells={headCells}
             order={order}
             orderBy={orderBy}
             mySort={mySort}

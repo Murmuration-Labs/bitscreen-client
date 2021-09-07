@@ -1,12 +1,17 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faEdit,
-  faEye,
-  faTrash,
-  faQuestionCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { isOrphan, isEnabled, isDisabled, isShared, isImported } from "./utils";
+import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  Checkbox,
+  Divider,
+  MenuItem,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TablePagination,
+  TableRow,
+} from "@material-ui/core";
+import axios from "axios";
 import _ from "lodash";
 import debounce from "lodash.debounce";
 import { useSnackbar } from "notistack";
@@ -16,22 +21,20 @@ import {
   Button,
   Col,
   Container,
-  Dropdown,
   Form,
   FormCheck,
-  OverlayTrigger,
   Row,
   Table,
-  Tooltip,
 } from "react-bootstrap";
-import { TableContainer, TablePagination } from "@material-ui/core";
 import { Link, useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
+import { HeadCell } from "../Public/Interfaces";
+import DropdownMenu from "./DropdownMenu";
+import EnhancedTableHead from "./EnhancedTableHead";
 import "./Filters.css";
 import ImportFilterModal from "./ImportFilterModal";
 import {
@@ -39,11 +42,30 @@ import {
   Config,
   EnabledOption,
   FilterList,
+  Order,
   Visibility,
   VisibilityString,
 } from "./Interfaces";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
-import axios from "axios";
+import { isDisabled, isEnabled, isImported, isOrphan, isShared } from "./utils";
+
+interface MyFiltersTableData {
+  name: string;
+  scope: string;
+  subs: string;
+  cids: string;
+  active: string;
+  actions: string;
+}
+
+const headCells: HeadCell<MyFiltersTableData>[] = [
+  { id: "name", label: "Name", numeric: false },
+  { id: "scope", label: "Scope", numeric: false },
+  { id: "subs", label: "# of Subs", numeric: true },
+  { id: "cids", label: "# of Cids", numeric: true },
+  { id: "active", label: "Active", numeric: false },
+  { id: "actions", label: "Actions", numeric: false },
+];
 
 function Filters(): JSX.Element {
   /**
@@ -55,6 +77,26 @@ function Filters(): JSX.Element {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   // ----------------------- PAGINATION -----------------------
+
+  // ----------------------- SORTING -----------------------
+  const [mySort, setMySort] = React.useState("asc");
+  const [mySortBy, setMySortBy] = React.useState("name");
+  const [order, setOrder] = React.useState<Order>("asc");
+  const [orderBy, setOrderBy] =
+    React.useState<keyof MyFiltersTableData>("name");
+  // ----------------------- SORTING -----------------------
+
+  const handleRequestSort = (
+    event: React.MouseEvent<unknown>,
+    property: keyof MyFiltersTableData
+  ) => {
+    // if (property !== ) return;
+
+    setMySort(mySort === "asc" ? "desc" : "asc");
+    setOrder(mySort === "asc" ? "desc" : "asc");
+    setMySortBy(property);
+    setOrderBy(property);
+  };
 
   const [enabledFilters, setEnabledFilters] = useState<FilterList[]>([]);
   const [disabledFilters, setDisabledFilters] = useState<FilterList[]>([]);
@@ -91,6 +133,16 @@ function Filters(): JSX.Element {
     import: false,
     share: false,
   });
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     async function setInitialConfig() {
@@ -391,129 +443,127 @@ function Filters(): JSX.Element {
           </p>
         )}
         <TableContainer>
-          <Table>
-            <thead>
-              <tr>
-                <th>Bulk</th>
-                <th>Filter name</th>
-                <th>Scope</th>
-                <th>Subscribers</th>
-                <th># of CIDs</th>
-                <th>
-                  Active{" "}
-                  <OverlayTrigger
-                    placement="right"
-                    delay={{ show: 150, hide: 300 }}
-                    overlay={
-                      <Tooltip id="button-tooltip">
-                        Active filter lists prevent deals with included CIDs
-                      </Tooltip>
-                    }
+          <Table aria-label="enhanced table">
+            <EnhancedTableHead
+              enableChecking
+              checkedCount={filterLists.filter((f) => f.isBulkSelected).length}
+              itemsCount={filterLists.length}
+              headCells={headCells}
+              order={order}
+              orderBy={orderBy}
+              mySort={mySort}
+              mySortBy={mySortBy}
+              onRequestSort={handleRequestSort}
+              rowCount={dataCount}
+            />
+            <TableBody>
+              {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+              {filterLists.map((row, index) => {
+                return (
+                  <TableRow
+                    hover
+                    // onClick={() => onRowToggle()}
+                    role="checkbox"
+                    tabIndex={-1}
+                    selected={!!row.isBulkSelected}
+                    key={index}
                   >
-                    <FontAwesomeIcon
-                      icon={faQuestionCircle as IconProp}
-                      color="#7393B3"
-                      style={{
-                        marginTop: 2,
-                      }}
-                    />
-                  </OverlayTrigger>
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filterLists.map((filterList) => (
-                <tr key={`filterList-${filterList.id}`}>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={filterList.isBulkSelected}
-                      onChange={() => {
-                        filterList.isBulkSelected = !filterList.isBulkSelected;
-                        setFilterLists([...filterLists]);
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <Link
-                      to={`/filters/edit/${filterList.shareId}`}
-                      className={
-                        filterList.enabled
-                          ? "double-space-left"
-                          : "double-space-left grey-clr"
-                      }
-                    >
-                      {filterList.name}
-                    </Link>
-                  </td>
-                  <td>
-                    <CIDFilterScope {...filterList} />
-                  </td>
-                  <td>
-                    {isImported(filterList) ||
-                    isOrphan(filterList) ||
-                    filterList.visibility !== Visibility.Public
-                      ? "-"
-                      : (filterList.provider_Filters || []).length - 1}
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        textAlign: "center",
-                        color: "blue",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {filterList.cids && filterList.cids.length
-                        ? filterList.cids.length
-                        : filterList.cidsCount || 0}
-                    </span>
-                  </td>
-                  <td>
-                    {!(
-                      filterList.provider_Filters &&
-                      !filterList.provider_Filters.some(
-                        (pf) => pf.provider.id === filterList.provider.id
-                      )
-                    ) && (
-                      <div
-                        onClick={() => {
-                          if (isShared(filterList)) {
-                            setSelectedFilterList(filterList);
-                            setShowConfirmEnabled(true);
-                          } else {
-                            toggleFilterEnabled(filterList);
-                          }
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={row.isBulkSelected}
+                        onChange={() => {
+                          row.isBulkSelected = !row.isBulkSelected;
+                          setFilterLists([...filterLists]);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell style={{ verticalAlign: "middle" }}>
+                      <Link
+                        to={`/filters/edit/${row.shareId}`}
+                        style={{
+                          color: row.enabled ? "black" : "grey",
+                          fontSize: 14,
                         }}
                       >
-                        <FormCheck
-                          readOnly
-                          type="switch"
-                          checked={filterList.enabled}
-                        />
-                      </div>
-                    )}
-                  </td>
-
-                  <td style={{ textAlign: "justify" }}>
-                    <Link
-                      to={`/filters/edit/${filterList.shareId}`}
-                      className="double-space-left"
+                        {row.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell style={{ verticalAlign: "middle" }}>
+                      <CIDFilterScope {...row} />
+                    </TableCell>
+                    <TableCell style={{ verticalAlign: "middle" }}>
+                      {isImported(row) ||
+                      isOrphan(row) ||
+                      row.visibility !== Visibility.Public
+                        ? "-"
+                        : (row.provider_Filters || []).length - 1}
+                    </TableCell>
+                    <TableCell style={{ verticalAlign: "middle" }}>
+                      <span
+                        style={{
+                          textAlign: "center",
+                          color: "blue",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {row.cids && row.cids.length
+                          ? row.cids.length
+                          : row.cidsCount || 0}
+                      </span>
+                    </TableCell>
+                    <TableCell style={{ verticalAlign: "middle" }}>
+                      {!(
+                        row.provider_Filters &&
+                        !row.provider_Filters.some(
+                          (pf) => pf.provider.id === row.provider.id
+                        )
+                      ) && (
+                        <div
+                          onClick={() => {
+                            if (isShared(row)) {
+                              setSelectedFilterList(row);
+                              setShowConfirmEnabled(true);
+                            } else {
+                              toggleFilterEnabled(row);
+                            }
+                          }}
+                        >
+                          <FormCheck
+                            readOnly
+                            type="switch"
+                            checked={row.enabled}
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      style={{ verticalAlign: "middle" }}
                     >
-                      {editOrEyeIcon(filterList)}
-                    </Link>
-                    <Link
-                      to="#"
-                      onClick={() => confirmDelete(filterList)}
-                      className="double-space-left"
-                    >
-                      <FontAwesomeIcon icon={faTrash as IconProp} />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+                      <Link
+                        to={`/filters/edit/${row.shareId}`}
+                        style={{ marginRight: 4 }}
+                      >
+                        {editOrEyeIcon(row)}
+                      </Link>
+                      <Link
+                        to="#"
+                        onClick={() => confirmDelete(row)}
+                        style={{ marginRight: 4 }}
+                      >
+                        <FontAwesomeIcon icon={faTrash as IconProp} />
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {/* {emptyRows === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )} */}
+            </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
@@ -628,138 +678,26 @@ function Filters(): JSX.Element {
         configuration.bitscreen ? (
           <div>
             <Container>
-              <h2>Filters</h2>
-              <Row style={{ marginBottom: 12 }}>
-                <Col>
-                  <Row className="d-flex flex-row justify-content-start">
-                    <Col className="d-flex flex-row">
-                      <Form.Group
-                        controlId="selectAll"
-                        className="d-flex align-items-center"
-                        style={{
-                          height: "100%",
-                          paddingLeft: "28px",
-                          marginBottom: 0,
-                        }}
-                      >
-                        <Form.Label style={{ marginTop: 6 }}>
-                          Select:
-                        </Form.Label>
-                        <Form.Check
-                          type="checkbox"
-                          style={{ marginLeft: 10 }}
-                          checked={isAllLoaded}
-                          onChange={() =>
-                            setSelectedConditional(
-                              isAllLoaded
-                                ? BulkSelectedType.None
-                                : BulkSelectedType.All
-                            )
-                          }
-                        />
-                      </Form.Group>
-                      <Dropdown>
-                        <Dropdown.Toggle
-                          style={{
-                            display: "flex",
-                            height: "20px",
-                            alignItems: "center",
-                            borderRadius: "0.5",
-                          }}
-                          id="dropdown-select-all"
-                          className="custom-dropdown-filters"
-                          variant="secondary"
-                        />
-                        <Dropdown.Menu>
-                          {Object.keys(BulkSelectedType)
-                            .filter((key) => isNaN(parseInt(key)))
-                            .map((key, idx) => (
-                              <Dropdown.Item
-                                key={idx}
-                                href="#"
-                                onClick={() =>
-                                  setSelectedConditional(BulkSelectedType[key])
-                                }
-                              >
-                                {key}
-                              </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-
-                      <Form.Group
-                        controlId="actionButtons"
-                        className="d-flex align-items-center"
-                        style={{
-                          height: "100%",
-                          paddingLeft: "28px",
-                          marginBottom: 0,
-                        }}
-                      >
-                        {(!!disabledSelectedFilters.length ||
-                          !!enabledSelectedFilters.length ||
-                          !!orphanSelectedFilters.length) && (
-                          <Form.Label style={{ marginTop: 6 }}>
-                            Actions:
-                          </Form.Label>
-                        )}
-
-                        {!!disabledSelectedFilters.length && (
-                          <Button
-                            variant="primary"
-                            style={{ marginLeft: 15 }}
-                            onClick={() => {
-                              const sharedFilters =
-                                disabledSelectedFilters.filter((x) =>
-                                  isShared(x)
-                                );
-                              if (sharedFilters.length > 0) {
-                                beginGlobalBulkSetEnabled(true);
-                              } else {
-                                beginLocalBulkSetEnabled(true);
-                              }
-                            }}
-                          >
-                            Enable ({disabledSelectedFilters.length})
-                          </Button>
-                        )}
-
-                        {!!enabledSelectedFilters.length && (
-                          <Button
-                            variant="danger"
-                            style={{ marginLeft: 15 }}
-                            onClick={() => {
-                              const sharedFilters =
-                                enabledSelectedFilters.filter((x) =>
-                                  isShared(x)
-                                );
-                              if (sharedFilters.length > 0) {
-                                beginGlobalBulkSetEnabled(false);
-                              } else {
-                                beginLocalBulkSetEnabled(false);
-                              }
-                            }}
-                          >
-                            Disable ({enabledSelectedFilters.length})
-                          </Button>
-                        )}
-
-                        {!!orphanSelectedFilters.length && (
-                          <Button
-                            variant="danger"
-                            style={{ marginLeft: 15 }}
-                            onClick={() => beginBulkDiscardOrphans()}
-                          >
-                            Discard ({orphanSelectedFilters.length})
-                          </Button>
-                        )}
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                </Col>
-                <Col className="text-right">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  verticalAlign: "top",
+                  paddingBottom: 0,
+                }}
+              >
+                <div
+                  style={{ display: "flex", flexDirection: "column", flex: 1 }}
+                >
+                  <h3>My Filters</h3>
+                  <span style={{ color: "grey", fontStyle: "oblique" }}>
+                    Filter lists running on my node
+                  </span>
+                </div>
+                <div>
                   <Button
                     variant="primary"
+                    style={{ marginRight: 4 }}
                     onClick={() => history.push(`/filters/new`)}
                   >
                     New Filter
@@ -781,11 +719,13 @@ function Filters(): JSX.Element {
                       data.
                     </p>
                   )}
-                </Col>
-              </Row>
+                </div>
+              </div>
 
-              <Row>
-                <Col>
+              <Divider style={{ marginTop: 6, marginBottom: 10 }} />
+
+              <div style={{ display: "flex" }}>
+                <div style={{ flex: 1, marginRight: 4 }}>
                   <Form.Group controlId="search">
                     <Form.Control
                       type="text"
@@ -800,8 +740,83 @@ function Filters(): JSX.Element {
                       }}
                     />
                   </Form.Group>
-                </Col>
-              </Row>
+                </div>
+                <div style={{ marginRight: 4 }}>
+                  <DropdownMenu
+                    title={
+                      selectedConditional
+                        ? BulkSelectedType[selectedConditional]
+                        : "Select"
+                    }
+                  >
+                    {Object.keys(BulkSelectedType)
+                      .filter((key) => isNaN(parseInt(key)))
+                      .map((key, idx) => (
+                        <MenuItem
+                          key={idx}
+                          onClick={() =>
+                            setSelectedConditional(BulkSelectedType[key])
+                          }
+                        >
+                          {key}
+                        </MenuItem>
+                      ))}
+                  </DropdownMenu>
+                </div>
+                <div>
+                  {
+                    <DropdownMenu
+                      title={"Bulk Actions"}
+                      disabled={
+                        !disabledSelectedFilters.length &&
+                        !enabledSelectedFilters.length &&
+                        !orphanSelectedFilters.length
+                      }
+                    >
+                      {!!disabledSelectedFilters.length && (
+                        <MenuItem
+                          onClick={() => {
+                            const sharedFilters =
+                              disabledSelectedFilters.filter((x) =>
+                                isShared(x)
+                              );
+                            if (sharedFilters.length > 0) {
+                              beginGlobalBulkSetEnabled(true);
+                            } else {
+                              beginLocalBulkSetEnabled(true);
+                            }
+                          }}
+                        >
+                          Enable ({disabledSelectedFilters.length})
+                        </MenuItem>
+                      )}
+
+                      {!!enabledSelectedFilters.length && (
+                        <MenuItem
+                          onClick={() => {
+                            const sharedFilters = enabledSelectedFilters.filter(
+                              (x) => isShared(x)
+                            );
+                            if (sharedFilters.length > 0) {
+                              beginGlobalBulkSetEnabled(false);
+                            } else {
+                              beginLocalBulkSetEnabled(false);
+                            }
+                          }}
+                        >
+                          Disable ({enabledSelectedFilters.length})
+                        </MenuItem>
+                      )}
+
+                      {!!orphanSelectedFilters.length && (
+                        <MenuItem onClick={() => beginBulkDiscardOrphans()}>
+                          Discard ({orphanSelectedFilters.length})
+                        </MenuItem>
+                      )}
+                    </DropdownMenu>
+                  }
+                </div>
+              </div>
 
               <Row>
                 <Col>

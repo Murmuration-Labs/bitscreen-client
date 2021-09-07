@@ -1,9 +1,9 @@
 import { CidItem } from "../Filters/Interfaces";
 
-export interface HeadCell {
-  id: keyof Data;
+export interface HeadCell<T> {
+  id: keyof T;
   label: string;
-  numeric: boolean;
+  numeric?: boolean;
 }
 
 export interface Data {
