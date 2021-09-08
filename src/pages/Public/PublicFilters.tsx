@@ -1,4 +1,5 @@
 import {
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -13,12 +14,12 @@ import { Link, useHistory } from "react-router-dom";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
+import EnhancedTableHead from "../Filters/EnhancedTableHead";
 import ImportFilterModal from "../Filters/ImportFilterModal";
 import { Config, FilterList, Order } from "../Filters/Interfaces";
 import { formatDate } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
-import EnhancedTableHead from "../Filters/EnhancedTableHead";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name" },
@@ -131,16 +132,33 @@ export default function PublicFilters() {
 
   return (
     <Container>
-      <h2>Public Filters</h2>
-      {!isImportEnabled() && (
-        <p className="text-dim">
-          To activate importing, go to{" "}
-          <a style={{ fontSize: 12 }} href="/settings">
-            Settings
-          </a>{" "}
-          and add country data.
-        </p>
-      )}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          verticalAlign: "top",
+          paddingBottom: 0,
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+          <h3>Public Filters</h3>
+          <span style={{ color: "grey", fontStyle: "oblique" }}>
+            Directory of public filter lists
+          </span>
+        </div>
+        {!isImportEnabled() && (
+          <p className="text-dim">
+            To activate importing, go to{" "}
+            <a style={{ fontSize: 12 }} href="/settings">
+              Settings
+            </a>{" "}
+            and add country data.
+          </p>
+        )}
+      </div>
+
+      <Divider style={{ marginTop: 6, marginBottom: 10 }} />
+
       <Form.Group controlId="search">
         <Form.Control
           type="text"
