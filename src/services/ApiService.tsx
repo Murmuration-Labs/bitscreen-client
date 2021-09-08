@@ -41,18 +41,21 @@ const ApiService = {
     return response.data;
   },
 
-  getFilters: async ({
-    searchTerm = "",
-    isPaged = true,
-    page = 0,
-    perPage = 5,
-  }): Promise<{ filters: FilterList[]; count: number }> => {
+  getFilters: async (
+    page: number,
+    perPage: number,
+    mySortBy: string,
+    mySort: string,
+    q: string
+  ): Promise<{ filters: FilterList[]; count: number }> => {
     const response: any = await axios.get(`${serverUri()}/filter`, {
       params: {
-        isPaged,
         page,
         perPage,
-        q: searchTerm,
+        q,
+        sort: {
+          [mySortBy]: mySort,
+        },
         providerId: AuthService.getProviderId(),
       },
     });

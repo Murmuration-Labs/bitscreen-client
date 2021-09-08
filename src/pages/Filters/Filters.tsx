@@ -54,7 +54,7 @@ interface MyFiltersTableData {
   scope: string;
   subs: string;
   cids: string;
-  active: string;
+  enabled: string;
   actions: string;
 }
 
@@ -63,7 +63,7 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
   { id: "scope", label: "Scope", numeric: false },
   { id: "subs", label: "# of Subs", numeric: true },
   { id: "cids", label: "# of Cids", numeric: true },
-  { id: "active", label: "Active", numeric: false },
+  { id: "enabled", label: "Active", numeric: false },
   { id: "actions", label: "Actions", numeric: false },
 ];
 
@@ -84,6 +84,7 @@ function Filters(): JSX.Element {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] =
     React.useState<keyof MyFiltersTableData>("name");
+  const [needsRefresh, setNeedsRefresh] = useState(false);
   // ----------------------- SORTING -----------------------
 
   const handleRequestSort = (
@@ -133,16 +134,6 @@ function Filters(): JSX.Element {
     import: false,
     share: false,
   });
-
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     async function setInitialConfig() {
@@ -250,35 +241,31 @@ function Filters(): JSX.Element {
     setPage(0);
   };
 
-  const getFilters = async () => {
-    const data = await ApiService.getFilters({
-      isPaged: true,
-      page,
-      perPage: rowsPerPage,
-      searchTerm,
-    });
-    const filterLists: FilterList[] = data.filters;
-
-    setFilterLists(filterLists);
-    setDataCount(data.count);
-    setSelectedConditional(BulkSelectedType.None);
-
-    setLoaded(true);
-  };
-
   useEffect(() => {
-    getFilters();
-  }, [rowsPerPage, page]);
+    setNeedsRefresh(false);
+
+    ApiService.getFilters(page, rowsPerPage, mySortBy, mySort, searchTerm).then(
+      (data) => {
+        const filterLists: FilterList[] = data.filters;
+
+        setFilterLists(filterLists);
+        setDataCount(data.count);
+        setSelectedConditional(BulkSelectedType.None);
+
+        setLoaded(true);
+      }
+    );
+  }, [rowsPerPage, page, mySortBy, mySort, searchTerm, needsRefresh]);
 
   const deleteFilter = async (filter: FilterList) => {
     await ApiService.deleteFilter(filter);
-    await getFilters();
+    setNeedsRefresh(true);
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
     await ApiService.updateFilter([filterList], false);
-    await getFilters();
+    setNeedsRefresh(true);
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
@@ -355,7 +342,7 @@ function Filters(): JSX.Element {
     } else if (option === EnabledOption.Global) {
       await toggleGlobalFilterEnabled();
     }
-    await getFilters();
+    setNeedsRefresh(true);
   };
 
   const confirmDelete = (filterList: FilterList): void => {
@@ -363,7 +350,7 @@ function Filters(): JSX.Element {
     setDeletedFilterList(filterList);
   };
 
-  const debounceSearchFilters = debounce(() => getFilters(), 300);
+  const debounceSearchFilters = debounce(() => setNeedsRefresh(true), 300);
 
   const searchFilters = (event): void => {
     setSearchTerm(event.target.value);
@@ -651,7 +638,7 @@ function Filters(): JSX.Element {
           },
         });
       })
-      .finally(() => getFilters());
+      .finally(() => setNeedsRefresh(true));
   };
 
   const bulkSetEnabled = async (enabled: boolean) => {
@@ -663,7 +650,7 @@ function Filters(): JSX.Element {
       false
     );
 
-    getFilters();
+    setNeedsRefresh(true);
   };
 
   const isImportEnabled = (): boolean => {
@@ -841,7 +828,7 @@ function Filters(): JSX.Element {
                 closeCallback={async (refreshParent = false): Promise<void> => {
                   setShowImportFilter(false);
                   if (refreshParent) {
-                    await getFilters();
+                    setNeedsRefresh(true);
                   }
                 }}
                 show={showImportFilter}
