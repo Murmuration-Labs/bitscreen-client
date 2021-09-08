@@ -679,6 +679,15 @@ function Filters(): JSX.Element {
                   <h3>My Filters</h3>
                   <span style={{ color: "grey", fontStyle: "oblique" }}>
                     Filter lists running on my node
+                    {!isImportEnabled() && (
+                      <p className="text-dim" style={{ marginRight: 4 }}>
+                        To activate importing, go to{" "}
+                        <a style={{ fontSize: 12 }} href="/settings">
+                          Settings
+                        </a>{" "}
+                        and add country data.
+                      </p>
+                    )}
                   </span>
                 </div>
                 <div>
@@ -700,12 +709,6 @@ function Filters(): JSX.Element {
                   >
                     Import Filter
                   </Button>
-                  {!isImportEnabled() && (
-                    <p className="text-dim hidden-tip">
-                      To activate importing, go to Settings and add country
-                      data.
-                    </p>
-                  )}
                 </div>
               </div>
 

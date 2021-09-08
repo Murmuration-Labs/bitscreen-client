@@ -144,17 +144,17 @@ export default function PublicFilters() {
           <h3>Public Filters</h3>
           <span style={{ color: "grey", fontStyle: "oblique" }}>
             Directory of public filter lists
+            {!isImportEnabled() && (
+              <p className="text-dim" style={{ marginRight: 4 }}>
+                To activate importing, go to{" "}
+                <a style={{ fontSize: 12 }} href="/settings">
+                  Settings
+                </a>{" "}
+                and add country data.
+              </p>
+            )}
           </span>
         </div>
-        {!isImportEnabled() && (
-          <p className="text-dim">
-            To activate importing, go to{" "}
-            <a style={{ fontSize: 12 }} href="/settings">
-              Settings
-            </a>{" "}
-            and add country data.
-          </p>
-        )}
       </div>
 
       <Divider style={{ marginTop: 6, marginBottom: 10 }} />
