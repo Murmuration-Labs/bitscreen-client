@@ -18,12 +18,15 @@ const MetamaskProvider = (props: any) => {
           window.location.reload();
         });
 
-        provider.on("accountsChanged", (wallets: Array<string>) =>
+        provider.on("accountsChanged", (wallets: Array<string>) => {
+          console.log("Account changes");
           AuthService.updateAccount({
             ...AuthService.getAccount(),
             walletAddress: wallets[0],
-          })
-        );
+          });
+        });
+
+        provider.on("disconnect", () => AuthService.removeAccount());
 
         // dispatch(setProviderAvailable(true));
         const web3 = new Web3(provider);

@@ -1,28 +1,41 @@
-import React, {
-  ChangeEvent,
-  ComponentType,
-  useEffect,
-  useState,
-  MouseEvent,
-} from "react";
+import {
+  createStyles,
+  Divider,
+  makeStyles,
+  TextField,
+  Theme,
+} from "@material-ui/core";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
-
+import { countries } from "countries-list";
+import _ from "lodash";
+import React, { ComponentType, MouseEvent, useEffect, useState } from "react";
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
 import { Prompt } from "react-router";
-import { Typeahead } from "react-bootstrap-typeahead";
-import "./Settings.css";
-import { serverUri } from "../../config";
-import { Config, SettingsProps } from "../Filters/Interfaces";
-import * as AuthService from "../../services/AuthService";
-import ApiService from "../../services/ApiService";
-import { countries } from "countries-list";
+import { toast } from "react-toastify";
 import validator from "validator";
-import _ from "lodash";
-import detectEthereumProvider from "@metamask/detect-provider";
+import { serverUri } from "../../config";
+import ApiService from "../../services/ApiService";
+import * as AuthService from "../../services/AuthService";
+import { Config, SettingsProps } from "../Filters/Interfaces";
+import "./Settings.css";
 
-const API_MESSAGES_TIME = 1500;
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: "flex",
+      flexWrap: "wrap",
+    },
+    textField: {
+      marginBottom: theme.spacing(2),
+    },
+  })
+);
 
 export default function Settings(props: ComponentType<SettingsProps>) {
+  const classes = useStyles();
+
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
@@ -38,6 +51,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [account, setAccount] = useState(AuthService.getAccount());
   const [loggedIn, setLoggedIn] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+
+  const disconnectMetamask = () => {
+    setLoggedIn(false);
+    AuthService.removeAccount();
+  };
 
   const connectWithMetamask = async (e) => {
     const provider: any = await detectEthereumProvider({
@@ -107,7 +125,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   };
 
   useEffect(() => {
-    if (loggedIn) {
+    console.log("Account", account);
+    console.log("Logged In", loggedIn);
+
+    if (!account || !account.walletAddress) {
+      setLoggedIn(false);
       return;
     }
 
@@ -116,7 +138,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       return;
     }
 
-    if (!account || !account.walletAddress) {
+    if (loggedIn) {
       return;
     }
 
@@ -155,21 +177,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
 
   useEffect(() => AuthService.subscribe(setAccount), []);
 
-  const handleFieldChange = (
-    key: string,
-    ev: ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!account) {
-      return;
-    }
-
-    account[key] = ev.target.value;
-    setAccount({
-      ...account,
-      [key]: ev.target.value,
-    });
-  };
-
   const unsavedChanges = () => {
     return !_.isEqual(account, AuthService.getAccount());
   };
@@ -202,23 +209,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
     });
   };
 
-  const showInfoError = (message: string) => {
-    setInfoErrorMessage(message);
-    setDisplayInfoError(true);
-
-    setTimeout(() => {
-      setInfoErrorMessage("");
-      setDisplayInfoError(false);
-    }, API_MESSAGES_TIME);
-  };
-
   const countryNames = Object.values(countries);
 
   return (
     <Container>
-      <h2>Settings</h2>
-
-      <Row className={"settings-block"}>
+      <Row>
         <Col>
           <FormCheck
             type="switch"
@@ -240,43 +235,62 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         </Col>
       </Row>
 
-      {configuration.bitscreen && (
-        <Form style={{ marginLeft: 12, marginTop: -20 }}>
-          <Form.Group>
-            <Form.Label>FIL wallet address</Form.Label>
-            <br />
-            {account && account.walletAddress && (
-              <p className="text-dim">{account.walletAddress}</p>
-            )}
+      {configuration.bitscreen && !loggedIn && (
+        <Row>
+          <Col>
+            <Form.Label>
+              <u>Please connect with you FIL Wallet Address</u>
+            </Form.Label>
+          </Col>
+        </Row>
+      )}
+
+      {configuration.bitscreen && !loggedIn && (
+        <Row>
+          <Col>
             <p className="text-dim">
               Linking a wallet address is required to activate BitScreen. Your
               wallet address is used to access your lists, and is stored hashed
               for statistical purposes.
             </p>
-          </Form.Group>
-          <Row>
-            <Col>
-              <Button disabled={loggedIn} onClick={connectWithMetamask}>
-                Connect with Metamask
-              </Button>
-            </Col>
-            <Col md="auto">
-              <Button
-                disabled={!loggedIn}
-                onClick={() => {
-                  setLoggedIn(false);
-                  AuthService.removeAccount();
-                }}
-              >
-                Log out
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+          </Col>
+        </Row>
+      )}
+
+      {configuration.bitscreen && (
+        <Row>
+          <Col>
+            {account && account.walletAddress && (
+              <p style={{ fontStyle: "oblique", fontWeight: "bold" }}>
+                {account.walletAddress}
+              </p>
+            )}
+          </Col>
+        </Row>
+      )}
+
+      {configuration.bitscreen && (
+        <Row>
+          <Col>
+            <Button
+              onClick={loggedIn ? disconnectMetamask : connectWithMetamask}
+            >
+              {loggedIn ? "Log Out" : "Connect with Metamask"}
+            </Button>
+          </Col>
+        </Row>
+      )}
+
+      {configuration.bitscreen && (
+        <Row>
+          <Col className="pt-3 pb-2">
+            <Divider />
+          </Col>
+        </Row>
       )}
 
       {configuration.bitscreen && loggedIn && (
-        <Row className={"settings-block"} style={{ marginTop: 25 }}>
+        <Row>
           <Col>
             <FormCheck
               type="switch"
@@ -294,8 +308,54 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         </Row>
       )}
 
-      {configuration.bitscreen && account && (
-        <Row className={"settings-block"}>
+      {configuration.bitscreen &&
+        loggedIn &&
+        account &&
+        (configuration.import || configuration.share) && (
+          <Row>
+            <Col>
+              <Autocomplete
+                options={countryNames}
+                getOptionLabel={(e) => e.name}
+                value={
+                  countryNames.filter((x) => x.name === account.country)[0]
+                }
+                renderInput={(params) => (
+                  <TextField
+                    variant="outlined"
+                    placeholder="Country"
+                    {...params}
+                  />
+                )}
+                onChange={(e, country) =>
+                  setAccount({
+                    ...account,
+                    country: country ? country.name : "",
+                  })
+                }
+              />
+            </Col>
+          </Row>
+        )}
+
+      {configuration.bitscreen && loggedIn && account && (
+        <Row>
+          <Col
+            className={`${
+              configuration.bitscreen &&
+              account &&
+              (configuration.import || configuration.share)
+                ? "pt-3"
+                : ""
+            } pb-2`}
+          >
+            <Divider />
+          </Col>
+        </Row>
+      )}
+
+      {configuration.bitscreen && loggedIn && account && (
+        <Row>
           <Col>
             <FormCheck
               type="switch"
@@ -313,178 +373,134 @@ export default function Settings(props: ComponentType<SettingsProps>) {
         </Row>
       )}
 
-      {configuration.bitscreen &&
-        account &&
-        (configuration.import || configuration.share) && (
-          <Form style={{ marginLeft: 12, marginTop: -15 }}>
-            <Form.Group>
-              <Form.Label>Country</Form.Label>
-              <Typeahead
-                id="typeahead-autocomplete"
-                labelKey="name"
-                selected={countryNames.filter(
-                  (x) => x.name === account.country
-                )}
-                options={countryNames}
-                onChange={(selected) => {
-                  if (selected.length === 0) {
-                    account.country = "";
-                  } else {
-                    account.country = selected[0].name;
-                  }
-
-                  setAccount({ ...account });
-                }}
-                clearButton
-              />
-            </Form.Group>
-          </Form>
-        )}
-
-      {configuration.bitscreen && account && configuration.share && (
-        <Form style={{ marginLeft: 12 }}>
-          <Form.Group>
-            <Form.Label>Business name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Business name"
-              value={account.businessName || ""}
-              onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange("businessName", ev)
-              }
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Website</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Website"
-              value={account.website || ""}
-              onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange("website", ev)
-              }
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              placeholder="Email"
-              value={account.email || ""}
-              onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange("email", ev)
-              }
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Contact person</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Contact person"
-              value={account.contactPerson || ""}
-              onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange("contactPerson", ev)
-              }
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Address</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Address"
-              value={account.address || ""}
-              onChange={(ev: ChangeEvent<HTMLInputElement>) =>
-                handleFieldChange("address", ev)
-              }
-            />
-          </Form.Group>
-        </Form>
+      {configuration.bitscreen && loggedIn && account && configuration.share && (
+        <form className={classes.root} noValidate autoComplete="false">
+          <TextField
+            fullWidth
+            className={classes.textField}
+            label="Business Name"
+            variant="outlined"
+            value={account.businessName || ""}
+            onChange={(ev) =>
+              setAccount({ ...account, businessName: ev.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            className={classes.textField}
+            label="Website"
+            variant="outlined"
+            value={account.website || ""}
+            onChange={(ev) =>
+              setAccount({ ...account, website: ev.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            className={classes.textField}
+            type="email"
+            label="Email"
+            variant="outlined"
+            value={account.email || ""}
+            onChange={(ev) =>
+              setAccount({ ...account, email: ev.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            className={classes.textField}
+            type="name"
+            label="Contact Person"
+            variant="outlined"
+            value={account.contactPerson || ""}
+            onChange={(ev) =>
+              setAccount({ ...account, contactPerson: ev.target.value })
+            }
+          />
+          <TextField
+            fullWidth
+            className={classes.textField}
+            type="address"
+            label="Address"
+            variant="outlined"
+            value={account.address || ""}
+            onChange={(ev) =>
+              setAccount({ ...account, address: ev.target.value })
+            }
+          />
+        </form>
       )}
 
       {configuration.bitscreen &&
+        loggedIn &&
         account &&
         (configuration.import || configuration.share) && (
-          <Form style={{ marginLeft: 12 }}>
-            <Row>
-              <Col xs="auto">
+          <Row>
+            <Col>
+              <Button
+                variant="primary"
+                type="button"
+                disabled={disableButton}
+                onClick={(ev: MouseEvent<HTMLElement>) => {
+                  ev.preventDefault();
+
+                  // validations here
+                  if (
+                    configuration.share &&
+                    account.email &&
+                    !validator.isEmail(account.email)
+                  ) {
+                    toast.error("Email is not valid");
+                    return;
+                  }
+
+                  if (
+                    configuration.share &&
+                    account.website &&
+                    !validator.isURL(account.website)
+                  ) {
+                    toast.error("Website is not a valid URL");
+                    return;
+                  }
+
+                  setDisableButton(true);
+
+                  let updatedAccount = account;
+                  const fetchedAccount = AuthService.getAccount();
+                  if (!configuration.share && fetchedAccount) {
+                    updatedAccount = {
+                      ...fetchedAccount,
+                      country: account.country,
+                    };
+                  }
+                  ApiService.updateProvider(updatedAccount)
+                    .then(() => {
+                      AuthService.updateAccount(updatedAccount);
+                      toast.success("Successfully saved information.");
+                      setDisableButton(false);
+                    })
+                    .catch(() => {
+                      toast.error("Something went wrong");
+                      setDisableButton(false);
+                    });
+                }}
+              >
+                Save
+              </Button>
+            </Col>
+            {configuration.share && (
+              <Col>
                 <Button
-                  variant="primary"
-                  type="button"
-                  disabled={disableButton}
-                  onClick={(ev: MouseEvent<HTMLElement>) => {
-                    ev.preventDefault();
-
-                    // validations here
-                    if (
-                      configuration.share &&
-                      account.email &&
-                      !validator.isEmail(account.email)
-                    ) {
-                      showInfoError("Email is not valid");
-                      return;
-                    }
-
-                    if (
-                      configuration.share &&
-                      account.website &&
-                      !validator.isURL(account.website)
-                    ) {
-                      showInfoError("Website is not a valid URL");
-                      return;
-                    }
-
-                    setDisableButton(true);
-
-                    let updatedAccount = account;
-                    const fetchedAccount = AuthService.getAccount();
-                    if (!configuration.share && fetchedAccount) {
-                      updatedAccount = {
-                        ...fetchedAccount,
-                        country: account.country,
-                      };
-                    }
-                    ApiService.updateProvider(updatedAccount)
-                      .then(() => {
-                        AuthService.updateAccount(updatedAccount);
-                        setDisplayInfoSuccess(true);
-                        setTimeout(() => {
-                          setDisplayInfoSuccess(false);
-                        }, API_MESSAGES_TIME);
-                        setDisableButton(false);
-                      })
-                      .catch(() => {
-                        showInfoError("Something went wrong");
-                        setDisableButton(false);
-                      });
+                  style={{ float: "right" }}
+                  onClick={() => {
+                    clearInputInfo();
                   }}
                 >
-                  Save
+                  Clear
                 </Button>
               </Col>
-              <Col style={{ marginLeft: -20, marginTop: 5 }}>
-                {displayInfoSuccess && (
-                  <span style={{ color: "green" }}>
-                    Successfully updated info
-                  </span>
-                )}
-                {displayInfoError && (
-                  <span style={{ color: "red" }}>{infoErrorMessage}</span>
-                )}
-              </Col>
-              {configuration.share && (
-                <Col>
-                  <Button
-                    style={{ float: "right" }}
-                    onClick={() => {
-                      clearInputInfo();
-                    }}
-                  >
-                    Clear
-                  </Button>
-                </Col>
-              )}
-            </Row>
-          </Form>
+            )}
+          </Row>
         )}
       <div style={{ marginTop: 50 }} />
       <Prompt
