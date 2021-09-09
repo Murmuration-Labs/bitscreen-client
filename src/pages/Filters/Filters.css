@@ -15,10 +15,6 @@
   margin-left: 4px;
 }
 
-.double-space-left {
-  margin-left: 8px;
-}
-
 .import-btn ~ .hidden-tip {
   visibility: hidden;
 }

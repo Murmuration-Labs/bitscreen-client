@@ -1,8 +1,3 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { NavDropdown, Row, Col } from "react-bootstrap";
-import * as AuthService from "../../services/AuthService";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog,
   faFile,
@@ -10,17 +5,17 @@ import {
   faSearch,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from "react";
+import { Col, NavDropdown, Row } from "react-bootstrap";
+import { NavLink } from "react-router-dom";
+import * as AuthService from "../../services/AuthService";
 import "./Navigation.css";
 
 function Navigation(): JSX.Element {
   const [provider, setProvider] = useState(AuthService.getAccount());
 
-  useEffect(() => {
-    const unsubscribe = AuthService.subscribe((acc) => setProvider(acc));
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  useEffect(() => AuthService.subscribe(setProvider), []);
 
   const shortenAddress = (address: string): string => {
     return address.length > 8
@@ -48,9 +43,7 @@ function Navigation(): JSX.Element {
               }
             >
               <NavDropdown.Item
-                href="/settings"
                 onClick={() => {
-                  setProvider(null);
                   AuthService.removeAccount();
                 }}
               >

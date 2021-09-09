@@ -70,6 +70,8 @@ export interface CidItemProps {
   prepareModalForDeleteItems: (i: CidItem[]) => void;
 }
 
+export type Order = "asc" | "desc";
+
 export interface MoveCIDModalProps {
   cidItems: CidItem[];
   optionFilters: FilterList[];

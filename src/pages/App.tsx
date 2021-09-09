@@ -31,75 +31,79 @@ function App(): JSX.Element {
   useEffect(() => AuthService.subscribe(setProvider), []);
 
   return (
-    // <MetamaskProvider>
-    <Router>
-      <Navigation />
-      <Container fluid={true}>
-        <Row className="fill-height">
-          <Col className={"stage"}>
-            <Route
-              path="/filters"
-              exact
-              component={provider && provider.accessToken ? Filters : Settings}
-            >
-              {(!provider || !provider.accessToken) && (
+    <MetamaskProvider>
+      <Router>
+        <Navigation />
+        <Container fluid={true}>
+          <Row className="fill-height">
+            <Col className={"stage"}>
+              <Route
+                path="/filters"
+                exact
+                component={
+                  provider && provider.accessToken ? Filters : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
+              <Route
+                path="/filters/edit/:shareId?"
+                exact
+                component={
+                  provider && provider.accessToken ? FilterPage : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
+              <Route
+                path="/filters/new"
+                exact
+                component={
+                  provider && provider.accessToken ? FilterPage : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
+              <Route path="/settings" exact component={Settings} />
+              <Route
+                path="/directory"
+                exact
+                component={
+                  provider && provider.accessToken ? PublicFilters : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
+              <Route
+                path="/directory/details/:shareId?"
+                exact
+                component={
+                  provider && provider.accessToken
+                    ? FilterDetailsPage
+                    : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
+              <Route exact path="/">
                 <Redirect to="/settings" />
-              )}
-            </Route>
-            <Route
-              path="/filters/edit/:shareId?"
-              exact
-              component={
-                provider && provider.accessToken ? FilterPage : Settings
-              }
-            >
-              {(!provider || !provider.accessToken) && (
-                <Redirect to="/settings" />
-              )}
-            </Route>
-            <Route
-              path="/filters/new"
-              exact
-              component={
-                provider && provider.accessToken ? FilterPage : Settings
-              }
-            >
-              {(!provider || !provider.accessToken) && (
-                <Redirect to="/settings" />
-              )}
-            </Route>
-            <Route path="/settings" exact component={Settings} />
-            <Route
-              path="/directory"
-              exact
-              component={
-                provider && provider.accessToken ? PublicFilters : Settings
-              }
-            >
-              {(!provider || !provider.accessToken) && (
-                <Redirect to="/settings" />
-              )}
-            </Route>
-            <Route
-              path="/directory/details/:shareId?"
-              exact
-              component={
-                provider && provider.accessToken ? FilterDetailsPage : Settings
-              }
-            >
-              {(!provider || !provider.accessToken) && (
-                <Redirect to="/settings" />
-              )}
-            </Route>
-            <Route exact path="/">
-              <Redirect to="/settings" />
-            </Route>
-          </Col>
-        </Row>
-        <ToastContainer />
-      </Container>
-    </Router>
-    // </MetamaskProvider>
+              </Route>
+            </Col>
+          </Row>
+          <ToastContainer />
+        </Container>
+      </Router>
+    </MetamaskProvider>
   );
 }
 
