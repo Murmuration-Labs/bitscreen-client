@@ -145,17 +145,17 @@ const FilterPage = (props): JSX.Element => {
 
     if (filterList.visibility === Visibility.Public) {
       generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
-      buttonText = "Copy Directory Link ";
+      buttonText = "Copy Link ";
     } else if (filterList.visibility === Visibility.Shareable) {
       generatedLink = serverUri() + "/filter/share/" + filterList.shareId;
-      buttonText = "Generate Shareable URL ";
+      buttonText = "Copy Link ";
     }
 
     return (
       <Button
         size="sm"
         className={"text-dim"}
-        style={{ paddingLeft: 3 }}
+        style={{ color: "blue" }}
         onClick={() => {
           clipboardCopy(generatedLink);
         }}
@@ -645,11 +645,19 @@ const FilterPage = (props): JSX.Element => {
         >
           <h2>Edit filter list</h2>
           &nbsp; &nbsp;
-          {filterList.provider_Filters && (
-            <h4 style={{ color: "grey" }}>
-              [{filterList.provider_Filters?.length} subs]
-            </h4>
-          )}
+          <span
+            style={{
+              color: "grey",
+              fontStyle: "oblique",
+              marginLeft: 10,
+            }}
+          >
+            Make changes to {filterList.name} (
+            {filterList.provider_Filters
+              ? filterList.provider_Filters?.length
+              : "No"}{" "}
+            active subscribers)
+          </span>
         </div>
       );
     }
@@ -801,34 +809,6 @@ const FilterPage = (props): JSX.Element => {
                       />
                     </Col>
                   </Form.Row>
-                  <Form.Row>
-                    {(isOwner || !isImported) && (
-                      <Col xs={"auto"}>
-                        <Form.Group controlId="visibility">
-                          <Form.Control
-                            as="select"
-                            disabled={filterOverride}
-                            onChange={changeVisibility}
-                            value={VisibilityString[filterList.visibility]}
-                          >
-                            {isShareEnabled() && <option>Public</option>}
-                            {isShareEnabled() && <option>Shareable</option>}
-                            <option>Private</option>
-                          </Form.Control>
-                        </Form.Group>
-                      </Col>
-                    )}
-                  </Form.Row>
-                  <Form.Row
-                    style={{ marginTop: -20, marginBottom: 10, marginLeft: -2 }}
-                  >
-                    <Col>
-                      <Form.Label className={"text-dim"}>
-                        {visibilityHelpText()}
-                      </Form.Label>
-                      {visibilityGenerateLink()}
-                    </Col>
-                  </Form.Row>
                   <Form.Row
                     style={{
                       marginLeft: 2,
@@ -974,6 +954,7 @@ const FilterPage = (props): JSX.Element => {
                               flexDirection: "row",
                               justifyContent: "flex-start",
                               paddingBottom: "1rem",
+                              alignItems: "center",
                             }}
                           >
                             <DropdownButton
@@ -1063,6 +1044,51 @@ const FilterPage = (props): JSX.Element => {
                                 </Button>
                               </Dropdown.Item>
                             </DropdownButton>
+                            {(isOwner || !isImported) && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <p>Sharing:</p>
+                                <Form.Group
+                                  controlId="visibility"
+                                  style={{
+                                    marginBottom: "auto",
+                                    paddingLeft: 10,
+                                  }}
+                                >
+                                  <Form.Control
+                                    as="select"
+                                    disabled={filterOverride}
+                                    onChange={changeVisibility}
+                                    value={
+                                      VisibilityString[filterList.visibility]
+                                    }
+                                  >
+                                    {isShareEnabled() && (
+                                      <option>Public</option>
+                                    )}
+                                    {isShareEnabled() && (
+                                      <option>Shareable</option>
+                                    )}
+                                    <option>Private</option>
+                                  </Form.Control>
+                                </Form.Group>
+                              </div>
+                            )}
+                            <span
+                              style={{
+                                color: "grey",
+                                fontStyle: "oblique",
+                                marginLeft: 10,
+                                fontSize: 13,
+                              }}
+                            >
+                              {visibilityGenerateLink()}({visibilityHelpText()})
+                            </span>
                           </Col>
                         </Row>
 
