@@ -86,6 +86,7 @@ function Filters(): JSX.Element {
     React.useState<keyof MyFiltersTableData>("name");
   const [needsRefresh, setNeedsRefresh] = useState(false);
   // ----------------------- SORTING -----------------------
+  const [hoveredFilterId, setHoveredFilterId] = useState(-1);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -414,21 +415,25 @@ function Filters(): JSX.Element {
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
     if (isImported(props)) {
-      return <FontAwesomeIcon icon={faEye as IconProp} />;
+      return (
+        <FontAwesomeIcon
+          icon={faEye as IconProp}
+          color={props.id === hoveredFilterId ? "blue" : "black"}
+        />
+      );
     }
 
-    return <FontAwesomeIcon icon={faEdit as IconProp} />;
+    return (
+      <FontAwesomeIcon
+        icon={faEdit as IconProp}
+        color={props.id === hoveredFilterId ? "blue" : "black"}
+      />
+    );
   };
 
   const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card-container"}>
-        {searchTerm && (
-          <p>
-            {filterLists ? filterLists.length : "0"} result
-            {filterLists && filterLists.length === 1 ? "" : "s"} found
-          </p>
-        )}
         <TableContainer>
           <Table aria-label="enhanced table">
             <EnhancedTableHead
@@ -450,7 +455,8 @@ function Filters(): JSX.Element {
                 return (
                   <TableRow
                     hover
-                    // onClick={() => onRowToggle()}
+                    onMouseEnter={() => setHoveredFilterId(row.id)}
+                    onMouseLeave={() => setHoveredFilterId(-1)}
                     role="checkbox"
                     tabIndex={-1}
                     selected={!!row.isBulkSelected}
@@ -539,7 +545,10 @@ function Filters(): JSX.Element {
                         onClick={() => confirmDelete(row)}
                         style={{ marginRight: 4 }}
                       >
-                        <FontAwesomeIcon icon={faTrash as IconProp} />
+                        <FontAwesomeIcon
+                          icon={faTrash as IconProp}
+                          color={row.id === hoveredFilterId ? "red" : "black"}
+                        />
                       </Link>
                     </TableCell>
                   </TableRow>
@@ -674,10 +683,21 @@ function Filters(): JSX.Element {
                 }}
               >
                 <div
-                  style={{ display: "flex", flexDirection: "column", flex: 1 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flex: 1,
+                    alignItems: "center",
+                  }}
                 >
                   <h3>My Filters</h3>
-                  <span style={{ color: "grey", fontStyle: "oblique" }}>
+                  <span
+                    style={{
+                      color: "grey",
+                      fontStyle: "oblique",
+                      marginLeft: 10,
+                    }}
+                  >
                     Filter lists running on my node
                     {!isImportEnabled() && (
                       <p className="text-dim" style={{ marginRight: 4 }}>
@@ -715,7 +735,15 @@ function Filters(): JSX.Element {
               <Divider style={{ marginTop: 6, marginBottom: 10 }} />
 
               <div style={{ display: "flex" }}>
-                <div style={{ flex: 1, marginRight: 4 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flex: 1,
+                    marginRight: 4,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
                   <Form.Group controlId="search">
                     <Form.Control
                       type="text"
@@ -730,6 +758,10 @@ function Filters(): JSX.Element {
                       }}
                     />
                   </Form.Group>
+                  <p className="ml-1">
+                    {filterLists ? filterLists.length : "0"} result
+                    {filterLists && filterLists.length === 1 ? "" : "s"} found
+                  </p>
                 </div>
                 <div style={{ marginRight: 4 }}>
                   <DropdownMenu
