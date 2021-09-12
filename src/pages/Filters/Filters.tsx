@@ -797,6 +797,15 @@ function Filters(): JSX.Element {
                     >
                       {!!disabledSelectedFilters.length && (
                         <MenuItem
+                          style={{
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderColor: "#137BFE",
+                            borderRadius: 10,
+                            marginLeft: 4,
+                            marginRight: 4,
+                            color: "#137BFE",
+                          }}
                           onClick={() => {
                             const sharedFilters =
                               disabledSelectedFilters.filter((x) =>
@@ -815,6 +824,16 @@ function Filters(): JSX.Element {
 
                       {!!enabledSelectedFilters.length && (
                         <MenuItem
+                          style={{
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderColor: "#FB6471",
+                            borderRadius: 10,
+                            marginLeft: 4,
+                            marginRight: 4,
+                            marginTop: 4,
+                            color: "#FB6471",
+                          }}
                           onClick={() => {
                             const sharedFilters = enabledSelectedFilters.filter(
                               (x) => isShared(x)
@@ -831,7 +850,19 @@ function Filters(): JSX.Element {
                       )}
 
                       {!!orphanSelectedFilters.length && (
-                        <MenuItem onClick={() => beginBulkDiscardOrphans()}>
+                        <MenuItem
+                          style={{
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderColor: "#FB6471",
+                            borderRadius: 10,
+                            marginLeft: 4,
+                            marginRight: 4,
+                            marginTop: 4,
+                            color: "#FB6471",
+                          }}
+                          onClick={() => beginBulkDiscardOrphans()}
+                        >
                           Discard ({orphanSelectedFilters.length})
                         </MenuItem>
                       )}
