@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navigation from "../components/Navigation/Navigation";
 import * as AuthService from "../services/AuthService";
 import "./App.css";
+import Dashboard from "./Dashboard/Dashboard";
 import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
 import FilterDetailsPage from "./Public/FilterDetailsPage";
@@ -37,6 +38,17 @@ function App(): JSX.Element {
         <Container fluid={true}>
           <Row className="fill-height">
             <Col className={"stage"}>
+              <Route
+                path="/dashboard"
+                exact
+                component={
+                  provider && provider.accessToken ? Dashboard : Settings
+                }
+              >
+                {(!provider || !provider.accessToken) && (
+                  <Redirect to="/settings" />
+                )}
+              </Route>
               <Route
                 path="/filters"
                 exact

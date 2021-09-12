@@ -7,6 +7,8 @@ import {
   CidItem,
   FilterList,
   ProviderFilter,
+  DashboardData,
+  Config,
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
@@ -44,18 +46,22 @@ const ApiService = {
   getFilters: async (
     page: number,
     perPage: number,
-    mySortBy: string,
-    mySort: string,
-    q: string
+    mySortBy?: string,
+    mySort?: string,
+    q?: string
   ): Promise<{ filters: FilterList[]; count: number }> => {
     const response: any = await axios.get(`${serverUri()}/filter`, {
       params: {
         page,
         perPage,
         q,
-        sort: {
-          [mySortBy]: mySort,
-        },
+        sort: mySortBy
+          ? {
+              [mySortBy]: mySort,
+            }
+          : {
+              name: "asc",
+            },
         providerId: AuthService.getProviderId(),
       },
     });
@@ -329,17 +335,32 @@ const ApiService = {
     return response.data;
   },
 
-  getCountAllFilter: async (searchedValue: string): Promise<number> => {
+  getAllFiltersCount: async (): Promise<number> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/public/count`,
-      {
-        params: {
-          q: searchedValue,
-        },
-      }
+      `${remoteMarketplaceUri()}/filter/count/${AuthService.getProviderId()}`
     );
 
     return response.data.count;
+  },
+
+  getDashboardInformation: async (): Promise<DashboardData> => {
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filter/dashboard`,
+      {
+        params: {
+          providerId: AuthService.getProviderId(),
+        },
+      }
+    );
+    console.log(response.data);
+    return response.data;
+  },
+
+  getProviderConfig: async (): Promise<Config> => {
+    const providerId = AuthService.getProviderId();
+    const response = await axios.get(`${serverUri()}/config/${providerId}`);
+
+    return response.data;
   },
 };
 

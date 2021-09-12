@@ -56,6 +56,17 @@ export interface CidItem {
   isSaved: boolean;
 }
 
+export interface DashboardData {
+  currentlyFiltering: number;
+  listSubscribers: number;
+  dealsDeclined: number;
+  activeLists: number;
+  inactiveLists: number;
+  importedLists: number;
+  privateLists: number;
+  publicLists: number;
+}
+
 export interface CidItemProps {
   index: number;
   cidItem: CidItem;
