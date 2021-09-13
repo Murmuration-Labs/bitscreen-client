@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
   Divider,
+  makeStyles,
   MenuItem,
   TableBody,
   TableCell,
@@ -36,6 +37,7 @@ import { HeadCell } from "../Public/Interfaces";
 import DropdownMenu from "./DropdownMenu";
 import EnhancedTableHead from "./EnhancedTableHead";
 import "./Filters.css";
+import HoverableMenuItem from "./HoverableMenuItem";
 import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
@@ -796,16 +798,8 @@ function Filters(): JSX.Element {
                       }
                     >
                       {!!disabledSelectedFilters.length && (
-                        <MenuItem
-                          style={{
-                            borderStyle: "solid",
-                            borderWidth: 1,
-                            borderColor: "#137BFE",
-                            borderRadius: 10,
-                            marginLeft: 4,
-                            marginRight: 4,
-                            color: "#137BFE",
-                          }}
+                        <HoverableMenuItem
+                          title={`Enable (${disabledSelectedFilters.length})`}
                           onClick={() => {
                             const sharedFilters =
                               disabledSelectedFilters.filter((x) =>
@@ -817,23 +811,13 @@ function Filters(): JSX.Element {
                               beginLocalBulkSetEnabled(true);
                             }
                           }}
-                        >
-                          Enable ({disabledSelectedFilters.length})
-                        </MenuItem>
+                        />
                       )}
 
                       {!!enabledSelectedFilters.length && (
-                        <MenuItem
-                          style={{
-                            borderStyle: "solid",
-                            borderWidth: 1,
-                            borderColor: "#FB6471",
-                            borderRadius: 10,
-                            marginLeft: 4,
-                            marginRight: 4,
-                            marginTop: 4,
-                            color: "#FB6471",
-                          }}
+                        <HoverableMenuItem
+                          type="destructive"
+                          title={`Disable (${enabledSelectedFilters.length})`}
                           onClick={() => {
                             const sharedFilters = enabledSelectedFilters.filter(
                               (x) => isShared(x)
@@ -844,27 +828,15 @@ function Filters(): JSX.Element {
                               beginLocalBulkSetEnabled(false);
                             }
                           }}
-                        >
-                          Disable ({enabledSelectedFilters.length})
-                        </MenuItem>
+                        />
                       )}
 
                       {!!orphanSelectedFilters.length && (
-                        <MenuItem
-                          style={{
-                            borderStyle: "solid",
-                            borderWidth: 1,
-                            borderColor: "#FB6471",
-                            borderRadius: 10,
-                            marginLeft: 4,
-                            marginRight: 4,
-                            marginTop: 4,
-                            color: "#FB6471",
-                          }}
+                        <HoverableMenuItem
+                          type="destructive"
+                          title={`Discard (${orphanSelectedFilters.length})`}
                           onClick={() => beginBulkDiscardOrphans()}
-                        >
-                          Discard ({orphanSelectedFilters.length})
-                        </MenuItem>
+                        />
                       )}
                     </DropdownMenu>
                   }
