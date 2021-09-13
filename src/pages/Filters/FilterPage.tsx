@@ -787,7 +787,7 @@ const FilterPage = (props): JSX.Element => {
     );
   }
 
-  const renderDeleteButton = (props: FilterList): JSX.Element => {
+  const renderDeleteButton = (): JSX.Element => {
     if (!isEdit) {
       return <></>;
     }
@@ -860,7 +860,7 @@ const FilterPage = (props): JSX.Element => {
               confirmDelete();
             }}
           >
-            <Button variant="danger" style={{ width: "100%" }}>
+            <Button variant="outline-danger" style={{ width: "100%" }}>
               {isImported ? "Discard" : "Delete"}
             </Button>
           </MenuItem>
@@ -870,7 +870,7 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  const renderCancelButton = (props: FilterList): JSX.Element => {
+  const renderCancelButton = (): JSX.Element => {
     return (
       <Col>
         <Button
@@ -891,7 +891,7 @@ const FilterPage = (props): JSX.Element => {
           <Container>
             <div style={{ display: "flex" }}>
               <div style={{ flex: 1 }}>{renderTitle()}</div>
-              {renderDeleteButton(filterList)}
+              {renderDeleteButton()}
             </div>
 
             <Row>
@@ -1132,7 +1132,7 @@ const FilterPage = (props): JSX.Element => {
                 </div>
               </Col>
             </Row>
-            <Row>{renderCancelButton(filterList)}</Row>
+            <Row>{renderCancelButton()}</Row>
             {editingCid && open && (
               <AddCidModal
                 cid={editingCid as CidItem}
