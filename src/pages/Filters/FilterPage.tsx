@@ -409,15 +409,11 @@ const FilterPage = (props): JSX.Element => {
     saveFilter({ ...filterList, name: event.target.value });
   };
 
-  const changeVisibility = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    event.preventDefault();
-    const fl = {
+  const changeVisibility = (visibility: Visibility): void => {
+    saveFilter({
       ...filterList,
-      visibility: mapVisibilityString(event.target.value),
-    };
-    saveFilter(fl);
+      visibility,
+    });
   };
 
   const onNewCid = (): void => {
@@ -960,6 +956,7 @@ const FilterPage = (props): JSX.Element => {
                         }}
                       >
                         <DropdownButton
+                          variant="dark"
                           menuAlign="left"
                           title="Add CID"
                           style={{
@@ -968,34 +965,53 @@ const FilterPage = (props): JSX.Element => {
                         >
                           <Dropdown.Item>
                             <Button
+                              variant="outline-secondary"
                               style={{
                                 width: "100%",
                               }}
                               onClick={onNewCid}
                               disabled={isImported}
                             >
-                              <FontAwesomeIcon
-                                icon={faPlusCircle as IconProp}
-                              />
-                              &nbsp;Single
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <span>Single</span>
+                                <FontAwesomeIcon
+                                  icon={faPlusCircle as IconProp}
+                                />
+                              </div>
                             </Button>
                           </Dropdown.Item>
                           <Dropdown.Item>
                             <Button
+                              variant="outline-secondary"
                               style={{ width: "100%" }}
                               onClick={() => {
                                 setAddCidBatchModal(true);
                               }}
                               disabled={isImported}
                             >
-                              <FontAwesomeIcon
-                                icon={faFolderPlus as IconProp}
-                              />
-                              &nbsp;Bulk
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <span>Bulk</span>
+                                <FontAwesomeIcon
+                                  icon={faFolderPlus as IconProp}
+                                />
+                              </div>
                             </Button>
                           </Dropdown.Item>
                         </DropdownButton>
                         <DropdownButton
+                          variant="outline-secondary"
                           menuAlign="left"
                           title="Bulk Actions"
                           style={{
@@ -1010,7 +1026,6 @@ const FilterPage = (props): JSX.Element => {
                               onClick={handleBulkEditCids}
                               disabled={!isBulkActionAllowed}
                             >
-                              {/* <FontAwesomeIcon icon={faEdit as IconProp} /> */}
                               Edit
                             </Button>
                           </Dropdown.Item>
@@ -1022,7 +1037,6 @@ const FilterPage = (props): JSX.Element => {
                                 onClick={handleBulkMoveCids}
                                 disabled={!isBulkActionAllowed}
                               >
-                                {/* <FontAwesomeIcon icon={faShare as IconProp} /> */}
                                 Move
                               </Button>
                             </Dropdown.Item>
@@ -1039,7 +1053,6 @@ const FilterPage = (props): JSX.Element => {
                               }}
                               disabled={!isBulkActionAllowed}
                             >
-                              {/* <FontAwesomeIcon icon={faTrash as IconProp} /> */}
                               Delete
                             </Button>
                           </Dropdown.Item>
@@ -1054,30 +1067,65 @@ const FilterPage = (props): JSX.Element => {
                             }}
                           >
                             <span>Sharing:</span>
-                            <Form.Group
-                              controlId="visibility"
-                              style={{
-                                marginBottom: "auto",
-                                paddingLeft: 10,
-                              }}
+                            <DropdownButton
+                              variant="outline-secondary"
+                              menuAlign="left"
+                              title={Visibility[filterList.visibility]}
                             >
-                              <Form.Control
-                                as="select"
-                                disabled={filterOverride}
-                                onChange={changeVisibility}
-                                value={VisibilityString[filterList.visibility]}
+                              {isShareEnabled() && (
+                                <Dropdown.Item
+                                  onClick={() =>
+                                    changeVisibility(Visibility.Public)
+                                  }
+                                >
+                                  <Button
+                                    variant="outline-secondary"
+                                    style={{
+                                      width: "100%",
+                                    }}
+                                  >
+                                    Public
+                                  </Button>
+                                </Dropdown.Item>
+                              )}
+                              {isShareEnabled() && (
+                                <Dropdown.Item
+                                  onClick={() =>
+                                    changeVisibility(Visibility.Shareable)
+                                  }
+                                >
+                                  <Button
+                                    variant="outline-secondary"
+                                    style={{
+                                      width: "100%",
+                                    }}
+                                  >
+                                    Shareable
+                                  </Button>
+                                </Dropdown.Item>
+                              )}
+                              <Dropdown.Item
+                                onClick={() =>
+                                  changeVisibility(Visibility.Private)
+                                }
                               >
-                                {isShareEnabled() && <option>Public</option>}
-                                {isShareEnabled() && <option>Shareable</option>}
-                                <option>Private</option>
-                              </Form.Control>
-                            </Form.Group>
+                                <Button
+                                  variant="outline-secondary"
+                                  style={{
+                                    width: "100%",
+                                  }}
+                                >
+                                  Private
+                                </Button>
+                              </Dropdown.Item>
+                            </DropdownButton>
                             <span
                               style={{
                                 color: "grey",
                                 fontStyle: "oblique",
-                                marginLeft: 10,
+                                marginLeft: "1rem",
                                 fontSize: 13,
+                                flex: 1,
                               }}
                             >
                               {visibilityGenerateLink()}({visibilityHelpText()})
