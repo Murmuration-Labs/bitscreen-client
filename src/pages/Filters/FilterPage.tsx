@@ -1,4 +1,5 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import MenuButton from "@material-ui/icons/MoreVert";
 import {
   faEdit,
   faExternalLinkAlt,
@@ -10,6 +11,8 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import axios from "axios";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
@@ -25,6 +28,7 @@ import {
   Row,
   Tooltip,
 } from "react-bootstrap";
+import DropdownMenu from "./DropdownMenu";
 import { Prompt } from "react-router";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -47,10 +51,10 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import MoveCIDModal from "./MoveCIDModal";
+import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import { isOrphan, isShared } from "./utils";
-import axios from "axios";
+import { IconButton, MenuItem } from "@material-ui/core";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -621,6 +625,64 @@ const FilterPage = (props): JSX.Element => {
         return ViewTypes.New;
     }
   };
+  const renderToggleButtonGroup = () => {
+    return (
+      <ToggleButtonGroup
+        color="primary"
+        exclusive
+        size="small"
+        value={filterEnabled}
+      >
+        <ToggleButton
+          value={false}
+          disabled={!filterEnabled}
+          style={
+            !filterEnabled
+              ? {
+                  backgroundColor: "#FB6471",
+                  color: "white",
+                }
+              : {}
+          }
+          color="primary"
+          onClick={() => {
+            if (!isOrphan(filterList)) {
+              if (isShared(filterList)) {
+                setShowConfirmEnabled(true);
+              } else {
+                saveFilter({ ...filterList, enabled: false });
+              }
+            }
+          }}
+        >
+          Inactive
+        </ToggleButton>
+        <ToggleButton
+          value={true}
+          style={
+            filterEnabled
+              ? {
+                  backgroundColor: "#137BFE",
+                  color: "white",
+                }
+              : {}
+          }
+          disabled={filterEnabled}
+          onClick={() => {
+            if (!isOrphan(filterList)) {
+              if (isShared(filterList)) {
+                setShowConfirmEnabled(true);
+              } else {
+                saveFilter({ ...filterList, enabled: true });
+              }
+            }
+          }}
+        >
+          Active
+        </ToggleButton>
+      </ToggleButtonGroup>
+    );
+  };
 
   const renderTitle = (): JSX.Element => {
     if (isImported) {
@@ -671,8 +733,8 @@ const FilterPage = (props): JSX.Element => {
     }
 
     return (
-      <Form.Row>
-        <Col>
+      <div style={{ display: "flex", paddingBottom: 4, alignItems: "center" }}>
+        <div style={{ flex: 1 }}>
           <h4>Origin</h4>
           <a
             href={`/directory/details/${filterList.shareId}`}
@@ -686,8 +748,9 @@ const FilterPage = (props): JSX.Element => {
               className="space-left"
             />
           </a>
-        </Col>
-      </Form.Row>
+        </div>
+        <div>{renderToggleButtonGroup()}</div>
+      </div>
     );
   };
 
@@ -730,31 +793,86 @@ const FilterPage = (props): JSX.Element => {
     }
 
     return (
-      <Col>
-        <Button
-          variant="danger"
-          onClick={() => {
-            confirmDelete();
-          }}
-          style={{ float: "right", marginRight: -30 }}
-        >
-          {isImported ? "Discard" : "Delete"}
-        </Button>
-      </Col>
-    );
-  };
-
-  const renderSaveAndCancelButtons = (props: FilterList): JSX.Element => {
-    return (
-      <Col>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
         <Button
           variant="primary"
-          style={{ marginBottom: 5 }}
+          style={{ marginRight: 5 }}
           disabled={!filterListChanged}
           onClick={save}
         >
           Save
         </Button>
+        <DropdownMenu
+          titleButton={
+            <IconButton size="small">
+              <MenuButton />
+            </IconButton>
+          }
+        >
+          {isOwner && !isImported && (
+            <MenuItem
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onClick={() => toggleFilterOverride()}
+            >
+              <FormCheck readOnly type="switch" checked={filterOverride} />
+              <Form.Label
+                style={{
+                  marginRight: 10,
+                  marginTop: 2,
+                }}
+                className={"text-dim"}
+              >
+                Override{" "}
+                <OverlayTrigger
+                  placement="right"
+                  delay={{ show: 150, hide: 300 }}
+                  overlay={
+                    <Tooltip id="button-tooltip">
+                      Override lists prevent CIDs on imported lists from being
+                      filtered. Override lists cannot be shared.
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon
+                    icon={faQuestionCircle as IconProp}
+                    color="#7393B3"
+                    style={{
+                      marginTop: 2,
+                    }}
+                  />
+                </OverlayTrigger>
+              </Form.Label>
+            </MenuItem>
+          )}
+          <MenuItem
+            onClick={() => {
+              confirmDelete();
+            }}
+          >
+            <Button variant="danger" style={{ width: "100%" }}>
+              {isImported ? "Discard" : "Delete"}
+            </Button>
+          </MenuItem>
+        </DropdownMenu>
+        {/*  */}
+      </div>
+    );
+  };
+
+  const renderCancelButton = (props: FilterList): JSX.Element => {
+    return (
+      <Col>
         <Button
           variant="secondary"
           style={{ marginBottom: 5, marginLeft: 5 }}
@@ -771,10 +889,11 @@ const FilterPage = (props): JSX.Element => {
       {loaded ? (
         <>
           <Container>
-            <Row style={{ width: "100%" }}>
-              <Col>{renderTitle()}</Col>
+            <div style={{ display: "flex" }}>
+              <div style={{ flex: 1 }}>{renderTitle()}</div>
               {renderDeleteButton(filterList)}
-            </Row>
+            </div>
+
             <Row>
               <Col>
                 <div>
@@ -789,8 +908,6 @@ const FilterPage = (props): JSX.Element => {
                         disabled={isImported}
                       />
                     </Col>
-                  </Form.Row>
-                  <Form.Row>
                     <Col>
                       <Form.Control
                         role="description"
@@ -803,133 +920,14 @@ const FilterPage = (props): JSX.Element => {
                           });
                         }}
                         as="textarea"
+                        rows={1}
                         placeholder="List Description"
                         value={filterList.description}
                         disabled={isImported}
                       />
                     </Col>
                   </Form.Row>
-                  <Form.Row
-                    style={{
-                      marginLeft: 2,
-                      marginTop: -20,
-                      marginBottom: 20,
-                      width: "auto",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "center",
-                      }}
-                      onClick={() => {
-                        if (!isOrphan(filterList)) {
-                          if (isShared(filterList)) {
-                            setShowConfirmEnabled(true);
-                          } else {
-                            toggleFilterEnabled();
-                          }
-                        }
-                      }}
-                    >
-                      <FormCheck
-                        readOnly
-                        type="switch"
-                        disabled={isOrphan(filterList)}
-                        checked={filterEnabled}
-                      />
-                      <Form.Label
-                        style={{
-                          marginRight: 10,
-                          marginTop: 2,
-                        }}
-                        className={"text-dim"}
-                      >
-                        Active{" "}
-                        <OverlayTrigger
-                          placement="right"
-                          delay={{ show: 150, hide: 300 }}
-                          overlay={
-                            <Tooltip id="button-tooltip">
-                              Active filter lists prevent deals with included
-                              CIDs
-                            </Tooltip>
-                          }
-                        >
-                          <FontAwesomeIcon
-                            icon={faQuestionCircle as IconProp}
-                            color="#7393B3"
-                            style={{
-                              marginTop: 2,
-                            }}
-                          />
-                        </OverlayTrigger>
-                      </Form.Label>
-                    </div>
-                  </Form.Row>
-                  {(isOwner || !isImported) && (
-                    <Form.Row
-                      style={{
-                        marginLeft: 2,
-                        marginTop: -35,
-                        marginBottom: 20,
-                        width: "auto",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "center",
-                        }}
-                        onClick={() => toggleFilterOverride()}
-                      >
-                        <FormCheck
-                          readOnly
-                          type="switch"
-                          checked={filterOverride}
-                        />
-                        <Form.Label
-                          style={{
-                            marginRight: 10,
-                            marginTop: 2,
-                          }}
-                          className={"text-dim"}
-                        >
-                          Override?{" "}
-                          <OverlayTrigger
-                            placement="right"
-                            delay={{ show: 150, hide: 300 }}
-                            overlay={
-                              <Tooltip id="button-tooltip">
-                                Override lists prevent CIDs on imported lists
-                                from being filtered
-                              </Tooltip>
-                            }
-                          >
-                            <FontAwesomeIcon
-                              icon={faQuestionCircle as IconProp}
-                              color="#7393B3"
-                              style={{
-                                marginTop: 2,
-                              }}
-                            />
-                          </OverlayTrigger>
-                        </Form.Label>
-                      </div>
-                    </Form.Row>
-                  )}
-                  {filterList.override && (
-                    <Form.Row style={{ marginTop: -32, marginLeft: -2 }}>
-                      <Col>
-                        <Form.Label className={"text-dim"}>
-                          Override lists cannot be shared
-                        </Form.Label>
-                      </Col>
-                    </Form.Row>
-                  )}
-                  {!isShareEnabled() && (
+                  {/* {!isShareEnabled() && (
                     <Form.Row style={{ marginTop: -10, marginLeft: -2 }}>
                       <Col>
                         <Form.Label className={"text-dim"}>
@@ -941,144 +939,139 @@ const FilterPage = (props): JSX.Element => {
                         </Form.Label>
                       </Col>
                     </Form.Row>
-                  )}
+                  )} */}
                   {renderOrigin()}
                   {renderNotes()}
                   {checkViewType() !== ViewTypes.Imported && (
-                    <Form.Row>
-                      <Col style={{ display: "flex", flexDirection: "column" }}>
-                        <Row>
-                          <Col
-                            style={{
-                              display: "flex",
-                              flexDirection: "row",
-                              justifyContent: "flex-start",
-                              paddingBottom: "1rem",
-                              alignItems: "center",
-                            }}
-                          >
-                            <DropdownButton
-                              menuAlign="left"
-                              title="Add CID"
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "flex-start",
+                          alignContent: "center",
+                          alignItems: "center",
+                          marginBottom: 10,
+                        }}
+                      >
+                        <DropdownButton
+                          menuAlign="left"
+                          title="Add CID"
+                          style={{
+                            margin: "0 1rem 0 0",
+                          }}
+                        >
+                          <Dropdown.Item>
+                            <Button
                               style={{
-                                margin: "0 1rem 0 0",
+                                width: "100%",
                               }}
+                              onClick={onNewCid}
+                              disabled={isImported}
                             >
-                              <Dropdown.Item>
-                                <Button
-                                  style={{
-                                    width: "100%",
-                                  }}
-                                  onClick={onNewCid}
-                                  disabled={isImported}
-                                >
-                                  <FontAwesomeIcon
-                                    icon={faPlusCircle as IconProp}
-                                  />
-                                  &nbsp;Single
-                                </Button>
-                              </Dropdown.Item>
-                              <Dropdown.Item>
-                                <Button
-                                  style={{ width: "100%" }}
-                                  onClick={() => {
-                                    setAddCidBatchModal(true);
-                                  }}
-                                  disabled={isImported}
-                                >
-                                  <FontAwesomeIcon
-                                    icon={faFolderPlus as IconProp}
-                                  />
-                                  &nbsp;Bulk
-                                </Button>
-                              </Dropdown.Item>
-                            </DropdownButton>
-                            <DropdownButton
-                              menuAlign="left"
-                              title="Bulk Actions"
-                              style={{
-                                margin: "0 1rem 0 0",
+                              <FontAwesomeIcon
+                                icon={faPlusCircle as IconProp}
+                              />
+                              &nbsp;Single
+                            </Button>
+                          </Dropdown.Item>
+                          <Dropdown.Item>
+                            <Button
+                              style={{ width: "100%" }}
+                              onClick={() => {
+                                setAddCidBatchModal(true);
+                              }}
+                              disabled={isImported}
+                            >
+                              <FontAwesomeIcon
+                                icon={faFolderPlus as IconProp}
+                              />
+                              &nbsp;Bulk
+                            </Button>
+                          </Dropdown.Item>
+                        </DropdownButton>
+                        <DropdownButton
+                          menuAlign="left"
+                          title="Bulk Actions"
+                          style={{
+                            margin: "0 1rem 0 0",
+                          }}
+                          disabled={!isBulkActionAllowed}
+                        >
+                          <Dropdown.Item>
+                            <Button
+                              variant="outline-primary"
+                              style={{ width: "100%" }}
+                              onClick={handleBulkEditCids}
+                              disabled={!isBulkActionAllowed}
+                            >
+                              {/* <FontAwesomeIcon icon={faEdit as IconProp} /> */}
+                              Edit
+                            </Button>
+                          </Dropdown.Item>
+                          {checkViewType() === ViewTypes.Edit && (
+                            <Dropdown.Item>
+                              <Button
+                                variant="outline-warning"
+                                style={{ width: "100%" }}
+                                onClick={handleBulkMoveCids}
+                                disabled={!isBulkActionAllowed}
+                              >
+                                {/* <FontAwesomeIcon icon={faShare as IconProp} /> */}
+                                Move
+                              </Button>
+                            </Dropdown.Item>
+                          )}
+                          <Dropdown.Item>
+                            <Button
+                              variant="outline-danger"
+                              style={{ width: "100%" }}
+                              onClick={() => {
+                                const items = cids.filter(
+                                  (item: CidItem) => item.isChecked
+                                );
+                                prepareCidDeleteModal(items);
                               }}
                               disabled={!isBulkActionAllowed}
                             >
-                              <Dropdown.Item>
-                                <Button
-                                  variant="primary"
-                                  style={{ width: "100%" }}
-                                  onClick={handleBulkEditCids}
-                                  disabled={!isBulkActionAllowed}
-                                >
-                                  <FontAwesomeIcon icon={faEdit as IconProp} />
-                                  &nbsp;Edit
-                                </Button>
-                              </Dropdown.Item>
-                              {checkViewType() === ViewTypes.Edit && (
-                                <Dropdown.Item>
-                                  <Button
-                                    variant="warning"
-                                    style={{ width: "100%" }}
-                                    onClick={handleBulkMoveCids}
-                                    disabled={!isBulkActionAllowed}
-                                  >
-                                    <FontAwesomeIcon
-                                      icon={faShare as IconProp}
-                                    />
-                                    &nbsp;Move
-                                  </Button>
-                                </Dropdown.Item>
-                              )}
-                              <Dropdown.Item>
-                                <Button
-                                  variant="danger"
-                                  style={{ width: "100%" }}
-                                  onClick={() => {
-                                    const items = cids.filter(
-                                      (item: CidItem) => item.isChecked
-                                    );
-                                    prepareCidDeleteModal(items);
-                                  }}
-                                  disabled={!isBulkActionAllowed}
-                                >
-                                  <FontAwesomeIcon icon={faTrash as IconProp} />
-                                  &nbsp;Delete
-                                </Button>
-                              </Dropdown.Item>
-                            </DropdownButton>
-                            {(isOwner || !isImported) && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                }}
+                              {/* <FontAwesomeIcon icon={faTrash as IconProp} /> */}
+                              Delete
+                            </Button>
+                          </Dropdown.Item>
+                        </DropdownButton>
+                        {(isOwner || !isImported) && (
+                          <div
+                            style={{
+                              display: "flex",
+                              flex: 1,
+                              flexDirection: "row",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Sharing:</span>
+                            <Form.Group
+                              controlId="visibility"
+                              style={{
+                                marginBottom: "auto",
+                                paddingLeft: 10,
+                              }}
+                            >
+                              <Form.Control
+                                as="select"
+                                disabled={filterOverride}
+                                onChange={changeVisibility}
+                                value={VisibilityString[filterList.visibility]}
                               >
-                                <p>Sharing:</p>
-                                <Form.Group
-                                  controlId="visibility"
-                                  style={{
-                                    marginBottom: "auto",
-                                    paddingLeft: 10,
-                                  }}
-                                >
-                                  <Form.Control
-                                    as="select"
-                                    disabled={filterOverride}
-                                    onChange={changeVisibility}
-                                    value={
-                                      VisibilityString[filterList.visibility]
-                                    }
-                                  >
-                                    {isShareEnabled() && (
-                                      <option>Public</option>
-                                    )}
-                                    {isShareEnabled() && (
-                                      <option>Shareable</option>
-                                    )}
-                                    <option>Private</option>
-                                  </Form.Control>
-                                </Form.Group>
-                              </div>
-                            )}
+                                {isShareEnabled() && <option>Public</option>}
+                                {isShareEnabled() && <option>Shareable</option>}
+                                <option>Private</option>
+                              </Form.Control>
+                            </Form.Group>
                             <span
                               style={{
                                 color: "grey",
@@ -1089,9 +1082,11 @@ const FilterPage = (props): JSX.Element => {
                             >
                               {visibilityGenerateLink()}({visibilityHelpText()})
                             </span>
-                          </Col>
-                        </Row>
-
+                            {renderToggleButtonGroup()}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ marginBottom: 10 }}>
                         <CidsTable
                           filter={filterList}
                           cids={cids}
@@ -1131,13 +1126,13 @@ const FilterPage = (props): JSX.Element => {
                           }
                           onDeleteClick={(index) => removeCid(index)}
                         ></CidsTable>
-                      </Col>
-                    </Form.Row>
+                      </div>
+                    </div>
                   )}
                 </div>
               </Col>
             </Row>
-            <Row>{renderSaveAndCancelButtons(filterList)}</Row>
+            <Row>{renderCancelButton(filterList)}</Row>
             {editingCid && open && (
               <AddCidModal
                 cid={editingCid as CidItem}

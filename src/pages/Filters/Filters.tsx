@@ -4,14 +4,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
   Divider,
-  makeStyles,
+  IconButton,
+  InputAdornment,
   MenuItem,
+  Select,
   TableBody,
   TableCell,
   TableContainer,
   TablePagination,
   TableRow,
+  TextField,
 } from "@material-ui/core";
+import ClearIcon from "@material-ui/icons/ClearRounded";
+import SearchIcon from "@material-ui/icons/Search";
 import axios from "axios";
 import _ from "lodash";
 import debounce from "lodash.debounce";
@@ -22,7 +27,6 @@ import {
   Button,
   Col,
   Container,
-  Form,
   FormCheck,
   Row,
   Table,
@@ -34,7 +38,6 @@ import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import { HeadCell } from "../Public/Interfaces";
-import DropdownMenu from "./DropdownMenu";
 import EnhancedTableHead from "./EnhancedTableHead";
 import "./Filters.css";
 import HoverableMenuItem from "./HoverableMenuItem";
@@ -736,110 +739,135 @@ function Filters(): JSX.Element {
 
               <Divider style={{ marginTop: 6, marginBottom: 10 }} />
 
-              <div style={{ display: "flex" }}>
+              <div style={{ display: "flex", marginBottom: 10 }}>
                 <div
                   style={{
                     display: "flex",
-                    flex: 1,
+                    flex: 0.5,
                     marginRight: 4,
                     flexDirection: "row",
                     alignItems: "center",
                   }}
                 >
-                  <Form.Group controlId="search">
-                    <Form.Control
-                      type="text"
-                      placeholder="Search CID or Filter Name"
-                      onChange={searchFilters}
-                      onKeyDown={(
-                        event: React.KeyboardEvent<HTMLInputElement>
-                      ) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                        }
-                      }}
-                    />
-                  </Form.Group>
-                  <p className="ml-1">
-                    {filterLists ? filterLists.length : "0"} result
-                    {filterLists && filterLists.length === 1 ? "" : "s"} found
-                  </p>
+                  <TextField
+                    style={{ width: "100%" }}
+                    type="text"
+                    placeholder="Search CID or Filter Name"
+                    label="Search"
+                    variant="outlined"
+                    value={searchTerm}
+                    onChange={searchFilters}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {searchTerm && (
+                            <IconButton
+                              onClick={() => {
+                                setSearchTerm("");
+                              }}
+                              color="default"
+                            >
+                              <ClearIcon />
+                            </IconButton>
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                    FormHelperTextProps={{ style: { fontSize: 12 } }}
+                  />
                 </div>
+                <span
+                  style={{
+                    marginRight: 4,
+                    flex: 1,
+                    verticalAlign: "middle",
+                    alignSelf: "center",
+                  }}
+                >
+                  {filterLists ? filterLists.length : "0"} result
+                  {filterLists && filterLists.length === 1 ? "" : "s"} found
+                </span>
                 <div style={{ marginRight: 4 }}>
-                  <DropdownMenu
-                    title={
-                      selectedConditional
-                        ? BulkSelectedType[selectedConditional]
-                        : "Select"
-                    }
+                  <Select
+                    style={{ minWidth: 100 }}
+                    variant="outlined"
+                    onChange={(e) => {
+                      setSelectedConditional(
+                        BulkSelectedType[e.target.value as string]
+                      );
+                    }}
+                    value={BulkSelectedType[selectedConditional]}
                   >
                     {Object.keys(BulkSelectedType)
                       .filter((key) => isNaN(parseInt(key)))
                       .map((key, idx) => (
-                        <MenuItem
-                          key={idx}
-                          onClick={() =>
-                            setSelectedConditional(BulkSelectedType[key])
-                          }
-                        >
+                        <MenuItem key={idx} value={key}>
                           {key}
                         </MenuItem>
                       ))}
-                  </DropdownMenu>
+                  </Select>
                 </div>
                 <div>
-                  {
-                    <DropdownMenu
-                      title={"Bulk Actions"}
-                      disabled={
-                        !disabledSelectedFilters.length &&
-                        !enabledSelectedFilters.length &&
-                        !orphanSelectedFilters.length
-                      }
-                    >
-                      {!!disabledSelectedFilters.length && (
-                        <HoverableMenuItem
-                          title={`Enable (${disabledSelectedFilters.length})`}
-                          onClick={() => {
-                            const sharedFilters =
-                              disabledSelectedFilters.filter((x) =>
-                                isShared(x)
-                              );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(true);
-                            } else {
-                              beginLocalBulkSetEnabled(true);
-                            }
-                          }}
-                        />
-                      )}
+                  <Select
+                    style={{ minWidth: 100 }}
+                    disabled={
+                      !disabledSelectedFilters.length &&
+                      !enabledSelectedFilters.length &&
+                      !orphanSelectedFilters.length
+                    }
+                    title={"Bulk Actions"}
+                    variant="outlined"
+                    defaultValue={"Bulk Actions"}
+                    value={"Bulk Actions"}
+                  >
+                    <MenuItem value="Bulk Actions">Bulk Actions</MenuItem>
+                    {!!disabledSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="default"
+                        title={`Enable (${disabledSelectedFilters.length})`}
+                        onClick={() => {
+                          const sharedFilters = disabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(true);
+                          } else {
+                            beginLocalBulkSetEnabled(true);
+                          }
+                        }}
+                      />
+                    )}
 
-                      {!!enabledSelectedFilters.length && (
-                        <HoverableMenuItem
-                          type="destructive"
-                          title={`Disable (${enabledSelectedFilters.length})`}
-                          onClick={() => {
-                            const sharedFilters = enabledSelectedFilters.filter(
-                              (x) => isShared(x)
-                            );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(false);
-                            } else {
-                              beginLocalBulkSetEnabled(false);
-                            }
-                          }}
-                        />
-                      )}
+                    {!!enabledSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="destructive"
+                        title={`Disable (${enabledSelectedFilters.length})`}
+                        onClick={() => {
+                          const sharedFilters = enabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(false);
+                          } else {
+                            beginLocalBulkSetEnabled(false);
+                          }
+                        }}
+                      />
+                    )}
 
-                      {!!orphanSelectedFilters.length && (
-                        <HoverableMenuItem
-                          type="destructive"
-                          title={`Discard (${orphanSelectedFilters.length})`}
-                          onClick={() => beginBulkDiscardOrphans()}
-                        />
-                      )}
-                    </DropdownMenu>
-                  }
+                    {!!orphanSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="destructive"
+                        title={`Discard (${orphanSelectedFilters.length})`}
+                        onClick={() => beginBulkDiscardOrphans()}
+                      />
+                    )}
+                  </Select>
                 </div>
               </div>
 
