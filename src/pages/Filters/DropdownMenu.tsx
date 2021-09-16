@@ -3,9 +3,10 @@ import React from "react";
 import { Button } from "react-bootstrap";
 
 interface DropdownMenuProps {
-  title: string;
+  title?: string;
   disabled?: boolean;
-  children: any[];
+  titleButton?: React.ReactElement;
+  children: any[] | any;
 }
 
 function DropdownMenu(props: DropdownMenuProps) {
@@ -18,11 +19,20 @@ function DropdownMenu(props: DropdownMenuProps) {
     setAnchorEl(null);
   };
 
+  console.log(props.titleButton);
+
   return (
     <div>
-      <Button disabled={!!props.disabled} onClick={handleClick}>
-        {props.title}
-      </Button>
+      {props.titleButton ? (
+        React.cloneElement(props.titleButton, {
+          onClick: handleClick,
+          disabled: !!props.disabled,
+        })
+      ) : (
+        <Button disabled={!!props.disabled} onClick={handleClick}>
+          {props.title}
+        </Button>
+      )}
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}

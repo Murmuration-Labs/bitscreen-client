@@ -81,7 +81,7 @@ function Navigation(): JSX.Element {
                 activeClassName={"is-active"}
                 to="/directory"
               >
-                <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Public Filters
+                <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
               </NavLink>
             )}
           </div>

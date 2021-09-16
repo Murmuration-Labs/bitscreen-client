@@ -3,6 +3,7 @@ import {
   faCheck,
   faEdit,
   faShare,
+  faShareAlt,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -89,6 +90,7 @@ const CidsRow = ({
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [remote, setRemote] = useState(false);
   const [local, setLocal] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -117,6 +119,8 @@ const CidsRow = ({
     <TableRow
       hover
       onClick={() => onRowToggle()}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       role="checkbox"
       tabIndex={-1}
       key={cid.tableKey}
@@ -241,7 +245,10 @@ const CidsRow = ({
               handleEdit();
             }}
           >
-            <FontAwesomeIcon color="rgb(0,121,251)" icon={faEdit} />
+            <FontAwesomeIcon
+              color={isHovered ? "blue" : "black"}
+              icon={faEdit}
+            />
           </IconButton>
         </Tooltip>
         {typeof filter.id === "number" && (
@@ -253,7 +260,10 @@ const CidsRow = ({
                 handleMove();
               }}
             >
-              <FontAwesomeIcon color="orange" icon={faShare} />
+              <FontAwesomeIcon
+                color={isHovered ? "orange" : "black"}
+                icon="paper-plane"
+              />
             </IconButton>
           </Tooltip>
         )}
@@ -265,7 +275,10 @@ const CidsRow = ({
               handleDelete();
             }}
           >
-            <FontAwesomeIcon color={"red"} size={"xs"} icon={faTrash} />
+            <FontAwesomeIcon
+              color={isHovered ? "red" : "black"}
+              icon="trash-alt"
+            />
           </IconButton>
         </Tooltip>
       </TableCell>
