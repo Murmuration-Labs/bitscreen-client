@@ -37,6 +37,17 @@ export enum EnabledOption {
   Global,
 }
 
+export enum PeriodType {
+  daily = "daily",
+  monthly = "monthly",
+  yearly = "yearly",
+}
+
+export interface PeriodInterval {
+  startDate: Date | null;
+  endDate: Date | null;
+}
+
 export function mapVisibilityString(visibilityStr: string): Visibility {
   if (visibilityStr === "Private") return Visibility.Private;
   if (visibilityStr === "Public") return Visibility.Public;
@@ -54,6 +65,12 @@ export interface CidItem {
   edit?: boolean;
   isChecked: boolean;
   isSaved: boolean;
+}
+
+export interface ChartDataEntry {
+  key: string;
+  total_count: number;
+  unique_count: number;
 }
 
 export interface DashboardData {

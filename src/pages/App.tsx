@@ -10,6 +10,7 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navigation from "../components/Navigation/Navigation";
+import MetamaskProvider from "../providers/MetamaskProvider";
 import * as AuthService from "../services/AuthService";
 import "./App.css";
 import Dashboard from "./Dashboard/Dashboard";
@@ -18,8 +19,6 @@ import Filters from "./Filters/Filters";
 import FilterDetailsPage from "./Public/FilterDetailsPage";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
-import MetamaskProvider from "../providers/MetamaskProvider";
-
 interface MatchParams {
   id: string;
 }

@@ -1,19 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import ApiService from "../../services/ApiService";
-import { Config, DashboardData } from "../Filters/Interfaces";
+import {
+  ChartDataEntry,
+  Config,
+  DashboardData,
+  PeriodInterval,
+  PeriodType,
+} from "../Filters/Interfaces";
 import {
   DashboardCard,
   DashboardDoubleCard,
 } from "./DashboardCards/DashboardCard";
+import { DashboardChart } from "./DashboardChart/DashboardChart";
+import { CardContent, Typography } from "@material-ui/core";
+import Card from "@material-ui/core/Card";
+import { Form } from "react-bootstrap";
+import { PeriodRange } from "./DatePicker/DatePicker";
+import moment from "moment";
 
 function Dashboard(): JSX.Element {
-  const [dataCount, setDataCount] = React.useState<number>(0);
+  const [periodType, setPeriodType] = useState<PeriodType>(PeriodType.daily);
+  const [periodInterval, setPeriodInterval] = useState<PeriodInterval>({
+    startDate: null,
+    endDate: null,
+  });
+
   const [configuration, setConfiguration] = useState<Config>({
     bitscreen: false,
     import: false,
     share: false,
   });
+
+  const [chartData, setChartData] = useState<ChartDataEntry[]>([]);
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     currentlyFiltering: 0,
     listSubscribers: 0,
@@ -26,7 +45,7 @@ function Dashboard(): JSX.Element {
   });
 
   useEffect(() => {
-    ApiService.getDashboardInformation().then((dashboardData) => {
+    ApiService.getDashboardData().then((dashboardData) => {
       setDashboardData(dashboardData);
     });
 
@@ -34,6 +53,50 @@ function Dashboard(): JSX.Element {
       setConfiguration(config)
     );
   }, []);
+
+  useEffect(() => {
+    if (!periodInterval.startDate || !periodInterval.endDate) {
+      setChartData([]);
+      return;
+    }
+
+    const stringPeriodInterval = {
+      startDate: moment(periodInterval.startDate).format("YYYY-MM-DD"),
+      endDate: moment(periodInterval.endDate).format("YYYY-MM-DD"),
+    };
+
+    ApiService.getChartData(periodType, stringPeriodInterval).then(
+      (chartInformation) => setChartData(chartInformation)
+    );
+  }, [periodInterval]);
+
+  const handlePeriodPickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPeriodInterval({
+      startDate: null,
+      endDate: null,
+    });
+    setPeriodType(e.target.value as PeriodType);
+  };
+
+  const dashboardChartRender = () => {
+    if (chartData.length) {
+      return <DashboardChart chartData={chartData} />;
+    }
+
+    if (periodInterval.startDate && periodInterval.endDate) {
+      return (
+        <h2 className="w-100 d-flex justify-content-center align-items-center font-weight-bold py-5">
+          NO CHART DATA
+        </h2>
+      );
+    }
+
+    return (
+      <h4 className="w-100 d-flex justify-content-center align-items-center font-weight-bold py-5">
+        PLEASE SELECT A PERIOD TYPE AND INTERVAL
+      </h4>
+    );
+  };
 
   return (
     <>
@@ -81,6 +144,31 @@ function Dashboard(): JSX.Element {
           />
         </Col>
       </Row>
+      <Card className="root" variant="outlined">
+        <CardContent>
+          <div className="chart-head-container">
+            <Typography className="card-title">Chart</Typography>
+            <div className="chart-head-container">
+              <Form.Control
+                as="select"
+                value={periodType}
+                className="chart-period-type-picker mr-3"
+                onChange={handlePeriodPickerChange}
+              >
+                <option value={PeriodType.daily}>Daily</option>
+                <option value={PeriodType.monthly}>Monthly</option>
+                <option value={PeriodType.yearly}>Yearly</option>
+              </Form.Control>
+              <PeriodRange
+                periodType={periodType}
+                periodInterval={periodInterval}
+                setPeriodInterval={setPeriodInterval}
+              ></PeriodRange>
+            </div>
+          </div>
+          {dashboardChartRender()}
+        </CardContent>
+      </Card>
     </>
   );
 }

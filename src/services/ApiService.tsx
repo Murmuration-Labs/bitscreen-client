@@ -9,6 +9,7 @@ import {
   ProviderFilter,
   DashboardData,
   Config,
+  ChartDataEntry,
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
@@ -343,7 +344,7 @@ const ApiService = {
     return response.data.count;
   },
 
-  getDashboardInformation: async (): Promise<DashboardData> => {
+  getDashboardData: async (): Promise<DashboardData> => {
     const response = await axios.get(
       `${remoteMarketplaceUri()}/filter/dashboard`,
       {
@@ -352,8 +353,29 @@ const ApiService = {
         },
       }
     );
-    console.log(response.data);
     return response.data;
+  },
+
+  getChartData: async (periodType, periodInterval): Promise<any> => {
+    const { startDate, endDate } = periodInterval;
+    const response = await axios.get(
+      `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
+    );
+    // return Object.values(response.data);
+    const data: ChartDataEntry[] = Object.values(response.data);
+    return data;
+    // const mock = data.map((element) => {
+    //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
+    //   const totalCidsFiltered =
+    //     totalRequestsBlocked -
+    //     Math.ceil(Math.random() * (totalRequestsBlocked - 50));
+    //   return {
+    //     key: element.key,
+    //     total_count: totalRequestsBlocked,
+    //     unique_count: totalCidsFiltered,
+    //   };
+    // });
+    // return mock;
   },
 
   getProviderConfig: async (): Promise<Config> => {

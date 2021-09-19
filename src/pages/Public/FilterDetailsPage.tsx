@@ -53,7 +53,6 @@ const FilterDetailsPage = (props) => {
     setFilterShareId(shareId);
     ApiService.getPublicFilterDetails(shareId).then((data: any) => {
       setIsImported(data.isImported);
-      console.log(data.filter);
       const details = [
         { columnName: "Name of list:", columnValue: data.filter.name },
         {
