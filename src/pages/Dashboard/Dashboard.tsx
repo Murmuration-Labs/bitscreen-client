@@ -11,7 +11,7 @@ import {
 import {
   DashboardCard,
   DashboardDoubleCard,
-} from "./DashboardCards/DashboardCard";
+} from "../../components/Cards/Cards";
 import { DashboardChart } from "./DashboardChart/DashboardChart";
 import { CardContent, Typography } from "@material-ui/core";
 import Card from "@material-ui/core/Card";

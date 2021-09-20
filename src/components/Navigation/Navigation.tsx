@@ -1,8 +1,6 @@
 import {
   faCog,
-  faFile,
-  faFolderOpen,
-  faSearch,
+  faQuestionCircle,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +9,7 @@ import { Col, NavDropdown, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import * as AuthService from "../../services/AuthService";
 import "./Navigation.css";
+import Bitscreenlogo from "./bitscreen-logo.png";
 
 function Navigation(): JSX.Element {
   const [provider, setProvider] = useState(AuthService.getAccount());
@@ -25,77 +24,94 @@ function Navigation(): JSX.Element {
 
   return (
     <nav className="container navbar mw-100">
-      <Row>
-        <Col xs={8}>
-          <NavLink className="nav-logo" to="/">
-            <FontAwesomeIcon icon={faSearch} /> BitScreen
+      <Row className="h-100">
+        <Col
+          className="d-flex align-items-center justify-content-center px-0"
+          xs={2}
+        >
+          <NavLink className="nav-logo d-flex justify-content-center" to="/">
+            <img src={Bitscreenlogo} height="48px"></img>
           </NavLink>
         </Col>
-        <Col className="d-flex align-items-center" xs={4}>
+        <Col className="d-flex align-items-end nav-container px-0" xs={10}>
           {provider && (
-            <NavDropdown
-              id="nav-dropdown-wallet-address"
-              title={
-                <span>
-                  <FontAwesomeIcon size="sm" icon={faUser} />{" "}
-                  {shortenAddress(provider.walletAddressHashed ?? "")}
-                </span>
-              }
+            <NavLink
+              className="nav-link"
+              activeClassName={"is-active"}
+              to="/dashboard"
             >
-              <NavDropdown.Item
-                onClick={() => {
-                  AuthService.removeAccount();
-                }}
+              Dashboard
+            </NavLink>
+          )}
+          {provider && (
+            <NavLink
+              className="nav-link"
+              activeClassName={"is-active"}
+              to="/settings"
+            >
+              Settings
+            </NavLink>
+          )}
+          {provider && (
+            <NavLink
+              className="nav-link"
+              activeClassName={"is-active"}
+              to="/filters"
+            >
+              My Filters
+            </NavLink>
+          )}
+          {provider && (
+            <NavLink
+              className="nav-link"
+              activeClassName={"is-active"}
+              to="/directory"
+            >
+              Directory
+            </NavLink>
+          )}
+          {provider && (
+            <div className="nav-item-container">
+              <a className="mr-4" href="/">
+                <FontAwesomeIcon
+                  color="white"
+                  size="lg"
+                  icon={faQuestionCircle}
+                />
+              </a>
+              <a className="mr-4" href="/settings">
+                <FontAwesomeIcon color="white" size="lg" icon={faCog} />
+              </a>
+              <NavDropdown
+                id="nav-dropdown-wallet-address"
+                title={
+                  <span>
+                    <FontAwesomeIcon size="sm" icon={faUser} />{" "}
+                    {shortenAddress(provider.walletAddressHashed ?? "")}
+                  </span>
+                }
               >
-                Disconnect wallet?
-              </NavDropdown.Item>
-            </NavDropdown>
+                <NavDropdown.Item
+                  onClick={() => {
+                    AuthService.removeAccount();
+                  }}
+                >
+                  Disconnect wallet?
+                </NavDropdown.Item>
+              </NavDropdown>
+            </div>
           )}
         </Col>
+        {/* <Col className="d-flex align-items-center" xs={4}>
+          
+        </Col> */}
       </Row>
-      <Row>
+      {/* <Row>
         <Col xs={0} sm={2} />
         <Col xs={12} sm={10}>
-          <div className="nav-container">
-            {provider && (
-              <NavLink
-                className="nav-link"
-                activeClassName={"is-active"}
-                to="/dashboard"
-              >
-                <FontAwesomeIcon size="sm" icon={faCog} /> Dashboard
-              </NavLink>
-            )}
-            {provider && (
-              <NavLink
-                className="nav-link"
-                activeClassName={"is-active"}
-                to="/settings"
-              >
-                <FontAwesomeIcon size="sm" icon={faCog} /> Settings
-              </NavLink>
-            )}
-            {provider && (
-              <NavLink
-                className="nav-link"
-                activeClassName={"is-active"}
-                to="/filters"
-              >
-                <FontAwesomeIcon size="sm" icon={faFile} /> Filters
-              </NavLink>
-            )}
-            {provider && (
-              <NavLink
-                className="nav-link"
-                activeClassName={"is-active"}
-                to="/directory"
-              >
-                <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Public Filters
-              </NavLink>
-            )}
-          </div>
+          
         </Col>
-      </Row>
+      </Row> */}
     </nav>
   );
 }
