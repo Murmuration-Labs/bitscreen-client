@@ -16,7 +16,7 @@ import "./App.css";
 import Dashboard from "./Dashboard/Dashboard";
 import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
-import FilterDetailsPage from "./Public/FilterDetailsPage";
+import PublicFilterDetailsPage from "./Public/PublicFilterDetails/PublicFilterDetails";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
 interface MatchParams {
@@ -98,7 +98,7 @@ function App(): JSX.Element {
                 exact
                 component={
                   provider && provider.accessToken
-                    ? FilterDetailsPage
+                    ? PublicFilterDetailsPage
                     : Settings
                 }
               >

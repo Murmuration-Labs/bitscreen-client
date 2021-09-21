@@ -1,0 +1,83 @@
+.root {
+  border-radius: 16px !important;
+}
+
+.double-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.triple-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.root-double-left {
+  flex-grow: 1;
+  border-radius: 16px 0 0 16px !important;
+}
+
+.root-double-right {
+  flex-grow: 1;
+  border-radius: 0 16px 16px 0 !important;
+}
+
+.public-double {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.public-double .MuiCardContent-root {
+  padding: 24px !important;
+}
+.public-triple .MuiCardContent-root {
+  padding: 24px !important;
+}
+
+.public-triple {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.root .MuiCardContent-root,
+.root-double-left .MuiCardContent-root,
+.root-double-right .MuiCardContent-root {
+  padding: 24px !important;
+}
+
+.card-title {
+  margin-bottom: 16px !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+}
+
+.card-text {
+  height: 72px !important;
+  line-height: 72px !important;
+  font-size: 64px !important;
+  font-weight: normal !important;
+}
+
+.public-card-title {
+  font-size: 20px !important;
+  line-height: 24px !important;
+  font-weight: 600 !important;
+  margin-bottom: 16px !important;
+}
+
+.public-card-text.single {
+  font-size: 64px;
+  line-height: 72px;
+  font-weight: 400;
+}
+
+.public-card-text.double,
+.public-card-text.triple {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+}
