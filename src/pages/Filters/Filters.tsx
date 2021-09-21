@@ -4,13 +4,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
   Divider,
+  IconButton,
+  InputAdornment,
   MenuItem,
+  Select,
   TableBody,
   TableCell,
   TableContainer,
   TablePagination,
   TableRow,
+  TextField,
 } from "@material-ui/core";
+import ClearIcon from "@material-ui/icons/ClearRounded";
+import SearchIcon from "@material-ui/icons/Search";
 import axios from "axios";
 import _ from "lodash";
 import debounce from "lodash.debounce";
@@ -21,7 +27,6 @@ import {
   Button,
   Col,
   Container,
-  Form,
   FormCheck,
   Row,
   Table,
@@ -33,9 +38,9 @@ import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
 import { HeadCell } from "../Public/Interfaces";
-import DropdownMenu from "./DropdownMenu";
 import EnhancedTableHead from "./EnhancedTableHead";
 import "./Filters.css";
+import HoverableMenuItem from "./HoverableMenuItem";
 import ImportFilterModal from "./ImportFilterModal";
 import {
   BulkSelectedType,
@@ -86,6 +91,7 @@ function Filters(): JSX.Element {
     React.useState<keyof MyFiltersTableData>("name");
   const [needsRefresh, setNeedsRefresh] = useState(false);
   // ----------------------- SORTING -----------------------
+  const [hoveredFilterId, setHoveredFilterId] = useState(-1);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -408,21 +414,25 @@ function Filters(): JSX.Element {
 
   const editOrEyeIcon = (props: FilterList): JSX.Element => {
     if (isImported(props)) {
-      return <FontAwesomeIcon icon={faEye as IconProp} />;
+      return (
+        <FontAwesomeIcon
+          icon={faEye as IconProp}
+          color={props.id === hoveredFilterId ? "blue" : "black"}
+        />
+      );
     }
 
-    return <FontAwesomeIcon icon={faEdit as IconProp} />;
+    return (
+      <FontAwesomeIcon
+        icon={faEdit as IconProp}
+        color={props.id === hoveredFilterId ? "blue" : "black"}
+      />
+    );
   };
 
   const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card-container"}>
-        {searchTerm && (
-          <p>
-            {filterLists ? filterLists.length : "0"} result
-            {filterLists && filterLists.length === 1 ? "" : "s"} found
-          </p>
-        )}
         <TableContainer>
           <Table aria-label="enhanced table">
             <EnhancedTableHead
@@ -444,7 +454,8 @@ function Filters(): JSX.Element {
                 return (
                   <TableRow
                     hover
-                    // onClick={() => onRowToggle()}
+                    onMouseEnter={() => setHoveredFilterId(row.id)}
+                    onMouseLeave={() => setHoveredFilterId(-1)}
                     role="checkbox"
                     tabIndex={-1}
                     selected={!!row.isBulkSelected}
@@ -533,7 +544,10 @@ function Filters(): JSX.Element {
                         onClick={() => confirmDelete(row)}
                         style={{ marginRight: 4 }}
                       >
-                        <FontAwesomeIcon icon={faTrash as IconProp} />
+                        <FontAwesomeIcon
+                          icon={faTrash as IconProp}
+                          color={row.id === hoveredFilterId ? "red" : "black"}
+                        />
                       </Link>
                     </TableCell>
                   </TableRow>
@@ -668,10 +682,21 @@ function Filters(): JSX.Element {
                 }}
               >
                 <div
-                  style={{ display: "flex", flexDirection: "column", flex: 1 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flex: 1,
+                    alignItems: "center",
+                  }}
                 >
                   <h3>My Filters</h3>
-                  <span style={{ color: "grey", fontStyle: "oblique" }}>
+                  <span
+                    style={{
+                      color: "grey",
+                      fontStyle: "oblique",
+                      marginLeft: 10,
+                    }}
+                  >
                     Filter lists running on my node
                     {!isImportEnabled() && (
                       <p className="text-dim" style={{ marginRight: 4 }}>
@@ -708,97 +733,135 @@ function Filters(): JSX.Element {
 
               <Divider style={{ marginTop: 6, marginBottom: 10 }} />
 
-              <div style={{ display: "flex" }}>
-                <div style={{ flex: 1, marginRight: 4 }}>
-                  <Form.Group controlId="search">
-                    <Form.Control
-                      type="text"
-                      placeholder="Search CID or Filter Name"
-                      onChange={searchFilters}
-                      onKeyDown={(
-                        event: React.KeyboardEvent<HTMLInputElement>
-                      ) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                        }
-                      }}
-                    />
-                  </Form.Group>
+              <div style={{ display: "flex", marginBottom: 10 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flex: 0.5,
+                    marginRight: 4,
+                    flexDirection: "row",
+                    alignItems: "center",
+                  }}
+                >
+                  <TextField
+                    style={{ width: "100%" }}
+                    type="text"
+                    placeholder="Search CID or Filter Name"
+                    label="Search"
+                    variant="outlined"
+                    value={searchTerm}
+                    onChange={searchFilters}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {searchTerm && (
+                            <IconButton
+                              onClick={() => {
+                                setSearchTerm("");
+                              }}
+                              color="default"
+                            >
+                              <ClearIcon />
+                            </IconButton>
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                    FormHelperTextProps={{ style: { fontSize: 12 } }}
+                  />
                 </div>
+                <span
+                  style={{
+                    marginRight: 4,
+                    flex: 1,
+                    verticalAlign: "middle",
+                    alignSelf: "center",
+                  }}
+                >
+                  {filterLists ? filterLists.length : "0"} result
+                  {filterLists && filterLists.length === 1 ? "" : "s"} found
+                </span>
                 <div style={{ marginRight: 4 }}>
-                  <DropdownMenu
-                    title={
-                      selectedConditional
-                        ? BulkSelectedType[selectedConditional]
-                        : "Select"
-                    }
+                  <Select
+                    style={{ minWidth: 100 }}
+                    variant="outlined"
+                    onChange={(e) => {
+                      setSelectedConditional(
+                        BulkSelectedType[e.target.value as string]
+                      );
+                    }}
+                    value={BulkSelectedType[selectedConditional]}
                   >
                     {Object.keys(BulkSelectedType)
                       .filter((key) => isNaN(parseInt(key)))
                       .map((key, idx) => (
-                        <MenuItem
-                          key={idx}
-                          onClick={() =>
-                            setSelectedConditional(BulkSelectedType[key])
-                          }
-                        >
+                        <MenuItem key={idx} value={key}>
                           {key}
                         </MenuItem>
                       ))}
-                  </DropdownMenu>
+                  </Select>
                 </div>
                 <div>
-                  {
-                    <DropdownMenu
-                      title={"Bulk Actions"}
-                      disabled={
-                        !disabledSelectedFilters.length &&
-                        !enabledSelectedFilters.length &&
-                        !orphanSelectedFilters.length
-                      }
-                    >
-                      {!!disabledSelectedFilters.length && (
-                        <MenuItem
-                          onClick={() => {
-                            const sharedFilters =
-                              disabledSelectedFilters.filter((x) =>
-                                isShared(x)
-                              );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(true);
-                            } else {
-                              beginLocalBulkSetEnabled(true);
-                            }
-                          }}
-                        >
-                          Enable ({disabledSelectedFilters.length})
-                        </MenuItem>
-                      )}
+                  <Select
+                    style={{ minWidth: 100 }}
+                    disabled={
+                      !disabledSelectedFilters.length &&
+                      !enabledSelectedFilters.length &&
+                      !orphanSelectedFilters.length
+                    }
+                    title={"Bulk Actions"}
+                    variant="outlined"
+                    defaultValue={"Bulk Actions"}
+                    value={"Bulk Actions"}
+                  >
+                    <MenuItem value="Bulk Actions">Bulk Actions</MenuItem>
+                    {!!disabledSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="default"
+                        title={`Enable (${disabledSelectedFilters.length})`}
+                        onClick={() => {
+                          const sharedFilters = disabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(true);
+                          } else {
+                            beginLocalBulkSetEnabled(true);
+                          }
+                        }}
+                      />
+                    )}
 
-                      {!!enabledSelectedFilters.length && (
-                        <MenuItem
-                          onClick={() => {
-                            const sharedFilters = enabledSelectedFilters.filter(
-                              (x) => isShared(x)
-                            );
-                            if (sharedFilters.length > 0) {
-                              beginGlobalBulkSetEnabled(false);
-                            } else {
-                              beginLocalBulkSetEnabled(false);
-                            }
-                          }}
-                        >
-                          Disable ({enabledSelectedFilters.length})
-                        </MenuItem>
-                      )}
+                    {!!enabledSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="destructive"
+                        title={`Disable (${enabledSelectedFilters.length})`}
+                        onClick={() => {
+                          const sharedFilters = enabledSelectedFilters.filter(
+                            (x) => isShared(x)
+                          );
+                          if (sharedFilters.length > 0) {
+                            beginGlobalBulkSetEnabled(false);
+                          } else {
+                            beginLocalBulkSetEnabled(false);
+                          }
+                        }}
+                      />
+                    )}
 
-                      {!!orphanSelectedFilters.length && (
-                        <MenuItem onClick={() => beginBulkDiscardOrphans()}>
-                          Discard ({orphanSelectedFilters.length})
-                        </MenuItem>
-                      )}
-                    </DropdownMenu>
-                  }
+                    {!!orphanSelectedFilters.length && (
+                      <HoverableMenuItem
+                        type="destructive"
+                        title={`Discard (${orphanSelectedFilters.length})`}
+                        onClick={() => beginBulkDiscardOrphans()}
+                      />
+                    )}
+                  </Select>
                 </div>
               </div>
 

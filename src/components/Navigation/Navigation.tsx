@@ -109,7 +109,44 @@ function Navigation(): JSX.Element {
       {/* <Row>
         <Col xs={0} sm={2} />
         <Col xs={12} sm={10}>
-          
+          <div className="nav-container">
+            {provider && (
+              <NavLink
+                className="nav-link"
+                activeClassName={"is-active"}
+                to="/dashboard"
+              >
+                <FontAwesomeIcon size="sm" icon={faCog} /> Dashboard
+              </NavLink>
+            )}
+            {provider && (
+              <NavLink
+                className="nav-link"
+                activeClassName={"is-active"}
+                to="/settings"
+              >
+                <FontAwesomeIcon size="sm" icon={faCog} /> Settings
+              </NavLink>
+            )}
+            {provider && (
+              <NavLink
+                className="nav-link"
+                activeClassName={"is-active"}
+                to="/filters"
+              >
+                <FontAwesomeIcon size="sm" icon={faFile} /> Filters
+              </NavLink>
+            )}
+            {provider && (
+              <NavLink
+                className="nav-link"
+                activeClassName={"is-active"}
+                to="/directory"
+              >
+                <FontAwesomeIcon size="sm" icon={faFolderOpen} /> Directory
+              </NavLink>
+            )}
+          </div>
         </Col>
       </Row> */}
     </nav>

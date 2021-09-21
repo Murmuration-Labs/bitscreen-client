@@ -23,12 +23,12 @@ import "./PublicFilters.css";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name" },
-  { id: "cids", numeric: true, label: "# of CIDs" },
-  { id: "subs", numeric: true, label: "# of Subs" },
-  { id: "providerName", numeric: true, label: "Provider Name" },
-  { id: "providerCountry", numeric: true, label: "Provider Country" },
+  { id: "cids", numeric: true, label: "CIDs" },
+  { id: "subs", numeric: true, label: "Subscribers" },
+  { id: "providerName", numeric: true, label: "Provider" },
+  { id: "providerCountry", numeric: true, label: "Country" },
   { id: "description", numeric: false, label: "Description" },
-  { id: "updated", numeric: false, label: "Last Updated" },
+  { id: "updated", numeric: false, label: "Updated" },
   { id: "actions", numeric: false, label: "Actions" },
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
@@ -124,6 +124,15 @@ export default function PublicFilters() {
     );
   };
 
+  const LongText = ({ content, limit }) => {
+    if (content.length <= limit) {
+      return <div>{content}</div>;
+    }
+
+    const toShow = content.substring(0, limit) + "...";
+    return <div>{toShow}</div>;
+  };
+
   return (
     <Container>
       <div
@@ -134,9 +143,22 @@ export default function PublicFilters() {
           paddingBottom: 0,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-          <h3>Public Filters</h3>
-          <span style={{ color: "grey", fontStyle: "oblique" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flex: 1,
+            alignItems: "center",
+          }}
+        >
+          <h3>Directory</h3>
+          <span
+            style={{
+              color: "grey",
+              fontStyle: "oblique",
+              marginLeft: 10,
+            }}
+          >
             Directory of public filter lists
             {!isImportEnabled() && (
               <p className="text-dim" style={{ marginRight: 4 }}>
@@ -153,23 +175,30 @@ export default function PublicFilters() {
 
       <Divider style={{ marginTop: 6, marginBottom: 10 }} />
 
-      <Form.Group controlId="search">
-        <Form.Control
-          type="text"
-          placeholder="Search..."
-          onChange={handlerInputChange}
-          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-            }
-          }}
-        />
-      </Form.Group>
-      {searchedValue && (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flex: 1,
+          alignItems: "center",
+        }}
+      >
+        <Form.Group controlId="search">
+          <Form.Control
+            type="text"
+            placeholder="Search"
+            onChange={handlerInputChange}
+            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+              }
+            }}
+          />
+        </Form.Group>
         <p className="ml-1">
           {dataCount} result{dataCount === 1 ? "" : "s"} found
         </p>
-      )}
+      </div>
       <TableContainer>
         <Table aria-label="enhanced table">
           <EnhancedTableHead
@@ -190,7 +219,7 @@ export default function PublicFilters() {
                   <TableCell>
                     <Link
                       to={`/directory/details/${row.shareId}`}
-                      style={{ fontSize: 14 }}
+                      style={{ fontSize: 14, color: "blue" }}
                     >
                       {row.name}
                     </Link>
@@ -199,12 +228,19 @@ export default function PublicFilters() {
                   <TableCell>{row.subs - 1}</TableCell>
                   <TableCell>{row.providerName}</TableCell>
                   <TableCell>{row.providerCountry}</TableCell>
-                  <TableCell>{row.description}</TableCell>
+                  <TableCell>
+                    <LongText content={row.description} limit={20} />
+                  </TableCell>
                   <TableCell>{formatDate(row.updated)}</TableCell>
                   <TableCell>
                     {row.isImported ? (
                       <Button
-                        style={{ marginLeft: -15 }}
+                        style={{
+                          marginLeft: -15,
+                          color: "blue",
+                          backgroundColor: "white",
+                          borderColor: "blue",
+                        }}
                         onClick={() => {
                           history.push(`/filters/edit/${row.shareId}`);
                         }}
@@ -214,7 +250,11 @@ export default function PublicFilters() {
                       </Button>
                     ) : row.providerId != providerId ? (
                       <Button
-                        style={{ marginLeft: -5 }}
+                        style={{
+                          marginLeft: -5,
+                          color: "white",
+                          backgroundColor: "blue",
+                        }}
                         disabled={!isImportEnabled()}
                         onClick={() => {
                           setToBeImportedFilter(row as any);
