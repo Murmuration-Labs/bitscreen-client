@@ -778,10 +778,6 @@ const FilterPage = (props): JSX.Element => {
   }
 
   const renderDeleteButton = (): JSX.Element => {
-    if (!isEdit) {
-      return <></>;
-    }
-
     return (
       <div
         style={{
@@ -792,69 +788,71 @@ const FilterPage = (props): JSX.Element => {
       >
         <Button
           variant="primary"
-          style={{ marginRight: 5 }}
+          style={{ marginRight: isEdit ? 5 : 0 }}
           disabled={!filterListChanged}
           onClick={save}
         >
           Save
         </Button>
-        <DropdownMenu
-          titleButton={
-            <IconButton size="small">
-              <MenuButton />
-            </IconButton>
-          }
-        >
-          {isOwner && !isImported && (
-            <MenuItem
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onClick={() => toggleFilterOverride()}
-            >
-              <FormCheck readOnly type="switch" checked={filterOverride} />
-              <Form.Label
-                style={{
-                  marginRight: 10,
-                  marginTop: 2,
-                }}
-                className={"text-dim"}
-              >
-                Override{" "}
-                <OverlayTrigger
-                  placement="right"
-                  delay={{ show: 150, hide: 300 }}
-                  overlay={
-                    <Tooltip id="button-tooltip">
-                      Override lists prevent CIDs on imported lists from being
-                      filtered. Override lists cannot be shared.
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faQuestionCircle as IconProp}
-                    color="#7393B3"
-                    style={{
-                      marginTop: 2,
-                    }}
-                  />
-                </OverlayTrigger>
-              </Form.Label>
-            </MenuItem>
-          )}
-          <MenuItem
-            onClick={() => {
-              confirmDelete();
-            }}
+        {isEdit && (
+          <DropdownMenu
+            titleButton={
+              <IconButton size="small">
+                <MenuButton />
+              </IconButton>
+            }
           >
-            <Button variant="outline-danger" style={{ width: "100%" }}>
-              {isImported ? "Discard" : "Delete"}
-            </Button>
-          </MenuItem>
-        </DropdownMenu>
+            {isOwner && !isImported && (
+              <MenuItem
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onClick={() => toggleFilterOverride()}
+              >
+                <FormCheck readOnly type="switch" checked={filterOverride} />
+                <Form.Label
+                  style={{
+                    marginRight: 10,
+                    marginTop: 2,
+                  }}
+                  className={"text-dim"}
+                >
+                  Override{" "}
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 150, hide: 300 }}
+                    overlay={
+                      <Tooltip id="button-tooltip">
+                        Override lists prevent CIDs on imported lists from being
+                        filtered. Override lists cannot be shared.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon
+                      icon={faQuestionCircle as IconProp}
+                      color="#7393B3"
+                      style={{
+                        marginTop: 2,
+                      }}
+                    />
+                  </OverlayTrigger>
+                </Form.Label>
+              </MenuItem>
+            )}
+            <MenuItem
+              onClick={() => {
+                confirmDelete();
+              }}
+            >
+              <Button variant="outline-danger" style={{ width: "100%" }}>
+                {isImported ? "Discard" : "Delete"}
+              </Button>
+            </MenuItem>
+          </DropdownMenu>
+        )}
         {/*  */}
       </div>
     );
