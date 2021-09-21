@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@amcharts/amcharts4": "^4.10.22",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
@@ -36,6 +37,7 @@
     "react-bootstrap": "^1.5.0",
     "react-bootstrap-table": "^4.3.1",
     "react-bootstrap-typeahead": "^5.1.4",
+    "react-datepicker": "^4.2.1",
     "react-dom": "^17.0.1",
     "react-grid-layout": "^1.2.4",
     "react-router-dom": "^5.2.0",

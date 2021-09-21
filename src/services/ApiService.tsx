@@ -7,6 +7,9 @@ import {
   CidItem,
   FilterList,
   ProviderFilter,
+  DashboardData,
+  Config,
+  ChartDataEntry,
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
@@ -44,18 +47,22 @@ const ApiService = {
   getFilters: async (
     page: number,
     perPage: number,
-    mySortBy: string,
-    mySort: string,
-    q: string
+    mySortBy?: string,
+    mySort?: string,
+    q?: string
   ): Promise<{ filters: FilterList[]; count: number }> => {
     const response: any = await axios.get(`${serverUri()}/filter`, {
       params: {
         page,
         perPage,
         q,
-        sort: {
-          [mySortBy]: mySort,
-        },
+        sort: mySortBy
+          ? {
+              [mySortBy]: mySort,
+            }
+          : {
+              name: "asc",
+            },
         providerId: AuthService.getProviderId(),
       },
     });
@@ -329,17 +336,53 @@ const ApiService = {
     return response.data;
   },
 
-  getCountAllFilter: async (searchedValue: string): Promise<number> => {
+  getAllFiltersCount: async (): Promise<number> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/public/count`,
-      {
-        params: {
-          q: searchedValue,
-        },
-      }
+      `${remoteMarketplaceUri()}/filter/count/${AuthService.getProviderId()}`
     );
 
     return response.data.count;
+  },
+
+  getDashboardData: async (): Promise<DashboardData> => {
+    const response = await axios.get(
+      `${remoteMarketplaceUri()}/filter/dashboard`,
+      {
+        params: {
+          providerId: AuthService.getProviderId(),
+        },
+      }
+    );
+    return response.data;
+  },
+
+  getChartData: async (periodType, periodInterval): Promise<any> => {
+    const { startDate, endDate } = periodInterval;
+    const response = await axios.get(
+      `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
+    );
+    // return Object.values(response.data);
+    const data: ChartDataEntry[] = Object.values(response.data);
+    return data;
+    // const mock = data.map((element) => {
+    //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
+    //   const totalCidsFiltered =
+    //     totalRequestsBlocked -
+    //     Math.ceil(Math.random() * (totalRequestsBlocked - 50));
+    //   return {
+    //     key: element.key,
+    //     total_count: totalRequestsBlocked,
+    //     unique_count: totalCidsFiltered,
+    //   };
+    // });
+    // return mock;
+  },
+
+  getProviderConfig: async (): Promise<Config> => {
+    const providerId = AuthService.getProviderId();
+    const response = await axios.get(`${serverUri()}/config/${providerId}`);
+
+    return response.data;
   },
 };
 

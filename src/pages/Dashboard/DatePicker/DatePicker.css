@@ -1,0 +1,47 @@
+.chart-date-picker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-date-picker-dropdown {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  height: 40px;
+  padding-left: 12px;
+  width: 125px;
+  cursor: pointer;
+}
+
+.react-datepicker__close-icon {
+  padding-right: 22px;
+}
+
+.dropdown-select-icon.react-datepicker__close-icon::after {
+  cursor: pointer;
+  background-color: #216ba5;
+  color: #fff;
+  border-radius: 50%;
+  height: 16px;
+  width: 16px;
+  padding: 2px;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
+  content: "v";
+}
+
+.react-datepicker__year-read-view--down-arrow,
+.react-datepicker__month-read-view--down-arrow,
+.react-datepicker__month-year-read-view--down-arrow,
+.react-datepicker__navigation-icon::before {
+  height: 14px !important;
+  width: 14px !important;
+  top: 10px !important;
+}
+
+.react-datepicker__year-wrapper {
+  justify-content: center;
+}

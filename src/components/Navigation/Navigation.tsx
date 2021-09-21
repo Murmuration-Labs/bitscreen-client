@@ -61,6 +61,15 @@ function Navigation(): JSX.Element {
               <NavLink
                 className="nav-link"
                 activeClassName={"is-active"}
+                to="/dashboard"
+              >
+                <FontAwesomeIcon size="sm" icon={faCog} /> Dashboard
+              </NavLink>
+            )}
+            {provider && (
+              <NavLink
+                className="nav-link"
+                activeClassName={"is-active"}
                 to="/settings"
               >
                 <FontAwesomeIcon size="sm" icon={faCog} /> Settings

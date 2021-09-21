@@ -5,13 +5,10 @@ body,
 }
 
 .container-fluid {
-  height: 100%;
 }
 
 .fill-height {
-  min-height: 100%;
   height: auto !important; /* cross-browser */
-  height: 100%; /* cross-browser */
 }
 
 .stage {

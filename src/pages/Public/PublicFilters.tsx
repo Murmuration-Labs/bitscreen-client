@@ -59,15 +59,9 @@ export default function PublicFilters() {
   });
 
   useEffect(() => {
-    async function setInitialConfig() {
-      const providerId = AuthService.getProviderId();
-      const response = await axios.get(`${serverUri()}/config/${providerId}`);
-      const config = response.data;
-
-      setConfiguration(config);
-    }
-
-    setInitialConfig();
+    ApiService.getProviderConfig().then((config: Config) =>
+      setConfiguration(config)
+    );
   }, []);
 
   useEffect(() => {
