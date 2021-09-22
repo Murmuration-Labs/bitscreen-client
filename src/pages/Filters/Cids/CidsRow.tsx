@@ -2,9 +2,11 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faCheck,
   faEdit,
+  faPaperPlane,
   faShare,
   faShareAlt,
   faTrash,
+  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -262,7 +264,7 @@ const CidsRow = ({
             >
               <FontAwesomeIcon
                 color={isHovered ? "orange" : "black"}
-                icon="paper-plane"
+                icon={faPaperPlane}
               />
             </IconButton>
           </Tooltip>
@@ -277,7 +279,7 @@ const CidsRow = ({
           >
             <FontAwesomeIcon
               color={isHovered ? "red" : "black"}
-              icon="trash-alt"
+              icon={faTrashAlt}
             />
           </IconButton>
         </Tooltip>
