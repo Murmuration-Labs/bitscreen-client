@@ -1,5 +1,10 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faEye,
+  faQuestionCircle,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
@@ -28,8 +33,10 @@ import {
   Col,
   Container,
   FormCheck,
+  OverlayTrigger,
   Row,
   Table,
+  Tooltip,
 } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
@@ -68,7 +75,30 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
   { id: "scope", label: "Scope", numeric: false },
   { id: "subs", label: "# of Subs", numeric: true },
   { id: "cids", label: "# of Cids", numeric: true },
-  { id: "enabled", label: "Active", numeric: false },
+  {
+    id: "enabled",
+    label: "Active",
+    numeric: false,
+    info: (
+      <OverlayTrigger
+        placement="right"
+        delay={{ show: 150, hide: 300 }}
+        overlay={
+          <Tooltip id="button-tooltip">
+            Active filters run on your node to prevent deals with included CIDs
+          </Tooltip>
+        }
+      >
+        <FontAwesomeIcon
+          icon={faQuestionCircle as IconProp}
+          color="#7393B3"
+          style={{
+            marginLeft: 4,
+          }}
+        />
+      </OverlayTrigger>
+    ),
+  },
   { id: "actions", label: "Actions", numeric: false },
 ];
 

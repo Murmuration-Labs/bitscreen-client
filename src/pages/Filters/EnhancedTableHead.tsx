@@ -42,35 +42,8 @@ export default function EnhancedTableHead<T>(props: EnhancedTableProps<T>) {
 
   return (
     <TableHead>
-      <TableRow
-        // key={cid.tableKey}
-        // hover
-        // onClick={() => onRowToggle()}
-        role="checkbox"
-        tabIndex={-1}
-        // style={}
-        // key={cid.tableKey}
-        // selected={!!cid.isChecked}
-      >
-        {props.enableChecking ? (
-          <TableCell align="left">
-            {/* <Checkbox
-              indeterminate={
-                !!props.checkedCount &&
-                !!props.itemsCount &&
-                props.checkedCount < props.itemsCount
-              }
-              checked={
-                !!props.checkedCount &&
-                !!props.itemsCount &&
-                props.checkedCount === props.itemsCount
-              }
-              onChange={props?.onMainCheckboxToggle}
-            /> */}
-          </TableCell>
-        ) : (
-          <></>
-        )}
+      <TableRow role="checkbox" tabIndex={-1}>
+        {props.enableChecking ? <TableCell align="left"></TableCell> : <></>}
         {props.headCells.map((headCell, idx) => (
           <TableCell
             style={{ verticalAlign: "middle" }}
@@ -85,6 +58,7 @@ export default function EnhancedTableHead<T>(props: EnhancedTableProps<T>) {
               onClick={createSortHandler(headCell.id)}
             >
               {headCell.label}
+              {headCell.info ? headCell.info : <></>}
               {orderBy === headCell.id ? (
                 <span style={{ display: "none" }}>
                   {order === "desc" ? "sorted descending" : "sorted ascending"}

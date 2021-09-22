@@ -4,6 +4,7 @@ export interface HeadCell<T> {
   id: keyof T;
   label: string;
   numeric?: boolean;
+  info?: JSX.Element;
 }
 
 export interface Data {

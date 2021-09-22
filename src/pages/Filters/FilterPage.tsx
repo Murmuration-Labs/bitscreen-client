@@ -617,60 +617,80 @@ const FilterPage = (props): JSX.Element => {
   };
   const renderToggleButtonGroup = () => {
     return (
-      <ToggleButtonGroup
-        color="primary"
-        exclusive
-        size="small"
-        value={filterEnabled}
-      >
-        <ToggleButton
-          value={false}
-          disabled={!filterEnabled}
-          style={
-            !filterEnabled
-              ? {
-                  backgroundColor: "#FB6471",
-                  color: "white",
-                }
-              : {}
+      <>
+        <OverlayTrigger
+          placement="right"
+          delay={{ show: 150, hide: 300 }}
+          overlay={
+            <Tooltip id="button-tooltip">
+              Active filters run on your node to prevent deals with included
+              CIDs
+            </Tooltip>
           }
+        >
+          <FontAwesomeIcon
+            icon={faQuestionCircle as IconProp}
+            color="#7393B3"
+            style={{
+              marginRight: 4,
+            }}
+          />
+        </OverlayTrigger>
+        <ToggleButtonGroup
           color="primary"
-          onClick={() => {
-            if (!isOrphan(filterList)) {
-              if (isShared(filterList)) {
-                setShowConfirmEnabled(true);
-              } else {
-                saveFilter({ ...filterList, enabled: false });
-              }
-            }
-          }}
+          exclusive
+          size="small"
+          value={filterEnabled}
         >
-          Inactive
-        </ToggleButton>
-        <ToggleButton
-          value={true}
-          style={
-            filterEnabled
-              ? {
-                  backgroundColor: "#137BFE",
-                  color: "white",
+          <ToggleButton
+            value={false}
+            disabled={!filterEnabled}
+            style={
+              !filterEnabled
+                ? {
+                    backgroundColor: "#FB6471",
+                    color: "white",
+                  }
+                : {}
+            }
+            color="primary"
+            onClick={() => {
+              if (!isOrphan(filterList)) {
+                if (isShared(filterList)) {
+                  setShowConfirmEnabled(true);
+                } else {
+                  saveFilter({ ...filterList, enabled: false });
                 }
-              : {}
-          }
-          disabled={filterEnabled}
-          onClick={() => {
-            if (!isOrphan(filterList)) {
-              if (isShared(filterList)) {
-                setShowConfirmEnabled(true);
-              } else {
-                saveFilter({ ...filterList, enabled: true });
               }
+            }}
+          >
+            Inactive
+          </ToggleButton>
+          <ToggleButton
+            value={true}
+            style={
+              filterEnabled
+                ? {
+                    backgroundColor: "#137BFE",
+                    color: "white",
+                  }
+                : {}
             }
-          }}
-        >
-          Active
-        </ToggleButton>
-      </ToggleButtonGroup>
+            disabled={filterEnabled}
+            onClick={() => {
+              if (!isOrphan(filterList)) {
+                if (isShared(filterList)) {
+                  setShowConfirmEnabled(true);
+                } else {
+                  saveFilter({ ...filterList, enabled: true });
+                }
+              }
+            }}
+          >
+            Active
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </>
     );
   };
 
