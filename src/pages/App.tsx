@@ -25,6 +25,23 @@ interface MatchParams {
 
 export type RouterProps = RouteComponentProps<MatchParams>;
 
+const PrivateRoute = ({
+  comp: Component, // use comp prop
+  auth: provider,
+  ...rest
+}) => (
+  <Route
+    {...rest}
+    render={(props) =>
+      !provider || !provider.accessToken ? (
+        <Redirect to="/settings" />
+      ) : (
+        <Component {...props} />
+      )
+    }
+  />
+);
+
 function App(): JSX.Element {
   const [provider, setProvider] = useState(AuthService.getAccount());
 
@@ -37,78 +54,46 @@ function App(): JSX.Element {
         <Container fluid={true}>
           <Row className="fill-height">
             <Col className={"stage"}>
-              <Route
-                path="/dashboard"
-                exact
-                component={
-                  provider && provider.accessToken ? Dashboard : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
-              <Route
-                path="/filters"
-                exact
-                component={
-                  provider && provider.accessToken ? Filters : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
-              <Route
-                path="/filters/edit/:shareId?"
-                exact
-                component={
-                  provider && provider.accessToken ? FilterPage : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
-              <Route
-                path="/filters/new"
-                exact
-                component={
-                  provider && provider.accessToken ? FilterPage : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
-              <Route path="/settings" exact component={Settings} />
-              <Route
-                path="/directory"
-                exact
-                component={
-                  provider && provider.accessToken ? PublicFilters : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
-              <Route
-                path="/directory/details/:shareId?"
-                exact
-                component={
-                  provider && provider.accessToken
-                    ? PublicFilterDetailsPage
-                    : Settings
-                }
-              >
-                {(!provider || !provider.accessToken) && (
-                  <Redirect to="/settings" />
-                )}
-              </Route>
               <Route exact path="/">
                 <Redirect to="/settings" />
               </Route>
+              <Route path="/settings" exact component={Settings} />
+              <PrivateRoute
+                path="/dashboard"
+                exact
+                comp={Dashboard}
+                auth={provider}
+              />
+              <PrivateRoute
+                path="/filters"
+                exact
+                comp={Filters}
+                auth={provider}
+              />
+              <PrivateRoute
+                path="/filters/edit/:shareId?"
+                exact
+                comp={FilterPage}
+                auth={provider}
+              />
+              <PrivateRoute
+                path="/filters/new"
+                exact
+                comp={FilterPage}
+                auth={provider}
+              />
+              <PrivateRoute
+                path="/directory"
+                exact
+                comp={FilterPage}
+                auth={provider}
+              />
+              <PrivateRoute
+                path="/directory/details/:shareId?"
+                exact
+                comp={PublicFilterDetailsPage}
+                auth={provider}
+              />
             </Col>
           </Row>
           <ToastContainer />
