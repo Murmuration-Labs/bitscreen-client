@@ -149,7 +149,7 @@ function Filters(): JSX.Element {
     FilterList[]
   >([]);
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
   const [selectedConditional, setSelectedConditional] =
