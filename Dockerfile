@@ -7,16 +7,10 @@ RUN apk add --no-cache --update \
   bash \
   curl
 
-# Create app directory
-WORKDIR /server
-# Install app dependencies
-COPY package*.json ./
-RUN yarn
-# Bundle app source
-COPY . /server
-# Build server
-RUN yarn build
+WORKDIR /client
+COPY . .
+RUN yarn install
 # Expose listen port
-EXPOSE 3030
+EXPOSE 3000
 
-ENTRYPOINT ["yarn", "server"]
+ENTRYPOINT ["yarn", "start-prod"]

@@ -70,6 +70,7 @@
   "proxy": "http://localhost:3030",
   "scripts": {
     "start": "react-scripts start",
+    "start-prod": "REACT_APP_HOST=https://bxn.mml.keyko.rocks react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
