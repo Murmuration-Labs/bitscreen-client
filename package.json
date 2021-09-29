@@ -79,6 +79,11 @@
     "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!@amcharts|(?!react-spinners))"
+    ]
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
