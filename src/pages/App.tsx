@@ -85,7 +85,7 @@ function App(): JSX.Element {
               <PrivateRoute
                 path="/directory"
                 exact
-                comp={FilterPage}
+                comp={PublicFilters}
                 auth={provider}
               />
               <PrivateRoute

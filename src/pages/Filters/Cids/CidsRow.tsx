@@ -1,4 +1,4 @@
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { icon, IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faCheck,
   faEdit,
@@ -22,6 +22,8 @@ import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
 import { CidItem, FilterList } from "../Interfaces";
 import { formatDate } from "../utils";
+import * as icons from "../../../resources/icons";
+import "./cids.css";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -56,7 +58,7 @@ const RemoteOverride = ({ loading, override }: OverrideProps) => {
         <PuffLoader color={"#28a745"} size={20} />
       ) : (
         <OverrideTemplate
-          text="This CID overrides the one in imported filter"
+          text="This CID is an exception for one of the CIDs in an imported filter list"
           color="#28a745"
         ></OverrideTemplate>
       )}
@@ -73,7 +75,7 @@ const LocalOverride = ({ loading, override }: OverrideProps) => {
         <PuffLoader color={"#28a745"} size={20} />
       ) : (
         <OverrideTemplate
-          text={`This CID is already in a local filter, please remove the CID from the local filter instead of adding it to an override list`}
+          text={`This CID is already in a local filter, please remove the CID from the local filter instead of adding it to an exception list`}
           color="#ffc107"
         ></OverrideTemplate>
       )}
@@ -140,6 +142,7 @@ const CidsRow = ({
         {cid.cid.length > 10 ? (
           <Tooltip title={cid.cid}>
             <a
+              className="table-row-cell-text"
               style={{ fontSize: "1rem", cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -174,6 +177,7 @@ const CidsRow = ({
           </Tooltip>
         ) : (
           <a
+            className="table-row-cell-text"
             style={{ fontSize: "1rem", cursor: "pointer" }}
             onClick={(e) => {
               e.stopPropagation();
@@ -195,6 +199,7 @@ const CidsRow = ({
       <TableCell align="left">
         {cid.refUrl && (
           <a
+            className="table-row-cell-text"
             style={{ fontSize: "1rem" }}
             href={
               cid.refUrl
@@ -214,6 +219,7 @@ const CidsRow = ({
       </TableCell>
       <TableCell align="left">
         <a
+          className="table-row-cell-text"
           style={{ fontSize: "1rem" }}
           onClick={(e) => {
             e.stopPropagation();
@@ -241,46 +247,40 @@ const CidsRow = ({
       <TableCell align="right">
         <Tooltip title="Edit">
           <IconButton
+            className="cid-row-icon"
             aria-label="Edit CID"
             onClick={(e) => {
               e.stopPropagation();
               handleEdit();
             }}
           >
-            <FontAwesomeIcon
-              color={isHovered ? "blue" : "black"}
-              icon={faEdit}
-            />
+            <img src={icons.editIcon}></img>
           </IconButton>
         </Tooltip>
         {typeof filter.id === "number" && (
           <Tooltip title="Move">
             <IconButton
+              className="cid-row-icon move-icon"
               aria-label="Move CID"
               onClick={(e) => {
                 e.stopPropagation();
                 handleMove();
               }}
             >
-              <FontAwesomeIcon
-                color={isHovered ? "orange" : "black"}
-                icon={faPaperPlane}
-              />
+              <img src={icons.moveIcon}></img>
             </IconButton>
           </Tooltip>
         )}
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete CID"
+            className="cid-row-icon"
             onClick={(e) => {
               e.stopPropagation();
               handleDelete();
             }}
           >
-            <FontAwesomeIcon
-              color={isHovered ? "red" : "black"}
-              icon={faTrashAlt}
-            />
+            <img src={icons.deleteIcon}></img>
           </IconButton>
         </Tooltip>
       </TableCell>

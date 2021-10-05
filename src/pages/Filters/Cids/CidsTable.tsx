@@ -53,7 +53,6 @@ const CidsTable = ({
   onDeleteClick,
 }: CidsTableProps): JSX.Element => {
   const [headCells, setHeadCells] = useState(defaultHeadCells);
-
   useEffect(() => {
     const sorted = [
       ...defaultHeadCells,

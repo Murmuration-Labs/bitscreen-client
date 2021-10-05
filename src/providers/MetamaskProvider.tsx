@@ -19,7 +19,6 @@ const MetamaskProvider = (props: any) => {
         });
 
         provider.on("accountsChanged", (wallets: Array<string>) => {
-          console.log("Account changes");
           AuthService.updateAccount({
             ...AuthService.getAccount(),
             walletAddress: wallets[0],
