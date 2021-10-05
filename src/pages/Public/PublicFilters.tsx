@@ -134,7 +134,7 @@ export default function PublicFilters() {
   };
 
   return (
-    <Container>
+    <>
       <div
         style={{
           display: "flex",
@@ -149,13 +149,21 @@ export default function PublicFilters() {
             flexDirection: "row",
             flex: 1,
             alignItems: "center",
+            marginBottom: "1rem",
           }}
         >
-          <h3>Directory</h3>
-          <span
+          <div
+            style={{
+              fontSize: 32,
+              fontWeight: 600,
+              lineHeight: "40px",
+            }}
+          >
+            Directory
+          </div>
+          <div
             style={{
               color: "grey",
-              fontStyle: "oblique",
               marginLeft: 10,
             }}
           >
@@ -169,11 +177,9 @@ export default function PublicFilters() {
                 and add country data.
               </p>
             )}
-          </span>
+          </div>
         </div>
       </div>
-
-      <Divider style={{ marginTop: 6, marginBottom: 10 }} />
 
       <div
         style={{
@@ -307,6 +313,6 @@ export default function PublicFilters() {
           prefetch={prefetch}
         />
       )}
-    </Container>
+    </>
   );
 }

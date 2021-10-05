@@ -37,6 +37,23 @@
   font-weight: normal;
 }
 
+.icon-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  width: 50px;
+  line-height: 24px;
+}
+
+.icon-nav-link.is-active {
+  background-color: white;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  align-self: flex-end;
+  height: 54px;
+}
+
 .nav-link:hover {
   color: white;
 }
@@ -49,6 +66,11 @@
   border-top-right-radius: 24px;
 }
 
+.icon-nav-link.is-active .svg-inline--fa {
+  margin-top: -13px;
+  color: black;
+}
+
 .nav-link.is-active:hover {
   color: #1b2738;
 }
@@ -59,6 +81,7 @@
   margin-right: 40px;
   align-self: center;
   align-items: center;
+  height: 100%;
 }
 
 .nav-item.dropdown {

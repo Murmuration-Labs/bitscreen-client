@@ -127,12 +127,14 @@ function Dashboard(): JSX.Element {
             cardTextLeft={dashboardData.activeLists}
             cardTitleRight="Inactive lists"
             cardTextRight={dashboardData.inactiveLists}
+            smallText={true}
           />
         </Col>
         <Col xs={12} md={4} xl={2}>
           <DashboardCard
             cardTitle="Imported lists"
             cardText={dashboardData.importedLists}
+            smallText={true}
           />
         </Col>
         <Col xs={12} md={4} xl={5}>
@@ -141,11 +143,12 @@ function Dashboard(): JSX.Element {
             cardTextLeft={dashboardData.privateLists}
             cardTitleRight="Public lists"
             cardTextRight={dashboardData.publicLists}
+            smallText={true}
           />
         </Col>
       </Row>
       <Card className="root" variant="outlined">
-        <CardContent>
+        <CardContent className="chart">
           <div className="chart-head-container">
             <Typography className="card-title">Chart</Typography>
             <div className="chart-head-container">

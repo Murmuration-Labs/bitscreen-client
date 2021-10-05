@@ -47,15 +47,6 @@ function Navigation(): JSX.Element {
             <NavLink
               className="nav-link"
               activeClassName={"is-active"}
-              to="/settings"
-            >
-              Settings
-            </NavLink>
-          )}
-          {provider && (
-            <NavLink
-              className="nav-link"
-              activeClassName={"is-active"}
               to="/filters"
             >
               My Filters
@@ -79,9 +70,13 @@ function Navigation(): JSX.Element {
                   icon={faQuestionCircle}
                 />
               </a>
-              <a className="mr-4" href="/settings">
+              <NavLink
+                className="mr-4 icon-nav-link"
+                to="/settings"
+                activeClassName={"is-active"}
+              >
                 <FontAwesomeIcon color="white" size="lg" icon={faCog} />
-              </a>
+              </NavLink>
               <NavDropdown
                 id="nav-dropdown-wallet-address"
                 title={

@@ -37,7 +37,6 @@ const ApiService = {
   getFilter: async (shareId: string): Promise<FilterList> => {
     const providerId = AuthService.getProviderId();
     const query = `providerId=${encodeURIComponent(providerId)}`;
-
     const response = await axios.get(
       `${serverUri()}/filter/${shareId}?${query}`
     );
@@ -361,21 +360,21 @@ const ApiService = {
     const response = await axios.get(
       `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
     );
-    // return Object.values(response.data);
+    // // return Object.values(response.data);
     const data: ChartDataEntry[] = Object.values(response.data);
-    return data;
-    // const mock = data.map((element) => {
-    //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
-    //   const totalCidsFiltered =
-    //     totalRequestsBlocked -
-    //     Math.ceil(Math.random() * (totalRequestsBlocked - 50));
-    //   return {
-    //     key: element.key,
-    //     total_count: totalRequestsBlocked,
-    //     unique_count: totalCidsFiltered,
-    //   };
-    // });
-    // return mock;
+    // return data;
+    const mock = data.map((element) => {
+      const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
+      const totalCidsFiltered =
+        totalRequestsBlocked -
+        Math.ceil(Math.random() * (totalRequestsBlocked - 50));
+      return {
+        key: element.key,
+        total_count: totalRequestsBlocked,
+        unique_count: totalCidsFiltered,
+      };
+    });
+    return mock;
   },
 
   getProviderConfig: async (): Promise<Config> => {
