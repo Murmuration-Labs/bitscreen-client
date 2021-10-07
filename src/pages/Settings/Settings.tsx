@@ -306,13 +306,11 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                 <div className="ml-3">
                   <Row>
                     <Col>
-                      <Button
-                        onClick={
-                          loggedIn ? disconnectMetamask : connectWithMetamask
-                        }
-                      >
-                        {loggedIn ? "Log Out" : "Connect with Metamask"}
-                      </Button>
+                      {!loggedIn ? (
+                        <Button onClick={connectWithMetamask}>
+                          Connect with Metamask
+                        </Button>
+                      ) : null}
                     </Col>
                   </Row>
                 </div>

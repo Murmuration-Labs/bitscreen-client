@@ -34,16 +34,49 @@ interface EnhancedTableProps<T> {
 }
 
 export default function EnhancedTableHead<T>(props: EnhancedTableProps<T>) {
-  const { order, orderBy, rowCount, onRequestSort, mySort, mySortBy } = props;
+  const {
+    order,
+    orderBy,
+    rowCount,
+    onRequestSort,
+    mySort,
+    mySortBy,
+    onMainCheckboxToggle,
+    checkedCount,
+    itemsCount,
+  } = props;
   const createSortHandler =
     (property: keyof T) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
+  let indeterminate = false;
+  let checked = false;
+
+  if (itemsCount && checkedCount && checkedCount > 0) {
+    if (itemsCount > checkedCount) {
+      indeterminate = true;
+      checked = false;
+    } else {
+      indeterminate = false;
+      checked = true;
+    }
+  }
+
   return (
     <TableHead>
       <TableRow role="checkbox" tabIndex={-1}>
-        {props.enableChecking ? <TableCell align="left"></TableCell> : <></>}
+        {props.enableChecking ? (
+          <TableCell padding="checkbox">
+            <Checkbox
+              indeterminate={indeterminate}
+              checked={checked}
+              onChange={onMainCheckboxToggle}
+            />
+          </TableCell>
+        ) : (
+          <></>
+        )}
         {props.headCells.map((headCell, idx) => (
           <TableCell
             style={{ verticalAlign: "middle" }}
