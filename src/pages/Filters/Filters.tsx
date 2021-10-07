@@ -153,6 +153,13 @@ function Filters(): JSX.Element {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
+  const [bulkCount, setBulkCount] = useState<{
+    checkedCount: number;
+    totalCount: number;
+  }>({
+    checkedCount: 0,
+    totalCount: 0,
+  });
   const [selectedConditional, setSelectedConditional] =
     useState<BulkSelectedType>(BulkSelectedType.None);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -418,7 +425,6 @@ function Filters(): JSX.Element {
       },
       [BadgeColor.Override]: { backgroundColor: "#027BFE" },
     };
-    console.log(colorMapper[props.visibility]);
 
     const isImported = props.provider.id !== AuthService.getProviderId();
 
@@ -475,6 +481,22 @@ function Filters(): JSX.Element {
     );
   };
 
+  const handleMainCheckboxToggle = () => {
+    if (bulkCount.checkedCount === 0) {
+      const newFilterLists = filterLists.map((element) => ({
+        ...element,
+        isBulkSelected: true,
+      }));
+      setFilterLists(newFilterLists);
+    } else {
+      const newFilterLists = filterLists.map((element) => ({
+        ...element,
+        isBulkSelected: false,
+      }));
+      setFilterLists(newFilterLists);
+    }
+  };
+
   const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card-container"}>
@@ -482,8 +504,8 @@ function Filters(): JSX.Element {
           <Table aria-label="enhanced table">
             <EnhancedTableHead
               enableChecking
-              checkedCount={filterLists.filter((f) => f.isBulkSelected).length}
-              itemsCount={filterLists.length}
+              checkedCount={bulkCount.checkedCount}
+              itemsCount={bulkCount.totalCount}
               headCells={headCells}
               order={order}
               orderBy={orderBy}
@@ -491,6 +513,7 @@ function Filters(): JSX.Element {
               mySortBy={mySortBy}
               onRequestSort={handleRequestSort}
               rowCount={dataCount}
+              onMainCheckboxToggle={handleMainCheckboxToggle}
             />
             <TableBody>
               {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
@@ -657,6 +680,11 @@ function Filters(): JSX.Element {
     setEnabledFilters(filterLists.filter((f) => isEnabled(f)));
     setDisabledFilters(filterLists.filter((f) => isDisabled(f)));
     setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
+
+    setBulkCount({
+      checkedCount: filterLists.filter((f) => f.isBulkSelected).length,
+      totalCount: filterLists.length,
+    });
   }, [filterLists]);
 
   const beginLocalBulkSetEnabled = (val: boolean): void => {
