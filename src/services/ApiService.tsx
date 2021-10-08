@@ -13,6 +13,7 @@ import {
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
+import fileDownload from "js-file-download";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -382,6 +383,12 @@ const ApiService = {
     const response = await axios.get(`${serverUri()}/config/${providerId}`);
 
     return response.data;
+  },
+
+  downloadCidList: async (): Promise<any> => {
+    axios.get(`${serverUri()}/cid/blocked?download=true`).then((response) => {
+      fileDownload(JSON.stringify(response.data), "cid_file.json");
+    });
   },
 };
 

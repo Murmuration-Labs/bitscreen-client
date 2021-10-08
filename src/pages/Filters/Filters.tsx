@@ -418,7 +418,6 @@ function Filters(): JSX.Element {
       },
       [BadgeColor.Override]: { backgroundColor: "#027BFE" },
     };
-    console.log(colorMapper[props.visibility]);
 
     const isImported = props.provider.id !== AuthService.getProviderId();
 
@@ -782,6 +781,7 @@ function Filters(): JSX.Element {
 
                 <Button
                   variant="outline-primary"
+                  style={{ marginRight: 4 }}
                   disabled={!isImportEnabled()}
                   onClick={() => {
                     setShowImportFilter(true);
@@ -789,6 +789,13 @@ function Filters(): JSX.Element {
                   className="double-space-left import-btn"
                 >
                   Import Filter
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  className="double-space-left import-btn"
+                  onClick={ApiService.downloadCidList}
+                >
+                  Download CID List
                 </Button>
               </div>
             </div>
