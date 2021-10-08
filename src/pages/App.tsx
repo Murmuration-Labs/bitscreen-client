@@ -41,11 +41,11 @@ const PrivateRoute = ({
   return (
     <Route
       {...rest}
-      render={() => {
+      render={(props) => {
         if (!provider || !provider.accessToken) {
           return <Redirect to="/settings" />;
         } else {
-          return <Component provider={provider} config={config} />;
+          return <Component {...props} provider={provider} config={config} />;
         }
       }}
     />
