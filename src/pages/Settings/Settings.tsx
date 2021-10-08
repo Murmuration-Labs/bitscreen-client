@@ -256,7 +256,7 @@ export default function Settings(props) {
                     <Row>
                       <Col>
                         <Form.Label>
-                          <u>Please connect with you FIL Wallet Address</u>
+                          <u>Please connect a wallet</u>
                         </Form.Label>
                       </Col>
                     </Row>
@@ -282,7 +282,7 @@ export default function Settings(props) {
                     <Row>
                       <Col>
                         <div className="filter-page-input-label">
-                          FIL wallet address
+                          wallet address
                         </div>
                       </Col>
                     </Row>
