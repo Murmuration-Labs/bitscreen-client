@@ -103,7 +103,7 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
   { id: "actions", label: "Actions", numeric: false },
 ];
 
-function Filters(): JSX.Element {
+function Filters(props): JSX.Element {
   /**
    * UTILS
    */
@@ -180,10 +180,8 @@ function Filters(): JSX.Element {
   });
 
   useEffect(() => {
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
-  }, []);
+    setConfiguration({ ...props.config });
+  }, [props.config]);
 
   useEffect(() => {
     setEnabledSelectedFilters(
@@ -810,6 +808,7 @@ function Filters(): JSX.Element {
 
                 <Button
                   variant="outline-primary"
+                  style={{ marginRight: 4 }}
                   disabled={!isImportEnabled()}
                   onClick={() => {
                     setShowImportFilter(true);
@@ -817,6 +816,13 @@ function Filters(): JSX.Element {
                   className="double-space-left import-btn"
                 >
                   Import Filter
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  className="double-space-left import-btn"
+                  onClick={ApiService.downloadCidList}
+                >
+                  Download CID List
                 </Button>
               </div>
             </div>

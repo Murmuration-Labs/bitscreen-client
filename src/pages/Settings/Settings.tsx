@@ -18,6 +18,7 @@ import validator from "validator";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
+import { Account } from "../Contact/Interfaces";
 import { Config, SettingsProps } from "../Filters/Interfaces";
 import "./Settings.css";
 
@@ -33,7 +34,9 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function Settings(props: ComponentType<SettingsProps>) {
+export default function Settings(props) {
+  const { connectMetamask, account, setAccount, config, setConfig } = props;
+
   const classes = useStyles();
 
   const [configuration, setConfiguration] = useState<Config>({
@@ -48,54 +51,28 @@ export default function Settings(props: ComponentType<SettingsProps>) {
   const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [infoErrorMessage, setInfoErrorMessage] = useState<string>("");
-  const [account, setAccount] = useState(AuthService.getAccount());
+  const [accountInfo, setAccountInfo] = useState<Account>({
+    id: 0,
+    walletAddressHashed: "",
+    businessName: "",
+    website: "",
+    email: "",
+    contactPerson: "",
+    address: "",
+    nonce: "",
+  });
   const [loggedIn, setLoggedIn] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
 
-  const disconnectMetamask = () => {
-    setLoggedIn(false);
-    AuthService.removeAccount();
-  };
-
-  const connectWithMetamask = async (e) => {
-    const provider: any = await detectEthereumProvider({
-      mustBeMetaMask: true,
-    });
-
-    if (!provider) {
-      return window.open("https://metamask.io/", "_blank");
-    }
-
-    if (parseInt(provider.chainId) !== 1) {
-      return alert(`Please switch to Mainnet.`);
-    }
-
-    provider
-      .request({ method: "eth_requestAccounts" })
-      .then((_wallets: string[]) =>
-        AuthService.updateAccount({
-          ...AuthService.getAccount(),
-          walletAddress: _wallets[0],
-        })
-      )
-      .catch((error: any) =>
-        console.error("Permission to wallets required", error)
-      );
-  };
+  const [autocompleteInput, setAutocompleteInput] = useState("");
 
   useEffect(() => {
-    const providerId = AuthService.getProviderId();
-    axios.get(`${serverUri()}/config/${providerId}`).then((response) => {
-      const config = response.data;
+    setConfiguration({ ...config });
+  }, [props.config]);
 
-      setConfiguration(config);
-    });
-  }, [loggedIn]);
-
-  const putConfig = async (config: Config): Promise<void> => {
-    const providerId = AuthService.getProviderId();
-    await axios.put(`${serverUri()}/config`, { providerId, ...config });
-  };
+  useEffect(() => {
+    setAccountInfo({ ...account });
+  }, [props.account]);
 
   const toggleBitScreen = async (): Promise<void> => {
     const newConfig = {
@@ -103,7 +80,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       bitscreen: !configuration.bitscreen,
     };
     setConfiguration(newConfig);
-    putConfig(newConfig);
   };
 
   const toggleImportingLists = async (): Promise<void> => {
@@ -112,7 +88,6 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       import: !configuration.import,
     };
     setConfiguration(newConfig);
-    putConfig(newConfig);
   };
 
   const toggleSharingLists = async (): Promise<void> => {
@@ -121,89 +96,107 @@ export default function Settings(props: ComponentType<SettingsProps>) {
       share: !configuration.share,
     };
     setConfiguration(newConfig);
-    putConfig(newConfig);
   };
 
   useEffect(() => {
-    if (!account || !account.walletAddress) {
+    if (!accountInfo || !accountInfo.walletAddress) {
       setLoggedIn(false);
       return;
     }
 
-    if (account?.accessToken) {
+    if (accountInfo?.accessToken) {
       setLoggedIn(true);
       return;
     }
-
-    if (loggedIn) {
-      return;
-    }
-
-    const wallet = account.walletAddress;
-
-    setLoading(true);
-
-    ApiService.getProvider(wallet)
-      .then(async (provider) => {
-        if (provider) {
-          ApiService.authenticateProvider(provider).then((acc) => {
-            setLoggedIn(true);
-            AuthService.updateAccount(acc);
-          });
-          return;
-        }
-
-        await ApiService.createProvider(wallet)
-          .then((_provider) => {
-            ApiService.authenticateProvider(_provider).then((acc) => {
-              setLoggedIn(true);
-              AuthService.updateAccount(acc);
-            });
-            return;
-          })
-          .catch((_e) => {
-            setLoggedIn(false);
-            setErrorMessage("Error Logging In");
-          });
-      })
-      .catch((_e) => {
-        setLoggedIn(false);
-        setErrorMessage("Error Logging In");
-      });
-  }, [account, loggedIn]);
-
-  useEffect(() => AuthService.subscribe(setAccount), []);
+  }, [accountInfo]);
 
   const unsavedChanges = () => {
-    return !_.isEqual(account, AuthService.getAccount());
+    return !_.isEqual(accountInfo, AuthService.getAccount());
   };
 
   const uncompletedInfo = () => {
-    const missingBitscreenData = !account;
-    const missingImportData = configuration.import && !account?.country;
+    const missingBitscreenData = !accountInfo;
+    const missingImportData = configuration.import && !accountInfo?.country;
     const missingShareData =
       configuration.share &&
-      (!account?.businessName ||
-        !account?.website ||
-        !account?.contactPerson ||
-        !account?.email ||
-        !account?.address);
+      (!accountInfo?.businessName ||
+        !accountInfo?.website ||
+        !accountInfo?.contactPerson ||
+        !accountInfo?.email ||
+        !accountInfo?.address);
     return missingBitscreenData || missingImportData || missingShareData;
   };
 
   const clearInputInfo = () => {
-    if (!account) {
+    if (!accountInfo) {
       return;
     }
 
-    setAccount({
-      ...account,
+    setAccountInfo({
+      ...accountInfo,
       businessName: "",
       website: "",
       email: "",
       contactPerson: "",
       address: "",
     });
+  };
+
+  const saveAccountConfiguration = async () => {
+    if (
+      configuration.share &&
+      accountInfo.email &&
+      !validator.isEmail(accountInfo.email)
+    ) {
+      toast.error("Email is not valid");
+      return;
+    }
+
+    if (
+      configuration.share &&
+      accountInfo.website &&
+      !validator.isURL(accountInfo.website)
+    ) {
+      toast.error("Website is not a valid URL");
+      return;
+    }
+
+    setDisableButton(true);
+
+    let updatedAccount = accountInfo;
+    const currentAccount = { ...account };
+    if (!configuration.share && currentAccount) {
+      updatedAccount = {
+        ...currentAccount,
+        country: accountInfo.country,
+      };
+    }
+
+    try {
+      const config = await ApiService.setProviderConfig({ ...configuration });
+      setConfig(config);
+    } catch (e) {
+      toast.error(
+        "Couldn't update the provider configuration. Please try again later!"
+      );
+      setDisableButton(false);
+      return;
+    }
+
+    try {
+      const account = await ApiService.updateProvider(updatedAccount);
+      setAccount(account);
+      AuthService.updateAccount(account);
+    } catch (e) {
+      toast.error(
+        "Couldn't update the account information. Please try again later!"
+      );
+      setDisableButton(false);
+      return;
+    }
+
+    toast.success("Successfully saved information.");
+    setDisableButton(false);
   };
 
   const countryNames = Object.values(countries);
@@ -240,7 +233,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                 type="switch"
                 id="bitscreen-switch"
                 label="Filter content using BitScreen"
-                checked={configuration.bitscreen}
+                checked={configuration.bitscreen || false}
                 onChange={() => toggleBitScreen()}
               />
               <p className="text-dim">
@@ -284,7 +277,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </div>
                 )}
 
-                {account && account.walletAddress && (
+                {accountInfo && accountInfo.walletAddress && (
                   <div className="ml-3">
                     <Row>
                       <Col>
@@ -296,7 +289,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                     <Row>
                       <Col>
                         <p style={{ fontStyle: "oblique", fontWeight: "bold" }}>
-                          {account.walletAddress}
+                          {accountInfo.walletAddress}
                         </p>
                       </Col>
                     </Row>
@@ -307,7 +300,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   <Row>
                     <Col>
                       {!loggedIn ? (
-                        <Button onClick={connectWithMetamask}>
+                        <Button onClick={connectMetamask}>
                           Connect with Metamask
                         </Button>
                       ) : null}
@@ -324,7 +317,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                         type="switch"
                         id="import-switch"
                         label="Activate Importing Lists"
-                        checked={configuration.import}
+                        checked={configuration.import || false}
                         onChange={() => toggleImportingLists()}
                       />
                       <p className="text-dim">
@@ -336,61 +329,63 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </Row>
                 )}
 
-                {loggedIn &&
-                  account &&
-                  (configuration.import || configuration.share) && (
-                    <>
-                      <div className="ml-3">
-                        <Row>
-                          <Col>
-                            <Autocomplete
-                              options={countryNames}
-                              getOptionLabel={(e) => e.name}
-                              value={
-                                countryNames.filter(
-                                  (x) => x.name === account.country
-                                )[0]
-                              }
-                              renderInput={(params) => (
-                                <TextField
-                                  label="Country"
-                                  variant="outlined"
-                                  placeholder="Country"
-                                  {...params}
-                                />
-                              )}
-                              onChange={(e, country) =>
-                                setAccount({
-                                  ...account,
-                                  country: country ? country.name : "",
-                                })
-                              }
-                            />
-                          </Col>
-                        </Row>
-                      </div>
-
+                {loggedIn && (configuration.import || configuration.share) && (
+                  <>
+                    <div className="ml-3">
                       <Row>
-                        <Col
-                          className={`${
-                            account &&
-                            (configuration.import || configuration.share)
-                              ? "pt-3"
-                              : ""
-                          } pb-2`}
-                        ></Col>
+                        <Col>
+                          <Autocomplete
+                            options={countryNames}
+                            getOptionLabel={(e) => e.name}
+                            value={
+                              countryNames.filter(
+                                (x) => x.name === accountInfo.country
+                              )[0] || null
+                            }
+                            inputValue={autocompleteInput || ""}
+                            onInputChange={(_, newInputValue) => {
+                              setAutocompleteInput(newInputValue);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                label="Country"
+                                variant="outlined"
+                                placeholder="Country"
+                                {...params}
+                              />
+                            )}
+                            onChange={(e, country) =>
+                              setAccountInfo({
+                                ...accountInfo,
+                                country: country ? country.name : "",
+                              })
+                            }
+                          />
+                        </Col>
                       </Row>
-                    </>
-                  )}
+                    </div>
 
-                {loggedIn && account && (
+                    <Row>
+                      <Col
+                        className={`${
+                          accountInfo &&
+                          (configuration.import || configuration.share)
+                            ? "pt-3"
+                            : ""
+                        } pb-2`}
+                      ></Col>
+                    </Row>
+                  </>
+                )}
+
+                {loggedIn && (
                   <Row>
                     <Col>
                       <FormCheck
                         type="switch"
                         id="share-switch"
                         label="Activate Sharing Lists"
-                        checked={configuration.share}
+                        checked={configuration.share || false}
                         onChange={() => toggleSharingLists()}
                       />
                       <p className="text-dim">
@@ -402,7 +397,7 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </Row>
                 )}
 
-                {loggedIn && account && configuration.share && (
+                {loggedIn && configuration.share && (
                   <div className="ml-3">
                     <Row>
                       <Col>
@@ -416,10 +411,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             className={classes.textField}
                             label="Business Name"
                             variant="outlined"
-                            value={account.businessName || ""}
+                            value={accountInfo.businessName || ""}
                             onChange={(ev) =>
-                              setAccount({
-                                ...account,
+                              setAccountInfo({
+                                ...accountInfo,
                                 businessName: ev.target.value,
                               })
                             }
@@ -429,10 +424,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             className={classes.textField}
                             label="Website"
                             variant="outlined"
-                            value={account.website || ""}
+                            value={accountInfo.website || ""}
                             onChange={(ev) =>
-                              setAccount({
-                                ...account,
+                              setAccountInfo({
+                                ...accountInfo,
                                 website: ev.target.value,
                               })
                             }
@@ -443,9 +438,12 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             type="email"
                             label="Email"
                             variant="outlined"
-                            value={account.email || ""}
+                            value={accountInfo.email || ""}
                             onChange={(ev) =>
-                              setAccount({ ...account, email: ev.target.value })
+                              setAccountInfo({
+                                ...accountInfo,
+                                email: ev.target.value,
+                              })
                             }
                           />
                           <TextField
@@ -454,10 +452,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             type="name"
                             label="Contact Person"
                             variant="outlined"
-                            value={account.contactPerson || ""}
+                            value={accountInfo.contactPerson || ""}
                             onChange={(ev) =>
-                              setAccount({
-                                ...account,
+                              setAccountInfo({
+                                ...accountInfo,
                                 contactPerson: ev.target.value,
                               })
                             }
@@ -468,10 +466,10 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                             type="address"
                             label="Address"
                             variant="outlined"
-                            value={account.address || ""}
+                            value={accountInfo.address || ""}
                             onChange={(ev) =>
-                              setAccount({
-                                ...account,
+                              setAccountInfo({
+                                ...accountInfo,
                                 address: ev.target.value,
                               })
                             }
@@ -482,76 +480,30 @@ export default function Settings(props: ComponentType<SettingsProps>) {
                   </div>
                 )}
 
-                {loggedIn &&
-                  account &&
-                  (configuration.import || configuration.share) && (
-                    <Row>
-                      <Col>
+                {loggedIn && (configuration.import || configuration.share) && (
+                  <Row>
+                    <Col>
+                      <Button
+                        variant="primary"
+                        className="mr-3"
+                        type="button"
+                        disabled={disableButton}
+                        onClick={saveAccountConfiguration}
+                      >
+                        Save
+                      </Button>
+                      {configuration.share && (
                         <Button
-                          variant="primary"
-                          className="mr-3"
-                          type="button"
-                          disabled={disableButton}
-                          onClick={(ev: MouseEvent<HTMLElement>) => {
-                            ev.preventDefault();
-
-                            // validations here
-                            if (
-                              configuration.share &&
-                              account.email &&
-                              !validator.isEmail(account.email)
-                            ) {
-                              toast.error("Email is not valid");
-                              return;
-                            }
-
-                            if (
-                              configuration.share &&
-                              account.website &&
-                              !validator.isURL(account.website)
-                            ) {
-                              toast.error("Website is not a valid URL");
-                              return;
-                            }
-
-                            setDisableButton(true);
-
-                            let updatedAccount = account;
-                            const fetchedAccount = AuthService.getAccount();
-                            if (!configuration.share && fetchedAccount) {
-                              updatedAccount = {
-                                ...fetchedAccount,
-                                country: account.country,
-                              };
-                            }
-                            ApiService.updateProvider(updatedAccount)
-                              .then(() => {
-                                AuthService.updateAccount(updatedAccount);
-                                toast.success(
-                                  "Successfully saved information."
-                                );
-                                setDisableButton(false);
-                              })
-                              .catch(() => {
-                                toast.error("Something went wrong");
-                                setDisableButton(false);
-                              });
+                          onClick={() => {
+                            clearInputInfo();
                           }}
                         >
-                          Save
+                          Clear
                         </Button>
-                        {configuration.share && (
-                          <Button
-                            onClick={() => {
-                              clearInputInfo();
-                            }}
-                          >
-                            Clear
-                          </Button>
-                        )}
-                      </Col>
-                    </Row>
-                  )}
+                      )}
+                    </Col>
+                  </Row>
+                )}
                 <Prompt
                   when={unsavedChanges() || uncompletedInfo()}
                   message={
