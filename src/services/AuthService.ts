@@ -2,10 +2,10 @@ import _ from "lodash";
 import { Account } from "../pages/Contact/Interfaces";
 
 const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";
-let subscribers: any[] = [];
 
-const update = (account: Account | null) => {
-  subscribers.forEach((s) => s(account));
+export const createAccount = (account: Account) => {
+  const updatedAccount = { ...account };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
 };
 
 export const getAccount = (): Account | null => {
@@ -15,7 +15,7 @@ export const getAccount = (): Account | null => {
   }
 
   const account: Account = JSON.parse(accountStringified);
-  if (!account || !Object.keys(account).length) {
+  if (!account || Object.keys(account).length === 0) {
     return null;
   }
 
@@ -23,35 +23,20 @@ export const getAccount = (): Account | null => {
 };
 
 export const updateAccount = (account: Account): void => {
-  account.walletAddress = account.walletAddress
-    ? account.walletAddress.toLowerCase()
-    : account.walletAddress;
+  const updatedAccount = { ...account };
+  account.walletAddress = updatedAccount.walletAddress
+    ? updatedAccount.walletAddress.toLowerCase()
+    : updatedAccount.walletAddress;
 
-  if (_.isEqual(account, getAccount())) {
+  if (_.isEqual(updatedAccount, getAccount())) {
     return;
   }
 
-  localStorage.setItem(AUTH_KEY, JSON.stringify(account));
-  update(account);
+  localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
 };
 
 export const removeAccount = (): void => {
   localStorage.removeItem(AUTH_KEY);
-  update(null);
-};
-
-export const subscribe = (
-  handler: (account: Account) => void
-): (() => void) => {
-  subscribers = [...subscribers, handler];
-  return () => {
-    const idx = subscribers.indexOf(handler);
-    if (idx < 0) {
-      return;
-    }
-
-    subscribers.splice(subscribers.indexOf(handler), 1);
-  };
 };
 
 export const getProviderId = (): number => {

@@ -33,7 +33,7 @@ const headCells: HeadCell<Data>[] = [
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
 
-export default function PublicFilters() {
+export default function PublicFilters(props) {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
   const [page, setPage] = React.useState(0);
@@ -59,10 +59,8 @@ export default function PublicFilters() {
   });
 
   useEffect(() => {
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
-  }, []);
+    setConfiguration(props.config);
+  }, [props.config]);
 
   useEffect(() => {
     setShowImportFilter(!!prefetch || !!toBeImportedFilter);

@@ -3,7 +3,6 @@ import { Col, Row } from "react-bootstrap";
 import ApiService from "../../services/ApiService";
 import {
   ChartDataEntry,
-  Config,
   DashboardData,
   PeriodInterval,
   PeriodType,
@@ -26,12 +25,6 @@ function Dashboard(): JSX.Element {
     endDate: null,
   });
 
-  const [configuration, setConfiguration] = useState<Config>({
-    bitscreen: false,
-    import: false,
-    share: false,
-  });
-
   const [chartData, setChartData] = useState<ChartDataEntry[]>([]);
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     currentlyFiltering: 0,
@@ -48,10 +41,6 @@ function Dashboard(): JSX.Element {
     ApiService.getDashboardData().then((dashboardData) => {
       setDashboardData(dashboardData);
     });
-
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
   }, []);
 
   useEffect(() => {

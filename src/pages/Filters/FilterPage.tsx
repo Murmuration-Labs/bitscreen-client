@@ -83,10 +83,8 @@ const FilterPage = (props): JSX.Element => {
   });
 
   useEffect(() => {
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
-  }, []);
+    setConfiguration(props.config);
+  }, [props.config]);
 
   const isAccountInfoValid = (): boolean => {
     return account
@@ -250,11 +248,9 @@ const FilterPage = (props): JSX.Element => {
 
   const mountedRef = useRef(true);
   const initFilter = (shareId: string): void => {
-    console.log("intru");
     if (shareId) {
       setIsEdit(true);
       ApiService.getFilter(shareId).then((filterList: FilterList) => {
-        console.log(filterList);
         if (!mountedRef.current) return;
         if (!filterList) {
           setInvalidFilterId(true);
@@ -288,7 +284,6 @@ const FilterPage = (props): JSX.Element => {
   };
 
   useEffect(() => {
-    console.log("aici");
     void initFilter(props.match.params.shareId as string);
 
     return () => {
