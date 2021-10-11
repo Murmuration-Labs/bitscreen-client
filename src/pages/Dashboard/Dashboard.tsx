@@ -3,7 +3,6 @@ import { Col, Row } from "react-bootstrap";
 import ApiService from "../../services/ApiService";
 import {
   ChartDataEntry,
-  Config,
   DashboardData,
   PeriodInterval,
   PeriodType,
@@ -26,12 +25,6 @@ function Dashboard(): JSX.Element {
     endDate: null,
   });
 
-  const [configuration, setConfiguration] = useState<Config>({
-    bitscreen: false,
-    import: false,
-    share: false,
-  });
-
   const [chartData, setChartData] = useState<ChartDataEntry[]>([]);
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     currentlyFiltering: 0,
@@ -48,10 +41,6 @@ function Dashboard(): JSX.Element {
     ApiService.getDashboardData().then((dashboardData) => {
       setDashboardData(dashboardData);
     });
-
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
   }, []);
 
   useEffect(() => {
@@ -127,12 +116,14 @@ function Dashboard(): JSX.Element {
             cardTextLeft={dashboardData.activeLists}
             cardTitleRight="Inactive lists"
             cardTextRight={dashboardData.inactiveLists}
+            smallText={true}
           />
         </Col>
         <Col xs={12} md={4} xl={2}>
           <DashboardCard
             cardTitle="Imported lists"
             cardText={dashboardData.importedLists}
+            smallText={true}
           />
         </Col>
         <Col xs={12} md={4} xl={5}>
@@ -141,11 +132,12 @@ function Dashboard(): JSX.Element {
             cardTextLeft={dashboardData.privateLists}
             cardTitleRight="Public lists"
             cardTextRight={dashboardData.publicLists}
+            smallText={true}
           />
         </Col>
       </Row>
       <Card className="root" variant="outlined">
-        <CardContent>
+        <CardContent className="chart">
           <div className="chart-head-container">
             <Typography className="card-title">Chart</Typography>
             <div className="chart-head-container">

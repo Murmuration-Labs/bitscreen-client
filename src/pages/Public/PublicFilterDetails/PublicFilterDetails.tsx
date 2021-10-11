@@ -78,17 +78,15 @@ const PublicFilterDetailsPage = (props) => {
     share: false,
   });
 
+  useEffect(() => {
+    setConfiguration(props.config);
+  }, [props.config]);
+
   const isImportEnabled = (): boolean => {
     return (
       configuration.bitscreen && configuration.import && !!account?.country
     );
   };
-
-  useEffect(() => {
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
-  }, []);
 
   useEffect(() => {
     setShowImportFilter(!!toBeImportedFilter);

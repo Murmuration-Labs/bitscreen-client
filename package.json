@@ -28,6 +28,7 @@
     "enzyme": "^3.11.0",
     "eth-sig-util": "^3.0.1",
     "express": "^4.17.1",
+    "js-file-download": "^0.4.12",
     "keccak256": "^1.0.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
@@ -78,6 +79,11 @@
     "lint": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx .",
     "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!@amcharts|(?!react-spinners))"
+    ]
   },
   "eslintConfig": {
     "extends": [

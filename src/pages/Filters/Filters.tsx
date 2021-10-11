@@ -50,6 +50,7 @@ import "./Filters.css";
 import HoverableMenuItem from "./HoverableMenuItem";
 import ImportFilterModal from "./ImportFilterModal";
 import {
+  BadgeColor,
   BulkSelectedType,
   Config,
   EnabledOption,
@@ -71,7 +72,7 @@ interface MyFiltersTableData {
 }
 
 const headCells: HeadCell<MyFiltersTableData>[] = [
-  { id: "name", label: "Name", numeric: false },
+  { id: "name", label: "Filter name", numeric: false },
   { id: "scope", label: "Scope", numeric: false },
   { id: "subs", label: "# of Subs", numeric: true },
   { id: "cids", label: "# of Cids", numeric: true },
@@ -102,7 +103,7 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
   { id: "actions", label: "Actions", numeric: false },
 ];
 
-function Filters(): JSX.Element {
+function Filters(props): JSX.Element {
   /**
    * UTILS
    */
@@ -149,9 +150,16 @@ function Filters(): JSX.Element {
     FilterList[]
   >([]);
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [filterLists, setFilterLists] = useState<FilterList[]>([]);
+  const [bulkCount, setBulkCount] = useState<{
+    checkedCount: number;
+    totalCount: number;
+  }>({
+    checkedCount: 0,
+    totalCount: 0,
+  });
   const [selectedConditional, setSelectedConditional] =
     useState<BulkSelectedType>(BulkSelectedType.None);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -172,10 +180,8 @@ function Filters(): JSX.Element {
   });
 
   useEffect(() => {
-    ApiService.getProviderConfig().then((config: Config) =>
-      setConfiguration(config)
-    );
-  }, []);
+    setConfiguration({ ...props.config });
+  }, [props.config]);
 
   useEffect(() => {
     setEnabledSelectedFilters(
@@ -404,6 +410,19 @@ function Filters(): JSX.Element {
       [Visibility.Public]: "success",
       [Visibility.Shareable]: "warning",
     };
+    const colorMapper = {
+      [BadgeColor.None]: { backgroundColor: "#7A869A" },
+      [BadgeColor.Private]: { backgroundColor: "#FC6471" },
+      [BadgeColor.Public]: { backgroundColor: "#4DA74D" },
+      [BadgeColor.Shared]: { backgroundColor: "#F7C143" },
+      [BadgeColor.Imported]: { backgroundColor: "#7A869A" },
+      [BadgeColor.Orphan]: {
+        backgroundColor: "#FFFFFF",
+        color: "#7A869A",
+        border: "1px solid #7A869A",
+      },
+      [BadgeColor.Override]: { backgroundColor: "#027BFE" },
+    };
 
     const isImported = props.provider.id !== AuthService.getProviderId();
 
@@ -414,28 +433,28 @@ function Filters(): JSX.Element {
     return (
       <Row style={{ display: "flex", flexDirection: "column" }}>
         <Col>
-          <Badge variant={variantMapper[props.visibility]}>
+          <Badge style={{ color: "#FFFFFF", ...colorMapper[props.visibility] }}>
             {translateVisibility(props.visibility)}
           </Badge>
         </Col>
         {isOverride && (
           <Col>
-            <Badge variant="primary">Override</Badge>
+            <Badge variant="primary">Exception</Badge>
           </Col>
         )}
         {isShared(props) && (
           <Col>
-            <Badge variant="info">Shared</Badge>
+            <Badge style={colorMapper[BadgeColor.Shared]}>Shared</Badge>
           </Col>
         )}
         {isImported && (
           <Col>
-            <Badge variant="dark">Imported</Badge>
+            <Badge style={colorMapper[BadgeColor.Imported]}>Imported</Badge>
           </Col>
         )}
         {orphan && (
           <Col>
-            <Badge variant="light">Orphan</Badge>
+            <Badge style={colorMapper[BadgeColor.Orphan]}>Orphan</Badge>
           </Col>
         )}
       </Row>
@@ -460,6 +479,22 @@ function Filters(): JSX.Element {
     );
   };
 
+  const handleMainCheckboxToggle = () => {
+    if (bulkCount.checkedCount === 0) {
+      const newFilterLists = filterLists.map((element) => ({
+        ...element,
+        isBulkSelected: true,
+      }));
+      setFilterLists(newFilterLists);
+    } else {
+      const newFilterLists = filterLists.map((element) => ({
+        ...element,
+        isBulkSelected: false,
+      }));
+      setFilterLists(newFilterLists);
+    }
+  };
+
   const CIDFilter = (): JSX.Element => {
     return (
       <div className={"card-container"}>
@@ -467,8 +502,8 @@ function Filters(): JSX.Element {
           <Table aria-label="enhanced table">
             <EnhancedTableHead
               enableChecking
-              checkedCount={filterLists.filter((f) => f.isBulkSelected).length}
-              itemsCount={filterLists.length}
+              checkedCount={bulkCount.checkedCount}
+              itemsCount={bulkCount.totalCount}
               headCells={headCells}
               order={order}
               orderBy={orderBy}
@@ -476,6 +511,7 @@ function Filters(): JSX.Element {
               mySortBy={mySortBy}
               onRequestSort={handleRequestSort}
               rowCount={dataCount}
+              onMainCheckboxToggle={handleMainCheckboxToggle}
             />
             <TableBody>
               {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
@@ -491,7 +527,10 @@ function Filters(): JSX.Element {
                     selected={!!row.isBulkSelected}
                     key={index}
                   >
-                    <TableCell padding="checkbox">
+                    <TableCell
+                      className="table-row-cell-text"
+                      padding="checkbox"
+                    >
                       <Checkbox
                         checked={row.isBulkSelected}
                         onChange={() => {
@@ -500,7 +539,10 @@ function Filters(): JSX.Element {
                         }}
                       />
                     </TableCell>
-                    <TableCell style={{ verticalAlign: "middle" }}>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: "middle", width: 400 }}
+                    >
                       <Link
                         to={`/filters/edit/${row.shareId}`}
                         style={{
@@ -511,22 +553,29 @@ function Filters(): JSX.Element {
                         {row.name}
                       </Link>
                     </TableCell>
-                    <TableCell style={{ verticalAlign: "middle" }}>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: "middle" }}
+                    >
                       <CIDFilterScope {...row} />
                     </TableCell>
-                    <TableCell style={{ verticalAlign: "middle" }}>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: "middle" }}
+                    >
                       {isImported(row) ||
                       isOrphan(row) ||
                       row.visibility !== Visibility.Public
                         ? "-"
                         : (row.provider_Filters || []).length - 1}
                     </TableCell>
-                    <TableCell style={{ verticalAlign: "middle" }}>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: "middle" }}
+                    >
                       <span
                         style={{
                           textAlign: "center",
-                          color: "blue",
-                          fontWeight: "bold",
                         }}
                       >
                         {row.cids && row.cids.length
@@ -534,7 +583,10 @@ function Filters(): JSX.Element {
                           : row.cidsCount || 0}
                       </span>
                     </TableCell>
-                    <TableCell style={{ verticalAlign: "middle" }}>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: "middle" }}
+                    >
                       {!(
                         row.provider_Filters &&
                         !row.provider_Filters.some(
@@ -626,6 +678,11 @@ function Filters(): JSX.Element {
     setEnabledFilters(filterLists.filter((f) => isEnabled(f)));
     setDisabledFilters(filterLists.filter((f) => isDisabled(f)));
     setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
+
+    setBulkCount({
+      checkedCount: filterLists.filter((f) => f.isBulkSelected).length,
+      totalCount: filterLists.length,
+    });
   }, [filterLists]);
 
   const beginLocalBulkSetEnabled = (val: boolean): void => {
@@ -702,275 +759,283 @@ function Filters(): JSX.Element {
       {loaded ? (
         configuration.bitscreen ? (
           <div>
-            <Container>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                verticalAlign: "top",
+                paddingBottom: 0,
+                marginBottom: 16,
+              }}
+            >
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  verticalAlign: "top",
-                  paddingBottom: 0,
+                  flexDirection: "row",
+                  flex: 1,
+                  alignItems: "center",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flex: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  <h3>My Filters</h3>
-                  <span
-                    style={{
-                      color: "grey",
-                      fontStyle: "oblique",
-                      marginLeft: 10,
-                    }}
-                  >
-                    Filter lists running on my node
-                    {!isImportEnabled() && (
-                      <p className="text-dim" style={{ marginRight: 4 }}>
-                        To activate importing, go to{" "}
-                        <a style={{ fontSize: 12 }} href="/settings">
-                          Settings
-                        </a>{" "}
-                        and add country data.
-                      </p>
-                    )}
-                  </span>
-                </div>
-                <div>
-                  <Button
-                    variant="primary"
-                    style={{ marginRight: 4 }}
-                    onClick={() => history.push(`/filters/new`)}
-                  >
-                    New Filter
-                  </Button>
-
-                  <Button
-                    variant="outline-primary"
-                    disabled={!isImportEnabled()}
-                    onClick={() => {
-                      setShowImportFilter(true);
-                    }}
-                    className="double-space-left import-btn"
-                  >
-                    Import Filter
-                  </Button>
-                </div>
-              </div>
-
-              <Divider style={{ marginTop: 6, marginBottom: 10 }} />
-
-              <div style={{ display: "flex", marginBottom: 10 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    flex: 0.5,
-                    marginRight: 4,
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <TextField
-                    style={{ width: "100%" }}
-                    type="text"
-                    placeholder="Search CID or Filter Name"
-                    label="Search"
-                    variant="outlined"
-                    value={searchTerm}
-                    onChange={searchFilters}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {searchTerm && (
-                            <IconButton
-                              onClick={() => {
-                                setSearchTerm("");
-                              }}
-                              color="default"
-                            >
-                              <ClearIcon />
-                            </IconButton>
-                          )}
-                        </InputAdornment>
-                      ),
-                    }}
-                    FormHelperTextProps={{ style: { fontSize: 12 } }}
-                  />
+                <div style={{ fontSize: 32, fontWeight: 600, marginBottom: 0 }}>
+                  My Filters
                 </div>
                 <span
                   style={{
-                    marginRight: 4,
-                    flex: 1,
-                    verticalAlign: "middle",
-                    alignSelf: "center",
+                    color: "#42526E",
+                    marginLeft: 12,
                   }}
                 >
-                  {filterLists ? filterLists.length : "0"} result
-                  {filterLists && filterLists.length === 1 ? "" : "s"} found
+                  Filter lists running on my node
+                  {!isImportEnabled() && (
+                    <p className="text-dim" style={{ marginRight: 4 }}>
+                      To activate importing, go to{" "}
+                      <a style={{ fontSize: 12 }} href="/settings">
+                        Settings
+                      </a>{" "}
+                      and add country data.
+                    </p>
+                  )}
                 </span>
-                <div style={{ marginRight: 4 }}>
-                  <Select
-                    style={{ minWidth: 100 }}
-                    variant="outlined"
-                    onChange={(e) => {
-                      setSelectedConditional(
-                        BulkSelectedType[e.target.value as string]
-                      );
-                    }}
-                    value={BulkSelectedType[selectedConditional]}
-                  >
-                    {Object.keys(BulkSelectedType)
-                      .filter((key) => isNaN(parseInt(key)))
-                      .map((key, idx) => (
-                        <MenuItem key={idx} value={key}>
-                          {key}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                </div>
-                <div>
-                  <Select
-                    style={{ minWidth: 100 }}
-                    disabled={
-                      !disabledSelectedFilters.length &&
-                      !enabledSelectedFilters.length &&
-                      !orphanSelectedFilters.length
-                    }
-                    title={"Bulk Actions"}
-                    variant="outlined"
-                    defaultValue={"Bulk Actions"}
-                    value={"Bulk Actions"}
-                  >
-                    <MenuItem value="Bulk Actions">Bulk Actions</MenuItem>
-                    {!!disabledSelectedFilters.length && (
-                      <HoverableMenuItem
-                        type="default"
-                        title={`Enable (${disabledSelectedFilters.length})`}
-                        onClick={() => {
-                          const sharedFilters = disabledSelectedFilters.filter(
-                            (x) => isShared(x)
-                          );
-                          if (sharedFilters.length > 0) {
-                            beginGlobalBulkSetEnabled(true);
-                          } else {
-                            beginLocalBulkSetEnabled(true);
-                          }
-                        }}
-                      />
-                    )}
-
-                    {!!enabledSelectedFilters.length && (
-                      <HoverableMenuItem
-                        type="destructive"
-                        title={`Disable (${enabledSelectedFilters.length})`}
-                        onClick={() => {
-                          const sharedFilters = enabledSelectedFilters.filter(
-                            (x) => isShared(x)
-                          );
-                          if (sharedFilters.length > 0) {
-                            beginGlobalBulkSetEnabled(false);
-                          } else {
-                            beginLocalBulkSetEnabled(false);
-                          }
-                        }}
-                      />
-                    )}
-
-                    {!!orphanSelectedFilters.length && (
-                      <HoverableMenuItem
-                        type="destructive"
-                        title={`Discard (${orphanSelectedFilters.length})`}
-                        onClick={() => beginBulkDiscardOrphans()}
-                      />
-                    )}
-                  </Select>
-                </div>
               </div>
+              <div>
+                <Button
+                  variant="primary"
+                  style={{ marginRight: 4, backgroundColor: "#003BDD" }}
+                  onClick={() => history.push(`/filters/new`)}
+                >
+                  New Filter
+                </Button>
 
-              <Row>
-                <Col>
-                  <CIDFilter />
-                </Col>
-              </Row>
+                <Button
+                  variant="outline-primary"
+                  style={{ marginRight: 4 }}
+                  disabled={!isImportEnabled()}
+                  onClick={() => {
+                    setShowImportFilter(true);
+                  }}
+                  className="double-space-left import-btn"
+                >
+                  Import Filter
+                </Button>
+                <Button
+                  variant="outline-primary"
+                  className="double-space-left import-btn"
+                  onClick={ApiService.downloadCidList}
+                >
+                  Download CID List
+                </Button>
+              </div>
+            </div>
 
-              <ConfirmModal
-                show={showConfirmDelete}
-                title={title}
-                message={message}
-                callback={() => {
-                  deleteFilter(deletedFilterList);
+            <div className="filters-page-search-bulk-actions">
+              <div
+                style={{
+                  display: "flex",
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
-                closeCallback={() => {
-                  setDeletedFilterList(FilterService.emptyFilterList());
-                  setShowConfirmDelete(false);
-                }}
-              />
-
-              <ImportFilterModal
-                closeCallback={async (refreshParent = false): Promise<void> => {
-                  setShowImportFilter(false);
-                  if (refreshParent) {
-                    setNeedsRefresh(true);
+              >
+                <TextField
+                  style={{ width: 480, marginRight: 12 }}
+                  type="text"
+                  placeholder="Search CID or Filter Name"
+                  variant="outlined"
+                  value={searchTerm}
+                  onChange={searchFilters}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {searchTerm && (
+                          <IconButton
+                            onClick={() => {
+                              setSearchTerm("");
+                            }}
+                            color="default"
+                          >
+                            <ClearIcon />
+                          </IconButton>
+                        )}
+                      </InputAdornment>
+                    ),
+                  }}
+                  FormHelperTextProps={{ style: { fontSize: 12 } }}
+                />
+                {searchTerm ? (
+                  <span
+                    style={{
+                      marginRight: 4,
+                      verticalAlign: "middle",
+                      alignSelf: "center",
+                    }}
+                  >
+                    {filterLists ? filterLists.length : "0"} result
+                    {filterLists && filterLists.length === 1 ? "" : "s"} found
+                  </span>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <div style={{ marginRight: 12 }}>
+                <span className="mr-2">Select</span>
+                <Select
+                  style={{ minWidth: 100 }}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setSelectedConditional(
+                      BulkSelectedType[e.target.value as string]
+                    );
+                  }}
+                  value={BulkSelectedType[selectedConditional]}
+                >
+                  {Object.keys(BulkSelectedType)
+                    .filter((key) => isNaN(parseInt(key)))
+                    .map((key, idx) => (
+                      <MenuItem key={idx} value={key}>
+                        {key}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </div>
+              <div>
+                <Select
+                  style={{ minWidth: 100 }}
+                  disabled={
+                    !disabledSelectedFilters.length &&
+                    !enabledSelectedFilters.length &&
+                    !orphanSelectedFilters.length
                   }
-                }}
-                show={showImportFilter}
-              />
+                  title={"Bulk Actions"}
+                  variant="outlined"
+                  defaultValue={"Bulk Actions"}
+                  value={"Bulk Actions"}
+                >
+                  <MenuItem value="Bulk Actions">Bulk Actions</MenuItem>
+                  {!!disabledSelectedFilters.length && (
+                    <HoverableMenuItem
+                      type="default"
+                      title={`Enable (${disabledSelectedFilters.length})`}
+                      onClick={() => {
+                        const sharedFilters = disabledSelectedFilters.filter(
+                          (x) => isShared(x)
+                        );
+                        if (sharedFilters.length > 0) {
+                          beginGlobalBulkSetEnabled(true);
+                        } else {
+                          beginLocalBulkSetEnabled(true);
+                        }
+                      }}
+                    />
+                  )}
 
-              <ConfirmModal
-                show={showConfirmEnableBulkAction}
-                title={"Confirm bulk enable filters"}
-                message={confirmEnableBulkActionMessage}
-                callback={() => bulkSetEnabled(true)}
-                closeCallback={() => {
-                  setShowConfirmEnableBulkAction(false);
-                  setConfirmEnableBulkActionMessage("");
-                }}
-              />
-              <ConfirmModal
-                show={showConfirmDisableBulkAction}
-                title={"Confirm bulk disable filters"}
-                message={confirmDisableBulkActionMessage}
-                callback={() => bulkSetEnabled(false)}
-                closeCallback={() => {
-                  setShowConfirmDisableBulkAction(false);
-                  setConfirmDisableBulkActionMessage("");
-                }}
-              />
+                  {!!enabledSelectedFilters.length && (
+                    <HoverableMenuItem
+                      type="destructive"
+                      title={`Disable (${enabledSelectedFilters.length})`}
+                      onClick={() => {
+                        const sharedFilters = enabledSelectedFilters.filter(
+                          (x) => isShared(x)
+                        );
+                        if (sharedFilters.length > 0) {
+                          beginGlobalBulkSetEnabled(false);
+                        } else {
+                          beginLocalBulkSetEnabled(false);
+                        }
+                      }}
+                    />
+                  )}
 
-              <ConfirmModal
-                show={showConfirmDiscardBulkAction}
-                title={"Confirm bulk discard filters"}
-                message={confirmDiscardBulkActionMessage}
-                callback={() => bulkDiscardOrphans()}
-                closeCallback={() => {
-                  setShowConfirmDiscardBulkAction(false);
-                  setConfirmDiscardBulkActionMessage("");
-                }}
-              />
+                  {!!orphanSelectedFilters.length && (
+                    <HoverableMenuItem
+                      type="destructive"
+                      title={`Discard (${orphanSelectedFilters.length})`}
+                      onClick={() => beginBulkDiscardOrphans()}
+                    />
+                  )}
+                </Select>
+              </div>
+            </div>
 
-              <ToggleEnabledFilterModal
-                show={showConfirmEnabled}
-                title={
-                  bulkEnabled === undefined
-                    ? "The selected filter is imported by other providers"
-                    : "One or more filters are imported by other providers"
+            <Row>
+              <Col>
+                <CIDFilter />
+              </Col>
+            </Row>
+
+            <ConfirmModal
+              show={showConfirmDelete}
+              title={title}
+              message={message}
+              callback={() => {
+                deleteFilter(deletedFilterList);
+              }}
+              closeCallback={() => {
+                setDeletedFilterList(FilterService.emptyFilterList());
+                setShowConfirmDelete(false);
+              }}
+            />
+
+            <ImportFilterModal
+              closeCallback={async (refreshParent = false): Promise<void> => {
+                setShowImportFilter(false);
+                if (refreshParent) {
+                  setNeedsRefresh(true);
                 }
-                callback={toggleSharedFilterEnabled}
-                closeCallback={() => {
-                  setSelectedFilterList(FilterService.emptyFilterList());
-                  setBulkEnabled(undefined);
-                  setShowConfirmEnabled(false);
-                }}
-              />
-            </Container>
+              }}
+              show={showImportFilter}
+            />
+
+            <ConfirmModal
+              show={showConfirmEnableBulkAction}
+              title={"Confirm bulk enable filters"}
+              message={confirmEnableBulkActionMessage}
+              callback={() => bulkSetEnabled(true)}
+              closeCallback={() => {
+                setShowConfirmEnableBulkAction(false);
+                setConfirmEnableBulkActionMessage("");
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmDisableBulkAction}
+              title={"Confirm bulk disable filters"}
+              message={confirmDisableBulkActionMessage}
+              callback={() => bulkSetEnabled(false)}
+              closeCallback={() => {
+                setShowConfirmDisableBulkAction(false);
+                setConfirmDisableBulkActionMessage("");
+              }}
+            />
+
+            <ConfirmModal
+              show={showConfirmDiscardBulkAction}
+              title={"Confirm bulk discard filters"}
+              message={confirmDiscardBulkActionMessage}
+              callback={() => bulkDiscardOrphans()}
+              closeCallback={() => {
+                setShowConfirmDiscardBulkAction(false);
+                setConfirmDiscardBulkActionMessage("");
+              }}
+            />
+
+            <ToggleEnabledFilterModal
+              show={showConfirmEnabled}
+              title={
+                bulkEnabled === undefined
+                  ? "The selected filter is imported by other providers"
+                  : "One or more filters are imported by other providers"
+              }
+              callback={toggleSharedFilterEnabled}
+              closeCallback={() => {
+                setSelectedFilterList(FilterService.emptyFilterList());
+                setBulkEnabled(undefined);
+                setShowConfirmEnabled(false);
+              }}
+            />
           </div>
         ) : (
           <div>

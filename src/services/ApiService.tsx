@@ -13,6 +13,7 @@ import {
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
+import fileDownload from "js-file-download";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -37,7 +38,6 @@ const ApiService = {
   getFilter: async (shareId: string): Promise<FilterList> => {
     const providerId = AuthService.getProviderId();
     const query = `providerId=${encodeURIComponent(providerId)}`;
-
     const response = await axios.get(
       `${serverUri()}/filter/${shareId}?${query}`
     );
@@ -250,38 +250,21 @@ const ApiService = {
     };
   },
 
-  authenticateProvider: async (account: Account): Promise<Account> => {
-    const provider: any = await detectEthereumProvider({
-      mustBeMetaMask: true,
-    });
-
-    if (!provider) {
-      console.error();
-      throw new Error("Please install metamask.");
-    }
-
-    if (!account || !account.walletAddress || !account.nonce) {
-      throw new Error("Please login with metamask.");
-    }
-
-    const { walletAddress, nonce } = account;
-
-    const web3 = new Web3(provider);
-    const signature = await web3.eth.personal.sign(nonce, walletAddress, "");
-
-    return (
-      await axios.post<Account>(
-        `${serverUri()}/provider/auth/${walletAddress}`,
-        {
-          signature,
-        }
-      )
-    ).data;
+  authenticateProvider: async (walletAddress, signature): Promise<Account> => {
+    const response = await axios.post<Account>(
+      `${serverUri()}/provider/auth/${walletAddress}`,
+      {
+        signature,
+      }
+    );
+    return response.data;
   },
 
   createProvider: async (wallet: string): Promise<Account> => {
-    return (await axios.post(`${serverUri()}/provider/${wallet.toLowerCase()}`))
-      .data;
+    const response = await axios.post(
+      `${serverUri()}/provider/${wallet.toLowerCase()}`
+    );
+    return response.data;
   },
 
   updateProvider: async (account: Account): Promise<Account> => {
@@ -361,28 +344,42 @@ const ApiService = {
     const response = await axios.get(
       `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
     );
-    // return Object.values(response.data);
+    // // return Object.values(response.data);
     const data: ChartDataEntry[] = Object.values(response.data);
-    return data;
-    // const mock = data.map((element) => {
-    //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
-    //   const totalCidsFiltered =
-    //     totalRequestsBlocked -
-    //     Math.ceil(Math.random() * (totalRequestsBlocked - 50));
-    //   return {
-    //     key: element.key,
-    //     total_count: totalRequestsBlocked,
-    //     unique_count: totalCidsFiltered,
-    //   };
-    // });
-    // return mock;
+    // return data;
+    const mock = data.map((element) => {
+      const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
+      const totalCidsFiltered =
+        totalRequestsBlocked -
+        Math.ceil(Math.random() * (totalRequestsBlocked - 50));
+      return {
+        key: element.key,
+        total_count: totalRequestsBlocked,
+        unique_count: totalCidsFiltered,
+      };
+    });
+    return mock;
   },
 
-  getProviderConfig: async (): Promise<Config> => {
-    const providerId = AuthService.getProviderId();
+  getProviderConfig: async (providerId): Promise<Config> => {
     const response = await axios.get(`${serverUri()}/config/${providerId}`);
 
     return response.data;
+  },
+
+  setProviderConfig: async (config: Config): Promise<void> => {
+    const providerId = AuthService.getProviderId();
+    const response = await axios.put(`${serverUri()}/config`, {
+      providerId,
+      ...config,
+    });
+    return response.data;
+  },
+
+  downloadCidList: async (): Promise<any> => {
+    axios.get(`${serverUri()}/cid/blocked?download=true`).then((response) => {
+      fileDownload(JSON.stringify(response.data), "cid_file.json");
+    });
   },
 };
 

@@ -17,8 +17,6 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [edit] = useState(!!props.edit);
   const [open] = useState(props.show);
 
-  console.log(props.show);
-
   // const renderCidsInputError = (): JSX.Element => {
   //   if (cidsInputError) {
   //     return (

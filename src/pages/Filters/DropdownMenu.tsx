@@ -19,8 +19,6 @@ function DropdownMenu(props: DropdownMenuProps) {
     setAnchorEl(null);
   };
 
-  console.log(props.titleButton);
-
   return (
     <div>
       {props.titleButton ? (

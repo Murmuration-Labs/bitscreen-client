@@ -20,6 +20,16 @@ export enum Visibility {
   Shareable,
 }
 
+export enum BadgeColor {
+  None,
+  Private,
+  Public,
+  Shared,
+  Imported,
+  Orphan,
+  Override,
+}
+
 export enum BulkSelectedType {
   None,
   All,
@@ -65,6 +75,7 @@ export interface CidItem {
   edit?: boolean;
   isChecked: boolean;
   isSaved: boolean;
+  updated?: string;
 }
 
 export interface ChartDataEntry {
@@ -175,6 +186,8 @@ export interface FilterList {
   provider?: any;
   provider_Filters?: Provider_Filter[];
   notes?: string;
+  created?: string;
+  updated?: string;
 }
 
 export interface ProviderFilter {

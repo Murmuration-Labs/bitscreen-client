@@ -301,16 +301,14 @@ export default function AccountContactPage(): JSX.Element {
 
   return (
     <>
-      <Container>
-        <Row>
-          <Col>
-            <h2>Account contact info</h2>
-          </Col>
-        </Row>
-        <Row>
-          <Col>{renderFormOrLoader()}</Col>
-        </Row>
-      </Container>
+      <Row>
+        <Col>
+          <h2>Account contact info</h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col>{renderFormOrLoader()}</Col>
+      </Row>
     </>
   );
 }
