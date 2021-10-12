@@ -24,7 +24,10 @@ const AuthProvider = (props: any) => {
         });
 
         walletProvider.on("accountsChanged", (wallets: Array<string>) => {
-          if (!wallets.length || currentWallet !== wallets[0]) {
+          if (
+            !wallets.length ||
+            (currentWallet && currentWallet !== wallets[0])
+          ) {
             AuthService.removeAccount();
             setProvider(null);
             setConfig(null);
