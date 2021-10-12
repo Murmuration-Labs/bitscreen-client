@@ -92,12 +92,6 @@ function App(): JSX.Element {
 
     const wallet = wallets[0].toLowerCase();
 
-    const currentAccount = AuthService.getAccount();
-    if (currentAccount?.walletAddress !== wallet) {
-      AuthService.removeAccount();
-      AuthService.createAccount({ walletAddress: wallet });
-    }
-
     let provider;
     let account: Account;
     let signature;
@@ -105,6 +99,7 @@ function App(): JSX.Element {
     try {
       provider = await ApiService.getProvider(wallet);
     } catch (e) {
+      AuthService.removeAccount();
       return toast.error(
         "Could not get provider information from the server. Please try again later!"
       );
@@ -114,6 +109,7 @@ function App(): JSX.Element {
       try {
         provider = await ApiService.createProvider(wallet);
       } catch (e) {
+        AuthService.removeAccount();
         return toast.error(
           "Could not create an account at the moment. Please try again later!"
         );
@@ -127,6 +123,7 @@ function App(): JSX.Element {
         ""
       );
     } catch (e) {
+      AuthService.removeAccount();
       return toast.error(
         "You must sign the metamask request in order to prove that the wallet belongs to you!"
       );
@@ -135,11 +132,12 @@ function App(): JSX.Element {
     try {
       account = await ApiService.authenticateProvider(wallet, signature);
     } catch (e) {
+      AuthService.removeAccount();
       return toast.error(
         "Could not authenticate you at the moment. Please try again later!"
       );
     }
-    AuthService.updateAccount(account);
+
     let config;
     try {
       config = await ApiService.getProviderConfig(account.id);
@@ -152,6 +150,13 @@ function App(): JSX.Element {
         });
       }
     }
+
+    const currentAccount = AuthService.getAccount();
+    if (currentAccount?.walletAddress !== wallet) {
+      AuthService.removeAccount();
+      AuthService.createAccount(account);
+    }
+
     setConfig(config);
     setProvider(account);
     setWallet(account.walletAddress);
