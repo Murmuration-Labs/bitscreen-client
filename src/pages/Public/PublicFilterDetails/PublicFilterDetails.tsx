@@ -68,6 +68,10 @@ const PublicFilterDetailsPage = (props) => {
       columnName: "Description:",
       columnValue: "",
     },
+    country: {
+      columnName: "Country:",
+      columnValue: "",
+    },
   });
   const [isImported, setIsImported] = useState<boolean>(false);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
@@ -144,6 +148,10 @@ const PublicFilterDetailsPage = (props) => {
         description: {
           columnName: "Description:",
           columnValue: data.filter.description,
+        },
+        country: {
+          columnName: "Country:",
+          columnValue: data.provider.country,
         },
       };
       setFilterDetails(details);
@@ -292,8 +300,8 @@ const PublicFilterDetailsPage = (props) => {
               <PublicFilterDetailsDoubleCard
                 cardTitleLeft="Address"
                 cardTextLeft={filterDetails.address.columnValue}
-                cardTitleRight="City & Country"
-                cardTextRight={filterDetails.address.columnValue}
+                cardTitleRight="Country"
+                cardTextRight={filterDetails.country.columnValue}
               />
             </Col>
           </Row>

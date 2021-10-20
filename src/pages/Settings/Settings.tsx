@@ -59,7 +59,9 @@ export default function Settings(props) {
 
   useEffect(() => {
     setAccountInfo({ ...account });
-    setSelectedCountryOption([account.country]);
+    if (account && account.country) {
+      setSelectedCountryOption([account.country]);
+    }
   }, [props.account]);
 
   const toggleBitScreen = async (): Promise<void> => {
