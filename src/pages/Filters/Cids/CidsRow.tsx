@@ -129,6 +129,7 @@ const CidsRow = ({
       tabIndex={-1}
       key={cid.tableKey}
       selected={!!cid.isChecked}
+      className=".cids-table-row"
     >
       <TableCell padding="checkbox">
         <Checkbox checked={!!cid.isChecked} />
@@ -138,6 +139,7 @@ const CidsRow = ({
         component="th"
         id={cid.tableKey}
         scope="row"
+        aria-label="CID Name Cell"
       >
         {cid.cid.length > 10 ? (
           <Tooltip title={cid.cid}>
@@ -249,6 +251,7 @@ const CidsRow = ({
           <IconButton
             className="cid-row-icon"
             aria-label="Edit CID"
+            id="edit-cid-button"
             onClick={(e) => {
               e.stopPropagation();
               handleEdit();
@@ -261,6 +264,7 @@ const CidsRow = ({
           <Tooltip title="Move">
             <IconButton
               className="cid-row-icon move-icon"
+              id="move-cid-button"
               aria-label="Move CID"
               onClick={(e) => {
                 e.stopPropagation();
@@ -274,6 +278,7 @@ const CidsRow = ({
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete CID"
+            id="delete-cid-button"
             className="cid-row-icon"
             onClick={(e) => {
               e.stopPropagation();

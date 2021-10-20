@@ -27,25 +27,24 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   //   return <></>;
   // };
 
-  const addCids = (): void => {
-    const match = /\r|\n|,|;|\s/.exec(cidsInput);
-    if (!match) {
-      setCidsInputError(true);
-      return;
+  const handleCids = (isEdit): void => {
+    let result: string[] = [];
+    if (!isEdit) {
+      const match = /\r|\n|,|;|\s/.exec(cidsInput);
+      if (!match) {
+        setCidsInputError(true);
+        console.log("aqui");
+        return;
+      }
+      result = cidsInput
+        .trim()
+        .split(match[0])
+        .map((element: string) => {
+          return element.trim();
+        });
+      setCidsInput("");
     }
-    const result = cidsInput
-      .trim()
-      .split(match[0])
-      .map((element: string) => {
-        return element.trim();
-      });
-    setCidsInput("");
     props.closeCallback({ result, refUrl });
-    setRefUrl("");
-  };
-
-  const updateCids = (): void => {
-    props.closeCallback({ result: [], refUrl });
     setRefUrl("");
   };
 
@@ -55,13 +54,10 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
       <DialogContent style={{ display: "flex", flexDirection: "column" }}>
         <form
           style={{ minWidth: "400px" }}
-          onKeyPress={(e) =>
-            e.nativeEvent.code === "Enter" && (edit || cidsInput)
-              ? edit
-                ? updateCids()
-                : addCids()
-              : null
-          }
+          onKeyPress={(e) => {
+            if (e.nativeEvent.code === "Enter" && (edit || cidsInput))
+              handleCids(edit);
+          }}
         >
           {!edit && (
             <TextField
@@ -98,14 +94,15 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
       <DialogActions>
         <Button
           color="primary"
+          aria-label="add cids"
           disabled={!edit && !cidsInput}
-          onClick={() => (edit ? updateCids() : addCids())}
+          onClick={() => handleCids(edit)}
         >
           {edit ? "Update" : "Add"}
         </Button>
         <Button
           color="primary"
-          title="Cancel"
+          aria-label="cancel"
           onClick={() => props.closeCallback(null)}
         >
           Cancel

@@ -74,13 +74,19 @@ const AddCidModal = ({
       </DialogContent>
       <DialogActions>
         <Button
+          aria-label="add-cid"
           color="primary"
           disabled={!cidClone.cid}
           onClick={() => handleClose(cidClone, index)}
         >
           {edit ? "Update" : "Add"}
         </Button>
-        <Button color="primary" title="Cancel" onClick={() => handleClose()}>
+        <Button
+          aria-label="cancel"
+          color="primary"
+          title="Cancel"
+          onClick={() => handleClose()}
+        >
           Cancel
         </Button>
       </DialogActions>

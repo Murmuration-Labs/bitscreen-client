@@ -18,7 +18,7 @@ import validator from "validator";
 import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
-import { Account } from "../Contact/Interfaces";
+import { Account } from "../../types/interfaces";
 import { Config, SettingsProps } from "../Filters/Interfaces";
 import "./Settings.css";
 

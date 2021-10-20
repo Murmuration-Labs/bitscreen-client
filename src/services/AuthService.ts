@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Account } from "../pages/Contact/Interfaces";
+import { Account } from "../types/interfaces";
 
 const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";
 

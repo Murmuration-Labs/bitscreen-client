@@ -24,7 +24,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 import Web3 from "web3";
 import ApiService from "../services/ApiService";
 import { Config } from "./Filters/Interfaces";
-import { Account } from "./Contact/Interfaces";
+import { Account } from "../types/interfaces";
 
 interface MatchParams {
   id: string;
@@ -164,11 +164,35 @@ function App(): JSX.Element {
 
   useEffect(() => {
     const account = AuthService.getAccount();
+    // use only if WE WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
+    const checkWallet = async (config, walletAddress) => {
+      const walletProvider: any = await detectEthereumProvider({
+        mustBeMetaMask: true,
+      });
+
+      const web3 = new Web3(walletProvider);
+
+      const wallets = await web3.eth.getAccounts();
+      if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
+        setConfig(config);
+      } else {
+        setProvider(null);
+        setConfig(null);
+        AuthService.removeAccount();
+      }
+    };
     if (account) {
-      ApiService.getProviderConfig(account.id).then((config) =>
-        setConfig(config)
-      );
+      ApiService.getProviderConfig(account.id).then((config) => {
+        checkWallet(config, account.walletAddress);
+      });
     }
+
+    // use below if WE DON'T WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
+    // if (account) {
+    //   ApiService.getProviderConfig(account.id).then((config) => {
+    //     setConfig(config);
+    //   });
+    // }
   }, []);
 
   return (

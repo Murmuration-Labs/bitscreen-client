@@ -2,7 +2,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
 import Web3 from "web3";
 import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account } from "../pages/Contact/Interfaces";
+import { Account } from "../types/interfaces";
 import {
   CidItem,
   FilterList,
