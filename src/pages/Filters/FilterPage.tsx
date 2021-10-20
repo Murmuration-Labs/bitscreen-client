@@ -124,7 +124,7 @@ const FilterPage = (props): JSX.Element => {
       text = "Private lists are only visible to you.";
     if (filterList.visibility === Visibility.Public)
       text = "Public lists are visible to all users via the directory.";
-    if (filterList.visibility === Visibility.Shareable)
+    if (filterList.visibility === Visibility.Shared)
       text =
         "Shared lists are only visible to other users if they have the URL.";
 
@@ -138,7 +138,7 @@ const FilterPage = (props): JSX.Element => {
   const visibilityGenerateLink = (): JSX.Element => {
     if (
       filterList.visibility !== Visibility.Public &&
-      filterList.visibility !== Visibility.Shareable
+      filterList.visibility !== Visibility.Shared
     ) {
       return <></>;
     }
@@ -149,7 +149,7 @@ const FilterPage = (props): JSX.Element => {
     if (filterList.visibility === Visibility.Public) {
       generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
       buttonText = "Copy Link ";
-    } else if (filterList.visibility === Visibility.Shareable) {
+    } else if (filterList.visibility === Visibility.Shared) {
       generatedLink = serverUri() + "/filter/share/" + filterList.shareId;
       buttonText = "Copy Link ";
     }
@@ -1116,14 +1116,14 @@ const FilterPage = (props): JSX.Element => {
                             {isShareEnabled() && (
                               <Dropdown.Item
                                 onClick={() =>
-                                  changeVisibility(Visibility.Shareable)
+                                  changeVisibility(Visibility.Shared)
                                 }
                               >
                                 <Button
                                   className="sharing-button-shareable"
                                   variant="outline-secondary"
                                 >
-                                  Shareable
+                                  Shared
                                 </Button>
                               </Dropdown.Item>
                             )}

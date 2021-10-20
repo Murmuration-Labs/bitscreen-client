@@ -408,7 +408,7 @@ function Filters(props): JSX.Element {
       [Visibility.None]: "secondary",
       [Visibility.Private]: "danger",
       [Visibility.Public]: "success",
-      [Visibility.Shareable]: "warning",
+      [Visibility.Shared]: "warning",
     };
     const colorMapper = {
       [BadgeColor.None]: { backgroundColor: "#7A869A" },
