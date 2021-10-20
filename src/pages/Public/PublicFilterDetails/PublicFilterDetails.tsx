@@ -202,7 +202,7 @@ const PublicFilterDetailsPage = (props) => {
                   color: "#42526E",
                 }}
               >
-                List provider info
+                List details & provider info
               </div>
             </div>
             <div className="">
