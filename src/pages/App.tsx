@@ -138,6 +138,12 @@ function App(): JSX.Element {
       );
     }
 
+    const currentAccount = AuthService.getAccount();
+    if (currentAccount?.walletAddress !== wallet) {
+      AuthService.removeAccount();
+      AuthService.createAccount(account);
+    }
+
     let config;
     try {
       config = await ApiService.getProviderConfig(account.id);
@@ -149,12 +155,6 @@ function App(): JSX.Element {
           share: false,
         });
       }
-    }
-
-    const currentAccount = AuthService.getAccount();
-    if (currentAccount?.walletAddress !== wallet) {
-      AuthService.removeAccount();
-      AuthService.createAccount(account);
     }
 
     setConfig(config);
