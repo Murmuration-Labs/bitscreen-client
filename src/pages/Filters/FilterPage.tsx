@@ -92,7 +92,10 @@ const FilterPage = (props): JSX.Element => {
 
   const isShareEnabled = (): boolean => {
     return (
-      configuration.bitscreen && configuration.share && isAccountInfoValid()
+      configuration &&
+      configuration.bitscreen &&
+      configuration.share &&
+      isAccountInfoValid()
     );
   };
 

@@ -33,7 +33,7 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
       const match = /\r|\n|,|;|\s/.exec(cidsInput);
       if (!match) {
         setCidsInputError(true);
-        console.log("aqui");
+
         return;
       }
       result = cidsInput
