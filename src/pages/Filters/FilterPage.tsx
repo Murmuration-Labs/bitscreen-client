@@ -1,25 +1,20 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import MenuButton from "@material-ui/icons/MoreVert";
 import {
-  faEdit,
   faExternalLinkAlt,
   faFolderPlus,
   faLink,
   faPlusCircle,
   faQuestionCircle,
-  faShare,
-  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import axios from "axios";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   Badge,
   Button,
   Col,
-  Container,
   Dropdown,
   DropdownButton,
   Form,
@@ -46,10 +41,8 @@ import {
   Config,
   EnabledOption,
   FilterList,
-  mapVisibilityString,
   ViewTypes,
   Visibility,
-  VisibilityString,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
@@ -591,6 +584,10 @@ const FilterPage = (props): JSX.Element => {
     filterList.override = !filterList.override;
     setFilterOverride(filterList.override);
 
+    if (filterList.override) {
+      filterList.visibility = Visibility.Private;
+    }
+
     const fl = {
       ...filterList,
       visibility: filterList.override
@@ -1099,7 +1096,7 @@ const FilterPage = (props): JSX.Element => {
                             className={`sharing-button ${getVisibilityButtonClass()}`}
                             title={Visibility[filterList.visibility]}
                           >
-                            {isShareEnabled() && (
+                            {isShareEnabled() && !filterList.override && (
                               <Dropdown.Item
                                 onClick={() =>
                                   changeVisibility(Visibility.Public)
@@ -1113,7 +1110,7 @@ const FilterPage = (props): JSX.Element => {
                                 </Button>
                               </Dropdown.Item>
                             )}
-                            {isShareEnabled() && (
+                            {isShareEnabled() && !filterList.override && (
                               <Dropdown.Item
                                 onClick={() =>
                                   changeVisibility(Visibility.Shared)
