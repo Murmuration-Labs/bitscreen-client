@@ -64,6 +64,10 @@ const PublicFilterDetailsPage = (props) => {
       columnName: "Updated:",
       columnValue: "",
     },
+    description: {
+      columnName: "Description:",
+      columnValue: "",
+    },
   });
   const [isImported, setIsImported] = useState<boolean>(false);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
@@ -136,6 +140,10 @@ const PublicFilterDetailsPage = (props) => {
         updatedAt: {
           columnName: "Updated:",
           columnValue: formatDate(data.filter.updated),
+        },
+        description: {
+          columnName: "Description:",
+          columnValue: data.filter.description,
         },
       };
       setFilterDetails(details);
@@ -243,6 +251,15 @@ const PublicFilterDetailsPage = (props) => {
               <PublicFilterDetailsCard
                 cardTitle="# of CIDs"
                 cardText={filterDetails.numberOfCids.columnValue}
+              />
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col sm={12} md={12}>
+              <PublicFilterDetailsCard
+                cardTitle="Description"
+                cardText={filterDetails.description.columnValue}
+                smallText={true}
               />
             </Col>
           </Row>
