@@ -17,28 +17,14 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [edit] = useState(!!props.edit);
   const [open] = useState(props.show);
 
-  // const renderCidsInputError = (): JSX.Element => {
-  //   if (cidsInputError) {
-  //     return (
-  //       <span className="double-space-left text-danger">Invalid CIDs list</span>
-  //     );
-  //   }
-
-  //   return <></>;
-  // };
-
   const handleCids = (isEdit): void => {
     let result: string[] = [];
     if (!isEdit) {
-      const match = /\r|\n|,|;|\s/.exec(cidsInput);
-      if (!match) {
-        setCidsInputError(true);
-        console.log("aqui");
-        return;
-      }
       result = cidsInput
         .trim()
-        .split(match[0])
+        .replace(/^[,;\s]+|[,;\s]+$/g, "")
+        .split(/[,;\s]/)
+        .filter((x) => x.length)
         .map((element: string) => {
           return element.trim();
         });

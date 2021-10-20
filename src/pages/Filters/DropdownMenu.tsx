@@ -10,7 +10,6 @@ interface DropdownMenuProps {
 }
 
 function DropdownMenu(props: DropdownMenuProps) {
-  console.log(props.children);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

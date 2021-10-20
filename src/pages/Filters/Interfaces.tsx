@@ -4,7 +4,7 @@ export const VisibilityString: string[] = [
   "None",
   "Private",
   "Public",
-  "Shareable",
+  "Shared",
 ];
 
 export enum ViewTypes {
@@ -17,7 +17,7 @@ export enum Visibility {
   None,
   Private,
   Public,
-  Shareable,
+  Shared,
 }
 
 export enum BadgeColor {
@@ -61,7 +61,7 @@ export interface PeriodInterval {
 export function mapVisibilityString(visibilityStr: string): Visibility {
   if (visibilityStr === "Private") return Visibility.Private;
   if (visibilityStr === "Public") return Visibility.Public;
-  if (visibilityStr === "Shareable") return Visibility.Shareable;
+  if (visibilityStr === "Shared") return Visibility.Shared;
 
   return Visibility.None;
 }

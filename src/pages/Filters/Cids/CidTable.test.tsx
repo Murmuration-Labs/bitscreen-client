@@ -168,7 +168,6 @@ describe("Cid table tests", () => {
     const testProps = { ...props, checkedCids };
 
     const page = shallow(<CidsTable {...testProps} />);
-    console.log(testProps.cids.length, typeof testProps.cids.length);
     expect(testProps.cids.length).toBeGreaterThan(0);
     expect(testProps.checkedCids.length).toBeGreaterThan(0);
     expect(testProps.cids.length).toBeGreaterThan(testProps.checkedCids.length);

@@ -6,6 +6,7 @@ import {
   Redirect,
   Route,
   RouteComponentProps,
+  Switch,
 } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
@@ -183,6 +184,7 @@ function App(): JSX.Element {
     };
     if (account) {
       ApiService.getProviderConfig(account.id).then((config) => {
+        setConfig(config);
         checkWallet(config, account.walletAddress);
       });
     }
@@ -210,70 +212,72 @@ function App(): JSX.Element {
         <Container fluid={true}>
           <Row className="fill-height">
             <Col className={"stage"}>
-              <Route path="*" exact={true}>
-                <Redirect to="/settings" />
-              </Route>
-              <Route exact path="/">
-                <Redirect to="/settings" />
-              </Route>
-              <Route
-                path="/settings"
-                exact
-                render={(props) => {
-                  return (
-                    <Settings
-                      connectMetamask={connectMetamask}
-                      setConfig={setConfig}
-                      config={config}
-                      setAccount={setProvider}
-                      account={provider}
-                      {...props}
-                    />
-                  );
-                }}
-              />
-              <PrivateRoute
-                path="/dashboard"
-                exact
-                comp={Dashboard}
-                provider={provider}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters"
-                exact
-                comp={Filters}
-                provider={provider}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/edit/:shareId?"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/new"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory"
-                exact
-                comp={PublicFilters}
-                provider={provider}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory/details/:shareId?"
-                exact
-                comp={PublicFilterDetailsPage}
-                provider={provider}
-                config={config}
-              />
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/settings" />
+                </Route>
+                <Route
+                  path="/settings"
+                  exact
+                  render={(props) => {
+                    return (
+                      <Settings
+                        connectMetamask={connectMetamask}
+                        setConfig={setConfig}
+                        config={config}
+                        setAccount={setProvider}
+                        account={provider}
+                        {...props}
+                      />
+                    );
+                  }}
+                />
+                <PrivateRoute
+                  path="/dashboard"
+                  exact
+                  comp={Dashboard}
+                  provider={provider}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters"
+                  exact
+                  comp={Filters}
+                  provider={provider}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/edit/:shareId?"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/new"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory"
+                  exact
+                  comp={PublicFilters}
+                  provider={provider}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory/details/:shareId?"
+                  exact
+                  comp={PublicFilterDetailsPage}
+                  provider={provider}
+                  config={config}
+                />
+                <Route exact path="*">
+                  <Redirect to="/settings" />
+                </Route>
+              </Switch>
             </Col>
           </Row>
           <ToastContainer />

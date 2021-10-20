@@ -64,6 +64,14 @@ const PublicFilterDetailsPage = (props) => {
       columnName: "Updated:",
       columnValue: "",
     },
+    description: {
+      columnName: "Description:",
+      columnValue: "",
+    },
+    country: {
+      columnName: "Country:",
+      columnValue: "",
+    },
   });
   const [isImported, setIsImported] = useState<boolean>(false);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
@@ -137,6 +145,14 @@ const PublicFilterDetailsPage = (props) => {
           columnName: "Updated:",
           columnValue: formatDate(data.filter.updated),
         },
+        description: {
+          columnName: "Description:",
+          columnValue: data.filter.description,
+        },
+        country: {
+          columnName: "Country:",
+          columnValue: data.provider.country,
+        },
       };
       setFilterDetails(details);
       setFilterProviderId(data.provider.id);
@@ -194,7 +210,7 @@ const PublicFilterDetailsPage = (props) => {
                   color: "#42526E",
                 }}
               >
-                List provider info
+                List details & provider info
               </div>
             </div>
             <div className="">
@@ -247,6 +263,15 @@ const PublicFilterDetailsPage = (props) => {
             </Col>
           </Row>
           <Row className="mb-3">
+            <Col sm={12} md={12}>
+              <PublicFilterDetailsCard
+                cardTitle="Description"
+                cardText={filterDetails.description.columnValue}
+                smallText={true}
+              />
+            </Col>
+          </Row>
+          <Row className="mb-3">
             <Col xs={12}>
               <PublicFilterDetailsDoubleCard
                 cardTitleLeft="Business Name"
@@ -275,8 +300,8 @@ const PublicFilterDetailsPage = (props) => {
               <PublicFilterDetailsDoubleCard
                 cardTitleLeft="Address"
                 cardTextLeft={filterDetails.address.columnValue}
-                cardTitleRight="City & Country"
-                cardTextRight={filterDetails.address.columnValue}
+                cardTitleRight="Country"
+                cardTextRight={filterDetails.country.columnValue}
               />
             </Col>
           </Row>

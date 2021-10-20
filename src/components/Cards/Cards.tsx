@@ -39,7 +39,7 @@ export function DashboardDoubleCard(props) {
           <Typography
             className={`${smallText ? "small-card-text" : "card-text"}`}
           >
-            {cardTextRight}
+            {cardTextLeft}
           </Typography>
         </CardContent>
       </Card>
@@ -58,7 +58,7 @@ export function DashboardDoubleCard(props) {
 }
 
 export function PublicFilterDetailsCard(props) {
-  const { cardTitle, cardText } = props;
+  const { cardTitle, cardText, smallText } = props;
 
   return (
     <Card className="root" variant="outlined">
@@ -66,7 +66,11 @@ export function PublicFilterDetailsCard(props) {
         <Typography className="public-card-title single">
           {cardTitle}
         </Typography>
-        <Typography className="public-card-text single">{cardText}</Typography>
+        <Typography
+          className={`public-card-text ${smallText ? "double" : "single"}`}
+        >
+          {cardText}
+        </Typography>
       </CardContent>
     </Card>
   );
