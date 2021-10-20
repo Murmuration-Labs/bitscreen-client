@@ -2,3 +2,12 @@
   color: #828282;
   font-size: 12px;
 }
+
+.input-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.settings-width {
+  width: 900px;
+}

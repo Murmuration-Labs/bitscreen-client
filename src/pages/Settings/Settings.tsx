@@ -1,26 +1,17 @@
-import {
-  createStyles,
-  Divider,
-  makeStyles,
-  TextField,
-  Theme,
-} from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import detectEthereumProvider from "@metamask/detect-provider";
-import axios from "axios";
+import { createStyles, makeStyles, Theme } from "@material-ui/core";
 import { countries } from "countries-list";
 import _ from "lodash";
-import React, { ComponentType, MouseEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
 import { Prompt } from "react-router";
 import { toast } from "react-toastify";
 import validator from "validator";
-import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import { Account } from "../../types/interfaces";
 import { Config, SettingsProps } from "../Filters/Interfaces";
 import "./Settings.css";
+import { Option, Typeahead } from "react-bootstrap-typeahead";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,12 +36,6 @@ export default function Settings(props) {
     share: false,
   });
 
-  const [loading, setLoading] = useState(false);
-
-  const [displayInfoSuccess, setDisplayInfoSuccess] = useState<boolean>(false);
-  const [displayInfoError, setDisplayInfoError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [infoErrorMessage, setInfoErrorMessage] = useState<string>("");
   const [accountInfo, setAccountInfo] = useState<Account>({
     id: 0,
     walletAddressHashed: "",
@@ -64,7 +49,9 @@ export default function Settings(props) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
 
-  const [autocompleteInput, setAutocompleteInput] = useState("");
+  const [selectedCountryOption, setSelectedCountryOption] = useState<Option[]>(
+    []
+  );
 
   useEffect(() => {
     setConfiguration({ ...config });
@@ -72,6 +59,7 @@ export default function Settings(props) {
 
   useEffect(() => {
     setAccountInfo({ ...account });
+    setSelectedCountryOption([account.country]);
   }, [props.account]);
 
   const toggleBitScreen = async (): Promise<void> => {
@@ -249,7 +237,7 @@ export default function Settings(props) {
             </Col>
           </Row>
           {configuration.bitscreen && (
-            <Row>
+            <Row className="settings-width">
               <Col>
                 {!loggedIn && (
                   <div className="ml-3">
@@ -282,7 +270,7 @@ export default function Settings(props) {
                     <Row>
                       <Col>
                         <div className="filter-page-input-label">
-                          wallet address
+                          Wallet Address
                         </div>
                       </Col>
                     </Row>
@@ -316,7 +304,7 @@ export default function Settings(props) {
                       <FormCheck
                         type="switch"
                         id="import-switch"
-                        label="Activate Importing Lists"
+                        label='Activate "Importing Lists"'
                         checked={configuration.import || false}
                         onChange={() => toggleImportingLists()}
                       />
@@ -334,33 +322,24 @@ export default function Settings(props) {
                     <div className="ml-3">
                       <Row>
                         <Col>
-                          <Autocomplete
-                            options={countryNames}
-                            getOptionLabel={(e) => e.name}
-                            value={
-                              countryNames.filter(
-                                (x) => x.name === accountInfo.country
-                              )[0] || null
-                            }
-                            inputValue={autocompleteInput || ""}
-                            onInputChange={(_, newInputValue) => {
-                              setAutocompleteInput(newInputValue);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                label="Country"
-                                variant="outlined"
-                                placeholder="Country"
-                                {...params}
-                              />
+                          <div className="input-label">Country</div>
+                          <Typeahead
+                            id="country"
+                            options={countryNames.map(
+                              (country) => country.name
                             )}
-                            onChange={(e, country) =>
+                            placeholder="Country"
+                            onChange={(country) => {
+                              setSelectedCountryOption(country);
                               setAccountInfo({
                                 ...accountInfo,
-                                country: country ? country.name : "",
-                              })
-                            }
-                          />
+                                country: country[0]
+                                  ? (country[0] as string)
+                                  : "",
+                              });
+                            }}
+                            selected={selectedCountryOption}
+                          ></Typeahead>
                         </Col>
                       </Row>
                     </div>
@@ -384,7 +363,7 @@ export default function Settings(props) {
                       <FormCheck
                         type="switch"
                         id="share-switch"
-                        label="Activate Sharing Lists"
+                        label='Activate "Sharing Lists"'
                         checked={configuration.share || false}
                         onChange={() => toggleSharingLists()}
                       />
@@ -406,73 +385,79 @@ export default function Settings(props) {
                           noValidate
                           autoComplete="false"
                         >
-                          <TextField
-                            fullWidth
+                          <div className="input-label">Business Name</div>
+                          <Form.Control
+                            role="businessName"
+                            placeholder="Business Name"
                             className={classes.textField}
-                            label="Business Name"
-                            variant="outlined"
-                            value={accountInfo.businessName || ""}
                             onChange={(ev) =>
                               setAccountInfo({
                                 ...accountInfo,
                                 businessName: ev.target.value,
                               })
                             }
+                            type="text"
+                            value={accountInfo.businessName || ""}
                           />
-                          <TextField
-                            fullWidth
+
+                          <div className="input-label">Website</div>
+                          <Form.Control
+                            role="website"
+                            placeholder="Website"
                             className={classes.textField}
-                            label="Website"
-                            variant="outlined"
-                            value={accountInfo.website || ""}
                             onChange={(ev) =>
                               setAccountInfo({
                                 ...accountInfo,
                                 website: ev.target.value,
                               })
                             }
+                            type="text"
+                            value={accountInfo.website || ""}
                           />
-                          <TextField
-                            fullWidth
+
+                          <div className="input-label">Email</div>
+                          <Form.Control
+                            role="email"
+                            placeholder="Email"
                             className={classes.textField}
-                            type="email"
-                            label="Email"
-                            variant="outlined"
-                            value={accountInfo.email || ""}
                             onChange={(ev) =>
                               setAccountInfo({
                                 ...accountInfo,
                                 email: ev.target.value,
                               })
                             }
+                            type="text"
+                            value={accountInfo.email || ""}
                           />
-                          <TextField
-                            fullWidth
+
+                          <div className="input-label">Contact Person</div>
+                          <Form.Control
+                            role="contactPerson"
+                            placeholder="Contact Person"
                             className={classes.textField}
-                            type="name"
-                            label="Contact Person"
-                            variant="outlined"
-                            value={accountInfo.contactPerson || ""}
                             onChange={(ev) =>
                               setAccountInfo({
                                 ...accountInfo,
                                 contactPerson: ev.target.value,
                               })
                             }
+                            type="text"
+                            value={accountInfo.contactPerson || ""}
                           />
-                          <TextField
-                            fullWidth
+
+                          <div className="input-label">Address</div>
+                          <Form.Control
+                            role="address"
+                            placeholder="Address"
                             className={classes.textField}
-                            type="address"
-                            label="Address"
-                            variant="outlined"
-                            value={accountInfo.address || ""}
                             onChange={(ev) =>
                               setAccountInfo({
                                 ...accountInfo,
                                 address: ev.target.value,
                               })
                             }
+                            type="text"
+                            value={accountInfo.address || ""}
                           />
                         </form>
                       </Col>
