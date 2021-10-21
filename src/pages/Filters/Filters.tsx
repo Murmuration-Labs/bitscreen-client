@@ -8,7 +8,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
-  Divider,
   IconButton,
   InputAdornment,
   MenuItem,
@@ -22,7 +21,6 @@ import {
 } from "@material-ui/core";
 import ClearIcon from "@material-ui/icons/ClearRounded";
 import SearchIcon from "@material-ui/icons/Search";
-import axios from "axios";
 import _ from "lodash";
 import debounce from "lodash.debounce";
 import { useSnackbar } from "notistack";
@@ -31,7 +29,6 @@ import {
   Badge,
   Button,
   Col,
-  Container,
   FormCheck,
   OverlayTrigger,
   Row,
@@ -40,7 +37,6 @@ import {
 } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import ConfirmModal from "../../components/Modal/ConfirmModal";
-import { serverUri } from "../../config";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import FilterService from "../../services/FilterService";
@@ -246,8 +242,8 @@ function Filters(props): JSX.Element {
         };
         break;
 
-      case BulkSelectedType.Override:
-        conditional = (x: FilterList) => x.override;
+      case BulkSelectedType.Exception:
+        conditional = (x: FilterList) => x.visibility === Visibility.Exception;
         break;
 
       default:
@@ -428,7 +424,7 @@ function Filters(props): JSX.Element {
 
     const orphan = isOrphan(props);
 
-    const isOverride = props.override;
+    const isException = props.visibility === Visibility.Exception;
 
     return (
       <Row style={{ display: "flex", flexDirection: "column" }}>
@@ -437,7 +433,7 @@ function Filters(props): JSX.Element {
             {translateVisibility(props.visibility)}
           </Badge>
         </Col>
-        {isOverride && (
+        {isException && (
           <Col>
             <Badge variant="primary">Exception</Badge>
           </Col>

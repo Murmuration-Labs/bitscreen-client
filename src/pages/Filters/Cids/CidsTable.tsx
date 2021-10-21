@@ -9,7 +9,7 @@ import {
   TableSortLabel,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { CidItem, FilterList } from "../Interfaces";
+import { CidItem, FilterList, Visibility } from "../Interfaces";
 import CidsRow from "./CidsRow";
 
 export interface CidsTableProps {
@@ -37,7 +37,7 @@ const defaultHeadCells: HeadCell[] = [
   { pos: 999, id: "actions", label: "", align: "right" },
 ];
 
-const overrideHeadCells: HeadCell[] = [
+const exceptionHeadCells: HeadCell[] = [
   { pos: 3, id: "remote", label: "Remote" },
   { pos: 4, id: "local", label: "Local" },
 ];
@@ -56,11 +56,11 @@ const CidsTable = ({
   useEffect(() => {
     const sorted = [
       ...defaultHeadCells,
-      ...(filter.override ? overrideHeadCells : []),
+      ...(filter.visibility == Visibility.Exception ? exceptionHeadCells : []),
     ].sort((a, b) => a.pos - b.pos);
 
     setHeadCells(sorted);
-  }, [filter.override]);
+  }, [filter.visibility]);
 
   return (
     <TableContainer>

@@ -1,29 +1,23 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import MenuButton from "@material-ui/icons/MoreVert";
 import {
-  faEdit,
   faExternalLinkAlt,
   faFolderPlus,
   faLink,
   faPlusCircle,
   faQuestionCircle,
-  faShare,
-  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import axios from "axios";
 import _ from "lodash";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   Badge,
   Button,
   Col,
-  Container,
   Dropdown,
   DropdownButton,
   Form,
-  FormCheck,
   OverlayTrigger,
   Row,
   Tooltip,
@@ -46,10 +40,8 @@ import {
   Config,
   EnabledOption,
   FilterList,
-  mapVisibilityString,
   ViewTypes,
   Visibility,
-  VisibilityString,
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
@@ -68,7 +60,6 @@ const FilterPage = (props): JSX.Element => {
   const [deferGlobalFilterEnabled, setDeferGlobalFilterEnabled] =
     useState<boolean>(false);
   const [filterEnabled, setFilterEnabled] = useState(filterList.enabled);
-  const [filterOverride, setFilterOverride] = useState(filterList.override);
   const [isOwner, setIsOwner] = useState(false);
   const [filterNotes, setFilterNotes] = useState<string | undefined>(undefined);
   const [initialFilterNotes, setInitialFilterNotes] = useState<
@@ -123,13 +114,23 @@ const FilterPage = (props): JSX.Element => {
 
   const visibilityHelpText = (): string => {
     let text = "";
-    if (filterList.visibility === Visibility.Private)
-      text = "Private lists are only visible to you.";
-    if (filterList.visibility === Visibility.Public)
-      text = "Public lists are visible to all users via the directory.";
-    if (filterList.visibility === Visibility.Shared)
-      text =
-        "Shared lists are only visible to other users if they have the URL.";
+
+    switch (filterList.visibility) {
+      case Visibility.Private:
+        text = "Private lists are only visible to you.";
+        break;
+      case Visibility.Public:
+        text = "Public lists are visible to all users via the directory.";
+        break;
+      case Visibility.Shared:
+        text =
+          "Shared lists are only visible to other users if they have the URL.";
+        break;
+      case Visibility.Exception:
+        text =
+          "Exception lists prevent CIDs from imported lists from being filtered. Cannot be shared.";
+        break;
+    }
 
     if (text) {
       return `(${text})`;
@@ -189,7 +190,6 @@ const FilterPage = (props): JSX.Element => {
         : []
     );
     setFilterEnabled(filterList.enabled);
-    setFilterOverride(filterList.override);
   }, [filterList]);
 
   useEffect(() => {
@@ -279,7 +279,6 @@ const FilterPage = (props): JSX.Element => {
         setInitialFilterList({ ...fl });
         setLoaded(true);
         setFilterEnabled(fl.enabled);
-        setFilterOverride(fl.override);
       });
     } else {
       setLoaded(true);
@@ -418,14 +417,19 @@ const FilterPage = (props): JSX.Element => {
     });
   };
 
-  const getVisibilityButtonClass = () => {
-    if (filterList.visibility === Visibility.Private) {
-      return "visibility-private";
-    } else if (filterList.visibility === Visibility.Public) {
-      return "visibility-public";
-    } else {
-      return "visibility-shareable";
+  const getVisibilityButtonClass = (): string => {
+    switch (filterList.visibility) {
+      case Visibility.Private:
+        return "visibility-private";
+      case Visibility.Public:
+        return "visibility-public";
+      case Visibility.Shared:
+        return "visibility-shared";
+      case Visibility.Exception:
+        return "visibility-exception";
     }
+
+    return "";
   };
 
   const onNewCid = (): void => {
@@ -588,19 +592,6 @@ const FilterPage = (props): JSX.Element => {
     } else if (option === EnabledOption.Local) {
       toggleFilterEnabled();
     }
-  };
-
-  const toggleFilterOverride = () => {
-    filterList.override = !filterList.override;
-    setFilterOverride(filterList.override);
-
-    const fl = {
-      ...filterList,
-      visibility: filterList.override
-        ? Visibility.Private
-        : initialFilterList.visibility,
-    };
-    saveFilter(fl);
   };
 
   const closeModalCallback = () => {
@@ -858,46 +849,6 @@ const FilterPage = (props): JSX.Element => {
               </IconButton>
             }
           >
-            {isOwner && !isImported && (
-              <MenuItem
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onClick={() => toggleFilterOverride()}
-              >
-                <FormCheck readOnly type="switch" checked={filterOverride} />
-                <Form.Label
-                  style={{
-                    marginRight: 10,
-                    marginTop: 2,
-                  }}
-                  className={"text-dim"}
-                >
-                  Exception{" "}
-                  <OverlayTrigger
-                    placement="left"
-                    delay={{ show: 150, hide: 300 }}
-                    overlay={
-                      <Tooltip style={{ zIndex: 100000 }} id="button-tooltip">
-                        Exception lists prevent CIDs on imported lists from
-                        being filtered. Exception lists cannot be shared.
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon
-                      icon={faQuestionCircle as IconProp}
-                      color="#7393B3"
-                      style={{
-                        marginTop: 2,
-                      }}
-                    />
-                  </OverlayTrigger>
-                </Form.Label>
-              </MenuItem>
-            )}
             <MenuItem
               onClick={() => {
                 confirmDelete();
@@ -1123,7 +1074,7 @@ const FilterPage = (props): JSX.Element => {
                                 }
                               >
                                 <Button
-                                  className="sharing-button-shareable"
+                                  className="sharing-button-shared"
                                   variant="outline-secondary"
                                 >
                                   Shared
@@ -1140,6 +1091,18 @@ const FilterPage = (props): JSX.Element => {
                                 variant="outline-secondary"
                               >
                                 Private
+                              </Button>
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() =>
+                                changeVisibility(Visibility.Exception)
+                              }
+                            >
+                              <Button
+                                className="sharing-button-exception"
+                                variant="outline-secondary"
+                              >
+                                Exception
                               </Button>
                             </Dropdown.Item>
                           </DropdownButton>

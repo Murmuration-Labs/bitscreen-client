@@ -185,7 +185,7 @@
   color: #4da74d;
 }
 
-.sharing-button-shareable {
+.sharing-button-shared {
   border: 1px solid #f7c143;
   color: #f7c143;
 }
@@ -195,12 +195,17 @@
   color: #fc6471;
 }
 
+.sharing-button-exception {
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
 .sharing-button-public:hover {
   border: 1px solid #4da74d;
   background-color: #4da74d;
 }
 
-.sharing-button-shareable:hover {
+.sharing-button-shared:hover {
   border: 1px solid #f7c143;
   background-color: #f7c143;
   color: white;
@@ -211,9 +216,15 @@
   background-color: #fc6471;
 }
 
+.sharing-button-exception:hover {
+  border: 1px solid #007bff;
+  background-color: #007bff;
+}
+
 .visibility-public .dropdown-toggle,
 .visibility-private .dropdown-toggle,
-.visibility-shareable .dropdown-toggle {
+.visibility-shared .dropdown-toggle,
+.visibility-exception .dropdown-toggle {
   color: white;
 }
 
@@ -229,8 +240,14 @@
   background-color: #fc6471 !important;
 }
 
-.visibility-shareable .dropdown-toggle,
-.visibility-shareable .dropdown-toggle:active {
+.visibility-exception .dropdown-toggle,
+.visibility-exception .dropdown-toggle:active {
+  border: 1px solid #007bff !important;
+  background-color: #007bff !important;
+}
+
+.visibility-shared .dropdown-toggle,
+.visibility-shared .dropdown-toggle:active {
   border: 1px solid #f7c143 !important;
   background-color: #f7c143 !important;
 }

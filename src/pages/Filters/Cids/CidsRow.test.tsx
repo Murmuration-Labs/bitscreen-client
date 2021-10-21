@@ -25,7 +25,6 @@ const props = {
     id: 5,
     name: "Edited from cli v2",
     description: "Test 1234 test",
-    override: false,
     enabled: true,
     visibility: 2,
     shareId: "fb21-6957-03d2-2d40",
@@ -165,19 +164,19 @@ describe("Cid row tests", () => {
     const row = page.find("WithStyles(ForwardRef(TableRow))").at(0);
     expect(row.exists).toBeTruthy();
 
-    let editButton = page.find("WithStyles(ForwardRef(IconButton))").at(0);
+    const editButton = page.find("WithStyles(ForwardRef(IconButton))").at(0);
     editButton.simulate("click", {
       stopPropagation: () => {},
     });
     expect(editMock).toHaveBeenCalledTimes(1);
 
-    let moveButton = page.find("WithStyles(ForwardRef(IconButton))").at(1);
+    const moveButton = page.find("WithStyles(ForwardRef(IconButton))").at(1);
     moveButton.simulate("click", {
       stopPropagation: () => {},
     });
     expect(moveMock).toHaveBeenCalledTimes(1);
 
-    let deleteButton = page.find("WithStyles(ForwardRef(IconButton))").at(2);
+    const deleteButton = page.find("WithStyles(ForwardRef(IconButton))").at(2);
     deleteButton.simulate("click", {
       stopPropagation: () => {},
     });
