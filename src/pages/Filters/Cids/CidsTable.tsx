@@ -38,8 +38,7 @@ const defaultHeadCells: HeadCell[] = [
 ];
 
 const exceptionHeadCells: HeadCell[] = [
-  { pos: 3, id: "remote", label: "Remote" },
-  { pos: 4, id: "local", label: "Local" },
+  { pos: 3, id: "local", label: "Local" },
 ];
 
 const CidsTable = ({

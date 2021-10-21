@@ -41,23 +41,6 @@ const ExceptionTemplate = ({ text, color }: any) => {
   );
 };
 
-const RemoteException = ({ loading, exception }: ExceptionProps) => {
-  if (!exception) return <></>;
-
-  return (
-    <>
-      {loading ? (
-        <PuffLoader color={"#28a745"} size={20} />
-      ) : (
-        <ExceptionTemplate
-          text="This CID is an exception for one of the CIDs in an imported filter list"
-          color="#28a745"
-        ></ExceptionTemplate>
-      )}
-    </>
-  );
-};
-
 const LocalException = ({ loading, exception }: ExceptionProps) => {
   if (!exception) return <></>;
 
@@ -84,7 +67,6 @@ const CidsRow = ({
   onDeleteClick,
 }: CidsRowProps): JSX.Element => {
   const [exceptionLoading, setExceptionLoading] = useState(false);
-  const [remote, setRemote] = useState(false);
   const [local, setLocal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -94,7 +76,6 @@ const CidsRow = ({
     if (filter.visibility === Visibility.Exception) {
       ApiService.getCidException(cid.cid, filter.id)
         .then(({ remote, local }) => {
-          setRemote(remote);
           setLocal(local);
         })
         .catch((err) => {
@@ -224,12 +205,6 @@ const CidsRow = ({
       </TableCell>
       {filter.visibility === Visibility.Exception && (
         <>
-          <TableCell>
-            <RemoteException
-              loading={exceptionLoading}
-              exception={remote}
-            ></RemoteException>
-          </TableCell>
           <TableCell>
             <LocalException
               loading={exceptionLoading}
