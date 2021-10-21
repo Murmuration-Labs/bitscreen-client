@@ -252,21 +252,22 @@ const CidsRow = ({
             <img src={icons.editIcon}></img>
           </IconButton>
         </Tooltip>
-        {typeof filter.id === "number" && (
-          <Tooltip title="Move">
-            <IconButton
-              className="cid-row-icon move-icon"
-              id="move-cid-button"
-              aria-label="Move CID"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMove();
-              }}
-            >
-              <img src={icons.moveIcon}></img>
-            </IconButton>
-          </Tooltip>
-        )}
+        {typeof filter.id === "number" &&
+          filter.visibility !== Visibility.Exception && (
+            <Tooltip title="Move">
+              <IconButton
+                className="cid-row-icon move-icon"
+                id="move-cid-button"
+                aria-label="Move CID"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMove();
+                }}
+              >
+                <img src={icons.moveIcon}></img>
+              </IconButton>
+            </Tooltip>
+          )}
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete CID"

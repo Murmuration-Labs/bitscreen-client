@@ -1014,18 +1014,19 @@ const FilterPage = (props): JSX.Element => {
                             Edit
                           </Button>
                         </Dropdown.Item>
-                        {checkViewType() === ViewTypes.Edit && (
-                          <Dropdown.Item>
-                            <Button
-                              variant="outline-warning"
-                              className="bulk-actions-move"
-                              onClick={handleBulkMoveCids}
-                              disabled={!isBulkActionAllowed}
-                            >
-                              Move
-                            </Button>
-                          </Dropdown.Item>
-                        )}
+                        {checkViewType() === ViewTypes.Edit &&
+                          filterList.visibility !== Visibility.Exception && (
+                            <Dropdown.Item>
+                              <Button
+                                variant="outline-warning"
+                                className="bulk-actions-move"
+                                onClick={handleBulkMoveCids}
+                                disabled={!isBulkActionAllowed}
+                              >
+                                Move
+                              </Button>
+                            </Dropdown.Item>
+                          )}
                         <Dropdown.Item>
                           <Button
                             variant="outline-danger"
