@@ -773,7 +773,7 @@ function Filters(props): JSX.Element {
                 }}
               >
                 <div style={{ fontSize: 32, fontWeight: 600, marginBottom: 0 }}>
-                  My Filters
+                  My filters
                 </div>
                 <span
                   style={{

@@ -724,7 +724,7 @@ const FilterPage = (props): JSX.Element => {
     if (isImported) {
       title = (
         <div className="filter-page-title">
-          View Filter List <Badge variant="dark">Imported</Badge>
+          View filter list <Badge variant="dark">Imported</Badge>
         </div>
       );
     } else if (isEdit) {
