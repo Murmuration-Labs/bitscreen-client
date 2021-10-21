@@ -628,7 +628,7 @@ const FilterPage = (props): JSX.Element => {
     return (
       <>
         <OverlayTrigger
-          placement="right"
+          placement="top"
           delay={{ show: 150, hide: 300 }}
           overlay={
             <Tooltip id="button-tooltip">
