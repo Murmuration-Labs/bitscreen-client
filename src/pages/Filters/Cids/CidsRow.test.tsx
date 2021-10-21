@@ -165,19 +165,19 @@ describe("Cid row tests", () => {
     const row = page.find("WithStyles(ForwardRef(TableRow))").at(0);
     expect(row.exists).toBeTruthy();
 
-    const editButton = page.find("WithStyles(ForwardRef(IconButton))").at(0);
+    let editButton = page.find("WithStyles(ForwardRef(IconButton))").at(0);
     editButton.simulate("click", {
       stopPropagation: () => {},
     });
     expect(editMock).toHaveBeenCalledTimes(1);
 
-    const moveButton = page.find("WithStyles(ForwardRef(IconButton))").at(1);
+    let moveButton = page.find("WithStyles(ForwardRef(IconButton))").at(1);
     moveButton.simulate("click", {
       stopPropagation: () => {},
     });
     expect(moveMock).toHaveBeenCalledTimes(1);
 
-    const deleteButton = page.find("WithStyles(ForwardRef(IconButton))").at(2);
+    let deleteButton = page.find("WithStyles(ForwardRef(IconButton))").at(2);
     deleteButton.simulate("click", {
       stopPropagation: () => {},
     });
