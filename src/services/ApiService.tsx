@@ -219,7 +219,7 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getCidOverride: async (
+  getCidException: async (
     cid: string,
     filterId: number
   ): Promise<{ remote: boolean; local: boolean }> => {
@@ -227,7 +227,7 @@ const ApiService = {
       filterId
     )}&cid=${cid}&providerId=${AuthService.getProviderId()}`;
     const response = await axios.get<{ remote: boolean; local: boolean }>(
-      `${serverUri()}/cid/override?${query}`
+      `${serverUri()}/cid/exception?${query}`
     );
     return response.data;
   },
@@ -277,7 +277,7 @@ const ApiService = {
 
   getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
     const response = await axios.post(
-      `${serverUri()}/cids/override/${filterList.id}`,
+      `${serverUri()}/cids/exception/${filterList.id}`,
       filterList.cids
     );
     return response.data as string[];

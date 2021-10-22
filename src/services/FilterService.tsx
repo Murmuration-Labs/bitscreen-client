@@ -9,7 +9,6 @@ const FilterService = {
       cids: [],
       visibility: Visibility.Private,
       enabled: true,
-      override: false,
       providerId: 0,
       provider: { id: 0 },
       description: "",

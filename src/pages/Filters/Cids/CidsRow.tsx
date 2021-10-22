@@ -1,13 +1,5 @@
-import { icon, IconProp } from "@fortawesome/fontawesome-svg-core";
-import {
-  faCheck,
-  faEdit,
-  faPaperPlane,
-  faShare,
-  faShareAlt,
-  faTrash,
-  faTrashAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
@@ -20,7 +12,7 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
-import { CidItem, FilterList } from "../Interfaces";
+import { CidItem, FilterList, Visibility } from "../Interfaces";
 import { formatDate } from "../utils";
 import * as icons from "../../../resources/icons";
 import "./cids.css";
@@ -34,12 +26,12 @@ export interface CidsRowProps {
   onDeleteClick: () => void;
 }
 
-interface OverrideProps {
+interface ExceptionProps {
   loading: boolean;
-  override: boolean;
+  exception: boolean;
 }
 
-const OverrideTemplate = ({ text, color }: any) => {
+const ExceptionTemplate = ({ text, color }: any) => {
   return (
     <Tooltip arrow title={text} PopperProps={{}}>
       <IconButton onClick={(e) => e.stopPropagation()}>
@@ -49,35 +41,18 @@ const OverrideTemplate = ({ text, color }: any) => {
   );
 };
 
-const RemoteOverride = ({ loading, override }: OverrideProps) => {
-  if (!override) return <></>;
+const LocalException = ({ loading, exception }: ExceptionProps) => {
+  if (!exception) return <></>;
 
   return (
     <>
       {loading ? (
         <PuffLoader color={"#28a745"} size={20} />
       ) : (
-        <OverrideTemplate
-          text="This CID is an exception for one of the CIDs in an imported filter list"
-          color="#28a745"
-        ></OverrideTemplate>
-      )}
-    </>
-  );
-};
-
-const LocalOverride = ({ loading, override }: OverrideProps) => {
-  if (!override) return <></>;
-
-  return (
-    <>
-      {loading ? (
-        <PuffLoader color={"#28a745"} size={20} />
-      ) : (
-        <OverrideTemplate
+        <ExceptionTemplate
           text={`This CID is already in a local filter, please remove the CID from the local filter instead of adding it to an exception list`}
           color="#ffc107"
-        ></OverrideTemplate>
+        ></ExceptionTemplate>
       )}
     </>
   );
@@ -91,29 +66,27 @@ const CidsRow = ({
   onMoveClick,
   onDeleteClick,
 }: CidsRowProps): JSX.Element => {
-  const [overrideLoading, setOverrideLoading] = useState(false);
-  const [remote, setRemote] = useState(false);
+  const [exceptionLoading, setExceptionLoading] = useState(false);
   const [local, setLocal] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    if (filter.override) {
-      ApiService.getCidOverride(cid.cid, filter.id)
+    if (filter.visibility === Visibility.Exception) {
+      ApiService.getCidException(cid.cid, filter.id)
         .then(({ remote, local }) => {
-          setRemote(remote);
           setLocal(local);
         })
         .catch((err) => {
           console.error(err);
         })
-        .finally(() => setOverrideLoading(false));
+        .finally(() => setExceptionLoading(false));
       return;
     }
 
-    setOverrideLoading(false);
-  }, [filter.id, filter.override, cid.cid]);
+    setExceptionLoading(false);
+  }, [filter.id, filter.visibility, cid.cid]);
 
   const handleEdit = (): void => onEditClick();
   const handleMove = (): void => onMoveClick();
@@ -230,19 +203,13 @@ const CidsRow = ({
           {formatDate(cid.created)}
         </a>
       </TableCell>
-      {filter.override && (
+      {filter.visibility === Visibility.Exception && (
         <>
           <TableCell>
-            <RemoteOverride
-              loading={overrideLoading}
-              override={remote}
-            ></RemoteOverride>
-          </TableCell>
-          <TableCell>
-            <LocalOverride
-              loading={overrideLoading}
-              override={local}
-            ></LocalOverride>
+            <LocalException
+              loading={exceptionLoading}
+              exception={local}
+            ></LocalException>
           </TableCell>
         </>
       )}
@@ -260,21 +227,22 @@ const CidsRow = ({
             <img src={icons.editIcon}></img>
           </IconButton>
         </Tooltip>
-        {typeof filter.id === "number" && (
-          <Tooltip title="Move">
-            <IconButton
-              className="cid-row-icon move-icon"
-              id="move-cid-button"
-              aria-label="Move CID"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMove();
-              }}
-            >
-              <img src={icons.moveIcon}></img>
-            </IconButton>
-          </Tooltip>
-        )}
+        {typeof filter.id === "number" &&
+          filter.visibility !== Visibility.Exception && (
+            <Tooltip title="Move">
+              <IconButton
+                className="cid-row-icon move-icon"
+                id="move-cid-button"
+                aria-label="Move CID"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMove();
+                }}
+              >
+                <img src={icons.moveIcon}></img>
+              </IconButton>
+            </Tooltip>
+          )}
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete CID"

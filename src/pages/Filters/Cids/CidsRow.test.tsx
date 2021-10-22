@@ -25,7 +25,6 @@ const props = {
     id: 5,
     name: "Edited from cli v2",
     description: "Test 1234 test",
-    override: false,
     enabled: true,
     visibility: 2,
     shareId: "fb21-6957-03d2-2d40",

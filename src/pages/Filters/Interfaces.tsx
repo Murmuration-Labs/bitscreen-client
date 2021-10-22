@@ -18,6 +18,7 @@ export enum Visibility {
   Private,
   Public,
   Shared,
+  Exception,
 }
 
 export enum BadgeColor {
@@ -37,7 +38,7 @@ export enum BulkSelectedType {
   Shared,
   Public,
   Imported,
-  Override,
+  Exception,
   Orphan,
 }
 
@@ -177,7 +178,6 @@ export interface FilterList {
   cidsCount?: number;
   visibility: Visibility;
   enabled: boolean;
-  override: boolean;
   shareId: string;
   shared?: boolean;
   isBulkSelected?: boolean;

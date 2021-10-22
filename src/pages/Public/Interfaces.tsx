@@ -27,7 +27,6 @@ export interface FilterList {
   name: string;
   cids: string[];
   enabled: boolean;
-  override: boolean;
   isBulkSelected?: boolean;
   description?: string;
   notes?: string;
