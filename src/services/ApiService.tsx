@@ -10,6 +10,7 @@ import {
   DashboardData,
   Config,
   ChartDataEntry,
+  Conflict,
 } from "../pages/Filters/Interfaces";
 import { isImported } from "../pages/Filters/utils";
 import * as AuthService from "./AuthService";
@@ -212,6 +213,10 @@ const ApiService = {
     return axios.delete(`${serverUri()}/cid/${cid.id}`);
   },
 
+  deleteCidById: async (id: number) => {
+    return axios.delete(`${serverUri()}/cid/${id}`);
+  },
+
   fetchRemoteFilter: async (filterUri: string): Promise<FilterList> => {
     const response = await axios.get(
       `${filterUri}?providerId=${AuthService.getProviderId()}`
@@ -219,15 +224,15 @@ const ApiService = {
     return response.data as FilterList;
   },
 
-  getCidException: async (
+  getCidConflict: async (
     cid: string,
     filterId: number
-  ): Promise<{ remote: boolean; local: boolean }> => {
-    const query = `filterId=${encodeURIComponent(
-      filterId
-    )}&cid=${cid}&providerId=${AuthService.getProviderId()}`;
-    const response = await axios.get<{ remote: boolean; local: boolean }>(
-      `${serverUri()}/cid/exception?${query}`
+  ): Promise<Conflict[]> => {
+    const response = await axios.get<Conflict[]>(
+      `${serverUri()}/cid/conflict`,
+      {
+        params: { filterId, cid },
+      }
     );
     return response.data;
   },

@@ -38,6 +38,7 @@ import "./Filters.css";
 import {
   CidItem,
   Config,
+  Conflict,
   EnabledOption,
   FilterList,
   ViewTypes,
@@ -47,6 +48,7 @@ import MoveCIDModal from "./MoveCIDModal";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import { isOrphan, isShared } from "./utils";
 import { IconButton, MenuItem } from "@material-ui/core";
+import ConflictModal from "./Cids/ConflictModal";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -72,6 +74,27 @@ const FilterPage = (props): JSX.Element => {
     import: false,
     share: false,
   });
+
+  const [showConflict, setShowConflict] = useState<boolean>(false);
+  const [conflict, setConflict] = useState<Conflict[]>([]);
+  const [totalConflicts, setTotalConflicts] = useState<Conflict[]>([]);
+  const [conflictsChanged, setConflictsChanged] = useState<boolean>(false);
+
+  const addConflicts = (conflicts: Conflict[]) => {
+    setTotalConflicts((prevConflicts) => prevConflicts.concat(conflicts));
+  };
+
+  const removeConflict = (cid: string) => {
+    setTotalConflicts((prevConflicts) =>
+      prevConflicts.filter((c) => c.cid !== cid)
+    );
+    setConflictsChanged((prevState) => !prevState);
+  };
+
+  const showConflictsModal = () => {
+    setConflict(totalConflicts);
+    setShowConflict(true);
+  };
 
   useEffect(() => {
     setConfiguration(props.config);
@@ -833,14 +856,25 @@ const FilterPage = (props): JSX.Element => {
           alignItems: "center",
         }}
       >
-        <Button
-          variant="primary"
-          style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
-          disabled={!filterListChanged}
-          onClick={save}
-        >
-          Save Changes
-        </Button>
+        {totalConflicts.length === 0 && (
+          <Button
+            variant="primary"
+            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
+            disabled={!filterListChanged}
+            onClick={save}
+          >
+            Save Changes
+          </Button>
+        )}
+        {totalConflicts.length > 0 && (
+          <Button
+            variant="primary"
+            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
+            onClick={showConflictsModal}
+          >
+            Resolve Conflicts
+          </Button>
+        )}
         {isEdit && (
           <DropdownMenu
             titleButton={
@@ -1163,6 +1197,11 @@ const FilterPage = (props): JSX.Element => {
                           prepareCidMoveModal([cids[index]])
                         }
                         onDeleteClick={(index) => removeCid(index)}
+                        setConflict={setConflict}
+                        setShowConflict={setShowConflict}
+                        addConflicts={addConflicts}
+                        removeConflict={removeConflict}
+                        conflictsChanged={conflictsChanged}
                       ></CidsTable>
                     </div>
                   </div>
@@ -1210,6 +1249,12 @@ const FilterPage = (props): JSX.Element => {
             move={move}
             closeCallback={closeModalCallback}
             show={showMoveModal}
+          />
+          <ConflictModal
+            show={showConflict}
+            conflicts={conflict}
+            handleClose={setShowConflict}
+            removeConflict={removeConflict}
           />
           {addCidBatchModal && (
             <AddCidBatchModal

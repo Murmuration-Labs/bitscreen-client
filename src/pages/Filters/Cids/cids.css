@@ -7,3 +7,29 @@
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+.local-conflict {
+  margin-left: 0px !important;
+}
+
+.cid-conflict-title {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.cid-conflict-url {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.conflict-modal-text {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 24px;
+  margin-top: 5px;
+}

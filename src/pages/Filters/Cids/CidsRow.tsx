@@ -1,5 +1,5 @@
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
@@ -12,10 +12,12 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
 import ApiService from "../../../services/ApiService";
-import { CidItem, FilterList, Visibility } from "../Interfaces";
+import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
 import { formatDate } from "../utils";
 import * as icons from "../../../resources/icons";
 import "./cids.css";
+import { Button } from "react-bootstrap";
+import { ErrorOutline } from "@material-ui/icons";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -24,35 +26,45 @@ export interface CidsRowProps {
   onEditClick: () => void;
   onMoveClick: () => void;
   onDeleteClick: () => void;
+  setConflict: (conflicts: Conflict[]) => void;
+  setShowConflict: (show: boolean) => void;
+  addConflicts: (conflicts: Conflict[]) => void;
+  removeConflict: (conflict: string) => void;
 }
 
 interface ExceptionProps {
   loading: boolean;
-  exception: boolean;
+  conflicts: Conflict[];
+  handleConflict: (conflicts: Conflict[]) => void;
 }
 
-const ExceptionTemplate = ({ text, color }: any) => {
-  return (
-    <Tooltip arrow title={text} PopperProps={{}}>
-      <IconButton onClick={(e) => e.stopPropagation()}>
-        <FontAwesomeIcon icon={faCheck as IconProp} color={color} />
-      </IconButton>
-    </Tooltip>
-  );
-};
-
-const LocalException = ({ loading, exception }: ExceptionProps) => {
-  if (!exception) return <></>;
+const LocalException = ({
+  loading,
+  conflicts,
+  handleConflict,
+}: ExceptionProps) => {
+  if (!conflicts.length) return <></>;
 
   return (
     <>
       {loading ? (
         <PuffLoader color={"#28a745"} size={20} />
       ) : (
-        <ExceptionTemplate
-          text={`This CID is already in a local filter, please remove the CID from the local filter instead of adding it to an exception list`}
-          color="#ffc107"
-        ></ExceptionTemplate>
+        <>
+          <ErrorOutline />
+          <Button
+            size="sm"
+            className={"text-dim local-conflict"}
+            style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConflict(conflicts);
+            }}
+            variant="muted"
+          >
+            Local conflict
+          </Button>
+        </>
       )}
     </>
   );
@@ -65,18 +77,23 @@ const CidsRow = ({
   onEditClick,
   onMoveClick,
   onDeleteClick,
+  setShowConflict,
+  setConflict,
+  addConflicts,
+  removeConflict,
 }: CidsRowProps): JSX.Element => {
   const [exceptionLoading, setExceptionLoading] = useState(false);
-  const [local, setLocal] = useState(false);
+  const [local, setLocal] = useState<Conflict[]>([]);
   const [isHovered, setIsHovered] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (filter.visibility === Visibility.Exception) {
-      ApiService.getCidException(cid.cid, filter.id)
-        .then(({ remote, local }) => {
-          setLocal(local);
+      ApiService.getCidConflict(cid.cid, filter.id)
+        .then((conflicts) => {
+          setLocal(conflicts);
+          addConflicts(conflicts);
         })
         .catch((err) => {
           console.error(err);
@@ -88,9 +105,20 @@ const CidsRow = ({
     setExceptionLoading(false);
   }, [filter.id, filter.visibility, cid.cid]);
 
+  useEffect(() => {
+    if (local.length > 0) {
+      return () => removeConflict(cid.cid);
+    }
+  }, [local]);
+
   const handleEdit = (): void => onEditClick();
   const handleMove = (): void => onMoveClick();
   const handleDelete = (): void => onDeleteClick();
+
+  const handleConflict = (conflicts: Conflict[]) => {
+    setConflict(conflicts);
+    setShowConflict(true);
+  };
 
   return (
     <TableRow
@@ -208,7 +236,8 @@ const CidsRow = ({
           <TableCell>
             <LocalException
               loading={exceptionLoading}
-              exception={local}
+              conflicts={local}
+              handleConflict={handleConflict}
             ></LocalException>
           </TableCell>
         </>
