@@ -83,7 +83,7 @@ const CidsRow = ({
   removeConflict,
 }: CidsRowProps): JSX.Element => {
   const [exceptionLoading, setExceptionLoading] = useState(false);
-  const [local, setLocal] = useState<Conflict[]>([]);
+  const [localConflicts, setLocalConflicts] = useState<Conflict[]>([]);
   const [isHovered, setIsHovered] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -92,7 +92,7 @@ const CidsRow = ({
     if (filter.visibility === Visibility.Exception) {
       ApiService.getCidConflict(cid.cid, filter.id)
         .then((conflicts) => {
-          setLocal(conflicts);
+          setLocalConflicts(conflicts);
           addConflicts(conflicts);
         })
         .catch((err) => {
@@ -106,10 +106,10 @@ const CidsRow = ({
   }, [filter.id, filter.visibility, cid.cid]);
 
   useEffect(() => {
-    if (local.length > 0) {
+    if (localConflicts.length > 0) {
       return () => removeConflict(cid.cid);
     }
-  }, [local]);
+  }, [localConflicts]);
 
   const handleEdit = (): void => onEditClick();
   const handleMove = (): void => onMoveClick();
@@ -236,7 +236,7 @@ const CidsRow = ({
           <TableCell>
             <LocalException
               loading={exceptionLoading}
-              conflicts={local}
+              conflicts={localConflicts}
               handleConflict={handleConflict}
             ></LocalException>
           </TableCell>
