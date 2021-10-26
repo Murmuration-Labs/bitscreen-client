@@ -213,3 +213,19 @@ export interface Config {
   import: boolean;
   share: boolean;
 }
+
+export interface Conflict {
+  crated: string;
+  updated: string;
+  id: number;
+  cid: string;
+  refUrl: string;
+  filter: { id; name; shareId };
+}
+
+export interface ConflictModalProps {
+  show: boolean;
+  conflicts: Conflict[];
+  handleClose: (show: boolean) => void;
+  removeConflict: (cid: string) => void;
+}

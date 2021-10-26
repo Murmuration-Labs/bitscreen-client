@@ -9,7 +9,7 @@ import {
   TableSortLabel,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { CidItem, FilterList, Visibility } from "../Interfaces";
+import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
 import CidsRow from "./CidsRow";
 
 export interface CidsTableProps {
@@ -21,6 +21,11 @@ export interface CidsTableProps {
   onEditClick: (index: number) => void;
   onMoveClick: (index: number) => void;
   onDeleteClick: (index: number) => void;
+  setConflict: (conflicts: Conflict[]) => void;
+  setShowConflict: (show: boolean) => void;
+  addConflicts: (conflicts: Conflict[]) => void;
+  removeConflict: (conflict: string) => void;
+  conflictsChanged: boolean;
 }
 
 export interface HeadCell {
@@ -38,7 +43,7 @@ const defaultHeadCells: HeadCell[] = [
 ];
 
 const exceptionHeadCells: HeadCell[] = [
-  { pos: 3, id: "local", label: "Local" },
+  { pos: 3, id: "local", label: "Problem" },
 ];
 
 const CidsTable = ({
@@ -50,8 +55,14 @@ const CidsTable = ({
   onEditClick,
   onMoveClick,
   onDeleteClick,
+  setConflict,
+  setShowConflict,
+  addConflicts,
+  removeConflict,
+  conflictsChanged,
 }: CidsTableProps): JSX.Element => {
   const [headCells, setHeadCells] = useState(defaultHeadCells);
+
   useEffect(() => {
     const sorted = [
       ...defaultHeadCells,
@@ -62,7 +73,7 @@ const CidsTable = ({
   }, [filter.visibility]);
 
   return (
-    <TableContainer>
+    <TableContainer key={String(conflictsChanged)}>
       <Table size={"small"} stickyHeader>
         <TableHead>
           <TableRow>
@@ -97,6 +108,10 @@ const CidsTable = ({
                 onEditClick={() => onEditClick(index)}
                 onMoveClick={() => onMoveClick(index)}
                 onDeleteClick={() => onDeleteClick(index)}
+                setConflict={setConflict}
+                setShowConflict={setShowConflict}
+                addConflicts={addConflicts}
+                removeConflict={removeConflict}
               ></CidsRow>
             );
           })}
