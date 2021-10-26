@@ -280,6 +280,14 @@ const ApiService = {
     };
   },
 
+  deleteProvider: async (account: Account): Promise<{ success: boolean }> => {
+    const response = await axios.delete(
+      `${serverUri()}/provider/${account.walletAddress}`
+    );
+
+    return response.data;
+  },
+
   getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
     const response = await axios.post(
       `${serverUri()}/cids/exception/${filterList.id}`,

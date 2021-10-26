@@ -12,6 +12,7 @@ import { Account } from "../../types/interfaces";
 import { Config, SettingsProps } from "../Filters/Interfaces";
 import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
+import DeleteAccountModal from "./DeleteAccountModal";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -52,6 +53,8 @@ export default function Settings(props) {
   const [selectedCountryOption, setSelectedCountryOption] = useState<Option[]>(
     []
   );
+
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
   useEffect(() => {
     setConfiguration({ ...config });
@@ -102,6 +105,16 @@ export default function Settings(props) {
 
   const unsavedChanges = () => {
     return !_.isEqual(accountInfo, AuthService.getAccount());
+  };
+
+  const handleDeleteClose = (result: boolean) => {
+    setShowDeleteModal(false);
+
+    if (result) {
+      setAccount(null);
+      setConfig(null);
+      AuthService.removeAccount();
+    }
   };
 
   const uncompletedInfo = () => {
@@ -469,7 +482,7 @@ export default function Settings(props) {
 
                 {loggedIn && (configuration.import || configuration.share) && (
                   <Row>
-                    <Col>
+                    <Col className="col-auto mr-auto">
                       <Button
                         variant="primary"
                         className="mr-3"
@@ -489,6 +502,16 @@ export default function Settings(props) {
                         </Button>
                       )}
                     </Col>
+                    <Col className="col-auto">
+                      <Button
+                        variant="danger"
+                        type="button"
+                        disabled={disableButton}
+                        onClick={() => setShowDeleteModal(true)}
+                      >
+                        Delete Account
+                      </Button>
+                    </Col>
                   </Row>
                 )}
                 <Prompt
@@ -504,6 +527,10 @@ export default function Settings(props) {
           )}
         </Col>
       </Row>
+      <DeleteAccountModal
+        show={showDeleteModal}
+        handleClose={handleDeleteClose}
+      />
     </>
   );
 }
