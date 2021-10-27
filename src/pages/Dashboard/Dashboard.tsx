@@ -17,6 +17,7 @@ import Card from "@material-ui/core/Card";
 import { Form } from "react-bootstrap";
 import { PeriodRange } from "./DatePicker/DatePicker";
 import moment from "moment";
+import LoggerService from "../../services/LoggerService";
 
 function Dashboard(): JSX.Element {
   const [periodType, setPeriodType] = useState<PeriodType>(PeriodType.daily);
@@ -38,6 +39,7 @@ function Dashboard(): JSX.Element {
   });
 
   useEffect(() => {
+    LoggerService.info("Loading Dashboard page.");
     ApiService.getDashboardData().then((dashboardData) => {
       setDashboardData(dashboardData);
     });

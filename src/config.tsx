@@ -1,8 +1,9 @@
 // process.env.NODE_ENV is automatically set by react-scripts from package.json
 // react-scripts start -> process.env.NODE_ENV = "development"
 
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as AuthService from "./services/AuthService";
+import LoggerService from "./services/LoggerService";
 
 const environment = process.env.NODE_ENV;
 
@@ -17,6 +18,28 @@ axios.interceptors.request.use((config: AxiosRequestConfig) => {
 
   return config;
 });
+
+axios.interceptors.request.use(
+  (config: AxiosRequestConfig) => {
+    LoggerService.debug(config);
+    return config;
+  },
+  (error) => {
+    LoggerService.error(error);
+    return Promise.reject(error);
+  }
+);
+
+axios.interceptors.response.use(
+  (response: AxiosResponse) => {
+    LoggerService.debug(response);
+    return response;
+  },
+  (error) => {
+    LoggerService.error(error);
+    return Promise.reject(error.message);
+  }
+);
 
 export const serverUri = (): string => {
   switch (environment) {

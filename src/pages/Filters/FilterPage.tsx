@@ -49,6 +49,7 @@ import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import { isOrphan, isShared } from "./utils";
 import { IconButton, MenuItem } from "@material-ui/core";
 import ConflictModal from "./Cids/ConflictModal";
+import LoggerService from "../../services/LoggerService";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -95,6 +96,8 @@ const FilterPage = (props): JSX.Element => {
     setConflict(totalConflicts);
     setShowConflict(true);
   };
+
+  useEffect(() => LoggerService.info("Loading Filter Details page."), []);
 
   useEffect(() => {
     setConfiguration(props.config);
@@ -377,11 +380,13 @@ const FilterPage = (props): JSX.Element => {
             .catch((err) => {
               toast.error("Error: " + err.message);
               setLoaded(false);
+              LoggerService.error(err);
             });
         })
         .catch((err) => {
           toast.error("Error: " + err.message);
           setLoaded(false);
+          LoggerService.error(err);
         });
     } else {
       ApiService.addFilter(fl)
@@ -394,6 +399,7 @@ const FilterPage = (props): JSX.Element => {
         .catch((err) => {
           toast.error("Error: " + err.message);
           setLoaded(false);
+          LoggerService.error(err);
         });
     }
   };
@@ -418,8 +424,9 @@ const FilterPage = (props): JSX.Element => {
           save();
         }
       })
-      .catch(() => {
+      .catch((err) => {
         toast.error("Something wrong happend please try again later.");
+        LoggerService.error(err);
       });
   };
 
