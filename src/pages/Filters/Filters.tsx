@@ -57,6 +57,7 @@ import {
 } from "./Interfaces";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
 import { isDisabled, isEnabled, isImported, isOrphan, isShared } from "./utils";
+import LoggerService from "../../services/LoggerService";
 
 interface MyFiltersTableData {
   name: string;
@@ -174,6 +175,8 @@ function Filters(props): JSX.Element {
     import: false,
     share: false,
   });
+
+  useEffect(() => LoggerService.info("Loading Filters List page."), []);
 
   useEffect(() => {
     setConfiguration({ ...props.config });
@@ -719,7 +722,7 @@ function Filters(props): JSX.Element {
           },
         });
       })
-      .catch(() => {
+      .catch((err) => {
         enqueueSnackbar("One or more filters could not be discarded.", {
           variant: "error",
           preventDuplicate: true,
@@ -728,6 +731,7 @@ function Filters(props): JSX.Element {
             vertical: "top",
           },
         });
+        LoggerService.error(err);
       })
       .finally(() => setNeedsRefresh(true));
   };

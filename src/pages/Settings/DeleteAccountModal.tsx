@@ -10,6 +10,7 @@ import { Alert, Col, Form, FormControl, InputGroup } from "react-bootstrap";
 import { getAccount } from "../../services/AuthService";
 import { Account } from "../../types/interfaces";
 import ApiService from "../../services/ApiService";
+import LoggerService from "../../services/LoggerService";
 
 interface DeleteAccountModalProps {
   show: boolean;
@@ -27,6 +28,7 @@ const DeleteAccountModal = ({
 
   useEffect(() => {
     if (show) {
+      LoggerService.info("Showing Delete account modal.");
       ApiService.getFilters(0, 100, "asc", "name", "").then(
         ({ count, filters }) => {
           for (const filter of filters) {
@@ -59,7 +61,7 @@ const DeleteAccountModal = ({
         handleClose(response.success);
       });
     } else {
-      console.log("error");
+      LoggerService.error("Confirmation text doesn't match wallet.");
     }
   };
 

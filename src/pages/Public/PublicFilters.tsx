@@ -20,6 +20,7 @@ import { Config, FilterList, Order } from "../Filters/Interfaces";
 import { formatDate } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
+import LoggerService from "../../services/LoggerService";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name" },
@@ -57,6 +58,8 @@ export default function PublicFilters(props) {
     import: false,
     share: false,
   });
+
+  useEffect(() => LoggerService.info("Loading Directory page."), []);
 
   useEffect(() => {
     setConfiguration(props.config);

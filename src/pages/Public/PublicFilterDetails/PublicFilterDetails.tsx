@@ -18,6 +18,7 @@ import ImportFilterModal from "../../Filters/ImportFilterModal";
 import { Config, FilterList } from "../../Filters/Interfaces";
 import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";
+import LoggerService from "../../../services/LoggerService";
 
 const PublicFilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -85,6 +86,11 @@ const PublicFilterDetailsPage = (props) => {
     import: false,
     share: false,
   });
+
+  useEffect(
+    () => LoggerService.info("Loading Public Filter Details page."),
+    []
+  );
 
   useEffect(() => {
     setConfiguration(props.config);

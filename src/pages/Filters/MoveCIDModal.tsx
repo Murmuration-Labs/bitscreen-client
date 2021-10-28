@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Typeahead } from "react-bootstrap-typeahead";
 
 import { Modal, Button } from "react-bootstrap";
 
 import { CidItem, FilterList, MoveCIDModalProps } from "./Interfaces";
 import FilterService from "../../services/FilterService";
+import LoggerService from "../../services/LoggerService";
 
 export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
   const [selectedFilter, setSelectedFilter] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
+
+  useEffect(() => {
+    if (props.show) {
+      LoggerService.info("Show add CID Batch modal");
+    }
+  }, [props.show]);
 
   const renderTitle = (cidItems: CidItem[]): JSX.Element => {
     const titleText =

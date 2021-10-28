@@ -18,6 +18,7 @@ import * as icons from "../../../resources/icons";
 import "./cids.css";
 import { Button } from "react-bootstrap";
 import { ErrorOutline } from "@material-ui/icons";
+import LoggerService from "../../../services/LoggerService";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -96,7 +97,7 @@ const CidsRow = ({
           addConflicts(conflicts);
         })
         .catch((err) => {
-          console.error(err);
+          LoggerService.error(err);
         })
         .finally(() => setExceptionLoading(false));
       return;

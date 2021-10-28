@@ -26,6 +26,7 @@ import Web3 from "web3";
 import ApiService from "../services/ApiService";
 import { Config } from "./Filters/Interfaces";
 import { Account } from "../types/interfaces";
+import LoggerService from "../services/LoggerService";
 
 interface MatchParams {
   id: string;
@@ -86,6 +87,7 @@ function App(): JSX.Element {
     try {
       wallets = await web3.eth.requestAccounts();
     } catch (e) {
+      LoggerService.error(e);
       return toast.error(
         "You must connect with metamask in order to use the Bitscreen client."
       );
@@ -100,6 +102,7 @@ function App(): JSX.Element {
     try {
       provider = await ApiService.getProvider(wallet);
     } catch (e) {
+      LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
         "Could not get provider information from the server. Please try again later!"
@@ -110,6 +113,7 @@ function App(): JSX.Element {
       try {
         provider = await ApiService.createProvider(wallet);
       } catch (e) {
+        LoggerService.error(e);
         AuthService.removeAccount();
         return toast.error(
           "Could not create an account at the moment. Please try again later!"
@@ -124,6 +128,7 @@ function App(): JSX.Element {
         ""
       );
     } catch (e) {
+      LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
         "You must sign the metamask request in order to prove that the wallet belongs to you!"
@@ -133,6 +138,7 @@ function App(): JSX.Element {
     try {
       account = await ApiService.authenticateProvider(wallet, signature);
     } catch (e) {
+      LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
         "Could not authenticate you at the moment. Please try again later!"
@@ -149,6 +155,7 @@ function App(): JSX.Element {
     try {
       config = await ApiService.getProviderConfig(account.id);
     } catch (e: any) {
+      LoggerService.error(e);
       if (e.response.status === 404) {
         config = await ApiService.setProviderConfig({
           bitscreen: true,

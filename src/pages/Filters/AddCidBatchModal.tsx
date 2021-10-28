@@ -5,10 +5,11 @@ import {
   DialogTitle,
   TextField,
 } from "@material-ui/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import "./Filters.css";
 import { AddCidBatchModalProps } from "./Interfaces";
+import LoggerService from "../../services/LoggerService";
 
 export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [cidsInput, setCidsInput] = useState<string>("");
@@ -16,6 +17,12 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [refUrl, setRefUrl] = useState<string>("");
   const [edit] = useState(!!props.edit);
   const [open] = useState(props.show);
+
+  useEffect(() => {
+    if (open) {
+      LoggerService.info("Show add CID Batch modal");
+    }
+  }, [open]);
 
   const handleCids = (isEdit): void => {
     let result: string[] = [];

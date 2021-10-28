@@ -22,6 +22,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { serverUri } from "../../config";
+import LoggerService from "../../services/LoggerService";
 
 const overrideLoaderCss = css`
   display: block;
@@ -51,6 +52,12 @@ export default function ImportFilterModal(
         : ""
     );
   }, [fetchedFilterList]);
+
+  useEffect(() => {
+    if (props.show) {
+      LoggerService.info("Show Import filter modal");
+    }
+  }, [props.show]);
 
   useEffect(() => {
     if (!props.filter) {
@@ -112,6 +119,7 @@ export default function ImportFilterModal(
       setRemoteFilterUri("");
       setRemoteFilterError(true);
       setIsFetchingRemoteFilter(false);
+      LoggerService.error(e);
     }
   };
 

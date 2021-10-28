@@ -13,6 +13,7 @@ import { Config, SettingsProps } from "../Filters/Interfaces";
 import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
+import LoggerService from "../../services/LoggerService";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -55,6 +56,8 @@ export default function Settings(props) {
   );
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+
+  useEffect(() => LoggerService.info("Loading Settings page."), []);
 
   useEffect(() => {
     setConfiguration({ ...config });
@@ -109,6 +112,7 @@ export default function Settings(props) {
 
   const handleDeleteClose = (result: boolean) => {
     setShowDeleteModal(false);
+    LoggerService.info("Hiding Delete account modal.");
 
     if (result) {
       setAccount(null);
@@ -183,6 +187,7 @@ export default function Settings(props) {
         "Couldn't update the provider configuration. Please try again later!"
       );
       setDisableButton(false);
+      LoggerService.error(e);
       return;
     }
 
@@ -195,6 +200,7 @@ export default function Settings(props) {
         "Couldn't update the account information. Please try again later!"
       );
       setDisableButton(false);
+      LoggerService.error(e);
       return;
     }
 

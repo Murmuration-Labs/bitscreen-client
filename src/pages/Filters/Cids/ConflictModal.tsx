@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Conflict, ConflictModalProps } from "../Interfaces";
 import { ListGroup } from "react-bootstrap";
 import ApiService from "../../../services/ApiService";
+import LoggerService from "../../../services/LoggerService";
 
 const resolveConflict = (conflicts: Conflict[]) => {
   return Promise.all(
@@ -25,6 +26,12 @@ const ConflictModal = ({
   const [multiple, setMultiple] = useState<boolean>(false);
 
   useEffect(() => {
+    if (show) {
+      LoggerService.info("Show Conflict modal");
+    }
+  }, [show]);
+
+  useEffect(() => {
     const cidsFound: string[] = [];
 
     for (const conflict of conflicts) {
@@ -35,6 +42,7 @@ const ConflictModal = ({
       cidsFound.push(conflict.cid);
     }
 
+    LoggerService.debug(cidsFound);
     if (cidsFound.length > 1) {
       setMultiple(true);
     } else {

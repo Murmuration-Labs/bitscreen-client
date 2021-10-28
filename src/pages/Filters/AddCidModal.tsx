@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { CidItem } from "./Interfaces";
+import LoggerService from "../../services/LoggerService";
 
 interface AddCidModalProps {
   cid: CidItem;
@@ -25,6 +26,12 @@ const AddCidModal = ({
   handleClose,
 }: AddCidModalProps): JSX.Element => {
   const [cidClone, setCidClone] = useState<CidItem>({ ...cid });
+
+  useEffect(() => {
+    if (open) {
+      LoggerService.info("Show add CID modal");
+    }
+  }, [open]);
 
   useEffect(() => {
     setCidClone(cid);
