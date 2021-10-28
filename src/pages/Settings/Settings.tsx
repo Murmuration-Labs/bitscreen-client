@@ -491,7 +491,7 @@ export default function Settings(props) {
                     <Col className="col-auto mr-auto">
                       <Button
                         variant="primary"
-                        className="mr-3"
+                        className="mr-3 settings-button"
                         type="button"
                         disabled={disableButton}
                         onClick={saveAccountConfiguration}
@@ -500,6 +500,7 @@ export default function Settings(props) {
                       </Button>
                       {configuration.share && (
                         <Button
+                          className="settings-button"
                           onClick={() => {
                             clearInputInfo();
                           }}
@@ -509,6 +510,13 @@ export default function Settings(props) {
                       )}
                     </Col>
                     <Col className="col-auto">
+                      <Button
+                        variant="outline-primary"
+                        className="double-space-left import-btn mr-3"
+                        onClick={ApiService.exportAccount}
+                      >
+                        Export Account
+                      </Button>
                       <Button
                         variant="danger"
                         type="button"

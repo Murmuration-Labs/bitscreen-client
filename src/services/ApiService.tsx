@@ -394,6 +394,12 @@ const ApiService = {
       fileDownload(JSON.stringify(response.data), "cid_file.json");
     });
   },
+
+  exportAccount: async (): Promise<any> => {
+    axios.get(`${serverUri()}/provider/export`).then((response) => {
+      fileDownload(response.data, "export.tar");
+    });
+  },
 };
 
 export default ApiService;

@@ -11,3 +11,9 @@
 .settings-width {
   width: 900px;
 }
+
+.settings-button {
+  border-color: #003bdd;
+  background-color: #003bdd;
+  color: white;
+}
