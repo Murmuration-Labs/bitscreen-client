@@ -520,6 +520,7 @@ const FilterPage = (props): JSX.Element => {
   const removeCid = (index: number) => {
     const cidsCopy = [...cids];
     cidsCopy.splice(index, 1);
+    setDeleteCidItems([...deleteCidItems, cids[index]]);
 
     saveFilter({
       ...filterList,
