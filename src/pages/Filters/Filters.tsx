@@ -586,29 +586,22 @@ function Filters(props): JSX.Element {
                       className="table-row-cell-text"
                       style={{ verticalAlign: "middle" }}
                     >
-                      {!(
-                        row.provider_Filters &&
-                        !row.provider_Filters.some(
-                          (pf) => pf.provider.id === row.provider.id
-                        )
-                      ) && (
-                        <div
-                          onClick={() => {
-                            if (isShared(row)) {
-                              setSelectedFilterList(row);
-                              setShowConfirmEnabled(true);
-                            } else {
-                              toggleFilterEnabled(row);
-                            }
-                          }}
-                        >
-                          <FormCheck
-                            readOnly
-                            type="switch"
-                            checked={row.enabled}
-                          />
-                        </div>
-                      )}
+                      <div
+                        onClick={() => {
+                          if (isShared(row)) {
+                            setSelectedFilterList(row);
+                            setShowConfirmEnabled(true);
+                          } else if (!isOrphan(row)) {
+                            toggleFilterEnabled(row);
+                          }
+                        }}
+                      >
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={row.enabled}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell
                       align="right"
