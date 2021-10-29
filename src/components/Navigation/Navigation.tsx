@@ -5,7 +5,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { Col, NavDropdown, Row } from "react-bootstrap";
+import {
+  Col,
+  NavDropdown,
+  OverlayTrigger,
+  Row,
+  Tooltip,
+} from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import * as AuthService from "../../services/AuthService";
 import "./Navigation.css";
@@ -60,13 +66,27 @@ function Navigation(props): JSX.Element {
           )}
           {provider && (
             <div className="nav-item-container">
-              <a className="mr-4" href="/">
-                <FontAwesomeIcon
-                  color="white"
-                  size="lg"
-                  icon={faQuestionCircle}
-                />
-              </a>
+              <OverlayTrigger
+                placement="bottom"
+                delay={{ show: 150, hide: 300 }}
+                overlay={
+                  <Tooltip id="help-tooltip">
+                    https://github.com/Murmuration-Labs/bitscreen
+                  </Tooltip>
+                }
+              >
+                <a
+                  className="mr-4"
+                  target="_blank"
+                  href="https://github.com/Murmuration-Labs/bitscreen"
+                >
+                  <FontAwesomeIcon
+                    color="white"
+                    size="lg"
+                    icon={faQuestionCircle}
+                  />
+                </a>
+              </OverlayTrigger>
               <NavLink
                 className="mr-4 icon-nav-link"
                 to="/settings"
