@@ -38,7 +38,7 @@ export default function PublicFilters(props) {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [publicFiltersData, setPublicFiltersData] = React.useState<Data[]>([]);
   const [mySort, setMySort] = React.useState("asc");
   const [mySortBy, setMySortBy] = React.useState("name");
@@ -294,7 +294,7 @@ export default function PublicFilters(props) {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[10, 25, 50]}
         component="div"
         count={dataCount}
         rowsPerPage={rowsPerPage}

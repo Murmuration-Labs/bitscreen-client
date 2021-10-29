@@ -108,7 +108,7 @@ function Filters(props): JSX.Element {
   // ----------------------- PAGINATION -----------------------
   const [dataCount, setDataCount] = React.useState<number>(0);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   // ----------------------- PAGINATION -----------------------
 
   // ----------------------- SORTING -----------------------
@@ -643,7 +643,7 @@ function Filters(props): JSX.Element {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10, 25, 50]}
           component="div"
           count={dataCount}
           rowsPerPage={rowsPerPage}
