@@ -98,7 +98,10 @@ const PublicFilterDetailsPage = (props) => {
 
   const isImportEnabled = (): boolean => {
     return (
-      configuration.bitscreen && configuration.import && !!account?.country
+      configuration &&
+      configuration.bitscreen &&
+      configuration.import &&
+      !!account?.country
     );
   };
 
