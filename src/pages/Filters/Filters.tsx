@@ -779,12 +779,7 @@ function Filters(props): JSX.Element {
                 <div style={{ fontSize: 32, fontWeight: 600, marginBottom: 0 }}>
                   My filters
                 </div>
-                <span
-                  style={{
-                    color: "#42526E",
-                    marginLeft: 12,
-                  }}
-                >
+                <span className="page-subtitle">
                   Filter lists running on my node
                   {!isImportEnabled() && (
                     <p className="text-dim" style={{ marginRight: 4 }}>

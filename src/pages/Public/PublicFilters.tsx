@@ -165,12 +165,7 @@ export default function PublicFilters(props) {
           >
             Directory
           </div>
-          <div
-            style={{
-              color: "grey",
-              marginLeft: 10,
-            }}
-          >
+          <div className="page-subtitle">
             Directory of public filter lists
             {!isImportEnabled() && (
               <p className="text-dim" style={{ marginRight: 4 }}>

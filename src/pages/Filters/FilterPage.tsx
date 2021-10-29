@@ -770,12 +770,7 @@ const FilterPage = (props): JSX.Element => {
           }}
         >
           <div className="filter-page-title">Edit filter list</div>
-          <span
-            style={{
-              color: "grey",
-              marginLeft: 12,
-            }}
-          >
+          <span className="page-subtitle">
             Make changes to {filterList.name} (
             {filterList.provider_Filters
               ? filterList.provider_Filters?.length
