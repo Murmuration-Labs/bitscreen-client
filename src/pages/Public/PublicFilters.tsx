@@ -200,9 +200,11 @@ export default function PublicFilters(props) {
             }}
           />
         </Form.Group>
-        <p className="ml-1">
-          {dataCount} result{dataCount === 1 ? "" : "s"} found
-        </p>
+        {searchedValue.length > 0 && (
+          <p className="ml-1">
+            {dataCount} result{dataCount === 1 ? "" : "s"} found
+          </p>
+        )}
       </div>
       <TableContainer>
         <Table aria-label="enhanced table">
