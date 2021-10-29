@@ -393,10 +393,10 @@ function Filters(props): JSX.Element {
 
   useEffect(() => {
     let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
-    let title = `Delete filter ${deletedFilterList.id}`;
+    let title = `Delete filter`;
     if (isImported(deletedFilterList)) {
       message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
-      title = `Discard filter ${deletedFilterList.id}`;
+      title = `Discard filter`;
     }
     setTitle(title);
     setMessage(message);

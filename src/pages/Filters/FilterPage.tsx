@@ -588,9 +588,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   useEffect(() => {
-    const title = isImported
-      ? `Discard filter ${filterList.id}`
-      : `Delete filter ${filterList.id}`;
+    const title = isImported ? `Discard filter` : `Delete filter`;
     const message = isImported
       ? `Are you sure you want to discard filter "${filterList.name}?"`
       : `Are you sure you want to delete filter "${filterList.name}?"`;
