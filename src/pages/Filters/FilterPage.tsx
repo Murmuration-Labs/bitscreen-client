@@ -1087,7 +1087,7 @@ const FilterPage = (props): JSX.Element => {
                       {(isOwner || !isImported) && (
                         <div className="sharing-section">
                           <div className="filter-page-input-label mr-2">
-                            Sharing:
+                            Type:
                           </div>
                           <DropdownButton
                             variant="outline-secondary"
