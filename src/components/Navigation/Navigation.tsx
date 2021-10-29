@@ -110,7 +110,7 @@ function Navigation(props): JSX.Element {
                     AuthService.removeAccount();
                   }}
                 >
-                  Disconnect wallet?
+                  Log out?
                 </NavDropdown.Item>
               </NavDropdown>
             </div>
