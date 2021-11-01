@@ -287,7 +287,7 @@ function App(): JSX.Element {
               </Switch>
             </Col>
           </Row>
-          <ToastContainer />
+          <ToastContainer position="bottom-left" />
         </Container>
       </AuthProvider>
     </Router>

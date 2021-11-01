@@ -32,3 +32,8 @@ a {
 .MuiTableContainer-root {
   box-shadow: none !important;
 }
+
+.page-subtitle {
+  color: grey;
+  margin-left: 12px;
+}

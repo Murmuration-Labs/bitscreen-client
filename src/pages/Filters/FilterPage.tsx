@@ -520,6 +520,7 @@ const FilterPage = (props): JSX.Element => {
   const removeCid = (index: number) => {
     const cidsCopy = [...cids];
     cidsCopy.splice(index, 1);
+    setDeleteCidItems([...deleteCidItems, cids[index]]);
 
     saveFilter({
       ...filterList,
@@ -588,9 +589,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   useEffect(() => {
-    const title = isImported
-      ? `Discard filter ${filterList.id}`
-      : `Delete filter ${filterList.id}`;
+    const title = isImported ? `Discard filter` : `Delete filter`;
     const message = isImported
       ? `Are you sure you want to discard filter "${filterList.name}?"`
       : `Are you sure you want to delete filter "${filterList.name}?"`;
@@ -770,12 +769,7 @@ const FilterPage = (props): JSX.Element => {
           }}
         >
           <div className="filter-page-title">Edit filter list</div>
-          <span
-            style={{
-              color: "grey",
-              marginLeft: 12,
-            }}
-          >
+          <span className="page-subtitle">
             Make changes to {filterList.name} (
             {filterList.provider_Filters
               ? filterList.provider_Filters?.length

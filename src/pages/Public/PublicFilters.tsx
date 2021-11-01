@@ -38,7 +38,7 @@ export default function PublicFilters(props) {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [publicFiltersData, setPublicFiltersData] = React.useState<Data[]>([]);
   const [mySort, setMySort] = React.useState("asc");
   const [mySortBy, setMySortBy] = React.useState("name");
@@ -165,12 +165,7 @@ export default function PublicFilters(props) {
           >
             Directory
           </div>
-          <div
-            style={{
-              color: "grey",
-              marginLeft: 10,
-            }}
-          >
+          <div className="page-subtitle">
             Directory of public filter lists
             {!isImportEnabled() && (
               <p className="text-dim" style={{ marginRight: 4 }}>
@@ -205,9 +200,11 @@ export default function PublicFilters(props) {
             }}
           />
         </Form.Group>
-        <p className="ml-1">
-          {dataCount} result{dataCount === 1 ? "" : "s"} found
-        </p>
+        {searchedValue.length > 0 && (
+          <p className="ml-1">
+            {dataCount} result{dataCount === 1 ? "" : "s"} found
+          </p>
+        )}
       </div>
       <TableContainer>
         <Table aria-label="enhanced table">
@@ -297,7 +294,7 @@ export default function PublicFilters(props) {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[10, 25, 50]}
         component="div"
         count={dataCount}
         rowsPerPage={rowsPerPage}

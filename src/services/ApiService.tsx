@@ -397,7 +397,7 @@ const ApiService = {
 
   exportAccount: async (): Promise<any> => {
     axios.get(`${serverUri()}/provider/export`).then((response) => {
-      fileDownload(response.data, "export.tar");
+      fileDownload(response.data, "bitscreen_export.tar");
     });
   },
 };

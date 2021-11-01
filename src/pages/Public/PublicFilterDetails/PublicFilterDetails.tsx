@@ -98,7 +98,10 @@ const PublicFilterDetailsPage = (props) => {
 
   const isImportEnabled = (): boolean => {
     return (
-      configuration.bitscreen && configuration.import && !!account?.country
+      configuration &&
+      configuration.bitscreen &&
+      configuration.import &&
+      !!account?.country
     );
   };
 
@@ -207,17 +210,7 @@ const PublicFilterDetailsPage = (props) => {
               >
                 {filterDetails.nameOfList.columnValue}
               </div>
-              <div
-                style={{
-                  marginRight: "12px",
-                  fontWeight: 600,
-                  fontSize: "16px",
-                  lineHeight: "24px",
-                  color: "#42526E",
-                }}
-              >
-                List details & provider info
-              </div>
+              <div className="page-subtitle">List details & provider info</div>
             </div>
             <div className="">
               {isImported ? (

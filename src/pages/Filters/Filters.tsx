@@ -108,7 +108,7 @@ function Filters(props): JSX.Element {
   // ----------------------- PAGINATION -----------------------
   const [dataCount, setDataCount] = React.useState<number>(0);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
   // ----------------------- PAGINATION -----------------------
 
   // ----------------------- SORTING -----------------------
@@ -393,10 +393,10 @@ function Filters(props): JSX.Element {
 
   useEffect(() => {
     let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
-    let title = `Delete filter ${deletedFilterList.id}`;
+    let title = `Delete filter`;
     if (isImported(deletedFilterList)) {
       message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
-      title = `Discard filter ${deletedFilterList.id}`;
+      title = `Discard filter`;
     }
     setTitle(title);
     setMessage(message);
@@ -586,29 +586,22 @@ function Filters(props): JSX.Element {
                       className="table-row-cell-text"
                       style={{ verticalAlign: "middle" }}
                     >
-                      {!(
-                        row.provider_Filters &&
-                        !row.provider_Filters.some(
-                          (pf) => pf.provider.id === row.provider.id
-                        )
-                      ) && (
-                        <div
-                          onClick={() => {
-                            if (isShared(row)) {
-                              setSelectedFilterList(row);
-                              setShowConfirmEnabled(true);
-                            } else {
-                              toggleFilterEnabled(row);
-                            }
-                          }}
-                        >
-                          <FormCheck
-                            readOnly
-                            type="switch"
-                            checked={row.enabled}
-                          />
-                        </div>
-                      )}
+                      <div
+                        onClick={() => {
+                          if (isShared(row)) {
+                            setSelectedFilterList(row);
+                            setShowConfirmEnabled(true);
+                          } else if (!isOrphan(row)) {
+                            toggleFilterEnabled(row);
+                          }
+                        }}
+                      >
+                        <FormCheck
+                          readOnly
+                          type="switch"
+                          checked={row.enabled}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell
                       align="right"
@@ -643,7 +636,7 @@ function Filters(props): JSX.Element {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[10, 25, 50]}
           component="div"
           count={dataCount}
           rowsPerPage={rowsPerPage}
@@ -779,12 +772,7 @@ function Filters(props): JSX.Element {
                 <div style={{ fontSize: 32, fontWeight: 600, marginBottom: 0 }}>
                   My filters
                 </div>
-                <span
-                  style={{
-                    color: "#42526E",
-                    marginLeft: 12,
-                  }}
-                >
+                <span className="page-subtitle">
                   Filter lists running on my node
                   {!isImportEnabled() && (
                     <p className="text-dim" style={{ marginRight: 4 }}>
