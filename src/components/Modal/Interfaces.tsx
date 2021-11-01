@@ -5,4 +5,6 @@ export interface ConfirmModalProps {
   bullets?: string[];
   callback: () => void;
   closeCallback: () => void;
+  confirmMessage?: string;
+  declineMessage?: string;
 }
