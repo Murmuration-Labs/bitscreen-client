@@ -1,7 +1,7 @@
 import { makeStyles, MenuItem } from "@material-ui/core";
 import React, { CSSProperties, SyntheticEvent } from "react";
 
-interface HoverableMenuItemProps {
+export interface HoverableMenuItemProps {
   title: string;
   type?: "default" | "destructive";
   onClick?: (e?: SyntheticEvent) => void;
@@ -55,6 +55,7 @@ function HoverableMenuItem(props: HoverableMenuItemProps): JSX.Element {
 
   return (
     <MenuItem
+      aria-label="hoverable-menu-item"
       className={deduceClassName()}
       style={props.style}
       onClick={props.onClick}

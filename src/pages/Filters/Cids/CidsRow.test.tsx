@@ -88,19 +88,40 @@ describe("Cid row tests", () => {
     const tableRow = page.find("tr").at(0);
     expect(tableRow.hasClass("MuiTableRow-root"));
     expect(tableRow.hasClass("MuiTableRow-hover"));
-
-    const actionsCell = tableRow.find("td").at(3);
-    expect(actionsCell.hasClass("MuiTableCell-root"));
-
-    const editButton = actionsCell.find("svg").at(0);
-    expect(editButton.prop("color")).toBe("black");
-    const moveButton = actionsCell.find("svg").at(1);
-    expect(moveButton.prop("color")).toBe("black");
-    const deleteButton = actionsCell.find("svg").at(2);
-    expect(deleteButton.prop("color")).toBe("black");
   });
 
-  it("Should change actions color on hover", () => {
+  it("Should have edit, delete and move buttons on CID Row", () => {
+    const page = mount(
+      <SnackbarProvider>
+        <TableContainer>
+          <Table size={"small"} stickyHeader>
+            <TableBody>
+              <CidsRow
+                {...props}
+                onRowToggle={() => console.log("toggle")}
+                onEditClick={() => console.log("edit")}
+                onMoveClick={() => console.log("move")}
+                onDeleteClick={() => console.log("delete")}
+              />
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </SnackbarProvider>
+    );
+
+    const tableRow = page.find("tr").at(0);
+
+    const editButton = tableRow.find("#edit-cid-button").at(0);
+    expect(editButton.prop("aria-label")).toBe("Edit CID");
+
+    const moveButton = tableRow.find("#move-cid-button").at(0);
+    expect(moveButton.prop("aria-label")).toBe("Move CID");
+
+    const deleteButton = tableRow.find("#delete-cid-button").at(0);
+    expect(deleteButton.prop("aria-label")).toBe("Delete CID");
+  });
+
+  it("Clicking on cid link triggers clipboard write text", () => {
     const page = shallow(
       <CidsRow
         {...props}
@@ -111,41 +132,28 @@ describe("Cid row tests", () => {
       />
     );
 
-    console.log(page.debug());
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn(),
+      },
+    });
 
-    const row = page.find(<TableRow />);
-    expect(row.exists).toBeTruthy();
+    const row = page.find(TableRow);
 
-    let editIcon = page.find("FontAwesomeIcon").at(0);
-    let moveIcon = page.find("FontAwesomeIcon").at(1);
-    let deleteIcon = page.find("FontAwesomeIcon").at(2);
+    expect(row.exists());
+    expect(row.exists(".table-row-cell-text")).toBeTruthy();
 
-    expect(editIcon.prop("color")).toBe("black");
-    expect(moveIcon.prop("color")).toBe("black");
-    expect(deleteIcon.prop("color")).toBe("black");
+    const cidNameCell = page.find({ "aria-label": "CID Name Cell" }).at(0);
 
-    page.simulate("mouseenter");
+    const cidLink = cidNameCell.find("a").at(0);
 
-    editIcon = page.find("FontAwesomeIcon").at(0);
-    moveIcon = page.find("FontAwesomeIcon").at(1);
-    deleteIcon = page.find("FontAwesomeIcon").at(2);
-
-    expect(editIcon.prop("color")).toBe("blue");
-    expect(moveIcon.prop("color")).toBe("orange");
-    expect(deleteIcon.prop("color")).toBe("red");
-
-    page.simulate("mouseleave");
-
-    editIcon = page.find("FontAwesomeIcon").at(0);
-    moveIcon = page.find("FontAwesomeIcon").at(1);
-    deleteIcon = page.find("FontAwesomeIcon").at(2);
-
-    expect(editIcon.prop("color")).toBe("black");
-    expect(moveIcon.prop("color")).toBe("black");
-    expect(deleteIcon.prop("color")).toBe("black");
+    cidLink.simulate("click", {
+      stopPropagation: () => {},
+    });
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
   });
 
-  it("Should trigger callbacks", () => {
+  it("Should trigger callbacks when clicking on row buttons", () => {
     const toggleMock = jest.fn();
     const editMock = jest.fn();
     const moveMock = jest.fn();

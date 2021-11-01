@@ -19,7 +19,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0;
 }
 
-interface EnhancedTableProps<T> {
+export interface EnhancedTableProps<T> {
   onRequestSort: (event: React.MouseEvent<unknown>, property: keyof T) => void;
   headCells: HeadCell<T>[];
   enableChecking?: boolean;
@@ -28,9 +28,9 @@ interface EnhancedTableProps<T> {
   onMainCheckboxToggle?: () => void;
   order: Order;
   orderBy: string;
-  rowCount: number;
-  mySort: string;
-  mySortBy: string;
+  rowCount?: number;
+  mySort?: string;
+  mySortBy?: string;
 }
 
 export default function EnhancedTableHead<T>(props: EnhancedTableProps<T>) {
