@@ -23,13 +23,13 @@ import "./PublicFilters.css";
 import LoggerService from "../../services/LoggerService";
 
 const headCells: HeadCell<Data>[] = [
-  { id: "name", numeric: false, label: "Filter Name" },
-  { id: "cids", numeric: true, label: "CIDs" },
-  { id: "subs", numeric: true, label: "Subscribers" },
-  { id: "providerName", numeric: true, label: "Provider" },
-  { id: "providerCountry", numeric: true, label: "Country" },
-  { id: "description", numeric: false, label: "Description" },
-  { id: "updated", numeric: false, label: "Updated" },
+  { id: "name", numeric: false, label: "Filter Name", sortable: true },
+  { id: "cids", numeric: true, label: "CIDs", sortable: true },
+  { id: "subs", numeric: true, label: "Subscribers", sortable: true },
+  { id: "providerName", numeric: true, label: "Provider", sortable: true },
+  { id: "providerCountry", numeric: true, label: "Country", sortable: true },
+  { id: "description", numeric: false, label: "Description", sortable: true },
+  { id: "updated", numeric: false, label: "Updated", sortable: true },
   { id: "actions", numeric: false, label: "Actions" },
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
