@@ -12,6 +12,8 @@ export const isShared = (f: FilterList) =>
   f.provider.id === AuthService.getProviderId();
 export const isImported = (f: FilterList) =>
   f.provider.id !== AuthService.getProviderId();
+export const isDisabledGlobally = (f: FilterList) =>
+  !isOrphan(f) && f.provider_Filters?.every((pf) => pf.active == false);
 
 export const formatDate = (date: string | undefined): string => {
   if (date) {

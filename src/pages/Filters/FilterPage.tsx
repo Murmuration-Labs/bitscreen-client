@@ -46,7 +46,7 @@ import {
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
-import { isOrphan, isShared } from "./utils";
+import { isDisabledGlobally, isOrphan, isShared } from "./utils";
 import { IconButton, MenuItem } from "@material-ui/core";
 import ConflictModal from "./Cids/ConflictModal";
 import LoggerService from "../../services/LoggerService";
@@ -238,6 +238,8 @@ const FilterPage = (props): JSX.Element => {
   const [isImported, setIsimported] = useState<boolean>(false);
   const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
   const [showDiscardOrphan, setShowDiscardOrphan] = useState<boolean>(false);
+  const [showDiscardDisabled, setShowDiscardDisabled] =
+    useState<boolean>(false);
 
   const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
 
@@ -253,6 +255,10 @@ const FilterPage = (props): JSX.Element => {
   useEffect(() => {
     if (isOrphan(filterList)) {
       setShowDiscardOrphan(true);
+    }
+
+    if (isDisabledGlobally(filterList)) {
+      setShowDiscardDisabled(true);
     }
 
     if (!filterList.provider_Filters) {
@@ -1356,6 +1362,18 @@ const FilterPage = (props): JSX.Element => {
             closeCallback={() => {
               setDeletedFilterList(FilterService.emptyFilterList());
               setShowDiscardOrphan(false);
+            }}
+          />
+          <ConfirmModal
+            show={showDiscardDisabled}
+            title="Globally disabled filter list"
+            message="This list was deactivated by the owner. Do you want to discard it?"
+            callback={() => deleteCurrentFilter()}
+            confirmMessage="Yes"
+            declineMessage="No"
+            closeCallback={() => {
+              setDeletedFilterList(FilterService.emptyFilterList());
+              setShowDiscardDisabled(false);
             }}
           />
 
