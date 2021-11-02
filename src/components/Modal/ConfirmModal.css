@@ -1,0 +1,4 @@
+.multiple-rows-delete-message {
+  display: flex;
+  flex-direction: column;
+}

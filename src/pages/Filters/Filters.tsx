@@ -392,11 +392,30 @@ function Filters(props): JSX.Element {
   };
 
   useEffect(() => {
-    let message = `Are you sure you want to delete filter "${deletedFilterList.name}?"`;
+    let message;
     let title = `Delete filter`;
     if (isImported(deletedFilterList)) {
       message = `Are you sure you want to discard filter "${deletedFilterList.name}?"`;
       title = `Discard filter`;
+    } else {
+      const numberOfSubscribers =
+        isImported(deletedFilterList) ||
+        isOrphan(deletedFilterList) ||
+        deletedFilterList.visibility !== Visibility.Public ||
+        !deletedFilterList.provider_Filters
+          ? 0
+          : deletedFilterList.provider_Filters.length - 1;
+      message = numberOfSubscribers ? (
+        `Are you sure you want to delete filter "${deletedFilterList.name}?"`
+      ) : (
+        <div className="multiple-rows-delete-message">
+          <div style={{ marginBottom: "12px" }}>
+            Deleting this list will impact {numberOfSubscribers}{" "}
+            {numberOfSubscribers === 1 ? "subscriber" : "subscribers"}.
+          </div>
+          <div>Do you want to delete it anyway?</div>
+        </div>
+      );
     }
     setTitle(title);
     setMessage(message);
@@ -564,9 +583,10 @@ function Filters(props): JSX.Element {
                     >
                       {isImported(row) ||
                       isOrphan(row) ||
-                      row.visibility !== Visibility.Public
+                      row.visibility !== Visibility.Public ||
+                      !row.provider_Filters
                         ? "-"
-                        : (row.provider_Filters || []).length - 1}
+                        : row.provider_Filters.length - 1}
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
@@ -1019,6 +1039,7 @@ function Filters(props): JSX.Element {
               }
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
+                console.log("a");
                 setSelectedFilterList(FilterService.emptyFilterList());
                 setBulkEnabled(undefined);
                 setShowConfirmEnabled(false);
