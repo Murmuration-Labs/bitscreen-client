@@ -22,6 +22,7 @@ import LoggerService from "../../../services/LoggerService";
 
 const PublicFilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [filterShareId, setFilterShareId] = useState<string>("");
   const [filterProviderId, setFilterProviderId] = useState<number>(-1);
   const [filterDetails, setFilterDetails] = useState({
@@ -111,62 +112,70 @@ const PublicFilterDetailsPage = (props) => {
 
   const loadFilter = (shareId: string): void => {
     setFilterShareId(shareId);
-    ApiService.getPublicFilterDetails(shareId).then((data: any) => {
-      setIsImported(data.isImported);
-      const details = {
-        nameOfList: {
-          columnName: "Name of list:",
-          columnValue: data.filter.name,
-        },
-        numberOfSubscribers: {
-          columnName: "Number of subscribers:",
-          columnValue: data.filter.provider_Filters.length - 1,
-        },
-        numberOfCids: {
-          columnName: "Number of CIDs:",
-          columnValue: data.filter.cids.length,
-        },
-        businessName: {
-          columnName: "Provider business name:",
-          columnValue: data.provider.businessName,
-        },
-        contactPerson: {
-          columnName: "Provider contact person:",
-          columnValue: data.provider.contactPerson,
-        },
-        website: {
-          columnName: "Provider website:",
-          columnValue: data.provider.website,
-        },
-        email: {
-          columnName: "Provider email:",
-          columnValue: data.provider.email,
-        },
-        address: {
-          columnName: "Provider address:",
-          columnValue: data.provider.address,
-        },
-        createdAt: {
-          columnName: "Created:",
-          columnValue: formatDate(data.filter.created),
-        },
-        updatedAt: {
-          columnName: "Updated:",
-          columnValue: formatDate(data.filter.updated),
-        },
-        description: {
-          columnName: "Description:",
-          columnValue: data.filter.description,
-        },
-        country: {
-          columnName: "Country:",
-          columnValue: data.provider.country,
-        },
-      };
-      setFilterDetails(details);
-      setFilterProviderId(data.provider.id);
-      setLoaded(true);
-    });
+    ApiService.getPublicFilterDetails(shareId)
+      .then((data: any) => {
+        setIsImported(data.isImported);
+        const details = {
+          nameOfList: {
+            columnName: "Name of list:",
+            columnValue: data.filter.name,
+          },
+          numberOfSubscribers: {
+            columnName: "Number of subscribers:",
+            columnValue: data.filter.provider_Filters.length - 1,
+          },
+          numberOfCids: {
+            columnName: "Number of CIDs:",
+            columnValue: data.filter.cids.length,
+          },
+          businessName: {
+            columnName: "Provider business name:",
+            columnValue: data.provider.businessName,
+          },
+          contactPerson: {
+            columnName: "Provider contact person:",
+            columnValue: data.provider.contactPerson,
+          },
+          website: {
+            columnName: "Provider website:",
+            columnValue: data.provider.website,
+          },
+          email: {
+            columnName: "Provider email:",
+            columnValue: data.provider.email,
+          },
+          address: {
+            columnName: "Provider address:",
+            columnValue: data.provider.address,
+          },
+          createdAt: {
+            columnName: "Created:",
+            columnValue: formatDate(data.filter.created),
+          },
+          updatedAt: {
+            columnName: "Updated:",
+            columnValue: formatDate(data.filter.updated),
+          },
+          description: {
+            columnName: "Description:",
+            columnValue: data.filter.description,
+          },
+          country: {
+            columnName: "Country:",
+            columnValue: data.provider.country,
+          },
+        };
+        setFilterDetails(details);
+        setFilterProviderId(data.provider.id);
+        setLoaded(true);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoaded(true);
+        setError(
+          "Filter does not exist or you do not have permission to view it's details."
+        );
+      });
   };
 
   useEffect(() => {
@@ -178,7 +187,8 @@ const PublicFilterDetailsPage = (props) => {
 
   return (
     <>
-      {loaded ? (
+      {loaded && error.length > 0 && <h1>{error}</h1>}
+      {loaded && error.length === 0 ? (
         <div style={{ padding: "0 25px 0 25px" }}>
           <div className="mb-3 d-flex justify-content-between">
             <div className="d-flex justify-content-between align-items-center">
