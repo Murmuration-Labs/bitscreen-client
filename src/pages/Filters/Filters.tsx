@@ -405,7 +405,8 @@ function Filters(props): JSX.Element {
         !deletedFilterList.provider_Filters
           ? 0
           : deletedFilterList.provider_Filters.length - 1;
-      message = numberOfSubscribers ? (
+      console.log("asdasdasdasd", numberOfSubscribers);
+      message = !numberOfSubscribers ? (
         `Are you sure you want to delete filter "${deletedFilterList.name}?"`
       ) : (
         <div className="multiple-rows-delete-message">
