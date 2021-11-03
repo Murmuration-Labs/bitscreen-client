@@ -69,14 +69,15 @@ interface MyFiltersTableData {
 }
 
 const headCells: HeadCell<MyFiltersTableData>[] = [
-  { id: "name", label: "Filter name", numeric: false },
+  { id: "name", label: "Filter name", numeric: false, sortable: true },
   { id: "scope", label: "Scope", numeric: false },
-  { id: "subs", label: "# of Subs", numeric: true },
-  { id: "cids", label: "# of Cids", numeric: true },
+  { id: "subs", label: "# of Subs", numeric: true, sortable: true },
+  { id: "cids", label: "# of Cids", numeric: true, sortable: true },
   {
     id: "enabled",
     label: "Active",
     numeric: false,
+    sortable: true,
     info: (
       <OverlayTrigger
         placement="top"

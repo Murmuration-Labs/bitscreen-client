@@ -5,6 +5,7 @@ export interface HeadCell<T> {
   label: string;
   numeric?: boolean;
   info?: JSX.Element;
+  sortable?: boolean;
 }
 
 export interface Data {
