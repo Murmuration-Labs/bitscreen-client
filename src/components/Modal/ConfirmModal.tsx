@@ -34,7 +34,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
             props.closeCallback();
           }}
         >
-          Cancel
+          {props.declineMessage || "Cancel"}
         </Button>
         <Button
           variant="primary"
@@ -43,7 +43,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
             props.closeCallback();
           }}
         >
-          Ok
+          {props.confirmMessage || "Ok"}
         </Button>
       </Modal.Footer>
     </Modal>

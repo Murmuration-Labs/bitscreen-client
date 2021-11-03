@@ -46,7 +46,7 @@ import {
 } from "./Interfaces";
 import MoveCIDModal from "./MoveCIDModal";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
-import { isOrphan, isShared } from "./utils";
+import { isDisabledGlobally, isOrphan, isShared } from "./utils";
 import { IconButton, MenuItem } from "@material-ui/core";
 import ConflictModal from "./Cids/ConflictModal";
 import LoggerService from "../../services/LoggerService";
@@ -237,6 +237,9 @@ const FilterPage = (props): JSX.Element => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isImported, setIsimported] = useState<boolean>(false);
   const [addCidBatchModal, setAddCidBatchModal] = useState<boolean>(false);
+  const [showDiscardOrphan, setShowDiscardOrphan] = useState<boolean>(false);
+  const [showDiscardDisabled, setShowDiscardDisabled] =
+    useState<boolean>(false);
 
   const [invalidFilterId, setInvalidFilterId] = useState<boolean>(false);
 
@@ -250,6 +253,14 @@ const FilterPage = (props): JSX.Element => {
   const history = useHistory();
 
   useEffect(() => {
+    if (isOrphan(filterList)) {
+      setShowDiscardOrphan(true);
+    }
+
+    if (isDisabledGlobally(filterList)) {
+      setShowDiscardDisabled(true);
+    }
+
     if (!filterList.provider_Filters) {
       return;
     }
@@ -653,18 +664,30 @@ const FilterPage = (props): JSX.Element => {
         return ViewTypes.New;
     }
   };
+
+  const getStatusTooltip = (isOrphan: boolean | undefined) => {
+    if (isOrphan) {
+      return (
+        <Tooltip id="button-tooltip">
+          List deleted by owner. Cannot be activated
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Tooltip id="button-tooltip">
+          Active filters run on your node to prevent deals with included CIDs
+        </Tooltip>
+      );
+    }
+  };
+
   const renderToggleButtonGroup = () => {
     return (
       <>
         <OverlayTrigger
           placement="top"
           delay={{ show: 150, hide: 300 }}
-          overlay={
-            <Tooltip id="button-tooltip">
-              Active filters run on your node to prevent deals with included
-              CIDs
-            </Tooltip>
-          }
+          overlay={getStatusTooltip(isOrphan(filterList))}
         >
           <FontAwesomeIcon
             icon={faQuestionCircle as IconProp}
@@ -752,9 +775,19 @@ const FilterPage = (props): JSX.Element => {
     let title;
     if (isImported) {
       title = (
-        <div className="filter-page-title">
-          View filter list <Badge variant="dark">Imported</Badge>
-        </div>
+        <>
+          <div className="filter-page-title">
+            View filter list{" "}
+            <Badge variant={isOrphan(filterList) ? "danger" : "dark"}>
+              {isOrphan(filterList) ? "Orphaned" : "Imported"}
+            </Badge>
+          </div>
+          {isOrphan(filterList) && (
+            <span className="page-subtitle">
+              This list was deleted by the owner.
+            </span>
+          )}
+        </>
       );
     } else if (isEdit) {
       title = (
@@ -1317,6 +1350,30 @@ const FilterPage = (props): JSX.Element => {
             callback={save}
             closeCallback={() => {
               setShowOverrideCids(false);
+            }}
+          />
+          <ConfirmModal
+            show={showDiscardOrphan}
+            title="Orphaned filter list"
+            message="This list was deleted by the owner. Do you want to discard it?"
+            callback={() => deleteCurrentFilter()}
+            confirmMessage="Yes"
+            declineMessage="No"
+            closeCallback={() => {
+              setDeletedFilterList(FilterService.emptyFilterList());
+              setShowDiscardOrphan(false);
+            }}
+          />
+          <ConfirmModal
+            show={showDiscardDisabled}
+            title="Globally disabled filter list"
+            message="This list was deactivated by the owner. Do you want to discard it?"
+            callback={() => deleteCurrentFilter()}
+            confirmMessage="Yes"
+            declineMessage="No"
+            closeCallback={() => {
+              setDeletedFilterList(FilterService.emptyFilterList());
+              setShowDiscardDisabled(false);
             }}
           />
 
