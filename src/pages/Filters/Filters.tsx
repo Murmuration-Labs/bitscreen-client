@@ -56,7 +56,14 @@ import {
   VisibilityString,
 } from "./Interfaces";
 import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
-import { isDisabled, isEnabled, isImported, isOrphan, isShared } from "./utils";
+import {
+  isDisabled,
+  isDisabledGlobally,
+  isEnabled,
+  isImported,
+  isOrphan,
+  isShared,
+} from "./utils";
 import LoggerService from "../../services/LoggerService";
 
 interface MyFiltersTableData {
@@ -613,7 +620,10 @@ function Filters(props): JSX.Element {
                           if (isShared(row)) {
                             setSelectedFilterList(row);
                             setShowConfirmEnabled(true);
-                          } else if (!isOrphan(row)) {
+                          } else if (
+                            !isOrphan(row) &&
+                            !isDisabledGlobally(row)
+                          ) {
                             toggleFilterEnabled(row);
                           }
                         }}

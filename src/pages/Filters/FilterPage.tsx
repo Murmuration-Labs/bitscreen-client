@@ -665,19 +665,29 @@ const FilterPage = (props): JSX.Element => {
     }
   };
 
-  const getStatusTooltip = (isOrphan: boolean | undefined) => {
-    if (isOrphan) {
-      return (
-        <Tooltip id="button-tooltip">
-          List deleted by owner. Cannot be activated
-        </Tooltip>
-      );
-    } else {
-      return (
-        <Tooltip id="button-tooltip">
-          Active filters run on your node to prevent deals with included CIDs
-        </Tooltip>
-      );
+  const getStatusTooltip = (
+    isOrphan: boolean | undefined,
+    isDeactivatedGlobally: boolean | undefined
+  ) => {
+    switch (true) {
+      case isOrphan:
+        return (
+          <Tooltip id="button-tooltip">
+            List deleted by owner. Cannot be activated
+          </Tooltip>
+        );
+      case isDeactivatedGlobally:
+        return (
+          <Tooltip id="button-tooltip">
+            List deactivated by owner. Cannot be activated.
+          </Tooltip>
+        );
+      default:
+        return (
+          <Tooltip id="button-tooltip">
+            Active filters run on your node to prevent deals with included CIDs
+          </Tooltip>
+        );
     }
   };
 
@@ -687,7 +697,10 @@ const FilterPage = (props): JSX.Element => {
         <OverlayTrigger
           placement="top"
           delay={{ show: 150, hide: 300 }}
-          overlay={getStatusTooltip(isOrphan(filterList))}
+          overlay={getStatusTooltip(
+            isOrphan(filterList),
+            isDisabledGlobally(filterList)
+          )}
         >
           <FontAwesomeIcon
             icon={faQuestionCircle as IconProp}
@@ -739,7 +752,7 @@ const FilterPage = (props): JSX.Element => {
             }
             disabled={filterEnabled}
             onClick={() => {
-              if (!isOrphan(filterList)) {
+              if (!isOrphan(filterList) && !isDisabledGlobally(filterList)) {
                 if (isShared(filterList)) {
                   setShowConfirmEnabled(true);
                 } else {
@@ -785,6 +798,11 @@ const FilterPage = (props): JSX.Element => {
           {isOrphan(filterList) && (
             <span className="page-subtitle">
               This list was deleted by the owner.
+            </span>
+          )}
+          {isDisabledGlobally(filterList) && (
+            <span className="page-subtitle">
+              This list was deactivated by the owner.
             </span>
           )}
         </>
