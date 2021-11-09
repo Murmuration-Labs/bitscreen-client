@@ -153,15 +153,18 @@ function App(): JSX.Element {
 
     let config;
     try {
-      config = await ApiService.getProviderConfig(account.id);
+      config = await ApiService.getProviderConfig();
     } catch (e: any) {
-      LoggerService.error(e);
-      if (e.response.status === 404) {
-        config = await ApiService.setProviderConfig({
-          bitscreen: true,
-          import: false,
-          share: false,
-        });
+      if (e.status === 404) {
+        try {
+          config = await ApiService.setProviderConfig({
+            bitscreen: true,
+            import: false,
+            share: false,
+          });
+        } catch (e: any) {
+          LoggerService.error(e);
+        }
       }
     }
 
@@ -190,7 +193,7 @@ function App(): JSX.Element {
       }
     };
     if (account) {
-      ApiService.getProviderConfig(account.id).then((config) => {
+      ApiService.getProviderConfig().then((config) => {
         setConfig(config);
         checkWallet(config, account.walletAddress);
       });
