@@ -343,9 +343,9 @@ const ApiService = {
   },
 
   getProviderConfig: async (): Promise<Config> => {
-    return axios.get(`${serverUri()}/config`);
-    // console.log("qwe", response);
-    // return response.data;
+    const response = await axios.get(`${serverUri()}/config`);
+
+    return response.data;
   },
 
   setProviderConfig: async (config: Config): Promise<void> => {
