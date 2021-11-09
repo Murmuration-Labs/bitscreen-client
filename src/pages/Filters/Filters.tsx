@@ -63,6 +63,7 @@ import {
   isImported,
   isOrphan,
   isShared,
+  itemsToPages,
 } from "./utils";
 import LoggerService from "../../services/LoggerService";
 
@@ -675,6 +676,7 @@ function Filters(props): JSX.Element {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={itemsToPages(rowsPerPage)}
         />
       </div>
     );

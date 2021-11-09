@@ -20,7 +20,7 @@ import * as AuthService from "../../services/AuthService";
 import EnhancedTableHead from "../Filters/EnhancedTableHead";
 import ImportFilterModal from "../Filters/ImportFilterModal";
 import { Config, FilterList, Order } from "../Filters/Interfaces";
-import { formatDate } from "../Filters/utils";
+import { formatDate, itemsToPages } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
 import LoggerService from "../../services/LoggerService";
@@ -332,6 +332,7 @@ export default function PublicFilters(props) {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        labelDisplayedRows={itemsToPages(rowsPerPage)}
       />
       {toBeImportedFilter && (
         <ImportFilterModal

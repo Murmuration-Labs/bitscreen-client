@@ -28,3 +28,12 @@ export const formatDate = (date: string | undefined): string => {
   }
   return "No data";
 };
+
+export const itemsToPages = (rowsPerPage) => {
+  return ({ from, to, count }) => {
+    const totalPages = Math.ceil(count / rowsPerPage);
+    const currentPage = Math.ceil(from / rowsPerPage);
+
+    return `${currentPage} of ${totalPages} pages`;
+  };
+};
