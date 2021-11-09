@@ -859,7 +859,7 @@ function Filters(props): JSX.Element {
                 <TextField
                   style={{ width: 480, marginRight: 12 }}
                   type="text"
-                  placeholder="Search CID or Filter Name"
+                  placeholder="Search"
                   variant="outlined"
                   value={searchTerm}
                   onChange={searchFilters}

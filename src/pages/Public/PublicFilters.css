@@ -17,3 +17,7 @@
 .MuiTableCell-head {
     font-weight: bold !important;
 }
+
+.MuiInputBase-root {
+    height: 40px;
+}
