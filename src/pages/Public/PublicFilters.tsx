@@ -225,9 +225,16 @@ export default function PublicFilters(props) {
           FormHelperTextProps={{ style: { fontSize: 12 } }}
         />
         {searchedValue.length > 0 && (
-          <p className="ml-1">
-            {dataCount} result{dataCount === 1 ? "" : "s"} found
-          </p>
+          <span
+            style={{
+              marginRight: 4,
+              verticalAlign: "middle",
+              alignSelf: "center",
+            }}
+          >
+            {dataCount ? dataCount : "0"} result
+            {dataCount && dataCount === 1 ? "" : "s"} found
+          </span>
         )}
       </div>
       <TableContainer>
