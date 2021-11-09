@@ -270,7 +270,7 @@ export default function PublicFilters(props) {
                     <LongText content={row.description} limit={20} />
                   </TableCell>
                   <TableCell>{formatDate(row.updated)}</TableCell>
-                  <TableCell>
+                  <TableCell className="actions-column">
                     {row.isImported ? (
                       <Button
                         style={{
