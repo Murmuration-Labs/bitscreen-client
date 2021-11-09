@@ -37,7 +37,7 @@ axios.interceptors.response.use(
   },
   (error) => {
     LoggerService.error(error);
-    return Promise.reject(error.message);
+    return Promise.reject(error.response);
   }
 );
 

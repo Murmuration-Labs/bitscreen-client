@@ -37,11 +37,7 @@ const cidsRequests = ({ id, cids }: FilterList) => {
 
 const ApiService = {
   getFilter: async (shareId: string): Promise<FilterList> => {
-    const providerId = AuthService.getProviderId();
-    const query = `providerId=${encodeURIComponent(providerId)}`;
-    const response = await axios.get(
-      `${serverUri()}/filter/${shareId}?${query}`
-    );
+    const response = await axios.get(`${serverUri()}/filter/${shareId}`);
     return response.data;
   },
 
@@ -64,7 +60,6 @@ const ApiService = {
           : {
               name: "asc",
             },
-        providerId: AuthService.getProviderId(),
       },
     });
 
@@ -72,15 +67,10 @@ const ApiService = {
   },
 
   addFilter: async (filterList: FilterList): Promise<number> => {
-    const providerId = AuthService.getProviderId();
-
-    filterList.providerId = providerId;
-
     const response = await axios.post(`${serverUri()}/filter`, filterList);
     const filterId = response.data.id;
 
     const providerFilter: ProviderFilter = {
-      providerId,
       filterId,
       notes: filterList.notes,
       active: filterList.enabled,
@@ -110,7 +100,6 @@ const ApiService = {
       }
     });
 
-    const currentProviderId = AuthService.getProviderId();
     await Promise.all(
       importedFilters.map((filter) => {
         const providerFilter: ProviderFilter = {
@@ -118,7 +107,7 @@ const ApiService = {
           active: filter.enabled,
         };
         const response = axios.put(
-          `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`,
+          `${serverUri()}/provider-filter/${filter.id}`,
           providerFilter
         );
 
@@ -133,7 +122,7 @@ const ApiService = {
           active: filter.enabled,
         };
         axios.put(
-          `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`,
+          `${serverUri()}/provider-filter/${filter.id}`,
           providerFilter
         );
 
@@ -157,14 +146,11 @@ const ApiService = {
     filterIds: number[],
     enabled: boolean
   ): Promise<void> => {
-    const providerId = AuthService.getProviderId();
-
     await Promise.all(
       filterIds.map((filterId) => {
         const response = axios.put(
           `${serverUri()}/provider-filter/${filterId}/shared/enabled`,
           {
-            providerId,
             enabled,
           }
         );
@@ -175,20 +161,12 @@ const ApiService = {
   },
 
   deleteFilter: (filter: FilterList): Promise<void> => {
-    const currentProviderId = AuthService.getProviderId();
-    return axios.delete(
-      `${serverUri()}/provider-filter/${currentProviderId}/${filter.id}`
-    );
+    return axios.delete(`${serverUri()}/provider-filter/${filter.id}`);
   },
 
   getPublicFilterDetails: async (shareId: string): Promise<void> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/public/details/${shareId}`,
-      {
-        params: {
-          providerId: AuthService.getProviderId(),
-        },
-      }
+      `${remoteMarketplaceUri()}/filter/public/details/${shareId}`
     );
 
     return response.data;
@@ -218,9 +196,7 @@ const ApiService = {
   },
 
   fetchRemoteFilter: async (filterUri: string): Promise<FilterList> => {
-    const response = await axios.get(
-      `${filterUri}?providerId=${AuthService.getProviderId()}`
-    );
+    const response = await axios.get(`${filterUri}`);
     return response.data as FilterList;
   },
 
@@ -325,7 +301,6 @@ const ApiService = {
             [mySortBy]: mySort,
           },
           q: searchedValue,
-          providerId: AuthService.getProviderId(),
         },
       }
     );
@@ -333,21 +308,14 @@ const ApiService = {
   },
 
   getAllFiltersCount: async (): Promise<number> => {
-    const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/count/${AuthService.getProviderId()}`
-    );
+    const response = await axios.get(`${remoteMarketplaceUri()}/filter/count`);
 
     return response.data.count;
   },
 
   getDashboardData: async (): Promise<DashboardData> => {
     const response = await axios.get(
-      `${remoteMarketplaceUri()}/filter/dashboard`,
-      {
-        params: {
-          providerId: AuthService.getProviderId(),
-        },
-      }
+      `${remoteMarketplaceUri()}/filter/dashboard`
     );
     return response.data;
   },
@@ -374,16 +342,14 @@ const ApiService = {
     return mock;
   },
 
-  getProviderConfig: async (providerId): Promise<Config> => {
-    const response = await axios.get(`${serverUri()}/config/${providerId}`);
-
-    return response.data;
+  getProviderConfig: async (): Promise<Config> => {
+    return axios.get(`${serverUri()}/config`);
+    // console.log("qwe", response);
+    // return response.data;
   },
 
   setProviderConfig: async (config: Config): Promise<void> => {
-    const providerId = AuthService.getProviderId();
     const response = await axios.put(`${serverUri()}/config`, {
-      providerId,
       ...config,
     });
     return response.data;
