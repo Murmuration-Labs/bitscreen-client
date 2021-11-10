@@ -27,6 +27,7 @@ import ApiService from "../services/ApiService";
 import { Config } from "./Filters/Interfaces";
 import { Account } from "../types/interfaces";
 import LoggerService from "../services/LoggerService";
+import ConsentModal from "../components/Modal/ConsentModal";
 
 interface MatchParams {
   id: string;
@@ -62,6 +63,12 @@ function App(): JSX.Element {
   const [provider, setProvider] = useState<Account | null>(
     AuthService.getAccount()
   );
+  const [showConsent, setShowConsent] = useState<boolean>(false);
+  const [consent, setConsent] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log("Consent => " + consent);
+  }, [consent]);
 
   const connectMetamask = async () => {
     const walletProvider: any = await detectEthereumProvider({
@@ -110,6 +117,10 @@ function App(): JSX.Element {
     }
 
     if (!provider) {
+      if (!consent) {
+        setShowConsent(true);
+        return;
+      }
       try {
         provider = await ApiService.createProvider(wallet);
       } catch (e) {
@@ -119,6 +130,11 @@ function App(): JSX.Element {
           "Could not create an account at the moment. Please try again later!"
         );
       }
+    }
+
+    if (!provider.consentDate && !consent) {
+      setShowConsent(true);
+      return;
     }
 
     try {
@@ -168,10 +184,22 @@ function App(): JSX.Element {
       }
     }
 
+    if (!provider.consentDate) {
+      provider.consentDate = new Date().toISOString();
+      await ApiService.updateProvider(provider);
+    }
+
     setConfig(config);
     setProvider(account);
     setWallet(account.walletAddress);
+    setConsent(false);
   };
+
+  useEffect(() => {
+    if (consent) {
+      connectMetamask();
+    }
+  }, [consent]);
 
   useEffect(() => {
     const account = AuthService.getAccount();
@@ -290,6 +318,11 @@ function App(): JSX.Element {
               </Switch>
             </Col>
           </Row>
+          <ConsentModal
+            show={showConsent}
+            callback={(consent: boolean) => setConsent(consent)}
+            closeCallback={() => setShowConsent(false)}
+          />
           <ToastContainer position="bottom-left" />
         </Container>
       </AuthProvider>
