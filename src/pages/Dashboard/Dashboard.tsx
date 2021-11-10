@@ -18,6 +18,7 @@ import { Form } from "react-bootstrap";
 import { PeriodRange } from "./DatePicker/DatePicker";
 import moment from "moment";
 import LoggerService from "../../services/LoggerService";
+import { toast } from "react-toastify";
 
 function Dashboard(): JSX.Element {
   const [periodType, setPeriodType] = useState<PeriodType>(PeriodType.daily);
@@ -40,9 +41,17 @@ function Dashboard(): JSX.Element {
 
   useEffect(() => {
     LoggerService.info("Loading Dashboard page.");
-    ApiService.getDashboardData().then((dashboardData) => {
-      setDashboardData(dashboardData);
-    });
+    ApiService.getDashboardData().then(
+      (dashboardData) => {
+        setDashboardData(dashboardData);
+      },
+      (e: any) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -57,7 +66,13 @@ function Dashboard(): JSX.Element {
     };
 
     ApiService.getChartData(periodType, stringPeriodInterval).then(
-      (chartInformation) => setChartData(chartInformation)
+      (chartInformation) => setChartData(chartInformation),
+      (e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     );
   }, [periodInterval]);
 

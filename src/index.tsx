@@ -4,11 +4,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import reportWebVitals from "./reportWebVitals";
 import App from "./pages/App";
 import { SnackbarProvider } from "notistack";
+import { Router } from "react-router-dom";
+import history from "./history";
 
 ReactDOM.render(
   <React.StrictMode>
     <SnackbarProvider maxSnack={3}>
-      <App />
+      <Router history={history}>
+        <App />
+      </Router>
     </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById("root")

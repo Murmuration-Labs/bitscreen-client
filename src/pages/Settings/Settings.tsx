@@ -14,6 +14,7 @@ import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
 import LoggerService from "../../services/LoggerService";
+import HttpService from "../../services/HttpService";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -182,7 +183,11 @@ export default function Settings(props) {
     try {
       const config = await ApiService.setProviderConfig({ ...configuration });
       setConfig(config);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
       toast.error(
         "Couldn't update the provider configuration. Please try again later!"
       );
@@ -195,7 +200,11 @@ export default function Settings(props) {
       const account = await ApiService.updateProvider(updatedAccount);
       setAccount(account);
       AuthService.updateAccount(account);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
       toast.error(
         "Couldn't update the account information. Please try again later!"
       );
@@ -513,7 +522,16 @@ export default function Settings(props) {
                       <Button
                         variant="outline-primary"
                         className="double-space-left import-btn mr-3"
-                        onClick={ApiService.exportAccount}
+                        onClick={async () => {
+                          try {
+                            await ApiService.exportAccount();
+                          } catch (e: any) {
+                            if (e.status === 401) {
+                              toast.error(e.data.message);
+                              return;
+                            }
+                          }
+                        }}
                       >
                         Export Account
                       </Button>
@@ -530,11 +548,17 @@ export default function Settings(props) {
                 )}
                 <Prompt
                   when={unsavedChanges() || uncompletedInfo()}
-                  message={
-                    unsavedChanges()
+                  message={(location, action) => {
+                    const { tokenExpired } = location.state as {
+                      tokenExpired: boolean;
+                    };
+                    if (tokenExpired) {
+                      return true;
+                    }
+                    return unsavedChanges()
                       ? "You have unsaved changes, are you sure you want to leave?"
-                      : "You have activated a toggle but did not enter relevant data, are you sure you want to leave?"
-                  }
+                      : "You have activated a toggle but did not enter relevant data, are you sure you want to leave?";
+                  }}
                 />
               </Col>
             </Row>

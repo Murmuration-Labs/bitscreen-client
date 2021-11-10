@@ -19,6 +19,7 @@ import { Config, FilterList } from "../../Filters/Interfaces";
 import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";
 import LoggerService from "../../../services/LoggerService";
+import { toast } from "react-toastify";
 
 const PublicFilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -169,8 +170,12 @@ const PublicFilterDetailsPage = (props) => {
         setFilterProviderId(data.provider.id);
         setLoaded(true);
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+        console.log(e);
         setLoaded(true);
         setError(
           "Filter does not exist or you do not have permission to view it's details."
