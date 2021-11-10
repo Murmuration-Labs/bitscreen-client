@@ -1,11 +1,14 @@
 import {
   Divider,
+  IconButton,
+  InputAdornment,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TablePagination,
   TableRow,
+  TextField,
 } from "@material-ui/core";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -17,10 +20,12 @@ import * as AuthService from "../../services/AuthService";
 import EnhancedTableHead from "../Filters/EnhancedTableHead";
 import ImportFilterModal from "../Filters/ImportFilterModal";
 import { Config, FilterList, Order } from "../Filters/Interfaces";
-import { formatDate } from "../Filters/utils";
+import { formatDate, itemsToPages } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";
 import "./PublicFilters.css";
 import LoggerService from "../../services/LoggerService";
+import SearchIcon from "@material-ui/icons/Search";
+import ClearIcon from "@material-ui/icons/ClearRounded";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name", sortable: true },
@@ -186,24 +191,50 @@ export default function PublicFilters(props) {
           flexDirection: "row",
           flex: 1,
           alignItems: "center",
+          marginBottom: 16,
         }}
       >
-        <Form.Group controlId="search">
-          <Form.Control
-            type="text"
-            placeholder="Search"
-            onChange={handlerInputChange}
-            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-              }
-            }}
-          />
-        </Form.Group>
+        <TextField
+          style={{ width: 480, marginRight: 12 }}
+          type="text"
+          placeholder="Search"
+          variant="outlined"
+          value={searchedValue}
+          onChange={handlerInputChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                {searchedValue && (
+                  <IconButton
+                    onClick={() => {
+                      setSearchedValue("");
+                    }}
+                    color="default"
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ),
+          }}
+          FormHelperTextProps={{ style: { fontSize: 12 } }}
+        />
         {searchedValue.length > 0 && (
-          <p className="ml-1">
-            {dataCount} result{dataCount === 1 ? "" : "s"} found
-          </p>
+          <span
+            style={{
+              marginRight: 4,
+              verticalAlign: "middle",
+              alignSelf: "center",
+            }}
+          >
+            {dataCount ? dataCount : "0"} result
+            {dataCount && dataCount === 1 ? "" : "s"} found
+          </span>
         )}
       </div>
       <TableContainer>
@@ -239,7 +270,7 @@ export default function PublicFilters(props) {
                     <LongText content={row.description} limit={20} />
                   </TableCell>
                   <TableCell>{formatDate(row.updated)}</TableCell>
-                  <TableCell>
+                  <TableCell className="actions-column">
                     {row.isImported ? (
                       <Button
                         style={{
@@ -301,6 +332,7 @@ export default function PublicFilters(props) {
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        labelDisplayedRows={itemsToPages(rowsPerPage)}
       />
       {toBeImportedFilter && (
         <ImportFilterModal

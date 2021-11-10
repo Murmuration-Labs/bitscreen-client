@@ -63,8 +63,11 @@ import {
   isImported,
   isOrphan,
   isShared,
+  itemsToPages,
 } from "./utils";
 import LoggerService from "../../services/LoggerService";
+import MenuButton from "@material-ui/icons/MoreVert";
+import DropdownMenu from "./DropdownMenu";
 
 interface MyFiltersTableData {
   name: string;
@@ -675,6 +678,7 @@ function Filters(props): JSX.Element {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelDisplayedRows={itemsToPages(rowsPerPage)}
         />
       </div>
     );
@@ -817,7 +821,13 @@ function Filters(props): JSX.Element {
                   )}
                 </span>
               </div>
-              <div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
                 <Button
                   variant="primary"
                   style={{ marginRight: 4, backgroundColor: "#003BDD" }}
@@ -837,13 +847,22 @@ function Filters(props): JSX.Element {
                 >
                   Import Filter
                 </Button>
-                <Button
-                  variant="outline-primary"
-                  className="double-space-left import-btn"
-                  onClick={ApiService.downloadCidList}
+                <DropdownMenu
+                  titleButton={
+                    <IconButton size="small">
+                      <MenuButton />
+                    </IconButton>
+                  }
                 >
-                  Download CID List
-                </Button>
+                  <MenuItem onClick={ApiService.downloadCidList}>
+                    <Button
+                      variant="outline-primary"
+                      className="double-space-left import-btn"
+                    >
+                      Download CID List
+                    </Button>
+                  </MenuItem>
+                </DropdownMenu>
               </div>
             </div>
 
@@ -859,7 +878,7 @@ function Filters(props): JSX.Element {
                 <TextField
                   style={{ width: 480, marginRight: 12 }}
                   type="text"
-                  placeholder="Search CID or Filter Name"
+                  placeholder="Search"
                   variant="outlined"
                   value={searchTerm}
                   onChange={searchFilters}
