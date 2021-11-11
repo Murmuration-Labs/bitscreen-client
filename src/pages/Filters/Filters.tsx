@@ -483,7 +483,6 @@ function Filters(props): JSX.Element {
         !deletedFilterList.provider_Filters
           ? 0
           : deletedFilterList.provider_Filters.length - 1;
-      console.log("asdasdasdasd", numberOfSubscribers);
       message = !numberOfSubscribers ? (
         `Are you sure you want to delete filter "${deletedFilterList.name}?"`
       ) : (
@@ -1159,7 +1158,6 @@ function Filters(props): JSX.Element {
               }
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
-                console.log("a");
                 setSelectedFilterList(FilterService.emptyFilterList());
                 setBulkEnabled(undefined);
                 setShowConfirmEnabled(false);
