@@ -50,6 +50,7 @@ import { isDisabledGlobally, isOrphan, isShared } from "./utils";
 import { IconButton, MenuItem } from "@material-ui/core";
 import ConflictModal from "./Cids/ConflictModal";
 import LoggerService from "../../services/LoggerService";
+import { CID } from "multiformats";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -80,6 +81,7 @@ const FilterPage = (props): JSX.Element => {
   const [conflict, setConflict] = useState<Conflict[]>([]);
   const [totalConflicts, setTotalConflicts] = useState<Conflict[]>([]);
   const [conflictsChanged, setConflictsChanged] = useState<boolean>(false);
+  const [cidsValid, setCidsValid] = useState<boolean>(true);
 
   const addConflicts = (conflicts: Conflict[]) => {
     setTotalConflicts((prevConflicts) => prevConflicts.concat(conflicts));
@@ -102,6 +104,19 @@ const FilterPage = (props): JSX.Element => {
   useEffect(() => {
     setConfiguration(props.config);
   }, [props.config]);
+
+  useEffect(() => {
+    for (const cid of filterList.cids) {
+      try {
+        CID.parse(cid.cid);
+      } catch (e) {
+        setCidsValid(false);
+        return;
+      }
+    }
+
+    setCidsValid(true);
+  }, [filterList.cids]);
 
   const isAccountInfoValid = (): boolean => {
     return account
@@ -959,7 +974,7 @@ const FilterPage = (props): JSX.Element => {
           <Button
             variant="primary"
             style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
-            disabled={!filterListChanged}
+            disabled={!filterListChanged || !cidsValid}
             onClick={save}
           >
             Save Changes

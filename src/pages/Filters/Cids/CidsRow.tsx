@@ -1,6 +1,3 @@
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Checkbox,
   IconButton,
@@ -16,10 +13,11 @@ import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
 import { formatDate } from "../utils";
 import * as icons from "../../../resources/icons";
 import "./cids.css";
-import { Button } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import { ErrorOutline } from "@material-ui/icons";
 import LoggerService from "../../../services/LoggerService";
 import { toast } from "react-toastify";
+import { CID } from "multiformats/cid";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -87,8 +85,19 @@ const CidsRow = ({
   const [exceptionLoading, setExceptionLoading] = useState(false);
   const [localConflicts, setLocalConflicts] = useState<Conflict[]>([]);
   const [isHovered, setIsHovered] = useState(false);
+  const [isValid, setIsValid] = useState<boolean>(true);
 
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    const cidString = cid.cid;
+    try {
+      const parsed = CID.parse(cidString);
+      setIsValid(true);
+    } catch (e) {
+      setIsValid(false);
+    }
+  }, [cid]);
 
   useEffect(() => {
     if (filter.visibility === Visibility.Exception) {
@@ -203,6 +212,11 @@ const CidsRow = ({
           >
             {cid.cid}
           </a>
+        )}
+        {!isValid && (
+          <Badge style={{ marginLeft: 10 }} variant="danger">
+            Invalid CID
+          </Badge>
         )}
       </TableCell>
       <TableCell align="left">

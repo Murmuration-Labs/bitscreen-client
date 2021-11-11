@@ -33,6 +33,7 @@
     "keccak256": "^1.0.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "multiformats": "^9.4.10",
     "node-cron": "^3.0.0",
     "notistack": "^1.0.10",
     "react": "^17.0.1",
