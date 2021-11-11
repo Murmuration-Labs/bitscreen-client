@@ -290,33 +290,41 @@ const FilterPage = (props): JSX.Element => {
   const initFilter = (shareId: string): void => {
     if (shareId) {
       setIsEdit(true);
-      ApiService.getFilter(shareId).then((filterList: FilterList) => {
-        if (!mountedRef.current) return;
-        if (!filterList) {
-          setInvalidFilterId(true);
-          return;
+      ApiService.getFilter(shareId).then(
+        (filterList: FilterList) => {
+          if (!mountedRef.current) return;
+          if (!filterList) {
+            setInvalidFilterId(true);
+            return;
+          }
+
+          const cidItems =
+            filterList.cids && filterList.cids.length
+              ? filterList.cids.map((cid: CidItem) => {
+                  return { ...cid, tableKey: generateUniqueKey() };
+                })
+              : [];
+          const fl = {
+            ...filterList,
+            cids: cidItems,
+          };
+
+          const owner =
+            !fl.provider || fl.provider.id === AuthService.getProviderId();
+          setIsOwner(owner);
+          setIsimported(!owner);
+          setFilterList(fl);
+          setInitialFilterList({ ...fl });
+          setLoaded(true);
+          setFilterEnabled(fl.enabled);
+        },
+        (e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
         }
-
-        const cidItems =
-          filterList.cids && filterList.cids.length
-            ? filterList.cids.map((cid: CidItem) => {
-                return { ...cid, tableKey: generateUniqueKey() };
-              })
-            : [];
-        const fl = {
-          ...filterList,
-          cids: cidItems,
-        };
-
-        const owner =
-          !fl.provider || fl.provider.id === AuthService.getProviderId();
-        setIsOwner(owner);
-        setIsimported(!owner);
-        setFilterList(fl);
-        setInitialFilterList({ ...fl });
-        setLoaded(true);
-        setFilterEnabled(fl.enabled);
-      });
+      );
     } else {
       setLoaded(true);
     }
@@ -362,10 +370,17 @@ const FilterPage = (props): JSX.Element => {
   const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
 
   const updateGlobalFilterEnabled = (): void => {
-    ApiService.updateEnabledForSharedFilters(
-      [filterList.id],
-      filterList.enabled
-    );
+    try {
+      ApiService.updateEnabledForSharedFilters(
+        [filterList.id],
+        filterList.enabled
+      );
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
   };
 
   const save = (): void => {
@@ -388,16 +403,24 @@ const FilterPage = (props): JSX.Element => {
               toast.success("Filter list updated successfully");
               setLoaded(false);
             })
-            .catch((err) => {
-              toast.error("Error: " + err.message);
+            .catch((e) => {
+              if (e.status === 401) {
+                toast.error(e.data.message);
+                return;
+              }
+              toast.error("Error: " + e.message);
               setLoaded(false);
-              LoggerService.error(err);
+              LoggerService.error(e);
             });
         })
-        .catch((err) => {
-          toast.error("Error: " + err.message);
+        .catch((e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+          toast.error("Error: " + e.message);
           setLoaded(false);
-          LoggerService.error(err);
+          LoggerService.error(e);
         });
     } else {
       ApiService.addFilter(fl)
@@ -407,10 +430,14 @@ const FilterPage = (props): JSX.Element => {
           toast.success("Filter list created successfully");
           setLoaded(false);
         })
-        .catch((err) => {
-          toast.error("Error: " + err.message);
+        .catch((e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+          toast.error("Error: " + e.message);
           setLoaded(false);
-          LoggerService.error(err);
+          LoggerService.error(e);
         });
     }
   };
@@ -435,9 +462,13 @@ const FilterPage = (props): JSX.Element => {
           save();
         }
       })
-      .catch((err) => {
+      .catch((e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
         toast.error("Something wrong happend please try again later.");
-        LoggerService.error(err);
+        LoggerService.error(e);
       });
   };
 
@@ -560,7 +591,15 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const prepareCidMoveModal = async (moveItems: CidItem[]): Promise<void> => {
-    const data = await ApiService.getFilters(0, 100, "asc", "name", "");
+    let data;
+    try {
+      data = await ApiService.getFilters(0, 100, "asc", "name", "");
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
     const filterLists: FilterList[] = data.filters;
 
     setMoveCidItems(moveItems);
@@ -609,14 +648,22 @@ const FilterPage = (props): JSX.Element => {
   }, [showConfirmDelete, deletedFilterList]);
 
   const deleteCurrentFilter = async (): Promise<void> => {
-    ApiService.deleteFilter(filterList).then(() => {
-      toast.success(
-        isImported
-          ? "Filter list discarded successfully"
-          : "Filter list deleted successfully"
-      );
-      history.push("/filters");
-    });
+    ApiService.deleteFilter(filterList).then(
+      () => {
+        toast.success(
+          isImported
+            ? "Filter list discarded successfully"
+            : "Filter list deleted successfully"
+        );
+        history.push("/filters");
+      },
+      (e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
+    );
   };
 
   const toggleFilterEnabled = () => {

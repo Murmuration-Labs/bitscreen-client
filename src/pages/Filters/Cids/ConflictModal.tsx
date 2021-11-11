@@ -10,11 +10,20 @@ import { Conflict, ConflictModalProps } from "../Interfaces";
 import { ListGroup } from "react-bootstrap";
 import ApiService from "../../../services/ApiService";
 import LoggerService from "../../../services/LoggerService";
+import { toast } from "react-toastify";
 
-const resolveConflict = (conflicts: Conflict[]) => {
-  return Promise.all(
-    conflicts.map((conflict) => ApiService.deleteCidById(conflict.id))
-  );
+const resolveConflict = async (conflicts: Conflict[]) => {
+  try {
+    await Promise.all(
+      conflicts.map((conflict) => ApiService.deleteCidById(conflict.id))
+    );
+  } catch (e: any) {
+    if (e.status === 401) {
+      toast.error(e.data.message);
+      return;
+    }
+  }
+  return;
 };
 
 const ConflictModal = ({

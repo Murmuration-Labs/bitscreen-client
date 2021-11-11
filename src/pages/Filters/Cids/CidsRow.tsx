@@ -19,6 +19,7 @@ import "./cids.css";
 import { Button } from "react-bootstrap";
 import { ErrorOutline } from "@material-ui/icons";
 import LoggerService from "../../../services/LoggerService";
+import { toast } from "react-toastify";
 
 export interface CidsRowProps {
   filter: FilterList;
@@ -96,8 +97,12 @@ const CidsRow = ({
           setLocalConflicts(conflicts);
           addConflicts(conflicts);
         })
-        .catch((err) => {
-          LoggerService.error(err);
+        .catch((e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+          LoggerService.error(e);
         })
         .finally(() => setExceptionLoading(false));
       return;

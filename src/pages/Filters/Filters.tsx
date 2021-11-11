@@ -68,6 +68,7 @@ import {
 import LoggerService from "../../services/LoggerService";
 import MenuButton from "@material-ui/icons/MoreVert";
 import DropdownMenu from "./DropdownMenu";
+import { toast } from "react-toastify";
 
 interface MyFiltersTableData {
   name: string;
@@ -187,7 +188,11 @@ function Filters(props): JSX.Element {
     share: false,
   });
 
-  useEffect(() => LoggerService.info("Loading Filters List page."), []);
+  const history = useHistory();
+
+  useEffect(() => {
+    LoggerService.info("Loading Filters List page.");
+  }, []);
 
   useEffect(() => {
     setConfiguration({ ...props.config });
@@ -299,18 +304,38 @@ function Filters(props): JSX.Element {
         setSelectedConditional(BulkSelectedType.None);
 
         setLoaded(true);
+      },
+      (e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
       }
     );
   }, [rowsPerPage, page, mySortBy, mySort, searchTerm, needsRefresh]);
 
   const deleteFilter = async (filter: FilterList) => {
-    await ApiService.deleteFilter(filter);
+    try {
+      await ApiService.deleteFilter(filter);
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
     setNeedsRefresh(true);
   };
 
   const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
     filterList.enabled = !filterList.enabled;
-    await ApiService.updateFilter([filterList], false);
+    try {
+      await ApiService.updateFilter([filterList], false);
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
     setNeedsRefresh(true);
   };
 
@@ -347,7 +372,14 @@ function Filters(props): JSX.Element {
           enabled: true,
         };
       });
-      await ApiService.updateFilter(fls, false);
+      try {
+        await ApiService.updateFilter(fls, false);
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     } else if (bulkEnabled === false) {
       const fls = enabledSelectedFilters.map((x) => {
         return {
@@ -355,28 +387,63 @@ function Filters(props): JSX.Element {
           enabled: false,
         };
       });
-      await ApiService.updateFilter(fls, false);
+      try {
+        await ApiService.updateFilter(fls, false);
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     } else {
       const fl = {
         ...selectedFilterList,
         enabled: !selectedFilterList.enabled,
       };
-      await ApiService.updateFilter([fl], false);
+      try {
+        await ApiService.updateFilter([fl], false);
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     }
   };
 
   const toggleGlobalFilterEnabled = async (): Promise<void> => {
     if (bulkEnabled === true) {
       const ids = disabledSelectedFilters.map((x) => x.id);
-      await ApiService.updateEnabledForSharedFilters(ids, true);
+      try {
+        await ApiService.updateEnabledForSharedFilters(ids, true);
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     } else if (bulkEnabled === false) {
       const ids = enabledSelectedFilters.map((x) => x.id);
-      await ApiService.updateEnabledForSharedFilters(ids, false);
+      try {
+        await ApiService.updateEnabledForSharedFilters(ids, false);
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     } else {
-      await ApiService.updateEnabledForSharedFilters(
-        [selectedFilterList.id],
-        !selectedFilterList.enabled
-      );
+      try {
+        await ApiService.updateEnabledForSharedFilters(
+          [selectedFilterList.id],
+          !selectedFilterList.enabled
+        );
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     }
   };
 
@@ -690,8 +757,6 @@ function Filters(props): JSX.Element {
 
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
 
-  const history = useHistory();
-
   const [isAllLoaded, setIsAllLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -751,7 +816,11 @@ function Filters(props): JSX.Element {
           },
         });
       })
-      .catch((err) => {
+      .catch((e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
         enqueueSnackbar("One or more filters could not be discarded.", {
           variant: "error",
           preventDuplicate: true,
@@ -760,19 +829,28 @@ function Filters(props): JSX.Element {
             vertical: "top",
           },
         });
-        LoggerService.error(err);
+        LoggerService.error(e);
       })
       .finally(() => setNeedsRefresh(true));
   };
 
   const bulkSetEnabled = async (enabled: boolean) => {
-    await ApiService.updateFilter(
-      (enabled ? disabledSelectedFilters : enabledSelectedFilters).map((x) => ({
-        ...x,
-        enabled,
-      })),
-      false
-    );
+    try {
+      await ApiService.updateFilter(
+        (enabled ? disabledSelectedFilters : enabledSelectedFilters).map(
+          (x) => ({
+            ...x,
+            enabled,
+          })
+        ),
+        false
+      );
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
 
     setNeedsRefresh(true);
   };
@@ -854,7 +932,18 @@ function Filters(props): JSX.Element {
                     </IconButton>
                   }
                 >
-                  <MenuItem onClick={ApiService.downloadCidList}>
+                  <MenuItem
+                    onClick={async () => {
+                      try {
+                        ApiService.downloadCidList();
+                      } catch (e: any) {
+                        if (e.status === 401) {
+                          toast.error(e.data.message);
+                          return;
+                        }
+                      }
+                    }}
+                  >
                     <Button
                       variant="outline-primary"
                       className="double-space-left import-btn"

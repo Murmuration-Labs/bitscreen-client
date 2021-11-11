@@ -26,6 +26,7 @@ import "./PublicFilters.css";
 import LoggerService from "../../services/LoggerService";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/ClearRounded";
+import { toast } from "react-toastify";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name", sortable: true },
@@ -77,16 +78,24 @@ export default function PublicFilters(props) {
   useEffect(() => {
     setNeedsRefresh(false);
     const getAllData = async () => {
-      await ApiService.getAllFilters(
+      ApiService.getAllFilters(
         page,
         rowsPerPage,
         mySortBy,
         mySort,
         searchedValue
-      ).then((response) => {
-        setPublicFiltersData(response.data as Data[]);
-        setDataCount(response.count);
-      });
+      ).then(
+        (response) => {
+          setPublicFiltersData(response.data as Data[]);
+          setDataCount(response.count);
+        },
+        (e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+        }
+      );
     };
 
     getAllData();

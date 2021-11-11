@@ -64,8 +64,14 @@ export default function ImportFilterModal(
       return;
     }
 
-    ApiService.getFilter(props.filter.shareId).then((f) =>
-      setFetchedFilterList(f)
+    ApiService.getFilter(props.filter.shareId).then(
+      (f) => setFetchedFilterList(f),
+      (e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     );
   }, [props.filter]);
 
@@ -115,7 +121,11 @@ export default function ImportFilterModal(
         setFetchedFilterList({ ...fl, notes: fetchedFilterList?.notes });
         setIsFetchingRemoteFilter(false);
       }, 1500);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.status === 401) {
+        toast.error(e.data.message);
+        return;
+      }
       setRemoteFilterUri("");
       setRemoteFilterError(true);
       setIsFetchingRemoteFilter(false);
@@ -137,12 +147,19 @@ export default function ImportFilterModal(
         "You cannot import your own filter! Please try to import an external filter."
       );
     } else {
-      await ApiService.addProviderFilter({
-        providerId: currentProviderId,
-        filterId: fetchedFilterList?.id,
-        notes: fetchedFilterList?.notes,
-        active: !!fetchedFilterList?.enabled,
-      });
+      try {
+        await ApiService.addProviderFilter({
+          providerId: currentProviderId,
+          filterId: fetchedFilterList?.id,
+          notes: fetchedFilterList?.notes,
+          active: !!fetchedFilterList?.enabled,
+        });
+      } catch (e: any) {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+      }
     }
 
     setTimeout(() => {

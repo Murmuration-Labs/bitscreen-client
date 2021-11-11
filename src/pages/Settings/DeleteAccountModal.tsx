@@ -11,6 +11,7 @@ import { getAccount } from "../../services/AuthService";
 import { Account } from "../../types/interfaces";
 import ApiService from "../../services/ApiService";
 import LoggerService from "../../services/LoggerService";
+import { toast } from "react-toastify";
 
 interface DeleteAccountModalProps {
   show: boolean;
@@ -44,6 +45,12 @@ const DeleteAccountModal = ({
           }
 
           setHasUsedFilters(false);
+        },
+        (e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
         }
       );
     }
@@ -56,10 +63,18 @@ const DeleteAccountModal = ({
 
   const confirmDelete = () => {
     if (confirmText === account?.walletAddress?.slice(-5)) {
-      ApiService.deleteProvider(account).then((response) => {
-        setConfirmText("");
-        handleClose(response.success);
-      });
+      ApiService.deleteProvider(account).then(
+        (response) => {
+          setConfirmText("");
+          handleClose(response.success);
+        },
+        (e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+        }
+      );
     } else {
       LoggerService.error("Confirmation text doesn't match wallet.");
     }

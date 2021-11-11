@@ -28,6 +28,8 @@ import { Config } from "./Filters/Interfaces";
 import { Account } from "../types/interfaces";
 import LoggerService from "../services/LoggerService";
 import ConsentModal from "../components/Modal/ConsentModal";
+import * as jwt from "jsonwebtoken";
+import { useHistory } from "react-router-dom";
 
 interface MatchParams {
   id: string;
@@ -69,6 +71,14 @@ function App(): JSX.Element {
   useEffect(() => {
     console.log("Consent => " + consent);
   }, [consent]);
+
+  const history = useHistory();
+
+  const logout = () => {
+    setProvider(null);
+    setConfig(null);
+    AuthService.removeAccount();
+  };
 
   const connectMetamask = async () => {
     const walletProvider: any = await detectEthereumProvider({
@@ -215,17 +225,54 @@ function App(): JSX.Element {
       if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
         setConfig(config);
       } else {
-        setProvider(null);
-        setConfig(null);
-        AuthService.removeAccount();
+        logout();
       }
     };
     if (account) {
-      ApiService.getProviderConfig().then((config) => {
-        setConfig(config);
-        checkWallet(config, account.walletAddress);
-      });
+      ApiService.getProviderConfig().then(
+        (config) => {
+          setConfig(config);
+          checkWallet(config, account.walletAddress);
+        },
+        (err: any) => {
+          if (err.status === 401) {
+            toast.error(err.data.message);
+            logout();
+            return;
+          }
+        }
+      );
     }
+
+    const unlisten = history.listen((location) => {
+      if (location.state) {
+        const { tokenExpired } = location.state as {
+          tokenExpired: boolean;
+        };
+        if (tokenExpired) {
+          return logout();
+        }
+      }
+      const accessToken = AuthService.getAccount()?.accessToken;
+      if (accessToken) {
+        const decodedToken: jwt.JwtPayload = jwt.decode(
+          accessToken
+        ) as jwt.JwtPayload;
+        if (
+          decodedToken &&
+          decodedToken.exp &&
+          Date.now() / 1000 > decodedToken.exp
+        ) {
+          toast.error("Your token has expired. Please login again!");
+          return logout();
+        }
+      } else {
+        return;
+      }
+    });
+    return () => {
+      unlisten();
+    };
 
     // use below if WE DON'T WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
     // if (account) {
@@ -236,97 +283,95 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <Router>
-      <AuthProvider
+    <AuthProvider
+      setProvider={setProvider}
+      setConfig={setConfig}
+      currentWallet={wallet}
+    >
+      <Navigation
+        provider={provider}
         setProvider={setProvider}
         setConfig={setConfig}
-        currentWallet={wallet}
-      >
-        <Navigation
-          provider={provider}
-          setProvider={setProvider}
-          setConfig={setConfig}
+      />
+      <Container fluid={true}>
+        <Row className="fill-height">
+          <Col className={"stage"}>
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/settings" />
+              </Route>
+              <Route
+                path="/settings"
+                exact
+                render={(props) => {
+                  return (
+                    <Settings
+                      connectMetamask={connectMetamask}
+                      setConfig={setConfig}
+                      config={config}
+                      setAccount={setProvider}
+                      account={provider}
+                      {...props}
+                    />
+                  );
+                }}
+              />
+              <PrivateRoute
+                path="/dashboard"
+                exact
+                comp={Dashboard}
+                provider={provider}
+                config={config}
+              />
+              <PrivateRoute
+                path="/filters"
+                exact
+                comp={Filters}
+                provider={provider}
+                config={config}
+              />
+              <PrivateRoute
+                path="/filters/edit/:shareId?"
+                exact
+                comp={FilterPage}
+                provider={provider}
+                config={config}
+              />
+              <PrivateRoute
+                path="/filters/new"
+                exact
+                comp={FilterPage}
+                provider={provider}
+                config={config}
+              />
+              <PrivateRoute
+                path="/directory"
+                exact
+                comp={PublicFilters}
+                provider={provider}
+                config={config}
+              />
+              <PrivateRoute
+                path="/directory/details/:shareId?"
+                exact
+                comp={PublicFilterDetailsPage}
+                provider={provider}
+                config={config}
+              />
+              <Route exact path="*">
+                <Redirect to="/settings" />
+              </Route>
+            </Switch>
+          </Col>
+        </Row>
+        <ConsentModal
+          show={showConsent}
+          callback={(consent: boolean) => setConsent(consent)}
+          closeCallback={() => setShowConsent(false)}
         />
-        <Container fluid={true}>
-          <Row className="fill-height">
-            <Col className={"stage"}>
-              <Switch>
-                <Route exact path="/">
-                  <Redirect to="/settings" />
-                </Route>
-                <Route
-                  path="/settings"
-                  exact
-                  render={(props) => {
-                    return (
-                      <Settings
-                        connectMetamask={connectMetamask}
-                        setConfig={setConfig}
-                        config={config}
-                        setAccount={setProvider}
-                        account={provider}
-                        {...props}
-                      />
-                    );
-                  }}
-                />
-                <PrivateRoute
-                  path="/dashboard"
-                  exact
-                  comp={Dashboard}
-                  provider={provider}
-                  config={config}
-                />
-                <PrivateRoute
-                  path="/filters"
-                  exact
-                  comp={Filters}
-                  provider={provider}
-                  config={config}
-                />
-                <PrivateRoute
-                  path="/filters/edit/:shareId?"
-                  exact
-                  comp={FilterPage}
-                  provider={provider}
-                  config={config}
-                />
-                <PrivateRoute
-                  path="/filters/new"
-                  exact
-                  comp={FilterPage}
-                  provider={provider}
-                  config={config}
-                />
-                <PrivateRoute
-                  path="/directory"
-                  exact
-                  comp={PublicFilters}
-                  provider={provider}
-                  config={config}
-                />
-                <PrivateRoute
-                  path="/directory/details/:shareId?"
-                  exact
-                  comp={PublicFilterDetailsPage}
-                  provider={provider}
-                  config={config}
-                />
-                <Route exact path="*">
-                  <Redirect to="/settings" />
-                </Route>
-              </Switch>
-            </Col>
-          </Row>
-          <ConsentModal
-            show={showConsent}
-            callback={(consent: boolean) => setConsent(consent)}
-            closeCallback={() => setShowConsent(false)}
-          />
-          <ToastContainer position="bottom-left" />
-        </Container>
-      </AuthProvider>
-    </Router>
+        <ToastContainer position="bottom-left" />
+      </Container>
+    </AuthProvider>
   );
 }
 
