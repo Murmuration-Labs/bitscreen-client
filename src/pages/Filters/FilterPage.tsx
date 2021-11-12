@@ -1399,7 +1399,17 @@ const FilterPage = (props): JSX.Element => {
           )}
           <Prompt
             when={filterListChanged}
-            message="You have unsaved changes, are you sure you want to leave?"
+            message={(location, action) => {
+              if (location.state) {
+                const { tokenExpired } = location.state as {
+                  tokenExpired: boolean;
+                };
+                if (tokenExpired) {
+                  return true;
+                }
+              }
+              return "You have unsaved changes, are you sure you want to leave?";
+            }}
           />
           <ConfirmModal
             show={showConfirmDelete}

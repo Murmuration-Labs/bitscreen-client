@@ -549,11 +549,13 @@ export default function Settings(props) {
                 <Prompt
                   when={unsavedChanges() || uncompletedInfo()}
                   message={(location, action) => {
-                    const { tokenExpired } = location.state as {
-                      tokenExpired: boolean;
-                    };
-                    if (tokenExpired) {
-                      return true;
+                    if (location.state) {
+                      const { tokenExpired } = location.state as {
+                        tokenExpired: boolean;
+                      };
+                      if (tokenExpired) {
+                        return true;
+                      }
                     }
                     return unsavedChanges()
                       ? "You have unsaved changes, are you sure you want to leave?"
