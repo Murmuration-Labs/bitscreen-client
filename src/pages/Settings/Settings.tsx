@@ -245,325 +245,329 @@ export default function Settings(props) {
         }}
       >
         <Col className="pl-0">
-          <Row>
-            <Col>
-              <FormCheck
-                type="switch"
-                id="bitscreen-switch"
-                label="Filter content using BitScreen"
-                checked={configuration.bitscreen || false}
-                onChange={() => toggleBitScreen()}
-              />
-              <p className="text-dim">
-                Filtering enables a node operator to decline storage and
-                retrieval deals for known CIDs.{" "}
-                <a
-                  className="text-dim"
-                  href="https://github.com/Murmuration-Labs/bitscreen"
-                >
-                  (Find out more)
-                </a>
-              </p>
-            </Col>
-          </Row>
-          {configuration.bitscreen && (
-            <Row className="settings-width">
-              <Col>
-                {!loggedIn && (
-                  <div className="ml-3">
-                    <Row>
-                      <Col>
-                        <Form.Label>
-                          <u>Please connect a wallet</u>
-                        </Form.Label>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-
-                {!loggedIn && (
-                  <div className="ml-3">
-                    <Row>
-                      <Col>
-                        <p className="text-dim">
-                          Linking a wallet address is required to activate
-                          BitScreen. Your wallet address is used to access your
-                          lists, and is stored hashed for statistical purposes.
-                        </p>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-
-                {accountInfo && accountInfo.walletAddress && (
-                  <div className="ml-3">
-                    <Row>
-                      <Col>
-                        <div className="filter-page-input-label">
-                          Wallet Address
-                        </div>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <p style={{ fontStyle: "oblique", fontWeight: "bold" }}>
-                          {accountInfo.walletAddress}
-                        </p>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
-
-                <div className="ml-3">
-                  <Row>
-                    <Col>
-                      {!loggedIn ? (
-                        <Button onClick={connectMetamask}>
-                          Connect with Metamask
-                        </Button>
-                      ) : null}
-                    </Col>
-                  </Row>
-                </div>
+          {!loggedIn && (
+            <>
+              <div className="ml-3">
                 <Row>
-                  <Col className="pt-2 pb-2"></Col>
+                  <Col>
+                    <Form.Label>
+                      <u>Please connect a wallet</u>
+                    </Form.Label>
+                  </Col>
                 </Row>
-                {loggedIn && (
-                  <Row>
-                    <Col>
-                      <FormCheck
-                        type="switch"
-                        id="import-switch"
-                        label='Activate "Importing Lists"'
-                        checked={configuration.import || false}
-                        onChange={() => toggleImportingLists()}
-                      />
-                      <p className="text-dim">
-                        Importing lists from other users is an optional feature
-                        that requires adding country information, which is used
-                        for statistical purposes.
-                      </p>
-                    </Col>
-                  </Row>
-                )}
+              </div>
+              <div className="ml-3">
+                <Row>
+                  <Col>
+                    <p className="text-dim">
+                      Linking a wallet address is required to activate
+                      BitScreen. Your wallet address is used to access your
+                      lists, and is stored hashed for statistical purposes.
+                    </p>
+                  </Col>
+                </Row>
+              </div>
+              <div className="ml-3">
+                <Row>
+                  <Col>
+                    <Button onClick={connectMetamask}>
+                      Connect with Metamask
+                    </Button>
+                  </Col>
+                </Row>
+              </div>
+            </>
+          )}
+          {loggedIn && (
+            <>
+              <Row>
+                <Col>
+                  <FormCheck
+                    type="switch"
+                    id="bitscreen-switch"
+                    label="Filter content using BitScreen"
+                    checked={configuration.bitscreen || false}
+                    onChange={() => toggleBitScreen()}
+                  />
+                  <p className="text-dim">
+                    Filtering enables a node operator to decline storage and
+                    retrieval deals for known CIDs.{" "}
+                    <a
+                      className="text-dim"
+                      href="https://github.com/Murmuration-Labs/bitscreen"
+                    >
+                      (Find out more)
+                    </a>
+                  </p>
+                </Col>
+              </Row>
+              {configuration.bitscreen && (
+                <Row className="settings-width">
+                  <Col>
+                    {accountInfo && accountInfo.walletAddress && (
+                      <div className="ml-3">
+                        <Row>
+                          <Col>
+                            <div className="filter-page-input-label">
+                              Wallet Address
+                            </div>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col>
+                            <p
+                              style={{
+                                fontStyle: "oblique",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {accountInfo.walletAddress}
+                            </p>
+                          </Col>
+                        </Row>
+                      </div>
+                    )}
 
-                {loggedIn && (configuration.import || configuration.share) && (
-                  <>
-                    <div className="ml-3">
+                    <Row>
+                      <Col className="pt-2 pb-2"></Col>
+                    </Row>
+                    {loggedIn && (
                       <Row>
                         <Col>
-                          <div className="input-label">Country</div>
-                          <Typeahead
-                            id="country"
-                            options={countryNames.map(
-                              (country) => country.name
-                            )}
-                            placeholder="Country"
-                            onChange={(country) => {
-                              setSelectedCountryOption(country);
-                              setAccountInfo({
-                                ...accountInfo,
-                                country: country[0]
-                                  ? (country[0] as string)
-                                  : "",
-                              });
-                            }}
-                            selected={selectedCountryOption}
-                          ></Typeahead>
+                          <FormCheck
+                            type="switch"
+                            id="import-switch"
+                            label='Activate "Importing Lists"'
+                            checked={configuration.import || false}
+                            onChange={() => toggleImportingLists()}
+                          />
+                          <p className="text-dim">
+                            Importing lists from other users is an optional
+                            feature that requires adding country information,
+                            which is used for statistical purposes.
+                          </p>
                         </Col>
                       </Row>
-                    </div>
+                    )}
 
-                    <Row>
-                      <Col
-                        className={`${
-                          accountInfo &&
-                          (configuration.import || configuration.share)
-                            ? "pt-3"
-                            : ""
-                        } pb-2`}
-                      ></Col>
-                    </Row>
-                  </>
-                )}
+                    {loggedIn && (configuration.import || configuration.share) && (
+                      <>
+                        <div className="ml-3">
+                          <Row>
+                            <Col>
+                              <div className="input-label">Country</div>
+                              <Typeahead
+                                id="country"
+                                options={countryNames.map(
+                                  (country) => country.name
+                                )}
+                                placeholder="Country"
+                                onChange={(country) => {
+                                  setSelectedCountryOption(country);
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    country: country[0]
+                                      ? (country[0] as string)
+                                      : "",
+                                  });
+                                }}
+                                selected={selectedCountryOption}
+                              ></Typeahead>
+                            </Col>
+                          </Row>
+                        </div>
 
-                {loggedIn && (
-                  <Row>
-                    <Col>
-                      <FormCheck
-                        type="switch"
-                        id="share-switch"
-                        label='Activate "Sharing Lists"'
-                        checked={configuration.share || false}
-                        onChange={() => toggleSharingLists()}
-                      />
-                      <p className="text-dim">
-                        Sharing lists with other users is an optional feature
-                        that requires adding list provider data, which is made
-                        public to other users when you share lists.
-                      </p>
-                    </Col>
-                  </Row>
-                )}
+                        <Row>
+                          <Col
+                            className={`${
+                              accountInfo &&
+                              (configuration.import || configuration.share)
+                                ? "pt-3"
+                                : ""
+                            } pb-2`}
+                          ></Col>
+                        </Row>
+                      </>
+                    )}
 
-                {loggedIn && configuration.share && (
-                  <div className="ml-3">
-                    <Row>
-                      <Col>
-                        <form
-                          className={classes.root}
-                          noValidate
-                          autoComplete="false"
-                        >
-                          <div className="input-label">Business Name</div>
-                          <Form.Control
-                            role="businessName"
-                            placeholder="Business Name"
-                            className={classes.textField}
-                            onChange={(ev) =>
-                              setAccountInfo({
-                                ...accountInfo,
-                                businessName: ev.target.value,
-                              })
-                            }
-                            type="text"
-                            value={accountInfo.businessName || ""}
+                    {loggedIn && (
+                      <Row>
+                        <Col>
+                          <FormCheck
+                            type="switch"
+                            id="share-switch"
+                            label='Activate "Sharing Lists"'
+                            checked={configuration.share || false}
+                            onChange={() => toggleSharingLists()}
                           />
+                          <p className="text-dim">
+                            Sharing lists with other users is an optional
+                            feature that requires adding list provider data,
+                            which is made public to other users when you share
+                            lists.
+                          </p>
+                        </Col>
+                      </Row>
+                    )}
 
-                          <div className="input-label">Website</div>
-                          <Form.Control
-                            role="website"
-                            placeholder="Website"
-                            className={classes.textField}
-                            onChange={(ev) =>
-                              setAccountInfo({
-                                ...accountInfo,
-                                website: ev.target.value,
-                              })
-                            }
-                            type="text"
-                            value={accountInfo.website || ""}
-                          />
+                    {loggedIn && configuration.share && (
+                      <div className="ml-3">
+                        <Row>
+                          <Col>
+                            <form
+                              className={classes.root}
+                              noValidate
+                              autoComplete="false"
+                            >
+                              <div className="input-label">Business Name</div>
+                              <Form.Control
+                                role="businessName"
+                                placeholder="Business Name"
+                                className={classes.textField}
+                                onChange={(ev) =>
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    businessName: ev.target.value,
+                                  })
+                                }
+                                type="text"
+                                value={accountInfo.businessName || ""}
+                              />
 
-                          <div className="input-label">Email</div>
-                          <Form.Control
-                            role="email"
-                            placeholder="Email"
-                            className={classes.textField}
-                            onChange={(ev) =>
-                              setAccountInfo({
-                                ...accountInfo,
-                                email: ev.target.value,
-                              })
-                            }
-                            type="text"
-                            value={accountInfo.email || ""}
-                          />
+                              <div className="input-label">Website</div>
+                              <Form.Control
+                                role="website"
+                                placeholder="Website"
+                                className={classes.textField}
+                                onChange={(ev) =>
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    website: ev.target.value,
+                                  })
+                                }
+                                type="text"
+                                value={accountInfo.website || ""}
+                              />
 
-                          <div className="input-label">Contact Person</div>
-                          <Form.Control
-                            role="contactPerson"
-                            placeholder="Contact Person"
-                            className={classes.textField}
-                            onChange={(ev) =>
-                              setAccountInfo({
-                                ...accountInfo,
-                                contactPerson: ev.target.value,
-                              })
-                            }
-                            type="text"
-                            value={accountInfo.contactPerson || ""}
-                          />
+                              <div className="input-label">Email</div>
+                              <Form.Control
+                                role="email"
+                                placeholder="Email"
+                                className={classes.textField}
+                                onChange={(ev) =>
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    email: ev.target.value,
+                                  })
+                                }
+                                type="text"
+                                value={accountInfo.email || ""}
+                              />
 
-                          <div className="input-label">Address</div>
-                          <Form.Control
-                            role="address"
-                            placeholder="Address"
-                            className={classes.textField}
-                            onChange={(ev) =>
-                              setAccountInfo({
-                                ...accountInfo,
-                                address: ev.target.value,
-                              })
-                            }
-                            type="text"
-                            value={accountInfo.address || ""}
-                          />
-                        </form>
-                      </Col>
-                    </Row>
-                  </div>
-                )}
+                              <div className="input-label">Contact Person</div>
+                              <Form.Control
+                                role="contactPerson"
+                                placeholder="Contact Person"
+                                className={classes.textField}
+                                onChange={(ev) =>
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    contactPerson: ev.target.value,
+                                  })
+                                }
+                                type="text"
+                                value={accountInfo.contactPerson || ""}
+                              />
 
-                {loggedIn && (configuration.import || configuration.share) && (
-                  <Row>
-                    <Col className="col-auto mr-auto">
-                      <Button
-                        variant="primary"
-                        className="mr-3 settings-button"
-                        type="button"
-                        disabled={disableButton}
-                        onClick={saveAccountConfiguration}
-                      >
-                        Save
-                      </Button>
-                      {configuration.share && (
-                        <Button
-                          className="settings-button"
-                          onClick={() => {
-                            clearInputInfo();
-                          }}
-                        >
-                          Clear
-                        </Button>
-                      )}
-                    </Col>
-                    <Col className="col-auto">
-                      <Button
-                        variant="outline-primary"
-                        className="double-space-left import-btn mr-3"
-                        onClick={async () => {
-                          try {
-                            await ApiService.exportAccount();
-                          } catch (e: any) {
-                            if (e.status === 401) {
-                              toast.error(e.data.message);
-                              return;
-                            }
-                          }
-                        }}
-                      >
-                        Export Account
-                      </Button>
-                      <Button
-                        variant="danger"
-                        type="button"
-                        disabled={disableButton}
-                        onClick={() => setShowDeleteModal(true)}
-                      >
-                        Delete Account
-                      </Button>
-                    </Col>
-                  </Row>
-                )}
-                <Prompt
-                  when={unsavedChanges() || uncompletedInfo()}
-                  message={(location, action) => {
-                    if (location.state) {
-                      const { tokenExpired } = location.state as {
-                        tokenExpired: boolean;
-                      };
-                      if (tokenExpired) {
-                        return true;
-                      }
-                    }
-                    return unsavedChanges()
-                      ? "You have unsaved changes, are you sure you want to leave?"
-                      : "You have activated a toggle but did not enter relevant data, are you sure you want to leave?";
-                  }}
-                />
-              </Col>
-            </Row>
+                              <div className="input-label">Address</div>
+                              <Form.Control
+                                role="address"
+                                placeholder="Address"
+                                className={classes.textField}
+                                onChange={(ev) =>
+                                  setAccountInfo({
+                                    ...accountInfo,
+                                    address: ev.target.value,
+                                  })
+                                }
+                                type="text"
+                                value={accountInfo.address || ""}
+                              />
+                            </form>
+                          </Col>
+                        </Row>
+                      </div>
+                    )}
+
+                    {loggedIn && (configuration.import || configuration.share) && (
+                      <Row>
+                        <Col className="col-auto mr-auto">
+                          <Button
+                            variant="primary"
+                            className="mr-3 settings-button"
+                            type="button"
+                            disabled={disableButton}
+                            onClick={saveAccountConfiguration}
+                          >
+                            Save
+                          </Button>
+                          {configuration.share && (
+                            <Button
+                              className="settings-button"
+                              onClick={() => {
+                                clearInputInfo();
+                              }}
+                            >
+                              Clear
+                            </Button>
+                          )}
+                        </Col>
+                        <Col className="col-auto">
+                          <Button
+                            variant="outline-primary"
+                            className="double-space-left import-btn mr-3"
+                            onClick={async () => {
+                              try {
+                                await ApiService.exportAccount();
+                              } catch (e: any) {
+                                if (e.status === 401) {
+                                  toast.error(e.data.message);
+                                  return;
+                                }
+                              }
+                            }}
+                          >
+                            Export Account
+                          </Button>
+                          <Button
+                            variant="danger"
+                            type="button"
+                            disabled={disableButton}
+                            onClick={() => setShowDeleteModal(true)}
+                          >
+                            Delete Account
+                          </Button>
+                        </Col>
+                      </Row>
+                    )}
+                    <Prompt
+                      when={unsavedChanges() || uncompletedInfo()}
+                      message={(location, action) => {
+                        const { tokenExpired } = location.state as {
+                          tokenExpired: boolean;
+                        };
+                        if (tokenExpired) {
+                          return true;
+                        }
+                        return unsavedChanges()
+                          ? "You have unsaved changes, are you sure you want to leave?"
+                          : "You have activated a toggle but did not enter relevant data, are you sure you want to leave?";
+                      }}
+                    />
+                  </Col>
+                </Row>
+              )}
+            </>
           )}
         </Col>
       </Row>
