@@ -120,7 +120,9 @@ const DeleteAccountModal = ({
             aria-label="add-cid"
             color="primary"
             onClick={confirmDelete}
-            disabled={confirmText !== account?.walletAddress?.slice(-5)}
+            disabled={
+              confirmText.toLowerCase() !== account?.walletAddress?.slice(-5)
+            }
           >
             Delete
           </Button>
