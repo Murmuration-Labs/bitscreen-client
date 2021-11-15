@@ -14,7 +14,7 @@ import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
 import LoggerService from "../../services/LoggerService";
-import HttpService from "../../services/HttpService";
+import QuickstartGuide from "./QuickstartGuide";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -48,6 +48,7 @@ export default function Settings(props) {
     contactPerson: "",
     address: "",
     nonce: "",
+    guideShown: false,
   });
   const [loggedIn, setLoggedIn] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
@@ -57,8 +58,16 @@ export default function Settings(props) {
   );
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showQuickstartGuide, setShowQuickstartGuide] =
+    useState<boolean>(false);
 
   useEffect(() => LoggerService.info("Loading Settings page."), []);
+
+  useEffect(() => {
+    if (loggedIn && !accountInfo.guideShown) {
+      setShowQuickstartGuide(true);
+    }
+  }, [loggedIn]);
 
   useEffect(() => {
     setConfiguration({ ...config });
@@ -120,6 +129,18 @@ export default function Settings(props) {
       setConfig(null);
       AuthService.removeAccount();
     }
+  };
+
+  const handleQuickstartGuideClose = () => {
+    setShowQuickstartGuide(false);
+    const provider = accountInfo;
+    provider.guideShown = true;
+    setAccountInfo(provider);
+
+    ApiService.updateProvider(provider).then(() => {
+      setAccount(provider);
+      AuthService.updateAccount(provider);
+    });
   };
 
   const uncompletedInfo = () => {
@@ -574,6 +595,10 @@ export default function Settings(props) {
       <DeleteAccountModal
         show={showDeleteModal}
         handleClose={handleDeleteClose}
+      />
+      <QuickstartGuide
+        show={showQuickstartGuide}
+        handleClose={handleQuickstartGuideClose}
       />
     </>
   );

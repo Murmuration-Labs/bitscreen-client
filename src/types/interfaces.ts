@@ -9,6 +9,7 @@ export interface Provider {
   address?: string;
   nonce?: string;
   consentDate?: string;
+  guideShown?: boolean;
 }
 
 export interface Account extends Provider {

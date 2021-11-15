@@ -68,10 +68,6 @@ function App(): JSX.Element {
   const [showConsent, setShowConsent] = useState<boolean>(false);
   const [consent, setConsent] = useState<boolean>(false);
 
-  useEffect(() => {
-    console.log("Consent => " + consent);
-  }, [consent]);
-
   const history = useHistory();
 
   const logout = () => {
