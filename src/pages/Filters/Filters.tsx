@@ -148,6 +148,7 @@ function Filters(props): JSX.Element {
   const [enabledFilters, setEnabledFilters] = useState<FilterList[]>([]);
   const [disabledFilters, setDisabledFilters] = useState<FilterList[]>([]);
   const [orphanFilters, setOrphanFilters] = useState<FilterList[]>([]);
+  const [ownedFilters, setOwnedFilters] = useState<FilterList[]>([]);
 
   const [enabledSelectedFilters, setEnabledSelectedFilters] = useState<
     FilterList[]
@@ -156,6 +157,9 @@ function Filters(props): JSX.Element {
     FilterList[]
   >([]);
   const [orphanSelectedFilters, setOrphanSelectedFilters] = useState<
+    FilterList[]
+  >([]);
+  const [ownedSelectedFilters, setOwnedSelectedFilters] = useState<
     FilterList[]
   >([]);
 
@@ -177,6 +181,11 @@ function Filters(props): JSX.Element {
     useState(false);
   const [confirmDiscardBulkActionMessage, setConfirmDiscardBulkActionMessage] =
     useState("");
+  const [showConfirmDeleteBulkAction, setShowConfirmDeleteBulkAction] =
+    useState(false);
+  const [confirmDeleteBulkActionMessage, setConfirmDeleteBulkActionMessage] =
+    useState("");
+
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
   };
@@ -209,6 +218,12 @@ function Filters(props): JSX.Element {
       disabledFilters.filter(({ isBulkSelected }) => isBulkSelected)
     );
   }, [disabledFilters]);
+
+  useEffect(() => {
+    setOwnedSelectedFilters(
+      ownedFilters.filter(({ isBulkSelected }) => isBulkSelected)
+    );
+  }, [ownedFilters]);
 
   useEffect(() => {
     setOrphanSelectedFilters(
@@ -770,6 +785,7 @@ function Filters(props): JSX.Element {
     setEnabledFilters(filterLists.filter((f) => isEnabled(f)));
     setDisabledFilters(filterLists.filter((f) => isDisabled(f)));
     setOrphanFilters(filterLists.filter((f) => isOrphan(f)));
+    setOwnedFilters(filterLists.filter((f) => !isImported(f)));
 
     setBulkCount({
       checkedCount: filterLists.filter((f) => f.isBulkSelected).length,
@@ -803,6 +819,27 @@ function Filters(props): JSX.Element {
     );
   };
 
+  const beginBulkDelete = () => {
+    console.log(ownedSelectedFilters);
+    const filterCount = ownedSelectedFilters.length;
+    let filterSubscriberCount = 0;
+    for (const filter of ownedSelectedFilters) {
+      if (filter.provider_Filters) {
+        filterSubscriberCount += filter.provider_Filters.length - 1;
+      }
+    }
+    setShowConfirmDeleteBulkAction(true);
+    if (filterSubscriberCount > 0) {
+      setConfirmDeleteBulkActionMessage(
+        `Deleting these ${filterCount} public or shared list(s) will impact ${filterSubscriberCount} subscribers.`
+      );
+    } else {
+      setConfirmDeleteBulkActionMessage(
+        `Are you sure you want to delete ${ownedFilters.length} items?`
+      );
+    }
+  };
+
   const bulkDiscardOrphans = () => {
     Promise.all(orphanSelectedFilters.map((f) => ApiService.deleteFilter(f)))
       .then(() => {
@@ -821,6 +858,36 @@ function Filters(props): JSX.Element {
           return;
         }
         enqueueSnackbar("One or more filters could not be discarded.", {
+          variant: "error",
+          preventDuplicate: true,
+          anchorOrigin: {
+            horizontal: "right",
+            vertical: "top",
+          },
+        });
+        LoggerService.error(e);
+      })
+      .finally(() => setNeedsRefresh(true));
+  };
+
+  const bulkDelete = () => {
+    Promise.all(ownedSelectedFilters.map((f) => ApiService.deleteFilter(f)))
+      .then(() => {
+        enqueueSnackbar("Successfully deleted all.", {
+          variant: "success",
+          preventDuplicate: true,
+          anchorOrigin: {
+            horizontal: "right",
+            vertical: "top",
+          },
+        });
+      })
+      .catch((e) => {
+        if (e.status === 401) {
+          toast.error(e.data.message);
+          return;
+        }
+        enqueueSnackbar("One or more filters could not be deleted.", {
           variant: "error",
           preventDuplicate: true,
           anchorOrigin: {
@@ -1035,7 +1102,8 @@ function Filters(props): JSX.Element {
                   disabled={
                     !disabledSelectedFilters.length &&
                     !enabledSelectedFilters.length &&
-                    !orphanSelectedFilters.length
+                    !orphanSelectedFilters.length &&
+                    !ownedSelectedFilters.length
                   }
                   title={"Bulk Actions"}
                   variant="outlined"
@@ -1082,6 +1150,14 @@ function Filters(props): JSX.Element {
                       type="destructive"
                       title={`Discard (${orphanSelectedFilters.length})`}
                       onClick={() => beginBulkDiscardOrphans()}
+                    />
+                  )}
+
+                  {!!ownedSelectedFilters.length && (
+                    <HoverableMenuItem
+                      type="destructive"
+                      title={`Delete (${ownedSelectedFilters.length})`}
+                      onClick={() => beginBulkDelete()}
                     />
                   )}
                 </Select>
@@ -1146,6 +1222,16 @@ function Filters(props): JSX.Element {
               closeCallback={() => {
                 setShowConfirmDiscardBulkAction(false);
                 setConfirmDiscardBulkActionMessage("");
+              }}
+            />
+            <ConfirmModal
+              show={showConfirmDeleteBulkAction}
+              title={"Confirm bulk delete filters"}
+              message={confirmDeleteBulkActionMessage}
+              callback={() => bulkDelete()}
+              closeCallback={() => {
+                setShowConfirmDeleteBulkAction(false);
+                setConfirmDeleteBulkActionMessage("");
               }}
             />
 
