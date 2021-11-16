@@ -850,7 +850,16 @@ const FilterPage = (props): JSX.Element => {
     let title;
     if (isImported) {
       title = (
-        <>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            flexWrap: "nowrap",
+            flexDirection: "row",
+          }}
+        >
           <div className="filter-page-title">
             View filter list{" "}
             <Badge variant={isOrphan(filterList) ? "danger" : "dark"}>
@@ -867,7 +876,7 @@ const FilterPage = (props): JSX.Element => {
               This list was deactivated by the owner.
             </span>
           )}
-        </>
+        </div>
       );
     } else if (isEdit) {
       title = (
