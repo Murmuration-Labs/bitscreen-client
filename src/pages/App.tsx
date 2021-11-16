@@ -145,7 +145,7 @@ function App(): JSX.Element {
 
     try {
       signature = await web3.eth.personal.sign(
-        provider.nonce,
+        provider.nonceMessage,
         provider.walletAddress,
         ""
       );
