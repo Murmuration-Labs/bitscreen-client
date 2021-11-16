@@ -831,11 +831,11 @@ function Filters(props): JSX.Element {
     setShowConfirmDeleteBulkAction(true);
     if (filterSubscriberCount > 0) {
       setConfirmDeleteBulkActionMessage(
-        `Deleting these ${filterCount} public or shared list(s) will impact ${filterSubscriberCount} subscribers.`
+        `Deleting ${filterCount} public or shared list(s) will impact ${filterSubscriberCount} subscriber(s).`
       );
     } else {
       setConfirmDeleteBulkActionMessage(
-        `Are you sure you want to delete ${ownedFilters.length} items?`
+        `Are you sure you want to delete ${ownedFilters.length} item(s)?`
       );
     }
   };
