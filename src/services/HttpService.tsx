@@ -34,21 +34,15 @@ export default {
         return response;
       },
       (error) => {
-        LoggerService.error(error);
-
-        if (error.response.status === 401) {
-          history.push("/settings", {
+        if (error.response && error.response.status === 401) {
+          AuthService.removeAccount();
+          history.push("/login", {
             tokenExpired: true,
+            currentPath: history.location.pathname,
           });
         }
         return Promise.reject(error.response);
       }
     );
-  },
-  checkIfErrorIsValid: (e) => {
-    if (e && e.tokenExpired) {
-      return false;
-    }
-    return true;
   },
 };
