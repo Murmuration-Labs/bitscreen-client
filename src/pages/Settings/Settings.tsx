@@ -14,10 +14,7 @@ import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
 import LoggerService from "../../services/LoggerService";
-<<<<<<< HEAD
 import QuickstartGuide from "./QuickstartGuide";
-=======
->>>>>>> Added login page + URL reminder
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -141,7 +138,7 @@ export default function Settings(props) {
     setAccountInfo(provider);
 
     ApiService.updateProvider(provider).then(() => {
-      setAccount(provider);
+      setProvider(provider);
       AuthService.updateAccount(provider);
     });
   };
