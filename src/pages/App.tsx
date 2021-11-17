@@ -21,6 +21,7 @@ import Filters from "./Filters/Filters";
 import PublicFilterDetailsPage from "./Public/PublicFilterDetails/PublicFilterDetails";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
+import Login from "./Login/Login";
 import detectEthereumProvider from "@metamask/detect-provider";
 import Web3 from "web3";
 import ApiService from "../services/ApiService";
@@ -38,6 +39,7 @@ interface MatchParams {
 export type RouterProps = RouteComponentProps<MatchParams>;
 
 const PrivateRoute = ({
+  additionalProps,
   comp: Component, // use comp prop
   provider: provider,
   config: config,
@@ -48,9 +50,16 @@ const PrivateRoute = ({
       {...rest}
       render={(props) => {
         if (!provider || !provider.accessToken) {
-          return <Redirect to="/settings" />;
+          return <Redirect to="/login" />;
         } else {
-          return <Component {...props} provider={provider} config={config} />;
+          return (
+            <Component
+              {...props}
+              {...additionalProps}
+              provider={provider}
+              config={config}
+            />
+          );
         }
       }}
     />
@@ -65,6 +74,7 @@ function App(): JSX.Element {
   const [provider, setProvider] = useState<Account | null>(
     AuthService.getAccount()
   );
+  const [previousPath, setPreviousPath] = useState<string>("");
   const [showConsent, setShowConsent] = useState<boolean>(false);
   const [consent, setConsent] = useState<boolean>(false);
 
@@ -121,7 +131,6 @@ function App(): JSX.Element {
         "Could not get provider information from the server. Please try again later!"
       );
     }
-
     if (!provider) {
       if (!consent) {
         setShowConsent(true);
@@ -142,7 +151,6 @@ function App(): JSX.Element {
       setShowConsent(true);
       return;
     }
-
     try {
       signature = await web3.eth.personal.sign(
         provider.nonceMessage,
@@ -180,7 +188,7 @@ function App(): JSX.Element {
       if (e.status === 404) {
         try {
           config = await ApiService.setProviderConfig({
-            bitscreen: true,
+            bitscreen: false,
             import: false,
             share: false,
           });
@@ -199,6 +207,11 @@ function App(): JSX.Element {
     setProvider(account);
     setWallet(account.walletAddress);
     setConsent(false);
+
+    if (previousPath) {
+      history.push(previousPath);
+      setPreviousPath("");
+    }
   };
 
   useEffect(() => {
@@ -241,14 +254,8 @@ function App(): JSX.Element {
     }
 
     const unlisten = history.listen((location) => {
-      if (location.state) {
-        const { tokenExpired } = location.state as {
-          tokenExpired: boolean;
-        };
-        if (tokenExpired) {
-          return logout();
-        }
-      }
+      if (location.pathname === "/login") return;
+
       const accessToken = AuthService.getAccount()?.accessToken;
       if (accessToken) {
         const decodedToken: jwt.JwtPayload = jwt.decode(
@@ -259,23 +266,15 @@ function App(): JSX.Element {
           decodedToken.exp &&
           Date.now() / 1000 > decodedToken.exp
         ) {
+          setPreviousPath(location.pathname);
           toast.error("Your token has expired. Please login again!");
           return logout();
         }
-      } else {
-        return;
       }
     });
     return () => {
       unlisten();
     };
-
-    // use below if WE DON'T WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
-    // if (account) {
-    //   ApiService.getProviderConfig(account.id).then((config) => {
-    //     setConfig(config);
-    //   });
-    // }
   }, []);
 
   return (
@@ -294,22 +293,59 @@ function App(): JSX.Element {
           <Col className={"stage"}>
             <Switch>
               <Route exact path="/">
-                <Redirect to="/settings" />
+                <Redirect to="/login" />
               </Route>
               <Route
-                path="/settings"
+                path="/login"
                 exact
                 render={(props) => {
-                  return (
-                    <Settings
-                      connectMetamask={connectMetamask}
-                      setConfig={setConfig}
-                      config={config}
-                      setAccount={setProvider}
-                      account={provider}
-                      {...props}
-                    />
-                  );
+                  if (!AuthService.getAccount() && props.location.state) {
+                    const { tokenExpired, currentPath } = props.location
+                      .state as {
+                      tokenExpired: boolean;
+                      currentPath: string;
+                    };
+
+                    if (tokenExpired) {
+                      setPreviousPath(currentPath);
+                      logout();
+                      return (
+                        <Login
+                          connectMetamask={connectMetamask}
+                          setConfig={setConfig}
+                          config={config}
+                          setProvider={setProvider}
+                          provider={provider}
+                          {...props}
+                        />
+                      );
+                    }
+                  }
+
+                  if (provider) {
+                    return <Redirect to="/settings" />;
+                  } else
+                    return (
+                      <Login
+                        connectMetamask={connectMetamask}
+                        setConfig={setConfig}
+                        config={config}
+                        setProvider={setProvider}
+                        provider={provider}
+                        {...props}
+                      />
+                    );
+                }}
+              />
+              <PrivateRoute
+                path="/settings"
+                exact
+                comp={Settings}
+                provider={provider}
+                config={config}
+                additionalProps={{
+                  setProvider: setProvider,
+                  setConfig: setConfig,
                 }}
               />
               <PrivateRoute
@@ -318,12 +354,14 @@ function App(): JSX.Element {
                 comp={Dashboard}
                 provider={provider}
                 config={config}
+                additionalProps={{}}
               />
               <PrivateRoute
                 path="/filters"
                 exact
                 comp={Filters}
                 provider={provider}
+                additionalProps={{}}
                 config={config}
               />
               <PrivateRoute
@@ -331,6 +369,7 @@ function App(): JSX.Element {
                 exact
                 comp={FilterPage}
                 provider={provider}
+                additionalProps={{}}
                 config={config}
               />
               <PrivateRoute
@@ -338,6 +377,7 @@ function App(): JSX.Element {
                 exact
                 comp={FilterPage}
                 provider={provider}
+                additionalProps={{}}
                 config={config}
               />
               <PrivateRoute
@@ -345,6 +385,7 @@ function App(): JSX.Element {
                 exact
                 comp={PublicFilters}
                 provider={provider}
+                additionalProps={{}}
                 config={config}
               />
               <PrivateRoute
@@ -352,10 +393,11 @@ function App(): JSX.Element {
                 exact
                 comp={PublicFilterDetailsPage}
                 provider={provider}
+                additionalProps={{}}
                 config={config}
               />
               <Route exact path="*">
-                <Redirect to="/settings" />
+                <Redirect to="/login" />
               </Route>
             </Switch>
           </Col>

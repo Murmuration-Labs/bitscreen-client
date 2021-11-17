@@ -9,12 +9,15 @@ import validator from "validator";
 import ApiService from "../../services/ApiService";
 import * as AuthService from "../../services/AuthService";
 import { Account } from "../../types/interfaces";
-import { Config, SettingsProps } from "../Filters/Interfaces";
+import { Config } from "../Filters/Interfaces";
 import "./Settings.css";
 import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
 import LoggerService from "../../services/LoggerService";
+<<<<<<< HEAD
 import QuickstartGuide from "./QuickstartGuide";
+=======
+>>>>>>> Added login page + URL reminder
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function Settings(props) {
-  const { connectMetamask, account, setAccount, config, setConfig } = props;
+  const { provider, setProvider, config, setConfig } = props;
 
   const classes = useStyles();
 
@@ -74,9 +77,9 @@ export default function Settings(props) {
   }, [props.config]);
 
   useEffect(() => {
-    setAccountInfo({ ...account });
-    if (account && account.country) {
-      setSelectedCountryOption([account.country]);
+    setAccountInfo({ ...provider });
+    if (provider && provider.country) {
+      setSelectedCountryOption([provider.country]);
     }
   }, [props.account]);
 
@@ -125,7 +128,7 @@ export default function Settings(props) {
     LoggerService.info("Hiding Delete account modal.");
 
     if (result) {
-      setAccount(null);
+      setProvider(null);
       setConfig(null);
       AuthService.removeAccount();
     }
@@ -193,7 +196,7 @@ export default function Settings(props) {
     setDisableButton(true);
 
     let updatedAccount = accountInfo;
-    const currentAccount = { ...account };
+    const currentAccount = { ...provider };
     if (!configuration.share && currentAccount) {
       updatedAccount = {
         ...currentAccount,
@@ -219,7 +222,7 @@ export default function Settings(props) {
 
     try {
       const account = await ApiService.updateProvider(updatedAccount);
-      setAccount(account);
+      setProvider(account);
       AuthService.updateAccount(account);
     } catch (e: any) {
       if (e.status === 401) {
@@ -266,39 +269,6 @@ export default function Settings(props) {
         }}
       >
         <Col className="pl-0">
-          {!loggedIn && (
-            <>
-              <div className="ml-3">
-                <Row>
-                  <Col>
-                    <Form.Label>
-                      <u>Please connect a wallet</u>
-                    </Form.Label>
-                  </Col>
-                </Row>
-              </div>
-              <div className="ml-3">
-                <Row>
-                  <Col>
-                    <p className="text-dim">
-                      Linking a wallet address is required to activate
-                      BitScreen. Your wallet address is used to access your
-                      lists, and is stored hashed for statistical purposes.
-                    </p>
-                  </Col>
-                </Row>
-              </div>
-              <div className="ml-3">
-                <Row>
-                  <Col>
-                    <Button onClick={connectMetamask}>
-                      Connect with Metamask
-                    </Button>
-                  </Col>
-                </Row>
-              </div>
-            </>
-          )}
           {loggedIn && (
             <>
               <Row>
@@ -520,7 +490,7 @@ export default function Settings(props) {
                       </div>
                     )}
 
-                    {loggedIn && (configuration.import || configuration.share) && (
+                    {loggedIn && (
                       <Row>
                         <Col className="col-auto mr-auto">
                           <Button

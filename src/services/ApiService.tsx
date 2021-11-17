@@ -213,10 +213,7 @@ const ApiService = {
     return response.data;
   },
 
-  getProvider: async (account: Account | string): Promise<Account | null> => {
-    const wallet =
-      typeof account === "string" ? account : account.walletAddress;
-
+  getProvider: async (wallet: string): Promise<Account | null> => {
     const response = await axios.get<Account | null>(
       `${serverUri()}/provider/${wallet}`
     );
@@ -224,10 +221,9 @@ const ApiService = {
     if (!response.data) {
       return null;
     }
-
     return {
-      ...(typeof account === "string" ? { walletAddress: wallet } : account),
       ...response.data,
+      walletAddress: wallet,
     };
   },
 
