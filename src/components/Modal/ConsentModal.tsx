@@ -62,6 +62,7 @@ export default function ConsentModal(props: ConsentModalProps): JSX.Element {
         </Button>
         <Button
           variant="primary"
+          disabled={!consentValue}
           onClick={() => {
             props.callback(consentValue);
             props.closeCallback();
