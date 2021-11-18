@@ -283,10 +283,11 @@ export default function PublicFilters(props) {
                     {row.isImported ? (
                       <Button
                         style={{
-                          marginLeft: -15,
+                          marginLeft: -5,
                           color: "blue",
                           backgroundColor: "white",
                           borderColor: "blue",
+                          width: 100,
                         }}
                         onClick={() => {
                           history.push(`/filters/edit/${row.shareId}`);
@@ -301,6 +302,7 @@ export default function PublicFilters(props) {
                           marginLeft: -5,
                           color: "white",
                           backgroundColor: "blue",
+                          width: 100,
                         }}
                         disabled={!isImportEnabled()}
                         onClick={() => {
@@ -312,7 +314,7 @@ export default function PublicFilters(props) {
                       </Button>
                     ) : (
                       <Button
-                        style={{ marginLeft: -5 }}
+                        style={{ marginLeft: -5, width: 100 }}
                         onClick={() => {
                           history.push(`/filters/edit/${row.shareId}`);
                         }}
