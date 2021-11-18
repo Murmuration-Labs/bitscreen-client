@@ -131,23 +131,23 @@ const PublicFilterDetailsPage = (props) => {
           },
           businessName: {
             columnName: "Provider business name:",
-            columnValue: data.provider.businessName,
+            columnValue: data.filter.provider.businessName,
           },
           contactPerson: {
             columnName: "Provider contact person:",
-            columnValue: data.provider.contactPerson,
+            columnValue: data.filter.provider.contactPerson,
           },
           website: {
             columnName: "Provider website:",
-            columnValue: data.provider.website,
+            columnValue: data.filter.provider.website,
           },
           email: {
             columnName: "Provider email:",
-            columnValue: data.provider.email,
+            columnValue: data.filter.provider.email,
           },
           address: {
             columnName: "Provider address:",
-            columnValue: data.provider.address,
+            columnValue: data.filter.provider.address,
           },
           createdAt: {
             columnName: "Created:",
@@ -163,7 +163,7 @@ const PublicFilterDetailsPage = (props) => {
           },
           country: {
             columnName: "Country:",
-            columnValue: data.provider.country,
+            columnValue: data.filter.provider.country,
           },
         };
         setFilterDetails(details);
