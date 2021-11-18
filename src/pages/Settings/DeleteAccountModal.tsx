@@ -18,9 +18,6 @@ import { Account } from "../../types/interfaces";
 import ApiService from "../../services/ApiService";
 import LoggerService from "../../services/LoggerService";
 import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
 
 interface DeleteAccountModalProps {
   show: boolean;
@@ -71,7 +68,8 @@ const DeleteAccountModal = ({
   }, [account]);
 
   const confirmDelete = () => {
-    if (confirmText === account?.walletAddress?.slice(-5)) {
+    if (confirmText === account?.walletAddress?.slice(-4)) {
+      toast.success("Account deletion initiated.");
       ApiService.deleteProvider(account).then(
         (response) => {
           setConfirmText("");
@@ -120,7 +118,7 @@ const DeleteAccountModal = ({
               </InputGroup>
               <Form.Text className="text-muted">
                 To confirm that you want to delete this account, please input
-                the last 5 characters of your wallet address.
+                the last 4 characters of your wallet address.
               </Form.Text>
             </Form.Row>
           </Form>
