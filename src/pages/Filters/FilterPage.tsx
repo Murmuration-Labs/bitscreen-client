@@ -1465,7 +1465,7 @@ const FilterPage = (props): JSX.Element => {
           />
           <ConfirmModal
             show={showDiscardDisabled}
-            title="Globally disabled filter list"
+            title="Inactive filter list"
             message="This list was deactivated by the owner. Do you want to discard it?"
             callback={() => deleteCurrentFilter()}
             confirmMessage="Yes"
