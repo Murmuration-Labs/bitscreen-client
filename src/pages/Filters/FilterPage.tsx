@@ -51,6 +51,8 @@ import { IconButton, MenuItem } from "@material-ui/core";
 import ConflictModal from "./Cids/ConflictModal";
 import LoggerService from "../../services/LoggerService";
 import { CID } from "multiformats";
+import { useTitle } from "react-use";
+import PageTitle from "../../components/Utils/PageTitle";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -860,6 +862,7 @@ const FilterPage = (props): JSX.Element => {
             flexDirection: "row",
           }}
         >
+          <PageTitle title="View filter list - BitScreen" />
           <div className="filter-page-title">
             View filter list{" "}
             <Badge variant={isOrphan(filterList) ? "danger" : "dark"}>
@@ -890,6 +893,7 @@ const FilterPage = (props): JSX.Element => {
             flexDirection: "row",
           }}
         >
+          <PageTitle title={`Edit ${filterList.name} - BitScreen`} />
           <div className="filter-page-title">Edit filter list</div>
           <span className="page-subtitle">
             Make changes to {filterList.name} (
@@ -901,7 +905,12 @@ const FilterPage = (props): JSX.Element => {
         </div>
       );
     } else {
-      title = <div className="filter-page-title">New filter list</div>;
+      title = (
+        <>
+          <PageTitle title="New filter list - BitScreen" />
+          <div className="filter-page-title">New filter list</div>
+        </>
+      );
     }
 
     return (

@@ -15,6 +15,7 @@ import { Option, Typeahead } from "react-bootstrap-typeahead";
 import DeleteAccountModal from "./DeleteAccountModal";
 import LoggerService from "../../services/LoggerService";
 import QuickstartGuide from "./QuickstartGuide";
+import { useTitle } from "react-use";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,6 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export default function Settings(props) {
+  useTitle("Settings - BitScreen");
   const { provider, setProvider, config, setConfig } = props;
 
   const classes = useStyles();

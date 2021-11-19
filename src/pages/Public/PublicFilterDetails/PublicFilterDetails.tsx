@@ -20,6 +20,8 @@ import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";
 import LoggerService from "../../../services/LoggerService";
 import { toast } from "react-toastify";
+import { useTitle } from "react-use";
+import PageTitle from "../../../components/Utils/PageTitle";
 
 const PublicFilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -215,6 +217,9 @@ const PublicFilterDetailsPage = (props) => {
               >
                 &#8249;
               </div>
+              <PageTitle
+                title={`${filterDetails.nameOfList.columnValue} - BitScreen`}
+              />
               <div
                 style={{
                   marginRight: "12px",
