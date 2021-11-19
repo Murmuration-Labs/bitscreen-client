@@ -167,7 +167,7 @@ const PublicFilterDetailsPage = (props) => {
           },
         };
         setFilterDetails(details);
-        setFilterProviderId(data.provider.id);
+        setFilterProviderId(data.filter.provider.id);
         setLoaded(true);
       })
       .catch((e) => {
