@@ -1,11 +1,5 @@
-import Paper from "@material-ui/core/Paper";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableRow from "@material-ui/core/TableRow";
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Badge, Button, Col, Container, Row } from "react-bootstrap";
 import { useHistory } from "react-router";
 import {
   PublicFilterDetailsCard,
@@ -15,7 +9,7 @@ import {
 import ApiService from "../../../services/ApiService";
 import * as AuthService from "../../../services/AuthService";
 import ImportFilterModal from "../../Filters/ImportFilterModal";
-import { Config, FilterList } from "../../Filters/Interfaces";
+import { Config, FilterList, Visibility } from "../../Filters/Interfaces";
 import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";
 import LoggerService from "../../../services/LoggerService";
@@ -79,6 +73,7 @@ const PublicFilterDetailsPage = (props) => {
     },
   });
   const [isImported, setIsImported] = useState<boolean>(false);
+  const [isUnlisted, setIsUnlisted] = useState<boolean>(false);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
   const [toBeImportedFilter, setToBeImportedFilter] = useState<
     FilterList | undefined
@@ -118,6 +113,7 @@ const PublicFilterDetailsPage = (props) => {
     ApiService.getPublicFilterDetails(shareId)
       .then((data: any) => {
         setIsImported(data.isImported);
+        setIsUnlisted(data.filter.visibility === Visibility.Shared);
         const details = {
           nameOfList: {
             columnName: "Name of list:",
@@ -169,7 +165,7 @@ const PublicFilterDetailsPage = (props) => {
           },
         };
         setFilterDetails(details);
-        setFilterProviderId(data.provider.id);
+        setFilterProviderId(data.filter.provider.id);
         setLoaded(true);
       })
       .catch((e) => {
@@ -229,6 +225,7 @@ const PublicFilterDetailsPage = (props) => {
                 }}
               >
                 {filterDetails.nameOfList.columnValue}
+                {isUnlisted && <Badge variant={"dark"}>Unlisted</Badge>}
               </div>
               <div className="page-subtitle">List details & provider info</div>
             </div>
