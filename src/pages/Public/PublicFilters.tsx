@@ -27,6 +27,7 @@ import LoggerService from "../../services/LoggerService";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/ClearRounded";
 import { toast } from "react-toastify";
+import { useTitle } from "react-use";
 
 const headCells: HeadCell<Data>[] = [
   { id: "name", numeric: false, label: "Filter Name", sortable: true },
@@ -41,6 +42,7 @@ const headCells: HeadCell<Data>[] = [
 ];
 
 export default function PublicFilters(props) {
+  useTitle(`Directory - BitScreen`);
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
   const [page, setPage] = React.useState(0);

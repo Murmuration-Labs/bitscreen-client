@@ -69,6 +69,7 @@ import LoggerService from "../../services/LoggerService";
 import MenuButton from "@material-ui/icons/MoreVert";
 import DropdownMenu from "./DropdownMenu";
 import { toast } from "react-toastify";
+import { useTitle } from "react-use";
 
 interface MyFiltersTableData {
   name: string;
@@ -113,6 +114,7 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
 ];
 
 function Filters(props): JSX.Element {
+  useTitle("My Filters - BitScreen");
   /**
    * UTILS
    */
