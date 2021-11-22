@@ -21,6 +21,7 @@ import Filters from "./Filters/Filters";
 import PublicFilterDetailsPage from "./Public/PublicFilterDetails/PublicFilterDetails";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
+import NewSettings from "./SettingsNew/Settings";
 import Login from "./Login/Login";
 import detectEthereumProvider from "@metamask/detect-provider";
 import Web3 from "web3";
@@ -394,6 +395,17 @@ function App(): JSX.Element {
                 comp={PublicFilterDetailsPage}
                 provider={provider}
                 additionalProps={{}}
+                config={config}
+              />
+              <PrivateRoute
+                path="/newsettings"
+                exact
+                comp={NewSettings}
+                provider={provider}
+                additionalProps={{
+                  setProvider: setProvider,
+                  setConfig: setConfig,
+                }}
                 config={config}
               />
               <Route exact path="*">
