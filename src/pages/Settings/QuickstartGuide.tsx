@@ -47,7 +47,7 @@ const QuickstartGuide = ({
             providers using Lotus Miner. It enables users to prevent storage and
             retrieval deals related to known CIDs on private or shared filter
             lists.
-            <ul>
+            <ul style={{ marginTop: 15 }}>
               <li>
                 <Link>Read the full BitScreen help documentation.</Link>
               </li>
@@ -57,7 +57,7 @@ const QuickstartGuide = ({
           <h3>Installation</h3>
           <Typography gutterBottom>
             To set up BitScreen, run the configuration script located
-            <Link> here </Link>. The script will walk you through available
+            <Link> here</Link>. The script will walk you through available
             options, and will download the required components based on your
             selections. Lotus Miner must be restarted once the BitScreen Plugin
             is installed.
@@ -70,8 +70,8 @@ const QuickstartGuide = ({
           </Typography>
           <ol>
             <li>
-              <Link>Lotus Plugin</Link> (required): Prevents deals in Lotus for
-              CIDs contained in Local CID List or List Manager.
+              <Link>Lotus Plugin</Link> (<i>required</i>): Prevents deals in
+              Lotus for CIDs contained in Local CID List or List Manager.
             </li>
             <li>
               <Link>Local CID List</Link>: Flat file containing CIDs to be
@@ -84,8 +84,8 @@ const QuickstartGuide = ({
               installed, overrides Local CID List.
             </li>
             <li>
-              <Link>List Manager</Link> (optional): Advanced cloud-based utility
-              to create, share & import filter lists.
+              <Link>List Manager</Link> (<i>optional</i>): Advanced cloud-based
+              utility to create, share & import filter lists.
               <ul>
                 <li>
                   <Link>GUI Client</Link>
@@ -104,14 +104,14 @@ const QuickstartGuide = ({
           </Typography>
           <ul>
             <li>
-              Basic: If you’re using the Plugin with the Local CID list only,
-              you can simply edit the CIDs contained on the list manually. You
-              won’t be able to share or import lists from other users.
+              <b>Basic</b>: If you’re using the Plugin with the Local CID list
+              only, you can simply edit the CIDs contained on the list manually.
+              You won’t be able to share or import lists from other users.
             </li>
             <li>
-              Advanced: If you’re using the Plugin with the List Updater daemon,
-              you will also need to run the List Manager, either from the
-              command line, or using the GUI client.
+              <b>Advanced</b>: If you’re using the Plugin with the List Updater
+              daemon, you will also need to run the List Manager, either from
+              the command line, or using the GUI client.
             </li>
           </ul>
 
@@ -120,16 +120,16 @@ const QuickstartGuide = ({
             <li>
               If you’re using the GUI client, connect a Metamask wallet in your
               browser. If you’re using the CLI, export a private key or seed
-              phrase from Metamask and enter it when prompted (required).
+              phrase from Metamask and enter it when prompted (<i>required</i>).
             </li>
             <li>
               Export a private key or seed phrase from Metamask and enter it
-              into the Updater (required).
+              into the Updater (<i>required</i>).
             </li>
             <li>
               {" "}
               Activate BitScreen filtering via Settings in the GUI client or CLI
-              (required).
+              (<i>required</i>).
             </li>
             <li>
               {" "}
@@ -138,13 +138,13 @@ const QuickstartGuide = ({
             </li>
             <li>
               {" "}
-              Activate list importing by entering country data in Settings
-              (optional).
+              Activate list importing by entering country data in Settings (
+              <i>optional</i>).
             </li>
             <li>
               {" "}
-              Activate list sharing by entering requested provider information
-              (optional).
+              Activate list sharing by entering requested provider information (
+              <i>optional</i>).
             </li>
           </ol>
         </DialogContent>
