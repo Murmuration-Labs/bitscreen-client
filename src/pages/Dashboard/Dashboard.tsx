@@ -21,7 +21,7 @@ import LoggerService from "../../services/LoggerService";
 import { toast } from "react-toastify";
 import { useTitle } from "react-use";
 
-function Dashboard(): JSX.Element {
+function Dashboard(props): JSX.Element {
   useTitle("Dashboard - BitScreen");
   const [periodType, setPeriodType] = useState<PeriodType>(PeriodType.daily);
   const [periodInterval, setPeriodInterval] = useState<PeriodInterval>({
