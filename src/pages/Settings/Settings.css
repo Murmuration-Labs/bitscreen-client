@@ -1,3 +1,12 @@
+@font-face {
+  font-family: Inter;
+  src: url(../../resources/fonts/Inter.ttf);
+}
+
+.settings-page-container {
+  font-family: "Inter";
+}
+
 .text-dim {
   color: #828282;
   font-size: 12px;
@@ -8,12 +17,207 @@
   font-size: 14px;
 }
 
-.settings-width {
-  width: 900px;
+.external-link {
+  cursor: pointer;
+  text-decoration-line: underline;
+  color: #0d6efd;
 }
 
-.settings-button {
-  border-color: #003bdd;
+.t-lp {
+  color: RGBA(0, 0, 0, 0.92);
+}
+
+.t-ls {
+  color: RGBA(0, 0, 0, 0.68);
+}
+
+.t-400 {
+  font-weight: 400;
+}
+
+.t-500 {
+  font-weight: 500;
+}
+
+.t-600 {
+  font-weight: 600;
+}
+
+.t-700 {
+  font-weight: 700;
+}
+
+.t-14 {
+  font-size: 14px;
+}
+
+.t-16 {
+  font-size: 16px;
+}
+
+.t-20 {
+  font-size: 20px;
+}
+
+.mr-12px {
+  margin-right: 12px;
+}
+
+.pb-8px {
+  padding-bottom: 8px;
+}
+
+.pb-16px {
+  padding-bottom: 16px;
+}
+
+.page-title {
+  margin: 8px 0 16px 0;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.box-container {
+  padding: 24px 40px;
+  border: 1px solid #def1e6;
+  border-radius: 16px;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+}
+
+.page-left-side {
+  width: 840px;
+  padding-right: 40px;
+}
+
+.page-right-side {
+  padding-left: 80px;
+  min-width: 440px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  padding-bottom: 20px;
+}
+
+.slice-info {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.address-info {
+  padding-bottom: 40px;
+}
+
+.slice-title-row {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  padding-bottom: 8px;
+}
+
+.slice-description {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  padding-bottom: 8px;
+}
+
+.slice-guide {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  padding-bottom: 12px;
+  font-style: italic;
+}
+
+.slice-input {
+  padding-bottom: 16px;
+}
+
+.input-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  padding-bottom: 4px;
+}
+
+.input-field {
+  height: 40px;
+  width: 100%;
+}
+
+.account-details {
+  margin-bottom: 40px;
+}
+
+.wallet-status-actions {
+  box-shadow: inset 0px -1px 0px #dfe1e6;
+  height: 80px;
+  padding-bottom: 40px;
+}
+
+.download-cids {
+  padding-bottom: 32px;
+  margin-bottom: 40px;
+  box-shadow: inset 0px -1px 0px #dfe1e6;
+}
+
+.button-style {
+  height: 40px;
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.blue-button,
+.blue-button:hover {
   background-color: #003bdd;
+  border-color: #003bdd;
   color: white;
+}
+
+.red-button,
+.red-button:hover {
+  background-color: #dc3534;
+  border-color: #dc3534;
+  color: white;
+}
+
+.grey-button,
+.grey-button:hover {
+  background-color: white;
+  border-color: #adb5bd;
+  color: RGBA(0, 0, 0, 0.44);
+}
+
+.status,
+.help {
+  padding: 24px;
+  background-color: #faf9f9;
+  border: 1px solid #dfe1e6;
+  border-radius: 16px;
+}
+
+.status {
+  margin-bottom: 20px;
+}
+
+.tools {
+  padding-bottom: 12px;
+}
+
+.help-link {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #0d6efd;
+  text-decoration: none;
+  cursor: pointer;
 }

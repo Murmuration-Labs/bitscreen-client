@@ -169,7 +169,7 @@ const PublicFilterDetailsPage = (props) => {
         setLoaded(true);
       })
       .catch((e) => {
-        if (e.status === 401) {
+        if (e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }

@@ -2,7 +2,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
 import Web3 from "web3";
 import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account } from "../types/interfaces";
+import { Account, DealFromApi } from "../types/interfaces";
 import {
   CidItem,
   FilterList,
@@ -321,21 +321,28 @@ const ApiService = {
     const response = await axios.get(
       `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
     );
-    // // return Object.values(response.data);
-    const data: ChartDataEntry[] = Object.values(response.data);
-    // return data;
-    const mock = data.map((element) => {
-      const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
-      const totalCidsFiltered =
-        totalRequestsBlocked -
-        Math.ceil(Math.random() * (totalRequestsBlocked - 50));
-      return {
-        key: element.key,
-        total_count: totalRequestsBlocked,
-        unique_count: totalCidsFiltered,
-      };
-    });
-    return mock;
+
+    const data: Array<DealFromApi> = response.data;
+    console.log(data);
+    const parsedData: ChartDataEntry[] = Object.values(data).map((e) => ({
+      unique_count: e.unique_blocked ? parseInt(e.unique_blocked) : 0,
+      total_count: e.total_blocked ? parseInt(e.total_blocked) : 0,
+      key: e.key,
+    }));
+    return parsedData;
+
+    // const mock = data.map((element) => {
+    //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
+    //   const totalCidsFiltered =
+    //     totalRequestsBlocked -
+    //     Math.ceil(Math.random() * (totalRequestsBlocked - 50));
+    //   return {
+    //     key: element.key,
+    //     total_count: totalRequestsBlocked,
+    //     unique_count: totalCidsFiltered,
+    //   };
+    // });
+    // return mock;
   },
 
   getProviderConfig: async (): Promise<Config> => {

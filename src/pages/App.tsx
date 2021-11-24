@@ -1,36 +1,34 @@
+import detectEthereumProvider from "@metamask/detect-provider";
+import * as jwt from "jsonwebtoken";
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import {
-  BrowserRouter as Router,
   Redirect,
   Route,
   RouteComponentProps,
   Switch,
+  useHistory,
 } from "react-router-dom";
-import { toast } from "react-toastify";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Web3 from "web3";
+import ConsentModal from "../components/Modal/ConsentModal";
 import Navigation from "../components/Navigation/Navigation";
 import AuthProvider from "../providers/AuthProvider";
+import ApiService from "../services/ApiService";
 import * as AuthService from "../services/AuthService";
+import LoggerService from "../services/LoggerService";
+import { Account } from "../types/interfaces";
 import "./App.css";
 import Dashboard from "./Dashboard/Dashboard";
 import FilterPage from "./Filters/FilterPage";
 import Filters from "./Filters/Filters";
+import { Config } from "./Filters/Interfaces";
+import Login from "./Login/Login";
 import PublicFilterDetailsPage from "./Public/PublicFilterDetails/PublicFilterDetails";
 import PublicFilters from "./Public/PublicFilters";
 import Settings from "./Settings/Settings";
-import Login from "./Login/Login";
-import detectEthereumProvider from "@metamask/detect-provider";
-import Web3 from "web3";
-import ApiService from "../services/ApiService";
-import { Config } from "./Filters/Interfaces";
-import { Account } from "../types/interfaces";
-import LoggerService from "../services/LoggerService";
-import ConsentModal from "../components/Modal/ConsentModal";
-import * as jwt from "jsonwebtoken";
-import { useHistory } from "react-router-dom";
 
 interface MatchParams {
   id: string;
@@ -181,13 +179,13 @@ function App(): JSX.Element {
       AuthService.createAccount(account);
     }
 
-    let config;
+    let configObject;
     try {
-      config = await ApiService.getProviderConfig();
+      configObject = await ApiService.getProviderConfig();
     } catch (e: any) {
       if (e.status === 404) {
         try {
-          config = await ApiService.setProviderConfig({
+          configObject = await ApiService.setProviderConfig({
             bitscreen: false,
             import: false,
             share: false,
@@ -202,8 +200,7 @@ function App(): JSX.Element {
       provider.consentDate = new Date().toISOString();
       await ApiService.updateProvider(provider);
     }
-
-    setConfig(config);
+    setConfig(configObject);
     setProvider(account);
     setWallet(account.walletAddress);
     setConsent(false);
@@ -246,9 +243,9 @@ function App(): JSX.Element {
         (err: any) => {
           if (err.status === 401) {
             toast.error(err.data.message);
-            logout();
-            return;
           }
+          logout();
+          return;
         }
       );
     }
@@ -307,8 +304,6 @@ function App(): JSX.Element {
                     };
 
                     if (tokenExpired) {
-                      setPreviousPath(currentPath);
-                      logout();
                       return (
                         <Login
                           connectMetamask={connectMetamask}
@@ -316,6 +311,8 @@ function App(): JSX.Element {
                           config={config}
                           setProvider={setProvider}
                           provider={provider}
+                          setPreviousPath={setPreviousPath}
+                          previousPath={currentPath}
                           {...props}
                         />
                       );
@@ -324,7 +321,7 @@ function App(): JSX.Element {
 
                   if (provider) {
                     return <Redirect to="/settings" />;
-                  } else
+                  } else {
                     return (
                       <Login
                         connectMetamask={connectMetamask}
@@ -335,6 +332,7 @@ function App(): JSX.Element {
                         {...props}
                       />
                     );
+                  }
                 }}
               />
               <PrivateRoute

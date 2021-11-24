@@ -3,4 +3,16 @@ import moveIcon from "./move.svg";
 import editIcon from "./edit.svg";
 import metamaskIcon from "./metamask.png";
 
-export { deleteIcon, moveIcon, editIcon, metamaskIcon };
+import activeIcon from "./active.svg";
+import inactiveIcon from "./inactive.svg";
+import infoIcon from "./info.svg";
+
+export {
+  deleteIcon,
+  moveIcon,
+  editIcon,
+  metamaskIcon,
+  activeIcon,
+  inactiveIcon,
+  infoIcon,
+};
