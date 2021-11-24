@@ -6,9 +6,21 @@ import LoggerService from "../../services/LoggerService";
 import { metamaskIcon } from "../../resources/icons/index";
 
 export default function Login(props) {
-  const { connectMetamask } = props;
+  const { connectMetamask, previousPath, setPreviousPath } = props;
 
   useEffect(() => LoggerService.info("Loading Login page."), []);
+
+  useEffect(() => {
+    if (previousPath) {
+      setPreviousPath((currentPath) => {
+        if (!currentPath) {
+          return previousPath;
+        } else {
+          return currentPath;
+        }
+      });
+    }
+  }, [previousPath]);
 
   return (
     <>

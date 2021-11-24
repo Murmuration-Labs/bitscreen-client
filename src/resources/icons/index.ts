@@ -5,6 +5,7 @@ import metamaskIcon from "./metamask.png";
 
 import activeIcon from "./active.svg";
 import inactiveIcon from "./inactive.svg";
+import infoIcon from "./info.svg";
 
 export {
   deleteIcon,
@@ -13,4 +14,5 @@ export {
   metamaskIcon,
   activeIcon,
   inactiveIcon,
+  infoIcon,
 };
