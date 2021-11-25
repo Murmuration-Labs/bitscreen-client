@@ -140,7 +140,7 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  const clipboardCopy = (linkToBeCopied) => {
+  const clipboardCopy = (linkToBeCopied, successMessage = "") => {
     const selBox = document.createElement("textarea");
     selBox.style.position = "fixed";
     selBox.style.left = "0";
@@ -152,7 +152,7 @@ const FilterPage = (props): JSX.Element => {
     selBox.select();
     document.execCommand("copy");
     document.body.removeChild(selBox);
-    toast.success("The link was copied succesfully");
+    toast.success(successMessage ?? "The link was copied succesfully");
   };
 
   const visibilityHelpText = (): string => {
@@ -167,7 +167,7 @@ const FilterPage = (props): JSX.Element => {
         break;
       case Visibility.Shared:
         text =
-          "Shared lists are only visible to other users if they have the URL.";
+          "Shared lists are only visible to other users if they have the URL or ID.";
         break;
       case Visibility.Exception:
         text =
@@ -183,37 +183,46 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const visibilityGenerateLink = (): JSX.Element => {
+    let generatedLink = "";
+
     if (
-      filterList.visibility !== Visibility.Public &&
-      filterList.visibility !== Visibility.Shared
+      [Visibility.Public, Visibility.Shared].includes(filterList.visibility)
     ) {
+      generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
+    } else {
       return <></>;
     }
 
-    let generatedLink = "";
-    let buttonText = "";
-
-    if (filterList.visibility === Visibility.Public) {
-      generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
-      buttonText = "Copy Link ";
-    } else if (filterList.visibility === Visibility.Shared) {
-      generatedLink = serverUri() + "/filter/share/" + filterList.shareId;
-      buttonText = "Copy Link ";
-    }
-
     return (
-      <Button
-        size="sm"
-        className={"text-dim"}
-        style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
-        onClick={() => {
-          clipboardCopy(generatedLink);
-        }}
-        variant="muted"
-      >
-        {buttonText}
-        <FontAwesomeIcon size="sm" icon={faLink as IconProp} />
-      </Button>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <Button
+          size="sm"
+          className={"text-dim"}
+          style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
+          onClick={() => {
+            clipboardCopy(generatedLink, "The link was copied successfully.");
+          }}
+          variant="muted"
+        >
+          Copy Link
+          <FontAwesomeIcon size="sm" icon={faLink as IconProp} />
+        </Button>
+        <Button
+          size="sm"
+          className={"text-dim"}
+          style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
+          onClick={() => {
+            clipboardCopy(
+              filterList.shareId,
+              "The ID was copied successfully."
+            );
+          }}
+          variant="muted"
+        >
+          Copy ID
+          <FontAwesomeIcon size="sm" icon={faLink as IconProp} />
+        </Button>
+      </div>
     );
   };
 
