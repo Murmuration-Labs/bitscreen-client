@@ -158,12 +158,7 @@ function Filters(props): JSX.Element {
   const [disabledSelectedFilters, setDisabledSelectedFilters] = useState<
     FilterList[]
   >([]);
-  const [orphanSelectedFilters, setOrphanSelectedFilters] = useState<
-    FilterList[]
-  >([]);
-  const [ownedSelectedFilters, setOwnedSelectedFilters] = useState<
-    FilterList[]
-  >([]);
+  const [selectedFilters, setSelectedFilters] = useState<FilterList[]>([]);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -179,13 +174,9 @@ function Filters(props): JSX.Element {
     useState<BulkSelectedType>(BulkSelectedType.None);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [showConfirmDiscardBulkAction, setShowConfirmDiscardBulkAction] =
+  const [showConfirmRemoveBulkAction, setShowConfirmRemoveBulkAction] =
     useState(false);
-  const [confirmDiscardBulkActionMessage, setConfirmDiscardBulkActionMessage] =
-    useState("");
-  const [showConfirmDeleteBulkAction, setShowConfirmDeleteBulkAction] =
-    useState(false);
-  const [confirmDeleteBulkActionMessage, setConfirmDeleteBulkActionMessage] =
+  const [confirmRemoveBulkActionMessage, setConfirmRemoveBulkActionMessage] =
     useState("");
 
   const translateVisibility = (visibility: Visibility): string => {
@@ -222,16 +213,10 @@ function Filters(props): JSX.Element {
   }, [disabledFilters]);
 
   useEffect(() => {
-    setOwnedSelectedFilters(
-      ownedFilters.filter(({ isBulkSelected }) => isBulkSelected)
+    setSelectedFilters(
+      filterLists.filter(({ isBulkSelected }) => isBulkSelected)
     );
   }, [ownedFilters]);
-
-  useEffect(() => {
-    setOrphanSelectedFilters(
-      orphanFilters.filter(({ isBulkSelected }) => isBulkSelected)
-    );
-  }, [orphanFilters]);
 
   useEffect(() => {
     if (!filterLists || !filterLists.length) {
@@ -814,65 +799,28 @@ function Filters(props): JSX.Element {
     setShowConfirmEnabled(true);
   };
 
-  const beginBulkDiscardOrphans = () => {
-    setShowConfirmDiscardBulkAction(true);
-    setConfirmDiscardBulkActionMessage(
-      `Are you sure you want to discard ${orphanSelectedFilters.length} items?`
-    );
-  };
-
   const beginBulkDelete = () => {
-    const filterCount = ownedSelectedFilters.length;
+    const filterCount = selectedFilters.length;
     let filterSubscriberCount = 0;
-    for (const filter of ownedSelectedFilters) {
-      if (filter.provider_Filters) {
+    for (const filter of selectedFilters) {
+      if (!isImported(filter) && filter.provider_Filters) {
         filterSubscriberCount += filter.provider_Filters.length - 1;
       }
     }
-    setShowConfirmDeleteBulkAction(true);
+    setShowConfirmRemoveBulkAction(true);
     if (filterSubscriberCount > 0) {
-      setConfirmDeleteBulkActionMessage(
-        `Deleting these ${filterCount} public or shared list(s) will impact ${filterSubscriberCount} subscribers.`
+      setConfirmRemoveBulkActionMessage(
+        `Removing these ${filterCount} list(s) will impact ${filterSubscriberCount} subscribers.`
       );
     } else {
-      setConfirmDeleteBulkActionMessage(
-        `Are you sure you want to delete ${ownedFilters.length} items?`
+      setConfirmRemoveBulkActionMessage(
+        `Are you sure you want to remove ${ownedFilters.length} items?`
       );
     }
   };
 
-  const bulkDiscardOrphans = () => {
-    Promise.all(orphanSelectedFilters.map((f) => ApiService.deleteFilter(f)))
-      .then(() => {
-        enqueueSnackbar("Successfully discarded all.", {
-          variant: "success",
-          preventDuplicate: true,
-          anchorOrigin: {
-            horizontal: "right",
-            vertical: "top",
-          },
-        });
-      })
-      .catch((e) => {
-        if (e.status === 401 && props.config) {
-          toast.error(e.data.message);
-          return;
-        }
-        enqueueSnackbar("One or more filters could not be discarded.", {
-          variant: "error",
-          preventDuplicate: true,
-          anchorOrigin: {
-            horizontal: "right",
-            vertical: "top",
-          },
-        });
-        LoggerService.error(e);
-      })
-      .finally(() => setNeedsRefresh(true));
-  };
-
-  const bulkDelete = () => {
-    Promise.all(ownedSelectedFilters.map((f) => ApiService.deleteFilter(f)))
+  const bulkRemove = () => {
+    Promise.all(selectedFilters.map((f) => ApiService.deleteFilter(f)))
       .then(() => {
         enqueueSnackbar("Successfully deleted all.", {
           variant: "success",
@@ -1103,8 +1051,7 @@ function Filters(props): JSX.Element {
                   disabled={
                     !disabledSelectedFilters.length &&
                     !enabledSelectedFilters.length &&
-                    !orphanSelectedFilters.length &&
-                    !ownedSelectedFilters.length
+                    !selectedFilters.length
                   }
                   title={"Bulk Actions"}
                   variant="outlined"
@@ -1146,18 +1093,10 @@ function Filters(props): JSX.Element {
                     />
                   )}
 
-                  {!!orphanSelectedFilters.length && (
+                  {!!selectedFilters.length && (
                     <HoverableMenuItem
                       type="destructive"
-                      title={`Discard (${orphanSelectedFilters.length})`}
-                      onClick={() => beginBulkDiscardOrphans()}
-                    />
-                  )}
-
-                  {!!ownedSelectedFilters.length && (
-                    <HoverableMenuItem
-                      type="destructive"
-                      title={`Delete (${ownedSelectedFilters.length})`}
+                      title={`Remove (${selectedFilters.length})`}
                       onClick={() => beginBulkDelete()}
                     />
                   )}
@@ -1216,23 +1155,13 @@ function Filters(props): JSX.Element {
             />
 
             <ConfirmModal
-              show={showConfirmDiscardBulkAction}
-              title={"Confirm bulk discard filters"}
-              message={confirmDiscardBulkActionMessage}
-              callback={() => bulkDiscardOrphans()}
+              show={showConfirmRemoveBulkAction}
+              title={"Confirm bulk remove filters"}
+              message={confirmRemoveBulkActionMessage}
+              callback={() => bulkRemove()}
               closeCallback={() => {
-                setShowConfirmDiscardBulkAction(false);
-                setConfirmDiscardBulkActionMessage("");
-              }}
-            />
-            <ConfirmModal
-              show={showConfirmDeleteBulkAction}
-              title={"Confirm bulk delete filters"}
-              message={confirmDeleteBulkActionMessage}
-              callback={() => bulkDelete()}
-              closeCallback={() => {
-                setShowConfirmDeleteBulkAction(false);
-                setConfirmDeleteBulkActionMessage("");
+                setShowConfirmRemoveBulkAction(false);
+                setConfirmRemoveBulkActionMessage("");
               }}
             />
 
