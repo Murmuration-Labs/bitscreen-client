@@ -34,7 +34,7 @@ const overrideLoaderCss = css`
 export default function ImportFilterModal(
   props: ImportFilterModalProps
 ): JSX.Element {
-  const [remoteFilterUri, setRemoteFilterUri] = useState<string>("");
+  const [remoteFilterId, setRemoteFilterId] = useState<string>("");
   const [remoteFilterError, setRemoteFilterError] = useState<boolean>(false);
   const [fetchedFilterList, setFetchedFilterList] = useState<
     FilterList | undefined
@@ -46,11 +46,7 @@ export default function ImportFilterModal(
     useState<boolean>(false);
 
   useEffect(() => {
-    setRemoteFilterUri(
-      fetchedFilterList
-        ? `${serverUri()}/filter/share/${fetchedFilterList?.shareId}`
-        : ""
-    );
+    setRemoteFilterId(fetchedFilterList ? `${fetchedFilterList?.shareId}` : "");
   }, [fetchedFilterList]);
 
   useEffect(() => {
@@ -79,7 +75,7 @@ export default function ImportFilterModal(
     if (remoteFilterError) {
       return (
         <span className="double-space-left text-danger">
-          Invalid remote filter URI
+          Invalid remote filter ID
         </span>
       );
     }
@@ -115,7 +111,9 @@ export default function ImportFilterModal(
   const fetchRemoteFilter = async (): Promise<void> => {
     setIsFetchingRemoteFilter(true);
     try {
-      const fl = await ApiService.fetchRemoteFilter(remoteFilterUri);
+      const fl = await ApiService.fetchRemoteFilter(
+        `${serverUri()}/filter/share/${remoteFilterId}`
+      );
       setTimeout(() => {
         // small gimmick to see loader in action
         setFetchedFilterList({ ...fl, notes: fetchedFilterList?.notes });
@@ -126,7 +124,7 @@ export default function ImportFilterModal(
         toast.error(e.data.message);
         return;
       }
-      setRemoteFilterUri("");
+      setRemoteFilterId("");
       setRemoteFilterError(true);
       setIsFetchingRemoteFilter(false);
       LoggerService.error(e);
@@ -134,7 +132,7 @@ export default function ImportFilterModal(
   };
 
   const discardFilter = (): void => {
-    setRemoteFilterUri("");
+    setRemoteFilterId("");
     setFetchedFilterList(FilterService.emptyFilterList());
   };
 
@@ -164,7 +162,7 @@ export default function ImportFilterModal(
 
     setTimeout(() => {
       // small gimmick to see loader in action
-      setRemoteFilterUri("");
+      setRemoteFilterId("");
       setFetchedFilterList(FilterService.emptyFilterList());
       setIsSavingFetchedFilter(false);
 
@@ -176,10 +174,10 @@ export default function ImportFilterModal(
     if (props.prefetch) {
       fetchRemoteFilter();
     }
-  }, [remoteFilterUri]);
+  }, [remoteFilterId]);
 
-  if (props.prefetch && !remoteFilterUri) {
-    setRemoteFilterUri(props.prefetch);
+  if (props.prefetch && !remoteFilterId) {
+    setRemoteFilterId(props.prefetch);
   }
 
   const renderActionButtons = (): JSX.Element => {
@@ -189,7 +187,7 @@ export default function ImportFilterModal(
           <Button
             variant="warning"
             onClick={fetchRemoteFilter}
-            disabled={!remoteFilterUri}
+            disabled={!remoteFilterId}
           >
             Fetch remote filter
           </Button>
@@ -215,7 +213,7 @@ export default function ImportFilterModal(
     <Modal
       show={props.show}
       onHide={() => {
-        setRemoteFilterUri("");
+        setRemoteFilterId("");
         setFetchedFilterList(FilterService.emptyFilterList());
         props.closeCallback(false);
       }}
@@ -231,14 +229,14 @@ export default function ImportFilterModal(
                 <Col>
                   <Form.Control
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      setRemoteFilterUri(event.target.value);
+                      setRemoteFilterId(event.target.value);
                       if (remoteFilterError) {
                         setRemoteFilterError(false);
                       }
                     }}
                     type="text"
-                    placeholder="Remote filter URI"
-                    value={remoteFilterUri}
+                    placeholder="Remote filter ID"
+                    value={remoteFilterId}
                     disabled={
                       isFetchingRemoteFilter || !!fetchedFilterList?.name
                     }
@@ -294,7 +292,7 @@ export default function ImportFilterModal(
         <Button
           variant="secondary"
           onClick={() => {
-            setRemoteFilterUri("");
+            setRemoteFilterId("");
             setFetchedFilterList(FilterService.emptyFilterList());
             props.closeCallback(false);
           }}
