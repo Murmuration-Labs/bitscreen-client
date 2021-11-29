@@ -748,7 +748,7 @@ export default function Settings(props) {
               className="section-slice list-updater"
             >
               <div className="slice-title-row d-flex align-items-center t-lp">
-                <span className="mr-2">ListUpdater</span>
+                <span className="mr-2">List Updater</span>
                 <OverlayTrigger
                   placement="right"
                   delay={{ show: 150, hide: 300 }}

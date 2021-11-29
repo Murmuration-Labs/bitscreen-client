@@ -177,24 +177,30 @@
 }
 
 .blue-button,
-.blue-button:hover {
-  background-color: #003bdd;
-  border-color: #003bdd;
-  color: white;
+.blue-button:hover,
+.blue-button:focus,
+.blue-button:active {
+  background-color: #003bdd !important;
+  border-color: #003bdd !important;
+  color: white !;
 }
 
 .red-button,
-.red-button:hover {
-  background-color: #dc3534;
-  border-color: #dc3534;
-  color: white;
+.red-button:hover,
+.red-button:focus,
+.red-button:active {
+  background-color: #dc3534 !important;
+  border-color: #dc3534 !important;
+  color: white !important;
 }
 
 .grey-button,
-.grey-button:hover {
-  background-color: white;
-  border-color: #adb5bd;
-  color: RGBA(0, 0, 0, 0.44);
+.grey-button:hover,
+.grey-button:focus,
+.grey-button:active {
+  background-color: white !important;
+  border-color: #adb5bd !important;
+  color: RGBA(0, 0, 0, 0.44) !important;
 }
 
 .status,

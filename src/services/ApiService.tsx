@@ -318,6 +318,7 @@ const ApiService = {
 
   getChartData: async (periodType, periodInterval): Promise<any> => {
     const { startDate, endDate } = periodInterval;
+
     const response = await axios.get(
       `${serverUri()}/deals/stats/${periodType}?start=${startDate}&end=${endDate}`
     );
@@ -330,8 +331,7 @@ const ApiService = {
       key: e.key,
     }));
     return parsedData;
-
-    // const mock = data.map((element) => {
+    // const mock = Object.values(data).map((element) => {
     //   const totalRequestsBlocked = Math.ceil(Math.random() * 500) + 100;
     //   const totalCidsFiltered =
     //     totalRequestsBlocked -

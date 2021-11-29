@@ -258,7 +258,7 @@ const CidsRow = ({
               loading={exceptionLoading}
               conflicts={localConflicts}
               handleConflict={handleConflict}
-            ></LocalException>
+            />
           </TableCell>
         </>
       )}
