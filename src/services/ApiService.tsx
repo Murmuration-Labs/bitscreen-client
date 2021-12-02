@@ -41,6 +41,11 @@ const ApiService = {
     return response.data;
   },
 
+  getSharedFilter: async (shareId: string): Promise<FilterList> => {
+    const response = await axios.get(`${serverUri()}/filter/share/${shareId}`);
+    return response.data;
+  },
+
   getFilters: async (
     page: number,
     perPage: number,

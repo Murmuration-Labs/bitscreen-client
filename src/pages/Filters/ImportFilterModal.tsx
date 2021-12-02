@@ -60,7 +60,7 @@ export default function ImportFilterModal(
       return;
     }
 
-    ApiService.getFilter(props.filter.shareId).then(
+    ApiService.getSharedFilter(props.filter.shareId).then(
       (f) => setFetchedFilterList(f),
       (e) => {
         if (e.status === 401) {
