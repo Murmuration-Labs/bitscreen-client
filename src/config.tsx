@@ -11,9 +11,9 @@ export const serverUri = (): string => {
     case "development":
       return process.env.REACT_APP_HOST || "http://localhost:3030";
     case "production":
-      return "https://bxn.keyko.rocks";
+      return "https://bxn.mml.keyko.rocks";
     default:
-      return "https://bxn.keyko.rocks";
+      return "https://bxn.mml.keyko.rocks";
   }
 };
 
@@ -23,8 +23,8 @@ export const remoteMarketplaceUri = (): string => {
       return process.env.REACT_APP_HOST || "http://localhost:3030";
     case "production":
       // here you can set another server for prod
-      return "https://bxn.keyko.rocks";
+      return "https://bxn.mml.keyko.rocks";
     default:
-      return "https://bxn.keyko.rocks";
+      return "https://bxn.mml.keyko.rocks";
   }
 };
