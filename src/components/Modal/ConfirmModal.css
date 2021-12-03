@@ -1,4 +1,3 @@
-.multiple-rows-delete-message {
-  display: flex;
-  flex-direction: column;
+.modal-message {
+  word-wrap: break-word;
 }

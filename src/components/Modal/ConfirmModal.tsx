@@ -1,6 +1,7 @@
 import { ConfirmModalProps } from "./Interfaces";
 import React from "react";
 import { Modal, Button, ListGroup } from "react-bootstrap";
+import "./ConfirmModal.css";
 
 export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
   return (
@@ -14,7 +15,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
         <Modal.Title>{props.title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {props.message}
+        <div className="modal-message">{props.message}</div>
         {props.bullets ? (
           <ListGroup style={{ width: "100%", marginTop: 15 }}>
             <ul>

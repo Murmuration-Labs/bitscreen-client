@@ -24,7 +24,11 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
       cidItems.length +
       " CIDs: " +
       cidItems.reduce((result, item) => result + item.cid + ", ", "");
-    return <Modal.Title>{titleText.slice(0, -2)}</Modal.Title>;
+    return (
+      <Modal.Title style={{ wordBreak: "break-word" }}>
+        {titleText.slice(0, -2)}
+      </Modal.Title>
+    );
   };
 
   return (

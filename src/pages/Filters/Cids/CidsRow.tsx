@@ -101,7 +101,8 @@ const CidsRow = ({
 
   useEffect(() => {
     if (filter.visibility === Visibility.Exception) {
-      ApiService.getCidConflict(cid.cid, filter.id)
+      console.log("paternite");
+      ApiService.getCidConflict(cid.cid, filter.id, true)
         .then((conflicts) => {
           setLocalConflicts(conflicts);
           addConflicts(conflicts);
@@ -115,6 +116,21 @@ const CidsRow = ({
         })
         .finally(() => setExceptionLoading(false));
       return;
+    } else {
+      console.log("maternite");
+      ApiService.getCidConflict(cid.cid, filter.id, false)
+        .then((conflicts) => {
+          setLocalConflicts(conflicts);
+          addConflicts(conflicts);
+        })
+        .catch((e) => {
+          if (e.status === 401) {
+            toast.error(e.data.message);
+            return;
+          }
+          LoggerService.error(e);
+        })
+        .finally(() => setExceptionLoading(false));
     }
 
     setExceptionLoading(false);
