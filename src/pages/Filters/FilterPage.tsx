@@ -627,10 +627,13 @@ const FilterPage = (props): JSX.Element => {
       }
     }
     const filterLists: FilterList[] = data.filters;
+    const providerId = AuthService.getProviderId();
 
-    setMoveCidItems(moveItems);
+    setMoveCidItems(moveItems.filter((x) => typeof x.id === "number"));
     setMoveOptionFilters(
-      filterLists.filter((x) => x.id !== filterList.id && isOwner)
+      filterLists.filter(
+        (x) => x.id !== filterList.id && x.provider.id == providerId
+      )
     );
     setShowMoveModal(true);
   };

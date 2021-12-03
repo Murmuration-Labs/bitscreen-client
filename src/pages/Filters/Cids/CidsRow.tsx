@@ -289,6 +289,7 @@ const CidsRow = ({
           </IconButton>
         </Tooltip>
         {typeof filter.id === "number" &&
+          typeof cid.id === "number" &&
           filter.visibility !== Visibility.Exception && (
             <Tooltip title="Move">
               <IconButton
