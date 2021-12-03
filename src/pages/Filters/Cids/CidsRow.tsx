@@ -267,17 +267,13 @@ const CidsRow = ({
           {formatDate(cid.created)}
         </a>
       </TableCell>
-      {filter.visibility === Visibility.Exception && (
-        <>
-          <TableCell>
-            <LocalException
-              loading={exceptionLoading}
-              conflicts={localConflicts}
-              handleConflict={handleConflict}
-            />
-          </TableCell>
-        </>
-      )}
+      <TableCell>
+        <LocalException
+          loading={exceptionLoading}
+          conflicts={localConflicts}
+          handleConflict={handleConflict}
+        />
+      </TableCell>
       <TableCell align="right">
         <Tooltip title="Edit">
           <IconButton
