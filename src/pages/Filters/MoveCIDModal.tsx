@@ -8,9 +8,9 @@ import FilterService from "../../services/FilterService";
 import LoggerService from "../../services/LoggerService";
 
 export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
-  const [selectedFilter, setSelectedFilter] = useState<FilterList>(
-    FilterService.emptyFilterList()
-  );
+  const [selectedFilter, setSelectedFilter] = useState<Array<FilterList>>([
+    FilterService.emptyFilterList(),
+  ]);
 
   useEffect(() => {
     if (props.show) {
@@ -24,7 +24,11 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
       cidItems.length +
       " CIDs: " +
       cidItems.reduce((result, item) => result + item.cid + ", ", "");
-    return <Modal.Title>{titleText.slice(0, -2)}</Modal.Title>;
+    return (
+      <Modal.Title style={{ wordBreak: "break-word" }}>
+        {titleText.slice(0, -2)}
+      </Modal.Title>
+    );
   };
 
   return (
@@ -41,9 +45,8 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
           id="typeahead-autocomplete"
           labelKey="name"
           options={props.optionFilters}
-          onChange={(selected) => {
-            setSelectedFilter(selected[0]);
-          }}
+          onChange={setSelectedFilter}
+          selected={selectedFilter}
         />
       </Modal.Body>
       <Modal.Footer>
@@ -58,10 +61,10 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
         <Button
           variant="primary"
           onClick={async () => {
-            await props.move(props.cidItems, selectedFilter);
+            await props.move(props.cidItems, selectedFilter[0]);
             props.closeCallback();
           }}
-          disabled={!selectedFilter.id}
+          disabled={!selectedFilter.length}
         >
           Ok
         </Button>

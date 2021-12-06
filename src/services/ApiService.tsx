@@ -207,12 +207,13 @@ const ApiService = {
 
   getCidConflict: async (
     cid: string,
-    filterId: number
+    filterId: number,
+    isException: boolean
   ): Promise<Conflict[]> => {
     const response = await axios.get<Conflict[]>(
       `${serverUri()}/cid/conflict`,
       {
-        params: { filterId, cid },
+        params: { filterId, cid, isException: isException ? 1 : 0 },
       }
     );
     return response.data;

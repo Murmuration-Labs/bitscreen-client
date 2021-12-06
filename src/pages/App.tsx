@@ -99,9 +99,17 @@ function App(): JSX.Element {
 
     const chainId = await web3.eth.getChainId();
     if (chainId !== 1) {
-      return toast.error(
-        `Please switch to Mainnet in order to use the Bitscreen client.`
-      );
+      try {
+        await walletProvider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x1" }],
+        });
+        return;
+      } catch (e: any) {
+        return toast.error(
+          `Please switch to Mainnet in order to use the Bitscreen client.`
+        );
+      }
     }
 
     let wallets;
@@ -155,6 +163,7 @@ function App(): JSX.Element {
         provider.walletAddress,
         ""
       );
+      if (AuthService.getAccount()) return;
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
@@ -319,8 +328,10 @@ function App(): JSX.Element {
                     }
                   }
 
-                  if (provider) {
+                  if (provider && !provider.guideShown) {
                     return <Redirect to="/settings" />;
+                  } else if (provider && provider.guideShown) {
+                    return <Redirect to="/dashboard" />;
                   } else {
                     return (
                       <Login

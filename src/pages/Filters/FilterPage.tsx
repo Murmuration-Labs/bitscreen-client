@@ -167,7 +167,7 @@ const FilterPage = (props): JSX.Element => {
         break;
       case Visibility.Shared:
         text =
-          "Shared lists are only visible to other users if they have the URL or ID.";
+          "Shared lists are only visible to other users if they have the URL or ID. Please save the filter to generate the shareable URL.";
         break;
       case Visibility.Exception:
         text =
@@ -627,10 +627,13 @@ const FilterPage = (props): JSX.Element => {
       }
     }
     const filterLists: FilterList[] = data.filters;
+    const providerId = AuthService.getProviderId();
 
-    setMoveCidItems(moveItems);
+    setMoveCidItems(moveItems.filter((x) => typeof x.id === "number"));
     setMoveOptionFilters(
-      filterLists.filter((x) => x.id !== filterList.id && isOwner)
+      filterLists.filter(
+        (x) => x.id !== filterList.id && x.provider.id == providerId
+      )
     );
     setShowMoveModal(true);
   };
@@ -715,8 +718,11 @@ const FilterPage = (props): JSX.Element => {
     items: CidItem[],
     selectedFilter: FilterList
   ): Promise<void> => {
-    selectedFilter.cids = [...selectedFilter.cids, ...items];
-    setMoveToFilterList(selectedFilter);
+    const selectedFilterWithCids = await ApiService.getFilter(
+      selectedFilter.shareId
+    );
+    selectedFilterWithCids.cids = [...selectedFilterWithCids.cids, ...items];
+    setMoveToFilterList(selectedFilterWithCids);
 
     filterList.cids = filterList.cids.filter((x) => !items.includes(x));
 
@@ -1282,7 +1288,7 @@ const FilterPage = (props): JSX.Element => {
                               </Button>
                             </Dropdown.Item>
                           </DropdownButton>
-                          {visibilityGenerateLink()}
+                          {filterList.shareId && visibilityGenerateLink()}
                           <span
                             style={{
                               color: "grey",
@@ -1435,6 +1441,7 @@ const FilterPage = (props): JSX.Element => {
                   return true;
                 }
               }
+              setFilterListChanged(true);
               return "You have unsaved changes, are you sure you want to leave?";
             }}
           />

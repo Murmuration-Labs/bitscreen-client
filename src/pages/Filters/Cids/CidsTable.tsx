@@ -39,11 +39,8 @@ const defaultHeadCells: HeadCell[] = [
   { pos: 0, id: "cid", label: "CID" },
   { pos: 1, id: "refUrl", label: "URL" },
   { pos: 2, id: "created", label: "Added" },
-  { pos: 999, id: "actions", label: "", align: "right" },
-];
-
-const exceptionHeadCells: HeadCell[] = [
   { pos: 3, id: "local", label: "Problem" },
+  { pos: 999, id: "actions", label: "", align: "right" },
 ];
 
 const CidsTable = ({
@@ -64,10 +61,7 @@ const CidsTable = ({
   const [headCells, setHeadCells] = useState(defaultHeadCells);
 
   useEffect(() => {
-    const sorted = [
-      ...defaultHeadCells,
-      ...(filter.visibility == Visibility.Exception ? exceptionHeadCells : []),
-    ].sort((a, b) => a.pos - b.pos);
+    const sorted = [...defaultHeadCells].sort((a, b) => a.pos - b.pos);
 
     setHeadCells(sorted);
   }, [filter.visibility]);

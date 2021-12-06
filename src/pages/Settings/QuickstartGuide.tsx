@@ -49,7 +49,17 @@ const QuickstartGuide = ({
             lists.
             <ul style={{ marginTop: 15 }}>
               <li>
-                <Link>Read the full BitScreen help documentation.</Link>
+                <div
+                  onClick={() =>
+                    window.open(
+                      "https://github.com/Murmuration-Labs/bitscreen/",
+                      "_blank"
+                    )
+                  }
+                  className="quick-link"
+                >
+                  Read the full BitScreen help documentation.
+                </div>
               </li>
             </ul>
           </Typography>
@@ -70,28 +80,49 @@ const QuickstartGuide = ({
           </Typography>
           <ol>
             <li>
-              <Link>Lotus Plugin</Link> (<i>required</i>): Prevents deals in
-              Lotus for CIDs contained in Local CID List or List Manager.
+              <span
+                onClick={() =>
+                  window.open(
+                    "https://github.com/Murmuration-Labs/bitscreen",
+                    "_blank"
+                  )
+                }
+                className="quick-link"
+              >
+                Lotus Plugin
+              </span>{" "}
+              (<i>required</i>): Prevents deals in Lotus for CIDs contained in
+              Local CID List or List Manager.
             </li>
             <li>
-              <Link>Local CID List</Link>: Flat file containing CIDs to be
-              filtered. Can be edited manually. Acts as fallback if Updater not
-              in use.
+              Local CID List: Flat file containing CIDs to be filtered. Can be
+              edited manually. Acts as fallback if Updater not in use.
             </li>
             <li>
-              <Link>List Updater</Link>: Daemon that periodically checks List
-              Manager for presence of CIDs requested by Lotus Plugin. If
-              installed, overrides Local CID List.
+              <span
+                onClick={() =>
+                  window.open(
+                    "https://pypi.org/project/bitscreen-updater/",
+                    "_blank"
+                  )
+                }
+                className="quick-link"
+              >
+                List Updater
+              </span>
+              : Daemon that periodically checks List Manager for presence of
+              CIDs requested by Lotus Plugin. If installed, overrides Local CID
+              List.
             </li>
             <li>
-              <Link>List Manager</Link> (<i>optional</i>): Advanced cloud-based
+              <span>List Manager</span> (<i>optional</i>): Advanced cloud-based
               utility to create, share & import filter lists.
               <ul>
                 <li>
-                  <Link>GUI Client</Link>
+                  <span>GUI Client</span>
                 </li>
                 <li>
-                  <Link>CLI</Link>
+                  <span>CLI</span>
                 </li>
               </ul>
             </li>
