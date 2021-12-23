@@ -117,7 +117,7 @@ function Dashboard(props): JSX.Element {
         </Col>
         <Col sm={12} md={4} xl={4}>
           <DashboardCard
-            cardTitle="List Subscribers"
+            cardTitle="My List Subscribers"
             cardText={dashboardData.listSubscribers}
           />
         </Col>
