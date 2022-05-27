@@ -11,6 +11,7 @@ export interface Provider {
   consentDate?: string;
   guideShown?: boolean;
   lastUpdate?: Date;
+  minerId?: string;
 }
 
 export interface Account extends Provider {

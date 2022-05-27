@@ -135,7 +135,10 @@ export default function Settings(props) {
   };
 
   const hasUnfilledInfo = () => {
-    if ((configInfo.share || configInfo.import) && !providerInfo.country) {
+    if (
+      (configInfo.share || configInfo.import) &&
+      (!providerInfo.country || !providerInfo.minerId)
+    ) {
       return true;
     }
 
@@ -158,7 +161,7 @@ export default function Settings(props) {
       config &&
       ((!config.import && configInfo.import) ||
         (!config.share && configInfo.share)) &&
-      !providerInfo.country
+      (!providerInfo.country || !providerInfo.minerId)
     ) {
       toast.error(
         "Please select a country from the list in order to enable importing or sharing lists!"
@@ -474,6 +477,23 @@ export default function Settings(props) {
                           }}
                           selected={countryInputValue}
                         ></Typeahead>
+                      </div>
+                    </div>
+                    <div className="slice-input">
+                      <div className="input-label">Miner ID</div>
+                      <div className="input-field">
+                        <Form.Control
+                          role="miner-id"
+                          placeholder="Miner ID"
+                          type="text"
+                          value={providerInfo.minerId || ""}
+                          onChange={(e) => {
+                            setProviderInfo({
+                              ...providerInfo,
+                              minerId: e.target.value,
+                            });
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
