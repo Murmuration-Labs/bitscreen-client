@@ -1,5 +1,4 @@
 import { Switch, withStyles } from "@material-ui/core";
-import { countries } from "countries-list";
 import _ from "lodash";
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -18,8 +17,8 @@ import QuickstartGuide from "./QuickstartGuide";
 import { useTitle } from "react-use";
 import moment from "moment";
 import "./Settings.css";
+import countryList from "react-select-country-list";
 
-const countryNames = Object.values(countries).map((e) => e.name);
 const HtmlSwitchComponent = withStyles((theme) => ({
   root: {
     width: 28,
@@ -90,6 +89,9 @@ export default function Settings(props) {
 
   const [countryInputValue, setCountryInputValue] = useState<Array<string>>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
+  const countries = countryList();
+  const countryNames = countries.data.map((e) => e.label);
+  const countryValues = countries.data.map((e) => e.value);
 
   useEffect(() => {
     LoggerService.info("Loading Settings page.");
@@ -110,7 +112,9 @@ export default function Settings(props) {
       setProviderInfo({ ...provider });
 
       if (provider.country) {
-        setCountryInputValue([provider.country]);
+        setCountryInputValue([
+          countries.data.find((e) => e.value === provider.country)?.label || "",
+        ]);
       }
 
       if (provider.lastUpdate) {
@@ -213,12 +217,17 @@ export default function Settings(props) {
 
     setIsDisabledWhileApiCall(true);
 
-    const provider = { ...providerInfo };
+    const provider = {
+      ...providerInfo,
+      country: countryList()
+        .getData()
+        .find((el) => el.label === providerInfo.country)?.value,
+    };
     const config = { ...configInfo };
 
     try {
       await ApiService.updateProvider(provider);
-      AuthService.updateAccount(provider);
+      AuthService.updateAccount({ ...providerInfo });
     } catch (e: any) {
       if (e.status === 401 && props.config) {
         toast.error(e.data.message);
