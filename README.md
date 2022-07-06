@@ -37,4 +37,4 @@ The app is also deployed at [https://bxn.mml-client.keyko.rocks/](https://bxn.mm
 
 ## Remote server
 
-Remote server is available at [https://bxn.mml.keyko.rocks](https://bxn.mml.keyko.rocks)
+Remote server is available at [http://app.bitscreen.co/](http://app.bitscreen.co/)
