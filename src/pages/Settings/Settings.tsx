@@ -1,23 +1,23 @@
 import { Switch, withStyles } from "@material-ui/core";
 import _ from "lodash";
-import React, { useEffect, useRef, useState } from "react";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { Prompt } from "react-router";
-import { toast } from "react-toastify";
-import validator from "validator";
-import { activeIcon, inactiveIcon, infoIcon } from "../../resources/icons";
-import ApiService from "../../services/ApiService";
-import * as AuthService from "../../services/AuthService";
-import LoggerService from "../../services/LoggerService";
-import { Account } from "../../types/interfaces";
-import { Config } from "../Filters/Interfaces";
-import DeleteAccountModal from "./DeleteAccountModal";
-import QuickstartGuide from "./QuickstartGuide";
-import { useTitle } from "react-use";
-import moment from "moment";
-import "./Settings.css";
 import countryList from "react-select-country-list";
+import { toast } from "react-toastify";
+import { useTitle } from "react-use";
+import { activeIcon, inactiveIcon, infoIcon } from "resources/icons";
+import ApiService from "services/ApiService";
+import * as AuthService from "services/AuthService";
+import LoggerService from "services/LoggerService";
+import { Account } from "types/interfaces";
+import validator from "validator";
+import { Config } from "../Filters/Interfaces";
+import DeleteAccountModal from "./DeleteAccountModal/DeleteAccountModal";
+import QuickstartGuide from "./QuickstartGuide/QuickstartGuide";
+import "./Settings.css";
 
 const HtmlSwitchComponent = withStyles((theme) => ({
   root: {

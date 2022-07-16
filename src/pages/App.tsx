@@ -13,21 +13,21 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Web3 from "web3";
-import ConsentModal from "../components/Modal/ConsentModal";
-import Navigation from "../components/Navigation/Navigation";
-import AuthProvider from "../providers/AuthProvider";
-import ApiService from "../services/ApiService";
-import * as AuthService from "../services/AuthService";
-import LoggerService from "../services/LoggerService";
-import { Account } from "../types/interfaces";
+import ConsentModal from "components/Modals/ConsentModal/ConsentModal";
+import Navigation from "components/Navigation/Navigation";
+import AuthProvider from "providers/AuthProvider";
+import ApiService from "services/ApiService";
+import * as AuthService from "services/AuthService";
+import LoggerService from "services/LoggerService";
+import { Account } from "types/interfaces";
 import "./App.css";
 import Dashboard from "./Dashboard/Dashboard";
-import FilterPage from "./Filters/FilterPage";
+import FilterPage from "./Filters/FilterPage/FilterPage";
 import Filters from "./Filters/Filters";
 import { Config } from "./Filters/Interfaces";
 import Login from "./Login/Login";
-import PublicFilterDetailsPage from "./Public/PublicFilterDetails/PublicFilterDetails";
-import PublicFilters from "./Public/PublicFilters";
+import PublicFilterDetailsPage from "./PublicFilters/PublicFilterDetails/PublicFilterDetails";
+import PublicFilters from "./PublicFilters/PublicFilters";
 import Settings from "./Settings/Settings";
 
 interface MatchParams {

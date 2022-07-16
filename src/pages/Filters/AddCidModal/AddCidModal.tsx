@@ -7,8 +7,8 @@ import {
   TextField,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { CidItem } from "./Interfaces";
-import LoggerService from "../../services/LoggerService";
+import { CidItem } from "../Interfaces";
+import LoggerService from "services/LoggerService";
 
 interface AddCidModalProps {
   cid: CidItem;

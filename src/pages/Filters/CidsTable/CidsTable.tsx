@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
-import CidsRow from "./CidsRow";
+import CidsRow from "./CidsRow/CidsRow";
 
 export interface CidsTableProps {
   filter: FilterList;

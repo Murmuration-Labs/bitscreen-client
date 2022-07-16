@@ -7,9 +7,9 @@ import {
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import "./Filters.css";
-import { AddCidBatchModalProps } from "./Interfaces";
-import LoggerService from "../../services/LoggerService";
+import "../Filters.css";
+import { AddCidBatchModalProps } from "../Interfaces";
+import LoggerService from "services/LoggerService";
 
 export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [cidsInput, setCidsInput] = useState<string>("");

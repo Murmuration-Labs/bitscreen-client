@@ -8,14 +8,14 @@ import {
 import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import PuffLoader from "react-spinners/PuffLoader";
-import ApiService from "../../../services/ApiService";
-import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
-import { formatDate } from "../utils";
-import * as icons from "../../../resources/icons";
-import "./cids.css";
+import ApiService from "services/ApiService";
+import { CidItem, Conflict, FilterList, Visibility } from "../../Interfaces";
+import { formatDate } from "../../utils";
+import * as icons from "resources/icons";
+import "./CidsRow.css";
 import { Badge, Button } from "react-bootstrap";
 import { ErrorOutline } from "@material-ui/icons";
-import LoggerService from "../../../services/LoggerService";
+import LoggerService from "services/LoggerService";
 import { toast } from "react-toastify";
 import { CID } from "multiformats/cid";
 

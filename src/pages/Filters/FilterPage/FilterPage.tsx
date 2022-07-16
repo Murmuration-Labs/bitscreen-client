@@ -22,19 +22,19 @@ import {
   Row,
   Tooltip,
 } from "react-bootstrap";
-import DropdownMenu from "./DropdownMenu";
+import DropdownMenu from "../DropdownMenu/DropdownMenu";
 import { Prompt } from "react-router";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
-import ConfirmModal from "../../components/Modal/ConfirmModal";
-import { serverUri } from "../../config";
-import ApiService from "../../services/ApiService";
-import * as AuthService from "../../services/AuthService";
-import FilterService from "../../services/FilterService";
-import AddCidBatchModal from "./AddCidBatchModal";
-import AddCidModal from "./AddCidModal";
-import CidsTable from "./Cids/CidsTable";
-import "./Filters.css";
+import ConfirmModal from "components/Modals/ConfirmModal/ConfirmModal";
+import { serverUri } from "../../../config";
+import ApiService from "services/ApiService";
+import * as AuthService from "services/AuthService";
+import FilterService from "services/FilterService";
+import AddCidBatchModal from "../AddCidBatchModal/AddCidBatchModal";
+import AddCidModal from "../AddCidModal/AddCidModal";
+import CidsTable from "../CidsTable/CidsTable";
+import "../Filters.css";
 import {
   CidItem,
   Config,
@@ -43,16 +43,16 @@ import {
   FilterList,
   ViewTypes,
   Visibility,
-} from "./Interfaces";
-import MoveCIDModal from "./MoveCIDModal";
-import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
-import { isDisabledGlobally, isOrphan, isShared } from "./utils";
+} from "../Interfaces";
+import MoveCIDModal from "../MoveCIDModal/MoveCIDModal";
+import ToggleEnabledFilterModal from "../ToggleEnabledFilterModal/ToggleEnabledFilterModal";
+import { isDisabledGlobally, isOrphan, isShared } from "../utils";
 import { IconButton, MenuItem } from "@material-ui/core";
-import ConflictModal from "./Cids/ConflictModal";
-import LoggerService from "../../services/LoggerService";
+import ConflictModal from "../../../components/Modals/ConflictModal/ConflictModal";
+import LoggerService from "services/LoggerService";
 import { CID } from "multiformats";
 import { useTitle } from "react-use";
-import PageTitle from "../../components/Utils/PageTitle";
+import PageTitle from "components/Utils/PageTitle";
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);

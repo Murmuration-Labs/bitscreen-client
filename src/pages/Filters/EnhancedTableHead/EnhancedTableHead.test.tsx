@@ -1,28 +1,17 @@
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Checkbox,
-  Dialog,
-  IconButton,
-  MenuItem,
-  TableCell,
+  Checkbox, TableCell
 } from "@material-ui/core";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import { configure, shallow } from "enzyme";
 import React from "react";
-import AddCidModal from "./AddCidModal";
-import MenuButton from "@material-ui/icons/MoreVert";
-import DropdownMenu from "./DropdownMenu";
 import {
-  Button,
-  Form,
-  FormCheck,
   OverlayTrigger,
-  Tooltip,
+  Tooltip
 } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 import EnhancedTableHead, { EnhancedTableProps } from "./EnhancedTableHead";
-import { HeadCell } from "../Public/Interfaces";
 
 configure({ adapter: new Adapter() });
 

@@ -1,7 +1,7 @@
-import App from "../App";
+import App from "../../App";
 import React from "react";
 import { configure, mount, shallow } from "enzyme";
-import { CidItem, Visibility } from "./Interfaces";
+import { CidItem, Visibility } from "../Interfaces";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import { SnackbarProvider } from "notistack";
 import {
@@ -14,8 +14,8 @@ import {
 import { useSnackbar, VariantType, WithSnackbarProps } from "notistack";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import FilterPage from "./FilterPage";
-import ApiService from "../../services/ApiService";
-jest.mock("../../services/ApiService");
+import ApiService from "services/ApiService";
+jest.mock("services/ApiService");
 
 configure({ adapter: new Adapter() });
 

@@ -36,15 +36,15 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
-import ConfirmModal from "../../components/Modal/ConfirmModal";
-import ApiService from "../../services/ApiService";
-import * as AuthService from "../../services/AuthService";
-import FilterService from "../../services/FilterService";
-import { HeadCell } from "../Public/Interfaces";
-import EnhancedTableHead from "./EnhancedTableHead";
+import ConfirmModal from "components/Modals/ConfirmModal/ConfirmModal";
+import ApiService from "services/ApiService";
+import * as AuthService from "services/AuthService";
+import FilterService from "services/FilterService";
+import { HeadCell } from "../PublicFilters/Interfaces";
+import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
 import "./Filters.css";
-import HoverableMenuItem from "./HoverableMenuItem";
-import ImportFilterModal from "./ImportFilterModal";
+import HoverableMenuItem from "./HoverableMenuItem/HoverableMenuItem";
+import ImportFilterModal from "./ImportFilterModal/ImportFilterModal";
 import {
   BadgeColor,
   BulkSelectedType,
@@ -55,7 +55,7 @@ import {
   Visibility,
   VisibilityString,
 } from "./Interfaces";
-import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal";
+import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal/ToggleEnabledFilterModal";
 import {
   isDisabled,
   isDisabledGlobally,
@@ -65,9 +65,9 @@ import {
   isShared,
   itemsToPages,
 } from "./utils";
-import LoggerService from "../../services/LoggerService";
+import LoggerService from "services/LoggerService";
 import MenuButton from "@material-ui/icons/MoreVert";
-import DropdownMenu from "./DropdownMenu";
+import DropdownMenu from "./DropdownMenu/DropdownMenu";
 import { toast } from "react-toastify";
 import { useTitle } from "react-use";
 

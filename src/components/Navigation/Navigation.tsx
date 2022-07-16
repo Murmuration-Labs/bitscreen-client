@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import * as AuthService from "../../services/AuthService";
+import * as AuthService from "services/AuthService";
 import "./Navigation.css";
 import Bitscreenlogo from "./bitscreen-logo.png";
 

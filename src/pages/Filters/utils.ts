@@ -1,5 +1,5 @@
 import { FilterList } from "./Interfaces";
-import * as AuthService from "../../services/AuthService";
+import * as AuthService from "services/AuthService";
 
 export const isOrphan = (f: FilterList) =>
   f.provider_Filters &&

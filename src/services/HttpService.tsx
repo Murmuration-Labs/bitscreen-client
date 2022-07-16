@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as AuthService from "./AuthService";
 import LoggerService from "./LoggerService";
-import history from "../history";
+import history from "../appHistory";
 
 export default {
   setupInterceptors: () => {

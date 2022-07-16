@@ -11,18 +11,18 @@ import {
 import { toast } from "react-toastify";
 import { css } from "@emotion/core";
 
-import "./Filters.css";
+import "../Filters.css";
 
 import PuffLoader from "react-spinners/PuffLoader";
-import { FilterList, ImportFilterModalProps } from "./Interfaces";
-import ApiService from "../../services/ApiService";
-import * as AuthService from "../../services/AuthService";
-import FilterService from "../../services/FilterService";
+import { FilterList, ImportFilterModalProps } from "../Interfaces";
+import ApiService from "services/ApiService";
+import * as AuthService from "services/AuthService";
+import FilterService from "services/FilterService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { serverUri } from "../../config";
-import LoggerService from "../../services/LoggerService";
+import { serverUri } from "../../../config";
+import LoggerService from "services/LoggerService";
 
 const overrideLoaderCss = css`
   display: block;

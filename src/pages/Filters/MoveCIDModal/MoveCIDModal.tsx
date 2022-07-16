@@ -3,9 +3,9 @@ import { Typeahead } from "react-bootstrap-typeahead";
 
 import { Modal, Button } from "react-bootstrap";
 
-import { CidItem, FilterList, MoveCIDModalProps } from "./Interfaces";
-import FilterService from "../../services/FilterService";
-import LoggerService from "../../services/LoggerService";
+import { CidItem, FilterList, MoveCIDModalProps } from "../Interfaces";
+import FilterService from "services/FilterService";
+import LoggerService from "services/LoggerService";
 
 export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
   const [selectedFilter, setSelectedFilter] = useState<Array<FilterList>>([

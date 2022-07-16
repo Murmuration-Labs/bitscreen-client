@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Account } from "../types/interfaces";
+import { Account } from "types/interfaces";
 import LoggerService from "./LoggerService";
 
 const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";

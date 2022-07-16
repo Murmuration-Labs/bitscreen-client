@@ -2,8 +2,8 @@ import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
 import "./Login.css";
-import LoggerService from "../../services/LoggerService";
-import { metamaskIcon } from "../../resources/icons/index";
+import LoggerService from "services/LoggerService";
+import { metamaskIcon } from "resources/icons/index";
 
 export default function Login(props) {
   const { connectMetamask, previousPath, setPreviousPath } = props;

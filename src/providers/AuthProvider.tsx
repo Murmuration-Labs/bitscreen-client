@@ -1,9 +1,9 @@
 import detectEthereumProvider from "@metamask/detect-provider";
 import React, { useEffect } from "react";
 import Web3 from "web3";
-import * as AuthService from "../services/AuthService";
+import * as AuthService from "services/AuthService";
 import { toast } from "react-toastify";
-import LoggerService from "../services/LoggerService";
+import LoggerService from "services/LoggerService";
 
 const AuthProvider = (props: any) => {
   const { setProvider, setConfig, currentWallet } = props;

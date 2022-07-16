@@ -1,7 +1,17 @@
-import { ConfirmModalProps } from "./Interfaces";
 import React from "react";
-import { Modal, Button, ListGroup } from "react-bootstrap";
+import { Button, ListGroup, Modal } from "react-bootstrap";
 import "./ConfirmModal.css";
+
+interface ConfirmModalProps {
+  show: boolean;
+  title: string;
+  message: string;
+  bullets?: string[];
+  callback: () => void;
+  closeCallback: () => void;
+  confirmMessage?: string;
+  declineMessage?: string;
+}
 
 export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
   return (

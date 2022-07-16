@@ -5,7 +5,7 @@ import reportWebVitals from "./reportWebVitals";
 import App from "./pages/App";
 import { SnackbarProvider } from "notistack";
 import { Router } from "react-router-dom";
-import history from "./history";
+import history from "./appHistory";
 
 ReactDOM.render(
   <React.StrictMode>

@@ -6,8 +6,8 @@ import {
   TableSortLabel,
 } from "@material-ui/core";
 import React from "react";
-import { HeadCell } from "../Public/Interfaces";
-import { Order } from "./Interfaces";
+import { HeadCell } from "pages/PublicFilters/Interfaces";
+import { Order } from "../Interfaces";
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { CidItem, FilterList, Visibility } from "../pages/Filters/Interfaces";
+import { CidItem, FilterList, Visibility } from "pages/Filters/Interfaces";
 
 const FilterService = {
   emptyFilterList: (): FilterList => {
@@ -14,6 +14,18 @@ const FilterService = {
       description: "",
       shareId: "",
     };
+  },
+  renderHashedCid: ({ cid }: CidItem, short = true): JSX.Element => {
+    if (short) {
+      return (
+        <span className="mono-hashes">
+          {cid.substr(0, 16)}...
+          {cid.substr(cid.length - 10, 10)}
+        </span>
+      );
+    }
+
+    return <span className="mono-hashes">{cid}</span>;
   },
 };
 

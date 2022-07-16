@@ -1,20 +1,17 @@
-import detectEthereumProvider from "@metamask/detect-provider";
 import axios from "axios";
-import Web3 from "web3";
-import { remoteMarketplaceUri, serverUri } from "../config";
-import { Account, DealFromApi } from "../types/interfaces";
+import fileDownload from "js-file-download";
 import {
+  ChartDataEntry,
   CidItem,
+  Config,
+  Conflict,
+  DashboardData,
   FilterList,
   ProviderFilter,
-  DashboardData,
-  Config,
-  ChartDataEntry,
-  Conflict,
-} from "../pages/Filters/Interfaces";
-import { isImported } from "../pages/Filters/utils";
-import * as AuthService from "./AuthService";
-import fileDownload from "js-file-download";
+} from "pages/Filters/Interfaces";
+import { isImported } from "pages/Filters/utils";
+import { Account, DealFromApi } from "types/interfaces";
+import { remoteMarketplaceUri, serverUri } from "../config";
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios

@@ -4,7 +4,7 @@ import { configure, mount, shallow } from "enzyme";
 import { SnackbarProvider } from "notistack";
 import React from "react";
 import CidsRow from "./CidsRow";
-import FilterPage from "../FilterPage";
+import FilterPage from "../../FilterPage/FilterPage";
 
 configure({ adapter: new Adapter() });
 

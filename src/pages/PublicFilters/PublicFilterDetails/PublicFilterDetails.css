@@ -1,0 +1,20 @@
+.head-button {
+  width: 120px;
+  height: 40px;
+  border-radius: 4px;
+  background-color: #003bdd;
+  border-color: #003bdd;
+}
+
+.head-button-imported {
+  width: 120px;
+  height: 40px;
+  border-radius: 4px;
+  background-color: white;
+  color: #003bdd;
+  border-color: #003bdd;
+}
+
+.badge {
+  margin-left: 10px;
+}

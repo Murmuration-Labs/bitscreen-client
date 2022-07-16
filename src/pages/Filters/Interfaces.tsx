@@ -1,4 +1,4 @@
-import { Provider } from "../../types/interfaces";
+import { Provider } from "types/interfaces";
 
 export const VisibilityString: string[] = [
   "None",

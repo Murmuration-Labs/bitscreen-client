@@ -3,14 +3,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
 } from "@material-ui/core";
+import { Conflict, ConflictModalProps } from "pages/Filters/Interfaces";
 import React, { useEffect, useState } from "react";
-import { Conflict, ConflictModalProps } from "../Interfaces";
 import { ListGroup } from "react-bootstrap";
-import ApiService from "../../../services/ApiService";
-import LoggerService from "../../../services/LoggerService";
 import { toast } from "react-toastify";
+import ApiService from "services/ApiService";
+import LoggerService from "services/LoggerService";
 
 const resolveConflict = async (conflicts: Conflict[]) => {
   try {

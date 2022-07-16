@@ -2,7 +2,7 @@ import { Dialog, IconButton, MenuItem } from "@material-ui/core";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import { configure, shallow } from "enzyme";
 import React from "react";
-import AddCidModal from "./AddCidModal";
+import AddCidModal from "../AddCidModal/AddCidModal";
 import MenuButton from "@material-ui/icons/MoreVert";
 import DropdownMenu from "./DropdownMenu";
 import {

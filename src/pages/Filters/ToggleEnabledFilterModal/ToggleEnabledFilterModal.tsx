@@ -1,4 +1,4 @@
-import { EnabledOption, ToggleEnabledFilterModalProps } from "./Interfaces";
+import { EnabledOption, ToggleEnabledFilterModalProps } from "../Interfaces";
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
