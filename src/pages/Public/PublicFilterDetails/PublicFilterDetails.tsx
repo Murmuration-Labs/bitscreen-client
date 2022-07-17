@@ -8,7 +8,7 @@ import {
 } from "../../../components/Cards/Cards";
 import ApiService from "../../../services/ApiService";
 import * as AuthService from "../../../services/AuthService";
-import ImportFilterModal from "../../Filters/ImportFilterModal";
+import { ImportFilterModal } from "../../../components/Modals/ImportFilterModal/ImportFilterModal";
 import { Config, FilterList, Visibility } from "../../Filters/Interfaces";
 import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";

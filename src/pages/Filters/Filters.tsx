@@ -44,7 +44,7 @@ import { HeadCell } from "../PublicFilters/Interfaces";
 import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
 import "./Filters.css";
 import HoverableMenuItem from "./HoverableMenuItem/HoverableMenuItem";
-import ImportFilterModal from "./ImportFilterModal/ImportFilterModal";
+import { ImportFilterModal } from "../../components/Modals/ImportFilterModal/ImportFilterModal";
 import {
   BadgeColor,
   BulkSelectedType,

@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Badge, Button, Col, Container, Row } from "react-bootstrap";
-import { useHistory } from "react-router";
 import {
   PublicFilterDetailsCard,
   PublicFilterDetailsDoubleCard,
   PublicFilterDetailsTripleCard,
 } from "components/Cards/Cards";
+import PageTitle from "components/Utils/PageTitle";
+import { ImportFilterModal } from "components/Modals/ImportFilterModal/ImportFilterModal";
+import React, { useEffect, useState } from "react";
+import { Badge, Button, Col, Row } from "react-bootstrap";
+import { useHistory } from "react-router";
+import { toast } from "react-toastify";
 import ApiService from "services/ApiService";
 import * as AuthService from "services/AuthService";
-import ImportFilterModal from "../../Filters/ImportFilterModal/ImportFilterModal";
+import LoggerService from "services/LoggerService";
 import { Config, FilterList, Visibility } from "../../Filters/Interfaces";
 import { formatDate } from "../../Filters/utils";
 import "./PublicFilterDetails.css";
-import LoggerService from "services/LoggerService";
-import { toast } from "react-toastify";
-import { useTitle } from "react-use";
-import PageTitle from "components/Utils/PageTitle";
 
 const PublicFilterDetailsPage = (props) => {
   const [loaded, setLoaded] = useState<boolean>(false);

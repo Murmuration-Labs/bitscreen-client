@@ -20,7 +20,7 @@ import ApiService from "services/ApiService";
 import * as AuthService from "services/AuthService";
 import LoggerService from "services/LoggerService";
 import EnhancedTableHead from "../Filters/EnhancedTableHead/EnhancedTableHead";
-import ImportFilterModal from "../Filters/ImportFilterModal/ImportFilterModal";
+import { ImportFilterModal } from "../../components/Modals/ImportFilterModal/ImportFilterModal";
 import { Config, FilterList, Order } from "../Filters/Interfaces";
 import { formatDate, itemsToPages } from "../Filters/utils";
 import { Data, HeadCell } from "./Interfaces";

@@ -11,10 +11,13 @@ import {
 import { toast } from "react-toastify";
 import { css } from "@emotion/core";
 
-import "../Filters.css";
+import "pages/Filters/Filters.css";
 
 import PuffLoader from "react-spinners/PuffLoader";
-import { FilterList, ImportFilterModalProps } from "../Interfaces";
+import {
+  FilterList,
+  ImportFilterModalProps,
+} from "../../../pages/Filters/Interfaces";
 import ApiService from "services/ApiService";
 import * as AuthService from "services/AuthService";
 import FilterService from "services/FilterService";
@@ -31,9 +34,9 @@ const overrideLoaderCss = css`
   color: red;
 `;
 
-export default function ImportFilterModal(
+export const ImportFilterModal = (
   props: ImportFilterModalProps
-): JSX.Element {
+): JSX.Element => {
   const [remoteFilterId, setRemoteFilterId] = useState<string>("");
   const [remoteFilterError, setRemoteFilterError] = useState<boolean>(false);
   const [fetchedFilterList, setFetchedFilterList] = useState<
@@ -304,4 +307,4 @@ export default function ImportFilterModal(
       </Modal.Footer>
     </Modal>
   );
-}
+};
