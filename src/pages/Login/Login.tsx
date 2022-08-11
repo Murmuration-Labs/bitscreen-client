@@ -65,7 +65,6 @@ export default function Login(props) {
                       </div>
                       <div className="wallet-name">MetaMask</div>
                     </div>
-                    <div className="wallet-end-of-row">Popular</div>
                   </div>
                 </div>
               </Col>
