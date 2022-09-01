@@ -71,9 +71,11 @@
     "@types/react-router-dom": "^5.1.7",
     "@types/react-select-country-list": "^2.2.0",
     "@types/validator": "^13.1.4",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "prettier": "^2.3.2"
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1"
   },
   "proxy": "http://localhost:3030",
   "scripts": {
@@ -85,7 +87,8 @@
     "server": "ts-node -O '{\"module\": \"commonjs\"}' server.ts",
     "lint": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx .",
     "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix",
-    "format": "prettier --write 'src/**/*.{ts,tsx}'"
+    "format": "prettier --write 'src/**/*.{ts,tsx,html,css}'",
+    "postinstall": "husky install"
   },
   "jest": {
     "transformIgnorePatterns": [
@@ -109,5 +112,18 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "lint-staged": {
+    "src/**/*.{html,ts,tsx,css}": [
+      "prettier --write"
+    ],
+    "src/**/*.{ts, tsx}": [
+      "eslint --fix"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
