@@ -2,26 +2,26 @@ import {
   faCog,
   faQuestionCircle,
   faUser,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
 import {
   Col,
   NavDropdown,
   OverlayTrigger,
   Row,
   Tooltip,
-} from "react-bootstrap";
-import { NavLink } from "react-router-dom";
-import * as AuthService from "services/AuthService";
-import "./Navigation.css";
-import Bitscreenlogo from "./bitscreen-logo.png";
+} from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
+import * as AuthService from 'services/AuthService';
+import './Navigation.css';
+import Bitscreenlogo from './bitscreen-logo.png';
 
 function Navigation(props): JSX.Element {
   const { provider, setProvider, setConfig } = props;
   const shortenAddress = (address: string): string => {
     return address.length > 8
-      ? address.substr(0, 4) + "..." + address.substr(-4)
+      ? address.substr(0, 4) + '...' + address.substr(-4)
       : address;
   };
 
@@ -40,7 +40,7 @@ function Navigation(props): JSX.Element {
           {provider && (
             <NavLink
               className="nav-link"
-              activeClassName={"is-active"}
+              activeClassName={'is-active'}
               to="/dashboard"
             >
               Dashboard
@@ -49,7 +49,7 @@ function Navigation(props): JSX.Element {
           {provider && (
             <NavLink
               className="nav-link"
-              activeClassName={"is-active"}
+              activeClassName={'is-active'}
               to="/filters"
             >
               My Filters
@@ -58,7 +58,7 @@ function Navigation(props): JSX.Element {
           {provider && (
             <NavLink
               className="nav-link"
-              activeClassName={"is-active"}
+              activeClassName={'is-active'}
               to="/directory"
             >
               Directory
@@ -90,7 +90,7 @@ function Navigation(props): JSX.Element {
               <NavLink
                 className="mr-4 icon-nav-link"
                 to="/settings"
-                activeClassName={"is-active"}
+                activeClassName={'is-active'}
               >
                 <FontAwesomeIcon color="white" size="lg" icon={faCog} />
               </NavLink>
@@ -98,8 +98,8 @@ function Navigation(props): JSX.Element {
                 id="nav-dropdown-wallet-address"
                 title={
                   <span>
-                    <FontAwesomeIcon size="sm" icon={faUser} />{" "}
-                    {shortenAddress(provider.walletAddress ?? "")}
+                    <FontAwesomeIcon size="sm" icon={faUser} />{' '}
+                    {shortenAddress(provider.walletAddress ?? '')}
                   </span>
                 }
               >

@@ -8,49 +8,49 @@ import {
   TablePagination,
   TableRow,
   TextField,
-} from "@material-ui/core";
-import ClearIcon from "@material-ui/icons/ClearRounded";
-import SearchIcon from "@material-ui/icons/Search";
-import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
-import { useTitle } from "react-use";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import LoggerService from "services/LoggerService";
-import EnhancedTableHead from "../Filters/EnhancedTableHead/EnhancedTableHead";
-import { ImportFilterModal } from "../../components/Modals/ImportFilterModal/ImportFilterModal";
-import { Config, FilterList, Order } from "../Filters/Interfaces";
-import { formatDate, itemsToPages } from "../Filters/utils";
-import { Data, HeadCell } from "./Interfaces";
-import "./PublicFilters.css";
+} from '@material-ui/core';
+import ClearIcon from '@material-ui/icons/ClearRounded';
+import SearchIcon from '@material-ui/icons/Search';
+import React, { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import { Link, useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useTitle } from 'react-use';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import LoggerService from 'services/LoggerService';
+import EnhancedTableHead from '../Filters/EnhancedTableHead/EnhancedTableHead';
+import { ImportFilterModal } from '../../components/Modals/ImportFilterModal/ImportFilterModal';
+import { Config, FilterList, Order } from '../Filters/Interfaces';
+import { formatDate, itemsToPages } from '../Filters/utils';
+import { Data, HeadCell } from './Interfaces';
+import './PublicFilters.css';
 
 const headCells: HeadCell<Data>[] = [
-  { id: "name", numeric: false, label: "Filter Name", sortable: true },
-  { id: "cids", numeric: true, label: "CIDs", sortable: true },
-  { id: "subs", numeric: true, label: "Subscribers", sortable: true },
-  { id: "providerName", numeric: true, label: "Provider", sortable: true },
-  { id: "providerCountry", numeric: true, label: "Country", sortable: true },
-  { id: "description", numeric: false, label: "Description", sortable: true },
-  { id: "updated", numeric: false, label: "Updated", sortable: true },
-  { id: "actions", numeric: false, label: "Actions" },
+  { id: 'name', numeric: false, label: 'Filter Name', sortable: true },
+  { id: 'cids', numeric: true, label: 'CIDs', sortable: true },
+  { id: 'subs', numeric: true, label: 'Subscribers', sortable: true },
+  { id: 'providerName', numeric: true, label: 'Provider', sortable: true },
+  { id: 'providerCountry', numeric: true, label: 'Country', sortable: true },
+  { id: 'description', numeric: false, label: 'Description', sortable: true },
+  { id: 'updated', numeric: false, label: 'Updated', sortable: true },
+  { id: 'actions', numeric: false, label: 'Actions' },
   // { id: "enabled", numeric: false, label: "Enabled" },
 ];
 
 export default function PublicFilters(props) {
   useTitle(`Directory - BitScreen`);
-  const [order, setOrder] = React.useState<Order>("asc");
-  const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
+  const [order, setOrder] = React.useState<Order>('asc');
+  const [orderBy, setOrderBy] = React.useState<keyof Data>('name');
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [publicFiltersData, setPublicFiltersData] = React.useState<Data[]>([]);
-  const [mySort, setMySort] = React.useState("asc");
-  const [mySortBy, setMySortBy] = React.useState("name");
+  const [mySort, setMySort] = React.useState('asc');
+  const [mySortBy, setMySortBy] = React.useState('name');
   const [dataCount, setDataCount] = React.useState<number>(0);
-  const [searchedValue, setSearchedValue] = React.useState("");
+  const [searchedValue, setSearchedValue] = React.useState('');
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
-  const [prefetch, setPrefetch] = useState<string>("");
+  const [prefetch, setPrefetch] = useState<string>('');
   const [toBeImportedFilter, setToBeImportedFilter] =
     useState<FilterList | null>(null);
   const [needsRefresh, setNeedsRefresh] = useState(true);
@@ -64,7 +64,7 @@ export default function PublicFilters(props) {
     share: false,
   });
 
-  useEffect(() => LoggerService.info("Loading Directory page."), []);
+  useEffect(() => LoggerService.info('Loading Directory page.'), []);
 
   useEffect(() => {
     setConfiguration(props.config);
@@ -104,10 +104,10 @@ export default function PublicFilters(props) {
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
-    if (property == "actions") return;
+    if (property == 'actions') return;
 
-    setMySort(mySort === "asc" ? "desc" : "asc");
-    setOrder(mySort === "asc" ? "desc" : "asc");
+    setMySort(mySort === 'asc' ? 'desc' : 'asc');
+    setOrder(mySort === 'asc' ? 'desc' : 'asc');
     setMySortBy(property);
     setOrderBy(property);
   };
@@ -146,7 +146,7 @@ export default function PublicFilters(props) {
       return <div>{content}</div>;
     }
 
-    const toShow = content.substring(0, limit) + "...";
+    const toShow = content.substring(0, limit) + '...';
     return <div>{toShow}</div>;
   };
 
@@ -154,26 +154,26 @@ export default function PublicFilters(props) {
     <>
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          verticalAlign: "top",
+          display: 'flex',
+          justifyContent: 'space-between',
+          verticalAlign: 'top',
           paddingBottom: 0,
         }}
       >
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
+            display: 'flex',
+            flexDirection: 'row',
             flex: 1,
-            alignItems: "center",
-            marginBottom: "1rem",
+            alignItems: 'center',
+            marginBottom: '1rem',
           }}
         >
           <div
             style={{
               fontSize: 32,
               fontWeight: 600,
-              lineHeight: "40px",
+              lineHeight: '40px',
             }}
           >
             Directory
@@ -182,10 +182,10 @@ export default function PublicFilters(props) {
             Directory of public filter lists
             {!isImportEnabled() && (
               <p className="text-dim" style={{ marginRight: 4 }}>
-                To activate importing, go to{" "}
+                To activate importing, go to{' '}
                 <a style={{ fontSize: 12 }} href="/settings">
                   Settings
-                </a>{" "}
+                </a>{' '}
                 and add country data.
               </p>
             )}
@@ -195,10 +195,10 @@ export default function PublicFilters(props) {
 
       <div
         style={{
-          display: "flex",
-          flexDirection: "row",
+          display: 'flex',
+          flexDirection: 'row',
           flex: 1,
-          alignItems: "center",
+          alignItems: 'center',
           marginBottom: 16,
         }}
       >
@@ -220,7 +220,7 @@ export default function PublicFilters(props) {
                 {searchedValue && (
                   <IconButton
                     onClick={() => {
-                      setSearchedValue("");
+                      setSearchedValue('');
                     }}
                     color="default"
                   >
@@ -236,12 +236,12 @@ export default function PublicFilters(props) {
           <span
             style={{
               marginRight: 4,
-              verticalAlign: "middle",
-              alignSelf: "center",
+              verticalAlign: 'middle',
+              alignSelf: 'center',
             }}
           >
-            {dataCount ? dataCount : "0"} result
-            {dataCount && dataCount === 1 ? "" : "s"} found
+            {dataCount ? dataCount : '0'} result
+            {dataCount && dataCount === 1 ? '' : 's'} found
           </span>
         )}
       </div>
@@ -265,7 +265,7 @@ export default function PublicFilters(props) {
                   <TableCell>
                     <Link
                       to={`/directory/details/${row.shareId}`}
-                      style={{ fontSize: 14, color: "blue" }}
+                      style={{ fontSize: 14, color: 'blue' }}
                     >
                       {row.name}
                     </Link>
@@ -283,9 +283,9 @@ export default function PublicFilters(props) {
                       <Button
                         style={{
                           marginLeft: -5,
-                          color: "blue",
-                          backgroundColor: "white",
-                          borderColor: "blue",
+                          color: 'blue',
+                          backgroundColor: 'white',
+                          borderColor: 'blue',
                           width: 100,
                         }}
                         onClick={() => {
@@ -299,8 +299,8 @@ export default function PublicFilters(props) {
                       <Button
                         style={{
                           marginLeft: -5,
-                          color: "white",
-                          backgroundColor: "blue",
+                          color: 'white',
+                          backgroundColor: 'blue',
                           width: 100,
                         }}
                         disabled={!isImportEnabled()}
@@ -347,7 +347,7 @@ export default function PublicFilters(props) {
       {toBeImportedFilter && (
         <ImportFilterModal
           closeCallback={async (_needsRefresh = false): Promise<void> => {
-            setPrefetch("");
+            setPrefetch('');
             setToBeImportedFilter(null);
             setNeedsRefresh(_needsRefresh);
           }}

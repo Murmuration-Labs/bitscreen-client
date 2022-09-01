@@ -1,11 +1,11 @@
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import {
   faEdit,
   faEye,
   faQuestionCircle,
   faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Checkbox,
   IconButton,
@@ -18,13 +18,13 @@ import {
   TablePagination,
   TableRow,
   TextField,
-} from "@material-ui/core";
-import ClearIcon from "@material-ui/icons/ClearRounded";
-import SearchIcon from "@material-ui/icons/Search";
-import _ from "lodash";
-import debounce from "lodash.debounce";
-import { useSnackbar } from "notistack";
-import React, { useEffect, useState } from "react";
+} from '@material-ui/core';
+import ClearIcon from '@material-ui/icons/ClearRounded';
+import SearchIcon from '@material-ui/icons/Search';
+import _ from 'lodash';
+import debounce from 'lodash.debounce';
+import { useSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -34,17 +34,17 @@ import {
   Row,
   Table,
   Tooltip,
-} from "react-bootstrap";
-import { Link, useHistory } from "react-router-dom";
-import ConfirmModal from "components/Modals/ConfirmModal/ConfirmModal";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import FilterService from "services/FilterService";
-import { HeadCell } from "../PublicFilters/Interfaces";
-import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
-import "./Filters.css";
-import HoverableMenuItem from "./HoverableMenuItem/HoverableMenuItem";
-import { ImportFilterModal } from "../../components/Modals/ImportFilterModal/ImportFilterModal";
+} from 'react-bootstrap';
+import { Link, useHistory } from 'react-router-dom';
+import ConfirmModal from 'components/Modals/ConfirmModal/ConfirmModal';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import FilterService from 'services/FilterService';
+import { HeadCell } from '../PublicFilters/Interfaces';
+import EnhancedTableHead from './EnhancedTableHead/EnhancedTableHead';
+import './Filters.css';
+import HoverableMenuItem from './HoverableMenuItem/HoverableMenuItem';
+import { ImportFilterModal } from '../../components/Modals/ImportFilterModal/ImportFilterModal';
 import {
   BadgeColor,
   BulkSelectedType,
@@ -54,8 +54,8 @@ import {
   Order,
   Visibility,
   VisibilityString,
-} from "./Interfaces";
-import ToggleEnabledFilterModal from "./ToggleEnabledFilterModal/ToggleEnabledFilterModal";
+} from './Interfaces';
+import ToggleEnabledFilterModal from './ToggleEnabledFilterModal/ToggleEnabledFilterModal';
 import {
   isDisabled,
   isDisabledGlobally,
@@ -64,12 +64,12 @@ import {
   isOrphan,
   isShared,
   itemsToPages,
-} from "./utils";
-import LoggerService from "services/LoggerService";
-import MenuButton from "@material-ui/icons/MoreVert";
-import DropdownMenu from "./DropdownMenu/DropdownMenu";
-import { toast } from "react-toastify";
-import { useTitle } from "react-use";
+} from './utils';
+import LoggerService from 'services/LoggerService';
+import MenuButton from '@material-ui/icons/MoreVert';
+import DropdownMenu from './DropdownMenu/DropdownMenu';
+import { toast } from 'react-toastify';
+import { useTitle } from 'react-use';
 
 interface MyFiltersTableData {
   name: string;
@@ -81,13 +81,13 @@ interface MyFiltersTableData {
 }
 
 const headCells: HeadCell<MyFiltersTableData>[] = [
-  { id: "name", label: "Filter name", numeric: false, sortable: true },
-  { id: "scope", label: "Scope", numeric: false },
-  { id: "subs", label: "# of Subs", numeric: true, sortable: true },
-  { id: "cids", label: "# of Cids", numeric: true, sortable: true },
+  { id: 'name', label: 'Filter name', numeric: false, sortable: true },
+  { id: 'scope', label: 'Scope', numeric: false },
+  { id: 'subs', label: '# of Subs', numeric: true, sortable: true },
+  { id: 'cids', label: '# of Cids', numeric: true, sortable: true },
   {
-    id: "enabled",
-    label: "Active",
+    id: 'enabled',
+    label: 'Active',
     numeric: false,
     sortable: true,
     info: (
@@ -110,11 +110,11 @@ const headCells: HeadCell<MyFiltersTableData>[] = [
       </OverlayTrigger>
     ),
   },
-  { id: "actions", label: "Actions", numeric: false },
+  { id: 'actions', label: 'Actions', numeric: false },
 ];
 
 function Filters(props): JSX.Element {
-  useTitle("My Filters - BitScreen");
+  useTitle('My Filters - BitScreen');
   /**
    * UTILS
    */
@@ -126,11 +126,11 @@ function Filters(props): JSX.Element {
   // ----------------------- PAGINATION -----------------------
 
   // ----------------------- SORTING -----------------------
-  const [mySort, setMySort] = React.useState("asc");
-  const [mySortBy, setMySortBy] = React.useState("name");
-  const [order, setOrder] = React.useState<Order>("asc");
+  const [mySort, setMySort] = React.useState('asc');
+  const [mySortBy, setMySortBy] = React.useState('name');
+  const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] =
-    React.useState<keyof MyFiltersTableData>("name");
+    React.useState<keyof MyFiltersTableData>('name');
   const [needsRefresh, setNeedsRefresh] = useState(false);
   // ----------------------- SORTING -----------------------
   const [hoveredFilterId, setHoveredFilterId] = useState(-1);
@@ -141,8 +141,8 @@ function Filters(props): JSX.Element {
   ) => {
     // if (property !== ) return;
 
-    setMySort(mySort === "asc" ? "desc" : "asc");
-    setOrder(mySort === "asc" ? "desc" : "asc");
+    setMySort(mySort === 'asc' ? 'desc' : 'asc');
+    setOrder(mySort === 'asc' ? 'desc' : 'asc');
     setMySortBy(property);
     setOrderBy(property);
   };
@@ -172,12 +172,12 @@ function Filters(props): JSX.Element {
   });
   const [selectedConditional, setSelectedConditional] =
     useState<BulkSelectedType>(BulkSelectedType.None);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [loaded, setLoaded] = useState<boolean>(false);
   const [showConfirmRemoveBulkAction, setShowConfirmRemoveBulkAction] =
     useState(false);
   const [confirmRemoveBulkActionMessage, setConfirmRemoveBulkActionMessage] =
-    useState("");
+    useState('');
 
   const translateVisibility = (visibility: Visibility): string => {
     return VisibilityString[visibility];
@@ -193,7 +193,7 @@ function Filters(props): JSX.Element {
   const history = useHistory();
 
   useEffect(() => {
-    LoggerService.info("Loading Filters List page.");
+    LoggerService.info('Loading Filters List page.');
   }, []);
 
   useEffect(() => {
@@ -342,8 +342,8 @@ function Filters(props): JSX.Element {
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
-  const [message, setMessage] = useState<string>("false");
+  const [title, setTitle] = useState<string>('');
+  const [message, setMessage] = useState<string>('false');
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
@@ -351,12 +351,12 @@ function Filters(props): JSX.Element {
   const [showConfirmEnableBulkAction, setShowConfirmEnableBulkAction] =
     useState<boolean>(false);
   const [confirmEnableBulkActionMessage, setConfirmEnableBulkActionMessage] =
-    useState<string>("");
+    useState<string>('');
 
   const [showConfirmDisableBulkAction, setShowConfirmDisableBulkAction] =
     useState<boolean>(false);
   const [confirmDisableBulkActionMessage, setConfirmDisableBulkActionMessage] =
-    useState<string>("");
+    useState<string>('');
 
   const [bulkEnabled, setBulkEnabled] = useState<boolean | undefined>(
     undefined
@@ -489,9 +489,9 @@ function Filters(props): JSX.Element {
         `Are you sure you want to delete filter "${deletedFilterList.name}?"`
       ) : (
         <div className="multiple-rows-delete-message">
-          <div style={{ marginBottom: "12px" }}>
-            Deleting this list will impact {numberOfSubscribers}{" "}
-            {numberOfSubscribers === 1 ? "subscriber" : "subscribers"}.
+          <div style={{ marginBottom: '12px' }}>
+            Deleting this list will impact {numberOfSubscribers}{' '}
+            {numberOfSubscribers === 1 ? 'subscriber' : 'subscribers'}.
           </div>
           <div>Do you want to delete it anyway?</div>
         </div>
@@ -503,23 +503,23 @@ function Filters(props): JSX.Element {
 
   const CIDFilterScope = (props: FilterList): JSX.Element => {
     const variantMapper = {
-      [Visibility.None]: "secondary",
-      [Visibility.Private]: "danger",
-      [Visibility.Public]: "success",
-      [Visibility.Shared]: "warning",
+      [Visibility.None]: 'secondary',
+      [Visibility.Private]: 'danger',
+      [Visibility.Public]: 'success',
+      [Visibility.Shared]: 'warning',
     };
     const colorMapper = {
-      [BadgeColor.None]: { backgroundColor: "#7A869A" },
-      [BadgeColor.Private]: { backgroundColor: "#FC6471" },
-      [BadgeColor.Public]: { backgroundColor: "#4DA74D" },
-      [BadgeColor.Shared]: { backgroundColor: "#F7C143" },
-      [BadgeColor.Imported]: { backgroundColor: "#7A869A" },
+      [BadgeColor.None]: { backgroundColor: '#7A869A' },
+      [BadgeColor.Private]: { backgroundColor: '#FC6471' },
+      [BadgeColor.Public]: { backgroundColor: '#4DA74D' },
+      [BadgeColor.Shared]: { backgroundColor: '#F7C143' },
+      [BadgeColor.Imported]: { backgroundColor: '#7A869A' },
       [BadgeColor.Orphan]: {
-        backgroundColor: "#FFFFFF",
-        color: "#7A869A",
-        border: "1px solid #7A869A",
+        backgroundColor: '#FFFFFF',
+        color: '#7A869A',
+        border: '1px solid #7A869A',
       },
-      [BadgeColor.Override]: { backgroundColor: "#027BFE" },
+      [BadgeColor.Override]: { backgroundColor: '#027BFE' },
     };
 
     const isImported = props.provider.id !== AuthService.getProviderId();
@@ -529,9 +529,9 @@ function Filters(props): JSX.Element {
     const isException = props.visibility === Visibility.Exception;
 
     return (
-      <Row style={{ display: "flex", flexDirection: "column" }}>
+      <Row style={{ display: 'flex', flexDirection: 'column' }}>
         <Col>
-          <Badge style={{ color: "#FFFFFF", ...colorMapper[props.visibility] }}>
+          <Badge style={{ color: '#FFFFFF', ...colorMapper[props.visibility] }}>
             {translateVisibility(props.visibility)}
           </Badge>
         </Col>
@@ -564,7 +564,7 @@ function Filters(props): JSX.Element {
       return (
         <FontAwesomeIcon
           icon={faEye as IconProp}
-          color={props.id === hoveredFilterId ? "blue" : "black"}
+          color={props.id === hoveredFilterId ? 'blue' : 'black'}
         />
       );
     }
@@ -572,7 +572,7 @@ function Filters(props): JSX.Element {
     return (
       <FontAwesomeIcon
         icon={faEdit as IconProp}
-        color={props.id === hoveredFilterId ? "blue" : "black"}
+        color={props.id === hoveredFilterId ? 'blue' : 'black'}
       />
     );
   };
@@ -595,7 +595,7 @@ function Filters(props): JSX.Element {
 
   const CIDFilter = (): JSX.Element => {
     return (
-      <div className={"card-container"}>
+      <div className={'card-container'}>
         <TableContainer>
           <Table aria-label="enhanced table">
             <EnhancedTableHead
@@ -639,12 +639,12 @@ function Filters(props): JSX.Element {
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
-                      style={{ verticalAlign: "middle", width: 400 }}
+                      style={{ verticalAlign: 'middle', width: 400 }}
                     >
                       <Link
                         to={`/filters/edit/${row.shareId}`}
                         style={{
-                          color: row.enabled ? "black" : "grey",
+                          color: row.enabled ? 'black' : 'grey',
                           fontSize: 14,
                         }}
                       >
@@ -653,28 +653,28 @@ function Filters(props): JSX.Element {
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
-                      style={{ verticalAlign: "middle" }}
+                      style={{ verticalAlign: 'middle' }}
                     >
                       <CIDFilterScope {...row} />
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
-                      style={{ verticalAlign: "middle" }}
+                      style={{ verticalAlign: 'middle' }}
                     >
                       {isImported(row) ||
                       isOrphan(row) ||
                       row.visibility !== Visibility.Public ||
                       !row.provider_Filters
-                        ? "-"
+                        ? '-'
                         : row.provider_Filters.length - 1}
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
-                      style={{ verticalAlign: "middle" }}
+                      style={{ verticalAlign: 'middle' }}
                     >
                       <span
                         style={{
-                          textAlign: "center",
+                          textAlign: 'center',
                         }}
                       >
                         {row.cids && row.cids.length
@@ -684,7 +684,7 @@ function Filters(props): JSX.Element {
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
-                      style={{ verticalAlign: "middle" }}
+                      style={{ verticalAlign: 'middle' }}
                     >
                       <div
                         onClick={() => {
@@ -708,7 +708,7 @@ function Filters(props): JSX.Element {
                     </TableCell>
                     <TableCell
                       align="right"
-                      style={{ verticalAlign: "middle" }}
+                      style={{ verticalAlign: 'middle' }}
                     >
                       <Link
                         to={`/filters/edit/${row.shareId}`}
@@ -723,7 +723,7 @@ function Filters(props): JSX.Element {
                       >
                         <FontAwesomeIcon
                           icon={faTrash as IconProp}
-                          color={row.id === hoveredFilterId ? "red" : "black"}
+                          color={row.id === hoveredFilterId ? 'red' : 'black'}
                         />
                       </Link>
                     </TableCell>
@@ -822,12 +822,12 @@ function Filters(props): JSX.Element {
   const bulkRemove = () => {
     Promise.all(selectedFilters.map((f) => ApiService.deleteFilter(f)))
       .then(() => {
-        enqueueSnackbar("Successfully deleted all.", {
-          variant: "success",
+        enqueueSnackbar('Successfully deleted all.', {
+          variant: 'success',
           preventDuplicate: true,
           anchorOrigin: {
-            horizontal: "right",
-            vertical: "top",
+            horizontal: 'right',
+            vertical: 'top',
           },
         });
       })
@@ -836,12 +836,12 @@ function Filters(props): JSX.Element {
           toast.error(e.data.message);
           return;
         }
-        enqueueSnackbar("One or more filters could not be deleted.", {
-          variant: "error",
+        enqueueSnackbar('One or more filters could not be deleted.', {
+          variant: 'error',
           preventDuplicate: true,
           anchorOrigin: {
-            horizontal: "right",
-            vertical: "top",
+            horizontal: 'right',
+            vertical: 'top',
           },
         });
         LoggerService.error(e);
@@ -883,19 +883,19 @@ function Filters(props): JSX.Element {
           <div>
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                verticalAlign: "top",
+                display: 'flex',
+                justifyContent: 'space-between',
+                verticalAlign: 'top',
                 paddingBottom: 0,
                 marginBottom: 16,
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "row",
+                  display: 'flex',
+                  flexDirection: 'row',
                   flex: 1,
-                  alignItems: "center",
+                  alignItems: 'center',
                 }}
               >
                 <div style={{ fontSize: 32, fontWeight: 600, marginBottom: 0 }}>
@@ -905,10 +905,10 @@ function Filters(props): JSX.Element {
                   Filter lists running on my node
                   {!isImportEnabled() && (
                     <p className="text-dim" style={{ marginRight: 4 }}>
-                      To activate importing, go to{" "}
+                      To activate importing, go to{' '}
                       <a style={{ fontSize: 12 }} href="/settings">
                         Settings
-                      </a>{" "}
+                      </a>{' '}
                       and add country data.
                     </p>
                   )}
@@ -916,14 +916,14 @@ function Filters(props): JSX.Element {
               </div>
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
                 }}
               >
                 <Button
                   variant="primary"
-                  style={{ marginRight: 4, backgroundColor: "#003BDD" }}
+                  style={{ marginRight: 4, backgroundColor: '#003BDD' }}
                   onClick={() => history.push(`/filters/new`)}
                 >
                   New Filter
@@ -973,10 +973,10 @@ function Filters(props): JSX.Element {
             <div className="filters-page-search-bulk-actions">
               <div
                 style={{
-                  display: "flex",
+                  display: 'flex',
                   flex: 1,
-                  flexDirection: "row",
-                  alignItems: "center",
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
               >
                 <TextField
@@ -997,7 +997,7 @@ function Filters(props): JSX.Element {
                         {searchTerm && (
                           <IconButton
                             onClick={() => {
-                              setSearchTerm("");
+                              setSearchTerm('');
                             }}
                             color="default"
                           >
@@ -1013,12 +1013,12 @@ function Filters(props): JSX.Element {
                   <span
                     style={{
                       marginRight: 4,
-                      verticalAlign: "middle",
-                      alignSelf: "center",
+                      verticalAlign: 'middle',
+                      alignSelf: 'center',
                     }}
                   >
-                    {filterLists ? filterLists.length : "0"} result
-                    {filterLists && filterLists.length === 1 ? "" : "s"} found
+                    {filterLists ? filterLists.length : '0'} result
+                    {filterLists && filterLists.length === 1 ? '' : 's'} found
                   </span>
                 ) : (
                   <></>
@@ -1053,10 +1053,10 @@ function Filters(props): JSX.Element {
                     !enabledSelectedFilters.length &&
                     !selectedFilters.length
                   }
-                  title={"Bulk Actions"}
+                  title={'Bulk Actions'}
                   variant="outlined"
-                  defaultValue={"Bulk Actions"}
-                  value={"Bulk Actions"}
+                  defaultValue={'Bulk Actions'}
+                  value={'Bulk Actions'}
                 >
                   <MenuItem value="Bulk Actions">Bulk Actions</MenuItem>
                   {!!disabledSelectedFilters.length && (
@@ -1135,33 +1135,33 @@ function Filters(props): JSX.Element {
 
             <ConfirmModal
               show={showConfirmEnableBulkAction}
-              title={"Confirm bulk enable filters"}
+              title={'Confirm bulk enable filters'}
               message={confirmEnableBulkActionMessage}
               callback={() => bulkSetEnabled(true)}
               closeCallback={() => {
                 setShowConfirmEnableBulkAction(false);
-                setConfirmEnableBulkActionMessage("");
+                setConfirmEnableBulkActionMessage('');
               }}
             />
             <ConfirmModal
               show={showConfirmDisableBulkAction}
-              title={"Confirm bulk disable filters"}
+              title={'Confirm bulk disable filters'}
               message={confirmDisableBulkActionMessage}
               callback={() => bulkSetEnabled(false)}
               closeCallback={() => {
                 setShowConfirmDisableBulkAction(false);
-                setConfirmDisableBulkActionMessage("");
+                setConfirmDisableBulkActionMessage('');
               }}
             />
 
             <ConfirmModal
               show={showConfirmRemoveBulkAction}
-              title={"Confirm bulk remove filters"}
+              title={'Confirm bulk remove filters'}
               message={confirmRemoveBulkActionMessage}
               callback={() => bulkRemove()}
               closeCallback={() => {
                 setShowConfirmRemoveBulkAction(false);
-                setConfirmRemoveBulkActionMessage("");
+                setConfirmRemoveBulkActionMessage('');
               }}
             />
 
@@ -1169,8 +1169,8 @@ function Filters(props): JSX.Element {
               show={showConfirmEnabled}
               title={
                 bulkEnabled === undefined
-                  ? "The selected filter is imported by other providers"
-                  : "One or more filters are imported by other providers"
+                  ? 'The selected filter is imported by other providers'
+                  : 'One or more filters are imported by other providers'
               }
               callback={toggleSharedFilterEnabled}
               closeCallback={() => {
@@ -1182,10 +1182,10 @@ function Filters(props): JSX.Element {
           </div>
         ) : (
           <div>
-            To activate filtering, go to{" "}
+            To activate filtering, go to{' '}
             <a style={{ fontSize: 16 }} href="/settings">
               Settings
-            </a>{" "}
+            </a>{' '}
             and add a wallet.
           </div>
         )

@@ -5,10 +5,10 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from "@material-ui/core";
-import React, { useEffect, useState } from "react";
-import { CidItem } from "../Interfaces";
-import LoggerService from "services/LoggerService";
+} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { CidItem } from '../Interfaces';
+import LoggerService from 'services/LoggerService';
 
 interface AddCidModalProps {
   cid: CidItem;
@@ -29,7 +29,7 @@ const AddCidModal = ({
 
   useEffect(() => {
     if (open) {
-      LoggerService.info("Show add CID modal");
+      LoggerService.info('Show add CID modal');
     }
   }, [open]);
 
@@ -43,11 +43,11 @@ const AddCidModal = ({
 
   return (
     <Dialog open={open} onClose={() => handleClose()}>
-      <DialogTitle>{edit ? "Update CID" : "Add CID"}</DialogTitle>
-      <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+      <DialogTitle>{edit ? 'Update CID' : 'Add CID'}</DialogTitle>
+      <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
         <form
           onKeyPress={(e) =>
-            e.nativeEvent.code === "Enter" && cidClone.cid
+            e.nativeEvent.code === 'Enter' && cidClone.cid
               ? handleClose(cidClone, index)
               : null
           }
@@ -86,7 +86,7 @@ const AddCidModal = ({
           disabled={!cidClone.cid}
           onClick={() => handleClose(cidClone, index)}
         >
-          {edit ? "Update" : "Add"}
+          {edit ? 'Update' : 'Add'}
         </Button>
         <Button
           aria-label="cancel"

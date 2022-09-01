@@ -3,14 +3,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "@material-ui/core";
-import React, { useEffect, useState } from "react";
-import { Alert, Button, Form, FormControl, InputGroup } from "react-bootstrap";
-import { toast } from "react-toastify";
-import ApiService from "services/ApiService";
-import { getAccount } from "services/AuthService";
-import LoggerService from "services/LoggerService";
-import { Account } from "types/interfaces";
+} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Form, FormControl, InputGroup } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import ApiService from 'services/ApiService';
+import { getAccount } from 'services/AuthService';
+import LoggerService from 'services/LoggerService';
+import { Account } from 'types/interfaces';
 
 interface DeleteAccountModalProps {
   show: boolean;
@@ -21,15 +21,15 @@ const DeleteAccountModal = ({
   show,
   handleClose,
 }: DeleteAccountModalProps): JSX.Element => {
-  const [confirmText, setConfirmText] = useState<string>("");
+  const [confirmText, setConfirmText] = useState<string>('');
   const [account, setAccount] = useState<Account | null>(getAccount());
-  const [toComplete, setToComplete] = useState<string>("");
+  const [toComplete, setToComplete] = useState<string>('');
   const [hasUsedFilters, setHasUsedFilters] = useState<boolean>(false);
 
   useEffect(() => {
     if (show) {
-      LoggerService.info("Showing Delete account modal.");
-      ApiService.getFilters(0, 100, "asc", "name", "").then(
+      LoggerService.info('Showing Delete account modal.');
+      ApiService.getFilters(0, 100, 'asc', 'name', '').then(
         ({ count, filters }) => {
           for (const filter of filters) {
             if (
@@ -56,16 +56,16 @@ const DeleteAccountModal = ({
   }, [show]);
 
   useEffect(() => {
-    const cutAddress = account?.walletAddress?.slice(2, -4) || "";
-    setToComplete(cutAddress + "...");
+    const cutAddress = account?.walletAddress?.slice(2, -4) || '';
+    setToComplete(cutAddress + '...');
   }, [account]);
 
   const confirmDelete = () => {
     if (confirmText === account?.walletAddress?.slice(-4)) {
-      toast.success("Account deletion initiated.");
+      toast.success('Account deletion initiated.');
       ApiService.deleteProvider(account).then(
         (response) => {
-          setConfirmText("");
+          setConfirmText('');
           handleClose(response.success);
         },
         (e) => {
@@ -84,7 +84,7 @@ const DeleteAccountModal = ({
     <>
       <Dialog open={show} maxWidth="sm" onClose={() => handleClose(false)}>
         <DialogTitle>Delete account</DialogTitle>
-        <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           <Form>
             <Form.Row>
               <Alert style={{ marginRight: 10 }} variant="danger">

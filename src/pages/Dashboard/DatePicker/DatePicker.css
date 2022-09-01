@@ -30,7 +30,7 @@
   text-align: center;
   display: table-cell;
   vertical-align: middle;
-  content: "v";
+  content: 'v';
 }
 
 .react-datepicker__year-read-view--down-arrow,

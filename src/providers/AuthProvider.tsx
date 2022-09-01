@@ -1,9 +1,9 @@
-import detectEthereumProvider from "@metamask/detect-provider";
-import React, { useEffect } from "react";
-import Web3 from "web3";
-import * as AuthService from "services/AuthService";
-import { toast } from "react-toastify";
-import LoggerService from "services/LoggerService";
+import detectEthereumProvider from '@metamask/detect-provider';
+import React, { useEffect } from 'react';
+import Web3 from 'web3';
+import * as AuthService from 'services/AuthService';
+import { toast } from 'react-toastify';
+import LoggerService from 'services/LoggerService';
 
 const AuthProvider = (props: any) => {
   const { setProvider, setConfig, currentWallet } = props;
@@ -14,19 +14,19 @@ const AuthProvider = (props: any) => {
       .then(async (walletProvider: any) => {
         if (!walletProvider) {
           return toast.error(
-            "In order to use the BitScreen application you need to install the metamask extension on your browser."
+            'In order to use the BitScreen application you need to install the metamask extension on your browser.'
           );
         }
-        walletProvider.on("chainChanged", () => {
-          LoggerService.debug("Chain change detected.");
+        walletProvider.on('chainChanged', () => {
+          LoggerService.debug('Chain change detected.');
           AuthService.removeAccount();
           setProvider(null);
           setConfig(null);
           window.location.reload();
         });
 
-        walletProvider.on("accountsChanged", (wallets: Array<string>) => {
-          LoggerService.debug("Account change detected.");
+        walletProvider.on('accountsChanged', (wallets: Array<string>) => {
+          LoggerService.debug('Account change detected.');
           if (
             !wallets.length ||
             (currentWallet && currentWallet !== wallets[0])
@@ -45,13 +45,13 @@ const AuthProvider = (props: any) => {
           AuthService.removeAccount();
           setProvider(null);
           setConfig(null);
-          LoggerService.debug("Chain ID: " + chainId);
+          LoggerService.debug('Chain ID: ' + chainId);
         }
       })
       .catch((error) => {
         LoggerService.error(error);
         return toast.error(
-          "In order to use the BitScreen application you need to install the metamask extension on your browser."
+          'In order to use the BitScreen application you need to install the metamask extension on your browser.'
         );
       });
   }, []);

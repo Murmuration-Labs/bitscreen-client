@@ -1,10 +1,10 @@
-import { Provider } from "types/interfaces";
+import { Provider } from 'types/interfaces';
 
 export const VisibilityString: string[] = [
-  "None",
-  "Private",
-  "Public",
-  "Shared",
+  'None',
+  'Private',
+  'Public',
+  'Shared',
 ];
 
 export enum ViewTypes {
@@ -49,9 +49,9 @@ export enum EnabledOption {
 }
 
 export enum PeriodType {
-  daily = "daily",
-  monthly = "monthly",
-  yearly = "yearly",
+  daily = 'daily',
+  monthly = 'monthly',
+  yearly = 'yearly',
 }
 
 export interface PeriodInterval {
@@ -60,9 +60,9 @@ export interface PeriodInterval {
 }
 
 export function mapVisibilityString(visibilityStr: string): Visibility {
-  if (visibilityStr === "Private") return Visibility.Private;
-  if (visibilityStr === "Public") return Visibility.Public;
-  if (visibilityStr === "Shared") return Visibility.Shared;
+  if (visibilityStr === 'Private') return Visibility.Private;
+  if (visibilityStr === 'Public') return Visibility.Public;
+  if (visibilityStr === 'Shared') return Visibility.Shared;
 
   return Visibility.None;
 }
@@ -110,7 +110,7 @@ export interface CidItemProps {
   prepareModalForDeleteItems: (i: CidItem[]) => void;
 }
 
-export type Order = "asc" | "desc";
+export type Order = 'asc' | 'desc';
 
 export interface MoveCIDModalProps {
   cidItems: CidItem[];

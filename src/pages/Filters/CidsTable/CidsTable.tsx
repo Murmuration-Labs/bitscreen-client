@@ -7,10 +7,10 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-} from "@material-ui/core";
-import React, { useEffect, useState } from "react";
-import { CidItem, Conflict, FilterList, Visibility } from "../Interfaces";
-import CidsRow from "./CidsRow/CidsRow";
+} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { CidItem, Conflict, FilterList, Visibility } from '../Interfaces';
+import CidsRow from './CidsRow/CidsRow';
 
 export interface CidsTableProps {
   filter: FilterList;
@@ -32,15 +32,15 @@ export interface HeadCell {
   pos: number;
   id: string;
   label: string;
-  align?: "inherit" | "left" | "center" | "right" | "justify";
+  align?: 'inherit' | 'left' | 'center' | 'right' | 'justify';
 }
 
 const defaultHeadCells: HeadCell[] = [
-  { pos: 0, id: "cid", label: "CID" },
-  { pos: 1, id: "refUrl", label: "URL" },
-  { pos: 2, id: "created", label: "Added" },
-  { pos: 3, id: "local", label: "Problem" },
-  { pos: 999, id: "actions", label: "", align: "right" },
+  { pos: 0, id: 'cid', label: 'CID' },
+  { pos: 1, id: 'refUrl', label: 'URL' },
+  { pos: 2, id: 'created', label: 'Added' },
+  { pos: 3, id: 'local', label: 'Problem' },
+  { pos: 999, id: 'actions', label: '', align: 'right' },
 ];
 
 const CidsTable = ({
@@ -68,7 +68,7 @@ const CidsTable = ({
 
   return (
     <TableContainer key={String(conflictsChanged)}>
-      <Table size={"small"} stickyHeader>
+      <Table size={'small'} stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
@@ -83,8 +83,8 @@ const CidsTable = ({
               />
             </TableCell>
             {headCells.map((headCell) => (
-              <TableCell key={headCell.id} align={headCell.align || "left"}>
-                <TableSortLabel active={false} direction={"asc"}>
+              <TableCell key={headCell.id} align={headCell.align || 'left'}>
+                <TableSortLabel active={false} direction={'asc'}>
                   {headCell.label}
                 </TableSortLabel>
               </TableCell>

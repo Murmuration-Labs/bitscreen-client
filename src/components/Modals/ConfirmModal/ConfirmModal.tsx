@@ -1,6 +1,6 @@
-import React from "react";
-import { Button, ListGroup, Modal } from "react-bootstrap";
-import "./ConfirmModal.css";
+import React from 'react';
+import { Button, ListGroup, Modal } from 'react-bootstrap';
+import './ConfirmModal.css';
 
 interface ConfirmModalProps {
   show: boolean;
@@ -27,7 +27,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
       <Modal.Body>
         <div className="modal-message">{props.message}</div>
         {props.bullets ? (
-          <ListGroup style={{ width: "100%", marginTop: 15 }}>
+          <ListGroup style={{ width: '100%', marginTop: 15 }}>
             <ul>
               {props.bullets.map((value, index) => (
                 <li key={index}>{value}</li>
@@ -35,7 +35,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
             </ul>
           </ListGroup>
         ) : (
-          ""
+          ''
         )}
       </Modal.Body>
       <Modal.Footer>
@@ -45,7 +45,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
             props.closeCallback();
           }}
         >
-          {props.declineMessage || "Cancel"}
+          {props.declineMessage || 'Cancel'}
         </Button>
         <Button
           variant="primary"
@@ -54,7 +54,7 @@ export default function ConfirmModal(props: ConfirmModalProps): JSX.Element {
             props.closeCallback();
           }}
         >
-          {props.confirmMessage || "Ok"}
+          {props.confirmMessage || 'Ok'}
         </Button>
       </Modal.Footer>
     </Modal>

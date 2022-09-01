@@ -1,25 +1,25 @@
-import { Dialog, IconButton, MenuItem } from "@material-ui/core";
-import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
-import { configure, shallow } from "enzyme";
-import React from "react";
-import AddCidModal from "../AddCidModal/AddCidModal";
-import MenuButton from "@material-ui/icons/MoreVert";
-import DropdownMenu from "./DropdownMenu";
+import { Dialog, IconButton, MenuItem } from '@material-ui/core';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { configure, shallow } from 'enzyme';
+import React from 'react';
+import AddCidModal from '../AddCidModal/AddCidModal';
+import MenuButton from '@material-ui/icons/MoreVert';
+import DropdownMenu from './DropdownMenu';
 import {
   Button,
   Form,
   FormCheck,
   OverlayTrigger,
   Tooltip,
-} from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 configure({ adapter: new Adapter() });
 
 const mockEnqueue = jest.fn();
-jest.mock("notistack", () => ({
-  ...jest.requireActual("notistack"),
+jest.mock('notistack', () => ({
+  ...jest.requireActual('notistack'),
   useSnackbar: () => {
     return {
       enqueueSnackbar: mockEnqueue,
@@ -41,10 +41,10 @@ const props = {
       className="dropdown-menu-item"
       key={1}
       style={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
       onClick={toggleFilterOverride}
     >
@@ -54,9 +54,9 @@ const props = {
           marginRight: 10,
           marginTop: 2,
         }}
-        className={"text-dim"}
+        className={'text-dim'}
       >
-        Exception{" "}
+        Exception{' '}
         <OverlayTrigger
           placement="left"
           delay={{ show: 150, hide: 300 }}
@@ -78,20 +78,20 @@ const props = {
       </Form.Label>
     </MenuItem>,
     <MenuItem className="dropdown-menu-item" key={2} onClick={confirmDelete}>
-      <Button variant="outline-danger" style={{ width: "100%" }}>
+      <Button variant="outline-danger" style={{ width: '100%' }}>
         Delete
       </Button>
     </MenuItem>,
   ],
 };
 
-describe("Dropdown Menu test", () => {
-  it("Should render the dropdown menu containing the delete button and override toggle", () => {
+describe('Dropdown Menu test', () => {
+  it('Should render the dropdown menu containing the delete button and override toggle', () => {
     const page = shallow(<DropdownMenu {...props} />);
 
-    const menuItem = page.find(".dropdown-menu-item").at(1);
+    const menuItem = page.find('.dropdown-menu-item').at(1);
 
-    menuItem.simulate("click", {
+    menuItem.simulate('click', {
       stopPropagation: () => {},
     });
 
@@ -100,16 +100,16 @@ describe("Dropdown Menu test", () => {
     const formCheck = page.find(FormCheck);
 
     expect(formCheck.exists()).toBeTruthy();
-    expect(formCheck.props()["type"]).toBe("switch");
+    expect(formCheck.props()['type']).toBe('switch');
   });
 
-  it("Should toggle filter override on click", () => {
+  it('Should toggle filter override on click', () => {
     const page = shallow(<DropdownMenu {...props} />);
 
     const menuItem = page.find(MenuItem).at(0);
     const formCheck = page.find(FormCheck);
 
-    menuItem.simulate("click");
+    menuItem.simulate('click');
 
     expect(toggleFilterOverride).toHaveBeenCalledTimes(1);
   });

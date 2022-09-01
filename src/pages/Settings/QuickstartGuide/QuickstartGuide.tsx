@@ -1,4 +1,4 @@
-import DeleteAccountModal from "../DeleteAccountModal/DeleteAccountModal";
+import DeleteAccountModal from '../DeleteAccountModal/DeleteAccountModal';
 import {
   Dialog,
   DialogContent,
@@ -9,12 +9,12 @@ import {
   List,
   ListItem,
   Typography,
-} from "@material-ui/core";
-import React from "react";
-import { CloseButton } from "react-bootstrap";
-import { Close } from "@material-ui/icons";
+} from '@material-ui/core';
+import React from 'react';
+import { CloseButton } from 'react-bootstrap';
+import { Close } from '@material-ui/icons';
 
-import "./QuickstartGuide.css";
+import './QuickstartGuide.css';
 
 interface QuickstartGuideProps {
   show: boolean;
@@ -36,11 +36,11 @@ const QuickstartGuide = ({
       >
         <DialogTitle>
           BitScreen Quickstart
-          <IconButton style={{ float: "right" }} onClick={handleClose}>
+          <IconButton style={{ float: 'right' }} onClick={handleClose}>
             <Close />
           </IconButton>
         </DialogTitle>
-        <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           <h3>Welcome to BitScreen Cloud App</h3>
           <Typography gutterBottom>
             BitScreen is a distributed filtering system for Filecoin storage
@@ -52,8 +52,8 @@ const QuickstartGuide = ({
                 <div
                   onClick={() =>
                     window.open(
-                      "https://github.com/Murmuration-Labs/bitscreen/",
-                      "_blank"
+                      'https://github.com/Murmuration-Labs/bitscreen/',
+                      '_blank'
                     )
                   }
                   className="quick-link"
@@ -83,14 +83,14 @@ const QuickstartGuide = ({
               <span
                 onClick={() =>
                   window.open(
-                    "https://github.com/Murmuration-Labs/bitscreen",
-                    "_blank"
+                    'https://github.com/Murmuration-Labs/bitscreen',
+                    '_blank'
                   )
                 }
                 className="quick-link"
               >
                 Lotus Plugin
-              </span>{" "}
+              </span>{' '}
               (<i>required</i>): Prevents deals in Lotus for CIDs contained in
               Local CID List or List Manager.
             </li>
@@ -102,8 +102,8 @@ const QuickstartGuide = ({
               <span
                 onClick={() =>
                   window.open(
-                    "https://pypi.org/project/bitscreen-updater/",
-                    "_blank"
+                    'https://pypi.org/project/bitscreen-updater/',
+                    '_blank'
                   )
                 }
                 className="quick-link"
@@ -158,22 +158,22 @@ const QuickstartGuide = ({
               into the Updater (<i>required</i>).
             </li>
             <li>
-              {" "}
+              {' '}
               Activate BitScreen filtering via Settings in the GUI client or CLI
               (<i>required</i>).
             </li>
             <li>
-              {" "}
+              {' '}
               You can now use BitScreen Cloud for advanced management of private
               filter lists.
             </li>
             <li>
-              {" "}
+              {' '}
               Activate list importing by entering country data in Settings (
               <i>optional</i>).
             </li>
             <li>
-              {" "}
+              {' '}
               Activate list sharing by entering requested provider information (
               <i>optional</i>).
             </li>

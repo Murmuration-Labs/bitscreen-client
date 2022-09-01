@@ -1,14 +1,14 @@
-import { Dialog } from "@material-ui/core";
-import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
-import { configure, mount, shallow } from "enzyme";
-import React from "react";
-import AddCidBatchModal from "./AddCidBatchModal";
+import { Dialog } from '@material-ui/core';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { configure, mount, shallow } from 'enzyme';
+import React from 'react';
+import AddCidBatchModal from './AddCidBatchModal';
 
 configure({ adapter: new Adapter() });
 
 const mockEnqueue = jest.fn();
-jest.mock("notistack", () => ({
-  ...jest.requireActual("notistack"),
+jest.mock('notistack', () => ({
+  ...jest.requireActual('notistack'),
   useSnackbar: () => {
     return {
       enqueueSnackbar: mockEnqueue,
@@ -28,35 +28,35 @@ const propsEdit = {
   show: true,
 };
 
-describe("CID Batch Modal test", () => {
-  it("Should render the Add CID batch modal", () => {
+describe('CID Batch Modal test', () => {
+  it('Should render the Add CID batch modal', () => {
     const page = shallow(<AddCidBatchModal {...propsAdd} />);
 
     expect(page.find(Dialog).exists()).toBeTruthy();
-    expect(page.text().includes("Add CIDs Batch")).toBeTruthy();
+    expect(page.text().includes('Add CIDs Batch')).toBeTruthy();
   });
 
-  it("Should render the Edit CID batch modal", () => {
+  it('Should render the Edit CID batch modal', () => {
     const page = shallow(<AddCidBatchModal {...propsEdit} />);
 
     expect(page.find(Dialog).exists()).toBeTruthy();
-    expect(page.text().includes("Update CIDs Batch")).toBeTruthy();
+    expect(page.text().includes('Update CIDs Batch')).toBeTruthy();
   });
 
-  it("Should have two inputs for CIDs and for URLs", () => {
+  it('Should have two inputs for CIDs and for URLs', () => {
     const page = shallow(<AddCidBatchModal {...propsAdd} />);
 
-    expect(page.find({ label: "CIDs" }).exists()).toBeTruthy();
-    expect(page.find({ label: "URL" }).exists()).toBeTruthy();
+    expect(page.find({ label: 'CIDs' }).exists()).toBeTruthy();
+    expect(page.find({ label: 'URL' }).exists()).toBeTruthy();
     // expect(page.text().includes("Add CIDs Batch")).toBeTruthy();
   });
 
-  it("Should trigger closeCallBack on cancel button clicks", () => {
+  it('Should trigger closeCallBack on cancel button clicks', () => {
     const page = shallow(<AddCidBatchModal {...propsAdd} />);
 
-    const cancelButton = page.find({ "aria-label": "cancel" });
+    const cancelButton = page.find({ 'aria-label': 'cancel' });
 
-    cancelButton.simulate("click", {
+    cancelButton.simulate('click', {
       stopPropagation: () => {},
     });
 

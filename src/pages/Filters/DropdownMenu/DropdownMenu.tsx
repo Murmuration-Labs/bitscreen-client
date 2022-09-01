@@ -1,6 +1,6 @@
-import { Menu } from "@material-ui/core";
-import React from "react";
-import { Button } from "react-bootstrap";
+import { Menu } from '@material-ui/core';
+import React from 'react';
+import { Button } from 'react-bootstrap';
 
 interface DropdownMenuProps {
   title?: string;

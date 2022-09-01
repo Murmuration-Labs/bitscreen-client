@@ -1,18 +1,18 @@
-import React from "react";
-import { CidItem, FilterList, Visibility } from "pages/Filters/Interfaces";
+import React from 'react';
+import { CidItem, FilterList, Visibility } from 'pages/Filters/Interfaces';
 
 const FilterService = {
   emptyFilterList: (): FilterList => {
     return {
       id: 0,
-      name: "",
+      name: '',
       cids: [],
       visibility: Visibility.Private,
       enabled: true,
       providerId: 0,
       provider: { id: 0 },
-      description: "",
-      shareId: "",
+      description: '',
+      shareId: '',
     };
   },
   renderHashedCid: ({ cid }: CidItem, short = true): JSX.Element => {

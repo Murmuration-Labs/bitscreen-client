@@ -1,16 +1,16 @@
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import MenuButton from "@material-ui/icons/MoreVert";
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import MenuButton from '@material-ui/icons/MoreVert';
 import {
   faExternalLinkAlt,
   faFolderPlus,
   faLink,
   faPlusCircle,
   faQuestionCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import _ from "lodash";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import _ from 'lodash';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   Badge,
   Button,
@@ -21,20 +21,20 @@ import {
   OverlayTrigger,
   Row,
   Tooltip,
-} from "react-bootstrap";
-import DropdownMenu from "../DropdownMenu/DropdownMenu";
-import { Prompt } from "react-router";
-import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
-import ConfirmModal from "components/Modals/ConfirmModal/ConfirmModal";
-import { serverUri } from "../../../config";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import FilterService from "services/FilterService";
-import AddCidBatchModal from "../AddCidBatchModal/AddCidBatchModal";
-import AddCidModal from "../AddCidModal/AddCidModal";
-import CidsTable from "../CidsTable/CidsTable";
-import "../Filters.css";
+} from 'react-bootstrap';
+import DropdownMenu from '../DropdownMenu/DropdownMenu';
+import { Prompt } from 'react-router';
+import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import ConfirmModal from 'components/Modals/ConfirmModal/ConfirmModal';
+import { serverUri } from '../../../config';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import FilterService from 'services/FilterService';
+import AddCidBatchModal from '../AddCidBatchModal/AddCidBatchModal';
+import AddCidModal from '../AddCidModal/AddCidModal';
+import CidsTable from '../CidsTable/CidsTable';
+import '../Filters.css';
 import {
   CidItem,
   Config,
@@ -43,16 +43,16 @@ import {
   FilterList,
   ViewTypes,
   Visibility,
-} from "../Interfaces";
-import MoveCIDModal from "../MoveCIDModal/MoveCIDModal";
-import ToggleEnabledFilterModal from "../ToggleEnabledFilterModal/ToggleEnabledFilterModal";
-import { isDisabledGlobally, isOrphan, isShared } from "../utils";
-import { IconButton, MenuItem } from "@material-ui/core";
-import ConflictModal from "../../../components/Modals/ConflictModal/ConflictModal";
-import LoggerService from "services/LoggerService";
-import { CID } from "multiformats";
-import { useTitle } from "react-use";
-import PageTitle from "components/Utils/PageTitle";
+} from '../Interfaces';
+import MoveCIDModal from '../MoveCIDModal/MoveCIDModal';
+import ToggleEnabledFilterModal from '../ToggleEnabledFilterModal/ToggleEnabledFilterModal';
+import { isDisabledGlobally, isOrphan, isShared } from '../utils';
+import { IconButton, MenuItem } from '@material-ui/core';
+import ConflictModal from '../../../components/Modals/ConflictModal/ConflictModal';
+import LoggerService from 'services/LoggerService';
+import { CID } from 'multiformats';
+import { useTitle } from 'react-use';
+import PageTitle from 'components/Utils/PageTitle';
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -101,7 +101,7 @@ const FilterPage = (props): JSX.Element => {
     setShowConflict(true);
   };
 
-  useEffect(() => LoggerService.info("Loading Filter Details page."), []);
+  useEffect(() => LoggerService.info('Loading Filter Details page.'), []);
 
   useEffect(() => {
     setConfiguration(props.config);
@@ -140,38 +140,38 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  const clipboardCopy = (linkToBeCopied, successMessage = "") => {
-    const selBox = document.createElement("textarea");
-    selBox.style.position = "fixed";
-    selBox.style.left = "0";
-    selBox.style.top = "0";
-    selBox.style.opacity = "0";
+  const clipboardCopy = (linkToBeCopied, successMessage = '') => {
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
     selBox.value = linkToBeCopied;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
-    document.execCommand("copy");
+    document.execCommand('copy');
     document.body.removeChild(selBox);
-    toast.success(successMessage ?? "The link was copied succesfully");
+    toast.success(successMessage ?? 'The link was copied succesfully');
   };
 
   const visibilityHelpText = (): string => {
-    let text = "";
+    let text = '';
 
     switch (filterList.visibility) {
       case Visibility.Private:
-        text = "Private lists are only visible to you.";
+        text = 'Private lists are only visible to you.';
         break;
       case Visibility.Public:
-        text = "Public lists are visible to all users via the directory.";
+        text = 'Public lists are visible to all users via the directory.';
         break;
       case Visibility.Shared:
         text =
-          "Shared lists are only visible to other users if they have the URL or ID. Please save the filter to generate the shareable URL.";
+          'Shared lists are only visible to other users if they have the URL or ID. Please save the filter to generate the shareable URL.';
         break;
       case Visibility.Exception:
         text =
-          "Exception lists prevent CIDs from imported lists from being filtered. Cannot be shared.";
+          'Exception lists prevent CIDs from imported lists from being filtered. Cannot be shared.';
         break;
     }
 
@@ -179,11 +179,11 @@ const FilterPage = (props): JSX.Element => {
       return `(${text})`;
     }
 
-    return "";
+    return '';
   };
 
   const visibilityGenerateLink = (): JSX.Element => {
-    let generatedLink = "";
+    let generatedLink = '';
 
     if (
       [Visibility.Public, Visibility.Shared].includes(filterList.visibility)
@@ -194,13 +194,13 @@ const FilterPage = (props): JSX.Element => {
     }
 
     return (
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <Button
           size="sm"
-          className={"text-dim"}
-          style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
+          className={'text-dim'}
+          style={{ color: 'blue', fontSize: 14, marginLeft: -16 }}
           onClick={() => {
-            clipboardCopy(generatedLink, "The link was copied successfully.");
+            clipboardCopy(generatedLink, 'The link was copied successfully.');
           }}
           variant="muted"
         >
@@ -209,12 +209,12 @@ const FilterPage = (props): JSX.Element => {
         </Button>
         <Button
           size="sm"
-          className={"text-dim"}
-          style={{ color: "blue", fontSize: 14, marginLeft: -16 }}
+          className={'text-dim'}
+          style={{ color: 'blue', fontSize: 14, marginLeft: -16 }}
           onClick={() => {
             clipboardCopy(
               filterList.shareId,
-              "The ID was copied successfully."
+              'The ID was copied successfully.'
             );
           }}
           variant="muted"
@@ -230,7 +230,7 @@ const FilterPage = (props): JSX.Element => {
     setCids(
       filterList &&
         filterList.cids &&
-        typeof filterList.cids !== "number" &&
+        typeof filterList.cids !== 'number' &&
         filterList.cids.length
         ? filterList.cids.sort((a, b) => {
             if (a.id && b.id) {
@@ -256,7 +256,7 @@ const FilterPage = (props): JSX.Element => {
 
   const [editingCid, setEditingCid] = useState<CidItem | null>(null);
   const [editingCidIndex, setEditingCidIndex] = useState<number>(-1);
-  const [editingCidType, setEditingCidType] = useState<"EDIT" | "ADD" | null>(
+  const [editingCidType, setEditingCidType] = useState<'EDIT' | 'ADD' | null>(
     null
   );
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -309,7 +309,7 @@ const FilterPage = (props): JSX.Element => {
     // Math.random should be unique because of its seeding algorithm.
     // Convert it to base 36 (numbers + letters), and grab the first 9 characters
     // after the decimal.
-    return "_" + Math.random().toString(36).substr(2, 9);
+    return '_' + Math.random().toString(36).substr(2, 9);
   };
 
   const mountedRef = useRef(true);
@@ -374,9 +374,9 @@ const FilterPage = (props): JSX.Element => {
         const e = event || window.event;
         e.preventDefault();
         if (e) {
-          e.returnValue = "";
+          e.returnValue = '';
         }
-        return "";
+        return '';
       }
     };
   };
@@ -426,7 +426,7 @@ const FilterPage = (props): JSX.Element => {
               }
               setFilterListChanged(false); // To prevent unsaved data prompt.
               history.push(`/filters`);
-              toast.success("Filter list updated successfully");
+              toast.success('Filter list updated successfully');
               setLoaded(false);
             })
             .catch((e) => {
@@ -434,7 +434,7 @@ const FilterPage = (props): JSX.Element => {
                 toast.error(e.data.message);
                 return;
               }
-              toast.error("Error: " + e.message);
+              toast.error('Error: ' + e.message);
               setLoaded(false);
               LoggerService.error(e);
             });
@@ -444,7 +444,7 @@ const FilterPage = (props): JSX.Element => {
             toast.error(e.data.message);
             return;
           }
-          toast.error("Error: " + e.message);
+          toast.error('Error: ' + e.message);
           setLoaded(false);
           LoggerService.error(e);
         });
@@ -453,7 +453,7 @@ const FilterPage = (props): JSX.Element => {
         .then(() => {
           setFilterListChanged(false); // To prevent unsaved data prompt.
           history.push(`/filters`);
-          toast.success("Filter list created successfully");
+          toast.success('Filter list created successfully');
           setLoaded(false);
         })
         .catch((e) => {
@@ -461,7 +461,7 @@ const FilterPage = (props): JSX.Element => {
             toast.error(e.data.message);
             return;
           }
-          toast.error("Error: " + e.message);
+          toast.error('Error: ' + e.message);
           setLoaded(false);
           LoggerService.error(e);
         });
@@ -469,18 +469,18 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const [showOverrideCids, setShowOverrideCids] = useState<boolean>(false);
-  const [overrideCidsTitle, setOverrideCidsTitle] = useState<string>("");
+  const [overrideCidsTitle, setOverrideCidsTitle] = useState<string>('');
   const [overrrideCidsMessage, setOverrrideCidsMessage] =
-    useState<string>("false");
+    useState<string>('false');
   const [overrideCidsBullets, setOverrideCidsBullets] = useState<string[]>([]);
 
   const canSave = (): void => {
     ApiService.getOverrideCids(filterList)
       .then((res) => {
         if (Object.keys(res).length > 0) {
-          setOverrideCidsTitle("Local filter cids exception warning");
+          setOverrideCidsTitle('Local filter cids exception warning');
           setOverrrideCidsMessage(
-            "The following cids are present on local filter lists:"
+            'The following cids are present on local filter lists:'
           );
           setOverrideCidsBullets(res);
           setShowOverrideCids(true);
@@ -493,7 +493,7 @@ const FilterPage = (props): JSX.Element => {
           toast.error(e.data.message);
           return;
         }
-        toast.error("Something wrong happend please try again later.");
+        toast.error('Something wrong happend please try again later.');
         LoggerService.error(e);
       });
   };
@@ -518,30 +518,30 @@ const FilterPage = (props): JSX.Element => {
   const getVisibilityButtonClass = (): string => {
     switch (filterList.visibility) {
       case Visibility.Private:
-        return "visibility-private";
+        return 'visibility-private';
       case Visibility.Public:
-        return "visibility-public";
+        return 'visibility-public';
       case Visibility.Shared:
-        return "visibility-shared";
+        return 'visibility-shared';
       case Visibility.Exception:
-        return "visibility-exception";
+        return 'visibility-exception';
     }
 
-    return "";
+    return '';
   };
 
   const onNewCid = (): void => {
     const newCid: CidItem = {
       tableKey: generateUniqueKey(),
-      cid: "",
-      refUrl: "",
+      cid: '',
+      refUrl: '',
       edit: true,
       isChecked: false,
       isSaved: false,
     };
 
     setEditingCid(newCid);
-    setEditingCidType("ADD");
+    setEditingCidType('ADD');
     setEditingCidIndex(-1);
   };
 
@@ -612,14 +612,14 @@ const FilterPage = (props): JSX.Element => {
 
     const cid = editItems[0];
     setEditingCid(cid);
-    setEditingCidType("EDIT");
+    setEditingCidType('EDIT');
     setEditingCidIndex(cids.indexOf(cid));
   };
 
   const prepareCidMoveModal = async (moveItems: CidItem[]): Promise<void> => {
     let data;
     try {
-      data = await ApiService.getFilters(0, 100, "asc", "name", "");
+      data = await ApiService.getFilters(0, 100, 'asc', 'name', '');
     } catch (e: any) {
       if (e.status === 401 && props.config) {
         toast.error(e.data.message);
@@ -629,7 +629,7 @@ const FilterPage = (props): JSX.Element => {
     const filterLists: FilterList[] = data.filters;
     const providerId = AuthService.getProviderId();
 
-    setMoveCidItems(moveItems.filter((x) => typeof x.id === "number"));
+    setMoveCidItems(moveItems.filter((x) => typeof x.id === 'number'));
     setMoveOptionFilters(
       filterLists.filter(
         (x) => x.id !== filterList.id && x.provider.id == providerId
@@ -656,8 +656,8 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>("");
-  const [message, setMessage] = useState<string>("false");
+  const [title, setTitle] = useState<string>('');
+  const [message, setMessage] = useState<string>('false');
   const [deletedFilterList, setDeletedFilterList] = useState<FilterList>(
     FilterService.emptyFilterList()
   );
@@ -681,10 +681,10 @@ const FilterPage = (props): JSX.Element => {
       () => {
         toast.success(
           isImported
-            ? "Filter list discarded successfully"
-            : "Filter list deleted successfully"
+            ? 'Filter list discarded successfully'
+            : 'Filter list deleted successfully'
         );
-        history.push("/filters");
+        history.push('/filters');
       },
       (e) => {
         if (e.status === 401 && props.config) {
@@ -801,8 +801,8 @@ const FilterPage = (props): JSX.Element => {
             style={
               !filterEnabled
                 ? {
-                    backgroundColor: "#FB6471",
-                    color: "white",
+                    backgroundColor: '#FB6471',
+                    color: 'white',
                   }
                 : {}
             }
@@ -824,8 +824,8 @@ const FilterPage = (props): JSX.Element => {
             style={
               filterEnabled
                 ? {
-                    backgroundColor: "#003BDD",
-                    color: "white",
+                    backgroundColor: '#003BDD',
+                    color: 'white',
                   }
                 : {}
             }
@@ -852,13 +852,13 @@ const FilterPage = (props): JSX.Element => {
       <div
         onClick={cancel}
         style={{
-          marginRight: "17px",
-          fontSize: "36px",
-          lineHeight: "36px",
-          textAlign: "center",
+          marginRight: '17px',
+          fontSize: '36px',
+          lineHeight: '36px',
+          textAlign: 'center',
           fontWeight: 200,
-          color: "#7A869A",
-          cursor: "pointer",
+          color: '#7A869A',
+          cursor: 'pointer',
         }}
       >
         &#8249;
@@ -869,19 +869,19 @@ const FilterPage = (props): JSX.Element => {
       title = (
         <div
           style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            flexWrap: "nowrap",
-            flexDirection: "row",
+            display: 'flex',
+            alignContent: 'center',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+            flexDirection: 'row',
           }}
         >
           <PageTitle title="View filter list - BitScreen" />
           <div className="filter-page-title">
-            View filter list{" "}
-            <Badge variant={isOrphan(filterList) ? "danger" : "dark"}>
-              {isOrphan(filterList) ? "Orphaned" : "Imported"}
+            View filter list{' '}
+            <Badge variant={isOrphan(filterList) ? 'danger' : 'dark'}>
+              {isOrphan(filterList) ? 'Orphaned' : 'Imported'}
             </Badge>
           </div>
           {isOrphan(filterList) && (
@@ -900,12 +900,12 @@ const FilterPage = (props): JSX.Element => {
       title = (
         <div
           style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            flexWrap: "nowrap",
-            flexDirection: "row",
+            display: 'flex',
+            alignContent: 'center',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            flexWrap: 'nowrap',
+            flexDirection: 'row',
           }}
         >
           <PageTitle title={`Edit ${filterList.name} - BitScreen`} />
@@ -914,7 +914,7 @@ const FilterPage = (props): JSX.Element => {
             Make changes to {filterList.name} (
             {filterList.provider_Filters
               ? filterList.provider_Filters?.length
-              : "No"}{" "}
+              : 'No'}{' '}
             active subscribers)
           </span>
         </div>
@@ -942,7 +942,7 @@ const FilterPage = (props): JSX.Element => {
     }
 
     return (
-      <div style={{ display: "flex", paddingBottom: 4, alignItems: "center" }}>
+      <div style={{ display: 'flex', paddingBottom: 4, alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
           <h4>Origin</h4>
           <a
@@ -979,7 +979,7 @@ const FilterPage = (props): JSX.Element => {
             }}
             as="textarea"
             placeholder="This note can only be seen by you."
-            value={filterNotes || ""}
+            value={filterNotes || ''}
           />
         </Col>
       </Form.Row>
@@ -998,15 +998,15 @@ const FilterPage = (props): JSX.Element => {
     return (
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
         }}
       >
         {totalConflicts.length === 0 && (
           <Button
             variant="primary"
-            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
+            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: '#003BDD' }}
             disabled={!filterListChanged || !cidsValid}
             onClick={save}
           >
@@ -1016,7 +1016,7 @@ const FilterPage = (props): JSX.Element => {
         {totalConflicts.length > 0 && (
           <Button
             variant="primary"
-            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: "#003BDD" }}
+            style={{ marginRight: isEdit ? 5 : 0, backgroundColor: '#003BDD' }}
             onClick={showConflictsModal}
           >
             Resolve Conflicts
@@ -1035,8 +1035,8 @@ const FilterPage = (props): JSX.Element => {
                 confirmDelete();
               }}
             >
-              <Button variant="outline-danger" style={{ width: "100%" }}>
-                {isImported ? "Discard" : "Delete"}
+              <Button variant="outline-danger" style={{ width: '100%' }}>
+                {isImported ? 'Discard' : 'Delete'}
               </Button>
             </MenuItem>
           </DropdownMenu>
@@ -1064,7 +1064,7 @@ const FilterPage = (props): JSX.Element => {
     <>
       {loaded ? (
         <>
-          <div style={{ display: "flex", marginBottom: "16px" }}>
+          <div style={{ display: 'flex', marginBottom: '16px' }}>
             <div style={{ flex: 1 }}>{renderTitle()}</div>
             {renderDeleteButton()}
           </div>
@@ -1124,17 +1124,17 @@ const FilterPage = (props): JSX.Element => {
                 {checkViewType() !== ViewTypes.Imported && (
                   <div
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
                     <div
                       style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "flex-start",
-                        alignContent: "center",
-                        alignItems: "center",
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'flex-start',
+                        alignContent: 'center',
+                        alignItems: 'center',
                         marginBottom: 10,
                       }}
                     >
@@ -1147,7 +1147,7 @@ const FilterPage = (props): JSX.Element => {
                           <Button
                             variant="outline-secondary"
                             style={{
-                              width: "100%",
+                              width: '100%',
                             }}
                             onClick={onNewCid}
                             disabled={isImported}
@@ -1163,7 +1163,7 @@ const FilterPage = (props): JSX.Element => {
                         <Dropdown.Item>
                           <Button
                             variant="outline-secondary"
-                            style={{ width: "100%" }}
+                            style={{ width: '100%' }}
                             onClick={() => {
                               setAddCidBatchModal(true);
                             }}
@@ -1291,7 +1291,7 @@ const FilterPage = (props): JSX.Element => {
                           {filterList.shareId && visibilityGenerateLink()}
                           <span
                             style={{
-                              color: "grey",
+                              color: 'grey',
                               fontSize: 12,
                               flex: 1,
                             }}
@@ -1361,7 +1361,7 @@ const FilterPage = (props): JSX.Element => {
               cid={editingCid as CidItem}
               index={editingCidIndex}
               open={!!editingCidType}
-              edit={editingCidType === "EDIT"}
+              edit={editingCidType === 'EDIT'}
               handleClose={(cid, idx) => {
                 setEditingCid(null);
                 setEditingCidType(null);
@@ -1442,7 +1442,7 @@ const FilterPage = (props): JSX.Element => {
                 }
               }
               setFilterListChanged(true);
-              return "You have unsaved changes, are you sure you want to leave?";
+              return 'You have unsaved changes, are you sure you want to leave?';
             }}
           />
           <ConfirmModal

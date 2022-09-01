@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { Modal, Button, ListGroup, Form } from "react-bootstrap";
-import { Link } from "@material-ui/core";
+import React, { useState } from 'react';
+import { Modal, Button, ListGroup, Form } from 'react-bootstrap';
+import { Link } from '@material-ui/core';
 
 export interface ConsentModalProps {
   show: boolean;
@@ -27,14 +27,14 @@ export default function ConsentModal(props: ConsentModalProps): JSX.Element {
       </Modal.Header>
       <Modal.Body>
         <p>
-          By using BitScreen, you agree to our{" "}
+          By using BitScreen, you agree to our{' '}
           <Link
             href="https://github.com/Murmuration-Labs/bitscreen/blob/master/terms_of_service.md"
             target="_blank"
           >
             Terms of Service
-          </Link>{" "}
-          &{" "}
+          </Link>{' '}
+          &{' '}
           <Link
             href="https://github.com/Murmuration-Labs/bitscreen/blob/master/privacy_policy.md"
             target="_blank"

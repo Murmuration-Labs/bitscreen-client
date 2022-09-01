@@ -3,13 +3,13 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-} from "@material-ui/core";
-import { Conflict, ConflictModalProps } from "pages/Filters/Interfaces";
-import React, { useEffect, useState } from "react";
-import { ListGroup } from "react-bootstrap";
-import { toast } from "react-toastify";
-import ApiService from "services/ApiService";
-import LoggerService from "services/LoggerService";
+} from '@material-ui/core';
+import { Conflict, ConflictModalProps } from 'pages/Filters/Interfaces';
+import React, { useEffect, useState } from 'react';
+import { ListGroup } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import ApiService from 'services/ApiService';
+import LoggerService from 'services/LoggerService';
 
 const resolveConflict = async (conflicts: Conflict[]) => {
   try {
@@ -35,7 +35,7 @@ const ConflictModal = ({
 
   useEffect(() => {
     if (show) {
-      LoggerService.info("Show Conflict modal");
+      LoggerService.info('Show Conflict modal');
     }
   }, [show]);
 
@@ -61,7 +61,7 @@ const ConflictModal = ({
   return (
     <>
       <Dialog open={show && !multiple} onClose={() => handleClose(false)}>
-        <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           This CID appears on {conflicts.length} local filter list/s. Do you
           want to remove it there?
           <ListGroup>
@@ -107,7 +107,7 @@ const ConflictModal = ({
         </DialogActions>
       </Dialog>
       <Dialog open={show && multiple} onClose={() => handleClose(false)}>
-        <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           <p className="conflict-modal-text">
             The following CID(s) in this list are in conflict with a local
             filter and cannot be saved.

@@ -1,6 +1,6 @@
-import { EnabledOption, ToggleEnabledFilterModalProps } from "../Interfaces";
-import React, { useState } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { EnabledOption, ToggleEnabledFilterModalProps } from '../Interfaces';
+import React, { useState } from 'react';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 export default function ToggleEnabledFilterModal(
   props: ToggleEnabledFilterModalProps
@@ -10,9 +10,9 @@ export default function ToggleEnabledFilterModal(
   );
 
   const mapOptionString = (option: string): EnabledOption => {
-    if (option === "No, enable/disable the filter(s) only for myself")
+    if (option === 'No, enable/disable the filter(s) only for myself')
       return EnabledOption.Local;
-    if (option === "Yes, enable/disable the filter(s) for all users")
+    if (option === 'Yes, enable/disable the filter(s) for all users')
       return EnabledOption.Global;
 
     return EnabledOption.None;

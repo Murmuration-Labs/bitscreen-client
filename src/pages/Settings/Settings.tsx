@@ -1,48 +1,48 @@
-import { Switch, withStyles } from "@material-ui/core";
-import _ from "lodash";
-import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Typeahead } from "react-bootstrap-typeahead";
-import { Prompt } from "react-router";
-import countryList from "react-select-country-list";
-import { toast } from "react-toastify";
-import { useTitle } from "react-use";
-import { activeIcon, inactiveIcon, infoIcon } from "resources/icons";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import LoggerService from "services/LoggerService";
-import { Account } from "types/interfaces";
-import validator from "validator";
-import { Config } from "../Filters/Interfaces";
-import DeleteAccountModal from "./DeleteAccountModal/DeleteAccountModal";
-import QuickstartGuide from "./QuickstartGuide/QuickstartGuide";
-import "./Settings.css";
+import { Switch, withStyles } from '@material-ui/core';
+import _ from 'lodash';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import { Button, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Typeahead } from 'react-bootstrap-typeahead';
+import { Prompt } from 'react-router';
+import countryList from 'react-select-country-list';
+import { toast } from 'react-toastify';
+import { useTitle } from 'react-use';
+import { activeIcon, inactiveIcon, infoIcon } from 'resources/icons';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import LoggerService from 'services/LoggerService';
+import { Account } from 'types/interfaces';
+import validator from 'validator';
+import { Config } from '../Filters/Interfaces';
+import DeleteAccountModal from './DeleteAccountModal/DeleteAccountModal';
+import QuickstartGuide from './QuickstartGuide/QuickstartGuide';
+import './Settings.css';
 
 const HtmlSwitchComponent = withStyles((theme) => ({
   root: {
     width: 28,
     height: 16,
     padding: 0,
-    display: "flex",
+    display: 'flex',
   },
   switchBase: {
     padding: 2,
-    color: "#7A869A",
-    "&$checked": {
-      transform: "translateX(12px)",
+    color: '#7A869A',
+    '&$checked': {
+      transform: 'translateX(12px)',
       color: theme.palette.common.white,
-      "& + $track": {
+      '& + $track': {
         opacity: 1,
-        backgroundColor: "#027BFE",
-        borderColor: "#027BFE",
+        backgroundColor: '#027BFE',
+        borderColor: '#027BFE',
       },
     },
   },
   thumb: {
     width: 12,
     height: 12,
-    boxShadow: "none",
+    boxShadow: 'none',
   },
   track: {
     border: `1px solid #7A869A`,
@@ -55,15 +55,15 @@ const HtmlSwitchComponent = withStyles((theme) => ({
 
 const providerInitialState = {
   id: 0,
-  walletAddressHashed: "",
-  businessName: "",
-  website: "",
-  email: "",
-  contactPerson: "",
-  address: "",
-  nonce: "",
+  walletAddressHashed: '',
+  businessName: '',
+  website: '',
+  email: '',
+  contactPerson: '',
+  address: '',
+  nonce: '',
   guideShown: false,
-  walletAddress: "",
+  walletAddress: '',
 };
 
 const configInitialState = {
@@ -73,7 +73,7 @@ const configInitialState = {
 };
 
 export default function Settings(props) {
-  useTitle("Settings - BitScreen");
+  useTitle('Settings - BitScreen');
   const { config, setProvider, setConfig } = props;
 
   const [providerInfo, setProviderInfo] =
@@ -88,13 +88,13 @@ export default function Settings(props) {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
   const [countryInputValue, setCountryInputValue] = useState<Array<string>>([]);
-  const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [lastUpdated, setLastUpdated] = useState<string>('');
   const countries = countryList();
   const countryNames = countries.data.map((e) => e.label);
   const countryValues = countries.data.map((e) => e.value);
 
   useEffect(() => {
-    LoggerService.info("Loading Settings page.");
+    LoggerService.info('Loading Settings page.');
   }, []);
 
   useEffect(() => {
@@ -113,14 +113,14 @@ export default function Settings(props) {
 
       if (provider.country) {
         setCountryInputValue([
-          countries.data.find((e) => e.value === provider.country)?.label || "",
+          countries.data.find((e) => e.value === provider.country)?.label || '',
         ]);
       }
 
       if (provider.lastUpdate) {
-        setLastUpdated(moment(provider.lastUpdate).format("lll"));
+        setLastUpdated(moment(provider.lastUpdate).format('lll'));
       } else {
-        setLastUpdated("N/A");
+        setLastUpdated('N/A');
       }
 
       if (!provider.guideShown) setShowQuickstartGuide(true);
@@ -168,7 +168,7 @@ export default function Settings(props) {
       (!providerInfo.country || !providerInfo.minerId)
     ) {
       toast.error(
-        "Please select a country from the list in order to enable importing or sharing lists!"
+        'Please select a country from the list in order to enable importing or sharing lists!'
       );
       return false;
     }
@@ -184,7 +184,7 @@ export default function Settings(props) {
         !providerInfo.website)
     ) {
       toast.error(
-        "Please fill the entire form in order to enable sharing lists!"
+        'Please fill the entire form in order to enable sharing lists!'
       );
       return false;
     }
@@ -194,7 +194,7 @@ export default function Settings(props) {
       providerInfo.website &&
       !validator.isURL(providerInfo.website)
     ) {
-      toast.error("Website is not a valid URL!");
+      toast.error('Website is not a valid URL!');
       return false;
     }
 
@@ -203,7 +203,7 @@ export default function Settings(props) {
       providerInfo.email &&
       !validator.isEmail(providerInfo.email)
     ) {
-      toast.error("Email is not valid!");
+      toast.error('Email is not valid!');
       return false;
     }
 
@@ -259,7 +259,7 @@ export default function Settings(props) {
     setConfig(config);
     setProvider(provider);
 
-    toast.success("Successfully updated provider information!");
+    toast.success('Successfully updated provider information!');
     setIsDisabledWhileApiCall(false);
   };
 
@@ -271,7 +271,7 @@ export default function Settings(props) {
 
   const handleDeleteClose = (result: boolean) => {
     setShowDeleteModal(false);
-    LoggerService.info("Hiding Delete account modal.");
+    LoggerService.info('Hiding Delete account modal.');
 
     if (result) {
       setProvider(null);
@@ -435,24 +435,24 @@ export default function Settings(props) {
                 </div>
                 <div className="slice-description t-ls">
                   Use filter lists by third parties to prevent deals in Lotus.
-                  (Requires{" "}
+                  (Requires{' '}
                   <span
                     onClick={() =>
                       window.open(
-                        "https://github.com/Murmuration-Labs/bitscreen",
-                        "_blank"
+                        'https://github.com/Murmuration-Labs/bitscreen',
+                        '_blank'
                       )
                     }
                     className="external-link"
                   >
                     Lotus Plugin
-                  </span>{" "}
-                  &{" "}
+                  </span>{' '}
+                  &{' '}
                   <span
                     onClick={() =>
                       window.open(
-                        "https://pypi.org/project/bitscreen-updater/",
-                        "_blank"
+                        'https://pypi.org/project/bitscreen-updater/',
+                        '_blank'
                       )
                     }
                     className="external-link"
@@ -481,7 +481,7 @@ export default function Settings(props) {
                             setCountryInputValue(country);
                             setProviderInfo({
                               ...providerInfo,
-                              country: country[0] || "",
+                              country: country[0] || '',
                             });
                           }}
                           selected={countryInputValue}
@@ -495,7 +495,7 @@ export default function Settings(props) {
                           role="miner-id"
                           placeholder="Miner ID"
                           type="text"
-                          value={providerInfo.minerId || ""}
+                          value={providerInfo.minerId || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -530,24 +530,24 @@ export default function Settings(props) {
                   />
                 </div>
                 <div className="slice-description t-ls">
-                  Share your filter lists with other Bitscreen users. (Requires{" "}
+                  Share your filter lists with other Bitscreen users. (Requires{' '}
                   <span
                     onClick={() =>
                       window.open(
-                        "https://github.com/Murmuration-Labs/bitscreen",
-                        "_blank"
+                        'https://github.com/Murmuration-Labs/bitscreen',
+                        '_blank'
                       )
                     }
                     className="external-link"
                   >
                     Lotus Plugin
-                  </span>{" "}
-                  &{" "}
+                  </span>{' '}
+                  &{' '}
                   <span
                     onClick={() =>
                       window.open(
-                        "https://pypi.org/project/bitscreen-updater/",
-                        "_blank"
+                        'https://pypi.org/project/bitscreen-updater/',
+                        '_blank'
                       )
                     }
                     className="external-link"
@@ -572,7 +572,7 @@ export default function Settings(props) {
                           role="business-name"
                           placeholder="Business name"
                           type="text"
-                          value={providerInfo.businessName || ""}
+                          value={providerInfo.businessName || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -589,7 +589,7 @@ export default function Settings(props) {
                           role="website"
                           placeholder="Website"
                           type="text"
-                          value={providerInfo.website || ""}
+                          value={providerInfo.website || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -606,7 +606,7 @@ export default function Settings(props) {
                           role="email"
                           placeholder="Email"
                           type="text"
-                          value={providerInfo.email || ""}
+                          value={providerInfo.email || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -623,7 +623,7 @@ export default function Settings(props) {
                           role="contact-person"
                           placeholder="Contact person"
                           type="text"
-                          value={providerInfo.contactPerson || ""}
+                          value={providerInfo.contactPerson || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -640,7 +640,7 @@ export default function Settings(props) {
                           role="business-address"
                           placeholder="Business address"
                           type="text"
-                          value={providerInfo.address || ""}
+                          value={providerInfo.address || ''}
                           onChange={(e) => {
                             setProviderInfo({
                               ...providerInfo,
@@ -811,8 +811,8 @@ export default function Settings(props) {
             <div
               onClick={() =>
                 window.open(
-                  "https://github.com/Murmuration-Labs/bitscreen/",
-                  "_blank"
+                  'https://github.com/Murmuration-Labs/bitscreen/',
+                  '_blank'
                 )
               }
               className="help-link pb-8px"
@@ -839,7 +839,7 @@ export default function Settings(props) {
                 providerInfo.accessToken &&
                 hasUnsavedChanges()
               ) {
-                return "You have unsaved changes, are you sure you want to leave?";
+                return 'You have unsaved changes, are you sure you want to leave?';
               }
 
               if (
@@ -847,7 +847,7 @@ export default function Settings(props) {
                 providerInfo.accessToken &&
                 hasUnfilledInfo()
               ) {
-                return "You have activated a toggle but did not enter relevant data, are you sure you want to leave?";
+                return 'You have activated a toggle but did not enter relevant data, are you sure you want to leave?';
               }
 
               return true;

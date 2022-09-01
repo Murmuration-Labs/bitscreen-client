@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Col, Row } from "react-bootstrap";
-import ApiService from "services/ApiService";
+import React, { useEffect, useState } from 'react';
+import { Col, Row } from 'react-bootstrap';
+import ApiService from 'services/ApiService';
 import {
   ChartDataEntry,
   DashboardData,
   PeriodInterval,
   PeriodType,
-} from "../Filters/Interfaces";
-import { DashboardCard, DashboardDoubleCard } from "components/Cards/Cards";
-import { DashboardChart } from "./DashboardChart/DashboardChart";
-import { CardContent, Typography } from "@material-ui/core";
-import Card from "@material-ui/core/Card";
-import { Form } from "react-bootstrap";
-import { PeriodRange } from "./DatePicker/DatePicker";
-import moment from "moment";
-import LoggerService from "services/LoggerService";
-import { toast } from "react-toastify";
-import { useTitle } from "react-use";
+} from '../Filters/Interfaces';
+import { DashboardCard, DashboardDoubleCard } from 'components/Cards/Cards';
+import { DashboardChart } from './DashboardChart/DashboardChart';
+import { CardContent, Typography } from '@material-ui/core';
+import Card from '@material-ui/core/Card';
+import { Form } from 'react-bootstrap';
+import { PeriodRange } from './DatePicker/DatePicker';
+import moment from 'moment';
+import LoggerService from 'services/LoggerService';
+import { toast } from 'react-toastify';
+import { useTitle } from 'react-use';
 
 function Dashboard(props): JSX.Element {
-  useTitle("Dashboard - BitScreen");
+  useTitle('Dashboard - BitScreen');
   const [periodType, setPeriodType] = useState<PeriodType>(PeriodType.daily);
   const [periodInterval, setPeriodInterval] = useState<PeriodInterval>({
     startDate: null,
@@ -39,7 +39,7 @@ function Dashboard(props): JSX.Element {
   });
 
   useEffect(() => {
-    LoggerService.info("Loading Dashboard page.");
+    LoggerService.info('Loading Dashboard page.');
     ApiService.getDashboardData().then(
       (dashboardData) => {
         setDashboardData(dashboardData);
@@ -60,8 +60,8 @@ function Dashboard(props): JSX.Element {
     }
 
     const stringPeriodInterval = {
-      startDate: moment(periodInterval.startDate).format("YYYY-MM-DD"),
-      endDate: moment(periodInterval.endDate).format("YYYY-MM-DD"),
+      startDate: moment(periodInterval.startDate).format('YYYY-MM-DD'),
+      endDate: moment(periodInterval.endDate).format('YYYY-MM-DD'),
     };
 
     ApiService.getChartData(periodType, stringPeriodInterval).then(

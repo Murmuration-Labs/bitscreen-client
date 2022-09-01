@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
-import moment from "moment";
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
 
-import "react-datepicker/dist/react-datepicker.css";
-import { PeriodType } from "../../Filters/Interfaces";
-import "./DatePicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
+import { PeriodType } from '../../Filters/Interfaces';
+import './DatePicker.css';
 
 export function PeriodRange(props) {
   const [periodType, setPeriodType] = useState<PeriodType>();
@@ -25,20 +25,20 @@ export function PeriodRange(props) {
       });
     }
 
-    let newStartDateMoment: moment.Moment = moment(date).startOf("day");
+    let newStartDateMoment: moment.Moment = moment(date).startOf('day');
     const endDateMoment = moment(endDate);
 
     switch (periodType) {
       case PeriodType.daily:
-        newStartDateMoment = moment(date).startOf("day");
+        newStartDateMoment = moment(date).startOf('day');
         break;
 
       case PeriodType.monthly:
-        newStartDateMoment = moment(date).startOf("month");
+        newStartDateMoment = moment(date).startOf('month');
         break;
 
       case PeriodType.yearly:
-        newStartDateMoment = moment(date).startOf("year");
+        newStartDateMoment = moment(date).startOf('year');
         break;
     }
 
@@ -57,19 +57,19 @@ export function PeriodRange(props) {
 
   const handleEndDateChange = (date) => {
     const { setPeriodInterval, periodType } = props;
-    let newEndDateMoment: moment.Moment = moment(date).endOf("day");
+    let newEndDateMoment: moment.Moment = moment(date).endOf('day');
 
     switch (periodType) {
       case PeriodType.daily:
-        newEndDateMoment = moment(date).endOf("day");
+        newEndDateMoment = moment(date).endOf('day');
         break;
 
       case PeriodType.monthly:
-        newEndDateMoment = moment(date).endOf("month");
+        newEndDateMoment = moment(date).endOf('month');
         break;
 
       case PeriodType.yearly:
-        newEndDateMoment = moment(date).endOf("year");
+        newEndDateMoment = moment(date).endOf('year');
         break;
     }
 
@@ -91,7 +91,7 @@ export function PeriodRange(props) {
             endDate={endDate}
             placeholderText="Start Date"
             className={`chart-date-picker-dropdown mr-3 ${
-              !startDate ? "" : "dropdown-select-icon"
+              !startDate ? '' : 'dropdown-select-icon'
             }`}
             showMonthDropdown
             showYearDropdown
@@ -124,7 +124,7 @@ export function PeriodRange(props) {
             endDate={endDate}
             placeholderText="Start Date"
             className={`chart-date-picker-dropdown mr-3 ${
-              !startDate ? "" : "dropdown-select-icon"
+              !startDate ? '' : 'dropdown-select-icon'
             }`}
             dateFormat="MM/yyyy"
             showMonthYearPicker
@@ -155,7 +155,7 @@ export function PeriodRange(props) {
             endDate={endDate}
             placeholderText="Start Date"
             className={`chart-date-picker-dropdown mr-3 ${
-              !startDate ? "" : "dropdown-select-icon"
+              !startDate ? '' : 'dropdown-select-icon'
             }`}
             dateFormat="yyyy"
             showYearPicker

@@ -1,34 +1,34 @@
-import detectEthereumProvider from "@metamask/detect-provider";
-import * as jwt from "jsonwebtoken";
-import React, { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
-import "react-bootstrap-typeahead/css/Typeahead.css";
+import detectEthereumProvider from '@metamask/detect-provider';
+import * as jwt from 'jsonwebtoken';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import 'react-bootstrap-typeahead/css/Typeahead.css';
 import {
   Redirect,
   Route,
   RouteComponentProps,
   Switch,
   useHistory,
-} from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Web3 from "web3";
-import ConsentModal from "components/Modals/ConsentModal/ConsentModal";
-import Navigation from "components/Navigation/Navigation";
-import AuthProvider from "providers/AuthProvider";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import LoggerService from "services/LoggerService";
-import { Account } from "types/interfaces";
-import "./App.css";
-import Dashboard from "./Dashboard/Dashboard";
-import FilterPage from "./Filters/FilterPage/FilterPage";
-import Filters from "./Filters/Filters";
-import { Config } from "./Filters/Interfaces";
-import Login from "./Login/Login";
-import PublicFilterDetailsPage from "./PublicFilters/PublicFilterDetails/PublicFilterDetails";
-import PublicFilters from "./PublicFilters/PublicFilters";
-import Settings from "./Settings/Settings";
+} from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Web3 from 'web3';
+import ConsentModal from 'components/Modals/ConsentModal/ConsentModal';
+import Navigation from 'components/Navigation/Navigation';
+import AuthProvider from 'providers/AuthProvider';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import LoggerService from 'services/LoggerService';
+import { Account } from 'types/interfaces';
+import './App.css';
+import Dashboard from './Dashboard/Dashboard';
+import FilterPage from './Filters/FilterPage/FilterPage';
+import Filters from './Filters/Filters';
+import { Config } from './Filters/Interfaces';
+import Login from './Login/Login';
+import PublicFilterDetailsPage from './PublicFilters/PublicFilterDetails/PublicFilterDetails';
+import PublicFilters from './PublicFilters/PublicFilters';
+import Settings from './Settings/Settings';
 
 interface MatchParams {
   id: string;
@@ -72,7 +72,7 @@ function App(): JSX.Element {
   const [provider, setProvider] = useState<Account | null>(
     AuthService.getAccount()
   );
-  const [previousPath, setPreviousPath] = useState<string>("");
+  const [previousPath, setPreviousPath] = useState<string>('');
   const [showConsent, setShowConsent] = useState<boolean>(false);
   const [consent, setConsent] = useState<boolean>(false);
 
@@ -91,7 +91,7 @@ function App(): JSX.Element {
 
     if (!walletProvider) {
       return toast.error(
-        "In order to use the BitScreen client you need to install the metamask extension on your browser. You can get it from here: https://metamask.io"
+        'In order to use the BitScreen client you need to install the metamask extension on your browser. You can get it from here: https://metamask.io'
       );
     }
 
@@ -101,8 +101,8 @@ function App(): JSX.Element {
     if (chainId !== 1) {
       try {
         await walletProvider.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x1" }],
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }],
         });
         return;
       } catch (e: any) {
@@ -118,7 +118,7 @@ function App(): JSX.Element {
     } catch (e) {
       LoggerService.error(e);
       return toast.error(
-        "You must connect with metamask in order to use the Bitscreen client."
+        'You must connect with metamask in order to use the Bitscreen client.'
       );
     }
 
@@ -134,7 +134,7 @@ function App(): JSX.Element {
       LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
-        "Could not get provider information from the server. Please try again later!"
+        'Could not get provider information from the server. Please try again later!'
       );
     }
     if (!provider) {
@@ -148,7 +148,7 @@ function App(): JSX.Element {
         LoggerService.error(e);
         AuthService.removeAccount();
         return toast.error(
-          "Could not create an account at the moment. Please try again later!"
+          'Could not create an account at the moment. Please try again later!'
         );
       }
     }
@@ -161,14 +161,14 @@ function App(): JSX.Element {
       signature = await web3.eth.personal.sign(
         provider.nonceMessage,
         provider.walletAddress,
-        ""
+        ''
       );
       if (AuthService.getAccount()) return;
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
-        "You must sign the metamask request in order to prove that the wallet belongs to you!"
+        'You must sign the metamask request in order to prove that the wallet belongs to you!'
       );
     }
 
@@ -178,7 +178,7 @@ function App(): JSX.Element {
       LoggerService.error(e);
       AuthService.removeAccount();
       return toast.error(
-        "Could not authenticate you at the moment. Please try again later!"
+        'Could not authenticate you at the moment. Please try again later!'
       );
     }
 
@@ -216,7 +216,7 @@ function App(): JSX.Element {
 
     if (previousPath) {
       history.push(previousPath);
-      setPreviousPath("");
+      setPreviousPath('');
     }
   };
 
@@ -260,7 +260,7 @@ function App(): JSX.Element {
     }
 
     const unlisten = history.listen((location) => {
-      if (location.pathname === "/login") return;
+      if (location.pathname === '/login') return;
 
       const accessToken = AuthService.getAccount()?.accessToken;
       if (accessToken) {
@@ -273,7 +273,7 @@ function App(): JSX.Element {
           Date.now() / 1000 > decodedToken.exp
         ) {
           setPreviousPath(location.pathname);
-          toast.error("Your token has expired. Please login again!");
+          toast.error('Your token has expired. Please login again!');
           return logout();
         }
       }
@@ -296,7 +296,7 @@ function App(): JSX.Element {
       />
       <Container fluid={true}>
         <Row className="fill-height">
-          <Col className={"stage"}>
+          <Col className={'stage'}>
             <Switch>
               <Route exact path="/">
                 <Redirect to="/login" />

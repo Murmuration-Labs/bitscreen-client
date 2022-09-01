@@ -1,14 +1,13 @@
-import _ from "lodash";
-import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, FormCheck, Row } from "react-bootstrap";
-import "./Login.css";
-import LoggerService from "services/LoggerService";
-import { metamaskIcon } from "resources/icons/index";
+import React, { useEffect } from 'react';
+import { Col, Form, Row } from 'react-bootstrap';
+import { metamaskIcon } from 'resources/icons/index';
+import LoggerService from 'services/LoggerService';
+import './Login.css';
 
 export default function Login(props) {
   const { connectMetamask, previousPath, setPreviousPath } = props;
 
-  useEffect(() => LoggerService.info("Loading Login page."), []);
+  useEffect(() => LoggerService.info('Loading Login page.'), []);
 
   useEffect(() => {
     if (previousPath) {
@@ -74,13 +73,13 @@ export default function Login(props) {
             <Row>
               <Col>
                 <p className="login-subtitle">
-                  By using BitScreen, you agree to our{" "}
+                  By using BitScreen, you agree to our{' '}
                   <a
                     href="https://github.com/Murmuration-Labs/bitscreen/blob/master/terms_of_service.md"
                     target="_blank"
                   >
                     Terms
-                  </a>{" "}
+                  </a>{' '}
                   & {` `}
                   <a
                     href="https://github.com/Murmuration-Labs/bitscreen/blob/master/privacy_policy.md"
@@ -88,7 +87,7 @@ export default function Login(props) {
                   >
                     Privacy Policy
                   </a>
-                  {"."}
+                  {'.'}
                 </p>
               </Col>
             </Row>

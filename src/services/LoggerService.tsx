@@ -1,18 +1,18 @@
 const LoggerService = {
   debug: (data) => {
-    console.debug("[DEBUG]", data);
+    console.debug('[DEBUG]', data);
   },
 
   info: (data) => {
-    console.info("[INFO]", data);
+    console.info('[INFO]', data);
   },
 
   warning: (data) => {
-    console.warn("[WARNING]", data);
+    console.warn('[WARNING]', data);
   },
 
   error: (data) => {
-    console.error("[ERROR]", data);
+    console.error('[ERROR]', data);
   },
 };
 

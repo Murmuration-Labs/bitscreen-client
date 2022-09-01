@@ -1,4 +1,4 @@
-import { CidItem } from "../Filters/Interfaces";
+import { CidItem } from '../Filters/Interfaces';
 
 export interface HeadCell<T> {
   id: keyof T;

@@ -1,9 +1,9 @@
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import React from "react";
-import { Col, Row } from "react-bootstrap";
-import "./Cards.css";
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import Typography from '@material-ui/core/Typography';
+import React from 'react';
+import { Col, Row } from 'react-bootstrap';
+import './Cards.css';
 
 export function DashboardCard(props) {
   const { cardTitle, cardText, smallText } = props;
@@ -13,7 +13,7 @@ export function DashboardCard(props) {
       <CardContent>
         <Typography className="card-title">{cardTitle}</Typography>
         <Typography
-          className={`${smallText ? "small-card-text" : "card-text"}`}
+          className={`${smallText ? 'small-card-text' : 'card-text'}`}
         >
           {cardText}
         </Typography>
@@ -37,7 +37,7 @@ export function DashboardDoubleCard(props) {
         <CardContent>
           <Typography className="card-title">{cardTitleLeft}</Typography>
           <Typography
-            className={`${smallText ? "small-card-text" : "card-text"}`}
+            className={`${smallText ? 'small-card-text' : 'card-text'}`}
           >
             {cardTextLeft}
           </Typography>
@@ -47,7 +47,7 @@ export function DashboardDoubleCard(props) {
         <CardContent>
           <Typography className="card-title">{cardTitleRight}</Typography>
           <Typography
-            className={`${smallText ? "small-card-text" : "card-text"}`}
+            className={`${smallText ? 'small-card-text' : 'card-text'}`}
           >
             {cardTextRight}
           </Typography>
@@ -67,7 +67,7 @@ export function PublicFilterDetailsCard(props) {
           {cardTitle}
         </Typography>
         <Typography
-          className={`public-card-text ${smallText ? "double" : "single"}`}
+          className={`public-card-text ${smallText ? 'double' : 'single'}`}
         >
           {cardText}
         </Typography>
@@ -97,7 +97,7 @@ export function PublicFilterDetailsDoubleCard(props) {
             <Typography className="public-card-text double">
               {cardTextLeftIsLink ? (
                 <a
-                  style={{ textDecoration: "underline", color: "#003bdd" }}
+                  style={{ textDecoration: 'underline', color: '#003bdd' }}
                   href={cardTextLeft}
                 >
                   {cardTextLeft}
@@ -117,7 +117,7 @@ export function PublicFilterDetailsDoubleCard(props) {
             <Typography className="public-card-text double">
               {cardTextRightIsLink ? (
                 <a
-                  style={{ textDecoration: "underline", color: "#003bdd" }}
+                  style={{ textDecoration: 'underline', color: '#003bdd' }}
                   href={cardTextRight}
                 >
                   {cardTextRight}
@@ -157,7 +157,7 @@ export function PublicFilterDetailsTripleCard(props) {
             <Typography className="public-card-text triple">
               {cardTextLeftIsLink ? (
                 <a
-                  style={{ textDecoration: "underline", color: "#003bdd" }}
+                  style={{ textDecoration: 'underline', color: '#003bdd' }}
                   href={cardTextLeft}
                 >
                   {cardTextLeft}
@@ -176,7 +176,7 @@ export function PublicFilterDetailsTripleCard(props) {
             <Typography className="public-card-text triple">
               {cardTextCenterIsLink ? (
                 <a
-                  style={{ textDecoration: "underline", color: "#003bdd" }}
+                  style={{ textDecoration: 'underline', color: '#003bdd' }}
                   href={cardTextCenter}
                 >
                   {cardTextCenter}
@@ -195,7 +195,7 @@ export function PublicFilterDetailsTripleCard(props) {
             <Typography className="public-card-text triple">
               {cardTextRightIsLink ? (
                 <a
-                  style={{ textDecoration: "underline", color: "#003bdd" }}
+                  style={{ textDecoration: 'underline', color: '#003bdd' }}
                   href={cardTextRight}
                 >
                   {cardTextRight}

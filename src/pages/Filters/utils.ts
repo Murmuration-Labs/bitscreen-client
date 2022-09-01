@@ -1,5 +1,5 @@
-import { FilterList } from "./Interfaces";
-import * as AuthService from "services/AuthService";
+import { FilterList } from './Interfaces';
+import * as AuthService from 'services/AuthService';
 
 export const isOrphan = (f: FilterList) =>
   f.provider_Filters &&
@@ -22,13 +22,13 @@ export const formatDate = (date: string | undefined): string => {
     const dateObj = new Date(date);
     return (
       dateObj.getFullYear() +
-      "-" +
+      '-' +
       (dateObj.getMonth() + 1) +
-      "-" +
+      '-' +
       dateObj.getDate()
     );
   }
-  return "No data";
+  return 'No data';
 };
 
 export const itemsToPages = (rowsPerPage) => {

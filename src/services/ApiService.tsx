@@ -1,5 +1,5 @@
-import axios from "axios";
-import fileDownload from "js-file-download";
+import axios from 'axios';
+import fileDownload from 'js-file-download';
 import {
   ChartDataEntry,
   CidItem,
@@ -8,17 +8,17 @@ import {
   DashboardData,
   FilterList,
   ProviderFilter,
-} from "pages/Filters/Interfaces";
-import { isImported } from "pages/Filters/utils";
-import { Account, DealFromApi } from "types/interfaces";
-import { remoteMarketplaceUri, serverUri } from "../config";
+} from 'pages/Filters/Interfaces';
+import { isImported } from 'pages/Filters/utils';
+import { Account, DealFromApi } from 'types/interfaces';
+import { remoteMarketplaceUri, serverUri } from '../config';
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
 
 const cidsRequests = ({ id, cids }: FilterList) => {
   return cids.map((cid) =>
-    typeof cid.id === "number"
+    typeof cid.id === 'number'
       ? axios.put<CidItem>(`${serverUri()}/cid/${cid.id}`, {
           cid: cid.cid,
           refUrl: cid.refUrl,
@@ -60,7 +60,7 @@ const ApiService = {
               [mySortBy]: mySort,
             }
           : {
-              name: "asc",
+              name: 'asc',
             },
       },
     });
@@ -363,13 +363,13 @@ const ApiService = {
 
   downloadCidList: async (): Promise<any> => {
     axios.get(`${serverUri()}/cid/blocked?download=true`).then((response) => {
-      fileDownload(JSON.stringify(response.data), "cid_file.json");
+      fileDownload(JSON.stringify(response.data), 'cid_file.json');
     });
   },
 
   exportAccount: async (): Promise<any> => {
     axios.get(`${serverUri()}/provider/export`).then((response) => {
-      fileDownload(response.data, "bitscreen_export.tar");
+      fileDownload(response.data, 'bitscreen_export.tar');
     });
   },
 };

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Typeahead } from "react-bootstrap-typeahead";
+import React, { useEffect, useState } from 'react';
+import { Typeahead } from 'react-bootstrap-typeahead';
 
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button } from 'react-bootstrap';
 
-import { CidItem, FilterList, MoveCIDModalProps } from "../Interfaces";
-import FilterService from "services/FilterService";
-import LoggerService from "services/LoggerService";
+import { CidItem, FilterList, MoveCIDModalProps } from '../Interfaces';
+import FilterService from 'services/FilterService';
+import LoggerService from 'services/LoggerService';
 
 export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
   const [selectedFilter, setSelectedFilter] = useState<Array<FilterList>>([
@@ -14,18 +14,18 @@ export default function MoveCIDModal(props: MoveCIDModalProps): JSX.Element {
 
   useEffect(() => {
     if (props.show) {
-      LoggerService.info("Show add CID Batch modal");
+      LoggerService.info('Show add CID Batch modal');
     }
   }, [props.show]);
 
   const renderTitle = (cidItems: CidItem[]): JSX.Element => {
     const titleText =
-      "Move " +
+      'Move ' +
       cidItems.length +
-      " CIDs: " +
-      cidItems.reduce((result, item) => result + item.cid + ", ", "");
+      ' CIDs: ' +
+      cidItems.reduce((result, item) => result + item.cid + ', ', '');
     return (
-      <Modal.Title style={{ wordBreak: "break-word" }}>
+      <Modal.Title style={{ wordBreak: 'break-word' }}>
         {titleText.slice(0, -2)}
       </Modal.Title>
     );

@@ -4,23 +4,23 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from "@material-ui/core";
-import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
-import "../Filters.css";
-import { AddCidBatchModalProps } from "../Interfaces";
-import LoggerService from "services/LoggerService";
+} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import '../Filters.css';
+import { AddCidBatchModalProps } from '../Interfaces';
+import LoggerService from 'services/LoggerService';
 
 export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
-  const [cidsInput, setCidsInput] = useState<string>("");
+  const [cidsInput, setCidsInput] = useState<string>('');
   const [cidsInputError, setCidsInputError] = useState<boolean>(false);
-  const [refUrl, setRefUrl] = useState<string>("");
+  const [refUrl, setRefUrl] = useState<string>('');
   const [edit] = useState(!!props.edit);
   const [open] = useState(props.show);
 
   useEffect(() => {
     if (open) {
-      LoggerService.info("Show add CID Batch modal");
+      LoggerService.info('Show add CID Batch modal');
     }
   }, [open]);
 
@@ -29,26 +29,26 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
     if (!isEdit) {
       result = cidsInput
         .trim()
-        .replace(/^[,;\s]+|[,;\s]+$/g, "")
+        .replace(/^[,;\s]+|[,;\s]+$/g, '')
         .split(/[,;\s]/)
         .filter((x) => x.length)
         .map((element: string) => {
           return element.trim();
         });
-      setCidsInput("");
+      setCidsInput('');
     }
     props.closeCallback({ result, refUrl });
-    setRefUrl("");
+    setRefUrl('');
   };
 
   return (
     <Dialog open={open}>
-      <DialogTitle>{edit ? "Update CIDs Batch" : "Add CIDs Batch"}</DialogTitle>
-      <DialogContent style={{ display: "flex", flexDirection: "column" }}>
+      <DialogTitle>{edit ? 'Update CIDs Batch' : 'Add CIDs Batch'}</DialogTitle>
+      <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
         <form
-          style={{ minWidth: "400px" }}
+          style={{ minWidth: '400px' }}
           onKeyPress={(e) => {
-            if (e.nativeEvent.code === "Enter" && (edit || cidsInput))
+            if (e.nativeEvent.code === 'Enter' && (edit || cidsInput))
               handleCids(edit);
           }}
         >
@@ -91,7 +91,7 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
           disabled={!edit && !cidsInput}
           onClick={() => handleCids(edit)}
         >
-          {edit ? "Update" : "Add"}
+          {edit ? 'Update' : 'Add'}
         </Button>
         <Button
           color="primary"

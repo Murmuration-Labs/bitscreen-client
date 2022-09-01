@@ -1,12 +1,12 @@
-import _ from "lodash";
-import { Account } from "types/interfaces";
-import LoggerService from "./LoggerService";
+import _ from 'lodash';
+import { Account } from 'types/interfaces';
+import LoggerService from './LoggerService';
 
-const AUTH_KEY = "BITSCREEN__IDENTITY__INFO";
+const AUTH_KEY = 'BITSCREEN__IDENTITY__INFO';
 
 export const createAccount = (account: Account) => {
   const updatedAccount = { ...account };
-  LoggerService.info("Logging in.");
+  LoggerService.info('Logging in.');
   localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
 };
 
@@ -25,7 +25,7 @@ export const getAccount = (): Account | null => {
 };
 
 export const updateAccount = (account: Account): void => {
-  LoggerService.info("Changing account.");
+  LoggerService.info('Changing account.');
   const updatedAccount = { ...account };
   account.walletAddress = updatedAccount.walletAddress
     ? updatedAccount.walletAddress.toLowerCase()
@@ -39,7 +39,7 @@ export const updateAccount = (account: Account): void => {
 };
 
 export const removeAccount = (): void => {
-  LoggerService.info("Logging out.");
+  LoggerService.info('Logging out.');
   localStorage.removeItem(AUTH_KEY);
 };
 

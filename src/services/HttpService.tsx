@@ -1,7 +1,7 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import * as AuthService from "./AuthService";
-import LoggerService from "./LoggerService";
-import history from "../appHistory";
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import * as AuthService from './AuthService';
+import LoggerService from './LoggerService';
+import history from '../appHistory';
 
 export default {
   setupInterceptors: () => {
@@ -36,7 +36,7 @@ export default {
       (error) => {
         if (error.response && error.response.status === 401) {
           AuthService.removeAccount();
-          history.push("/login", {
+          history.push('/login', {
             tokenExpired: true,
             currentPath: history.location.pathname,
           });

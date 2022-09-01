@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import {
   Modal,
   Button,
@@ -7,25 +7,25 @@ import {
   Col,
   Table,
   FormCheck,
-} from "react-bootstrap";
-import { toast } from "react-toastify";
-import { css } from "@emotion/core";
+} from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import { css } from '@emotion/core';
 
-import "pages/Filters/Filters.css";
+import 'pages/Filters/Filters.css';
 
-import PuffLoader from "react-spinners/PuffLoader";
+import PuffLoader from 'react-spinners/PuffLoader';
 import {
   FilterList,
   ImportFilterModalProps,
-} from "../../../pages/Filters/Interfaces";
-import ApiService from "services/ApiService";
-import * as AuthService from "services/AuthService";
-import FilterService from "services/FilterService";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGlobe, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { serverUri } from "../../../config";
-import LoggerService from "services/LoggerService";
+} from '../../../pages/Filters/Interfaces';
+import ApiService from 'services/ApiService';
+import * as AuthService from 'services/AuthService';
+import FilterService from 'services/FilterService';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGlobe, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { serverUri } from '../../../config';
+import LoggerService from 'services/LoggerService';
 
 const overrideLoaderCss = css`
   display: block;
@@ -37,7 +37,7 @@ const overrideLoaderCss = css`
 export const ImportFilterModal = (
   props: ImportFilterModalProps
 ): JSX.Element => {
-  const [remoteFilterId, setRemoteFilterId] = useState<string>("");
+  const [remoteFilterId, setRemoteFilterId] = useState<string>('');
   const [remoteFilterError, setRemoteFilterError] = useState<boolean>(false);
   const [fetchedFilterList, setFetchedFilterList] = useState<
     FilterList | undefined
@@ -49,12 +49,12 @@ export const ImportFilterModal = (
     useState<boolean>(false);
 
   useEffect(() => {
-    setRemoteFilterId(fetchedFilterList ? `${fetchedFilterList?.shareId}` : "");
+    setRemoteFilterId(fetchedFilterList ? `${fetchedFilterList?.shareId}` : '');
   }, [fetchedFilterList]);
 
   useEffect(() => {
     if (props.show) {
-      LoggerService.info("Show Import filter modal");
+      LoggerService.info('Show Import filter modal');
     }
   }, [props.show]);
 
@@ -127,7 +127,7 @@ export const ImportFilterModal = (
         toast.error(e.data.message);
         return;
       }
-      setRemoteFilterId("");
+      setRemoteFilterId('');
       setRemoteFilterError(true);
       setIsFetchingRemoteFilter(false);
       LoggerService.error(e);
@@ -135,7 +135,7 @@ export const ImportFilterModal = (
   };
 
   const discardFilter = (): void => {
-    setRemoteFilterId("");
+    setRemoteFilterId('');
     setFetchedFilterList(FilterService.emptyFilterList());
   };
 
@@ -145,7 +145,7 @@ export const ImportFilterModal = (
     const currentProviderId = AuthService.getProviderId();
     if (currentProviderId === fetchedFilterList?.provider.id) {
       toast.error(
-        "You cannot import your own filter! Please try to import an external filter."
+        'You cannot import your own filter! Please try to import an external filter.'
       );
     } else {
       try {
@@ -165,7 +165,7 @@ export const ImportFilterModal = (
 
     setTimeout(() => {
       // small gimmick to see loader in action
-      setRemoteFilterId("");
+      setRemoteFilterId('');
       setFetchedFilterList(FilterService.emptyFilterList());
       setIsSavingFetchedFilter(false);
 
@@ -216,7 +216,7 @@ export const ImportFilterModal = (
     <Modal
       show={props.show}
       onHide={() => {
-        setRemoteFilterId("");
+        setRemoteFilterId('');
         setFetchedFilterList(FilterService.emptyFilterList());
         props.closeCallback(false);
       }}
@@ -258,7 +258,7 @@ export const ImportFilterModal = (
         <Row>
           <Col>
             <PuffLoader
-              color={"#ffc107"}
+              color={'#ffc107'}
               loading={isFetchingRemoteFilter || isSavingFetchedFilter}
               css={overrideLoaderCss}
               size={150}
@@ -295,7 +295,7 @@ export const ImportFilterModal = (
         <Button
           variant="secondary"
           onClick={() => {
-            setRemoteFilterId("");
+            setRemoteFilterId('');
             setFetchedFilterList(FilterService.emptyFilterList());
             props.closeCallback(false);
           }}
