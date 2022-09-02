@@ -108,7 +108,7 @@ const CidsRow = ({
           addConflicts(conflicts);
         })
         .catch((e) => {
-          if (e.status === 401) {
+          if (e && e.status === 401) {
             toast.error(e.data.message);
             return;
           }
@@ -124,7 +124,7 @@ const CidsRow = ({
           addConflicts(conflicts);
         })
         .catch((e) => {
-          if (e.status === 401) {
+          if (e && e.status === 401) {
             toast.error(e.data.message);
             return;
           }

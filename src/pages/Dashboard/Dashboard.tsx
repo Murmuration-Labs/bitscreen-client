@@ -45,7 +45,7 @@ function Dashboard(props): JSX.Element {
         setDashboardData(dashboardData);
       },
       (e: any) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -67,7 +67,7 @@ function Dashboard(props): JSX.Element {
     ApiService.getChartData(periodType, stringPeriodInterval).then(
       (chartInformation) => setChartData(chartInformation),
       (e) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }

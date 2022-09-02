@@ -66,7 +66,7 @@ export const ImportFilterModal = (
     ApiService.getSharedFilter(props.filter.shareId).then(
       (f) => setFetchedFilterList(f),
       (e) => {
-        if (e.status === 401) {
+        if (e && e.status === 401) {
           toast.error(e.data.message);
           return;
         }
@@ -123,7 +123,7 @@ export const ImportFilterModal = (
         setIsFetchingRemoteFilter(false);
       }, 1500);
     } catch (e: any) {
-      if (e.status === 401) {
+      if (e && e.status === 401) {
         toast.error(e.data.message);
         return;
       }
@@ -156,7 +156,7 @@ export const ImportFilterModal = (
           active: !!fetchedFilterList?.enabled,
         });
       } catch (e: any) {
-        if (e.status === 401) {
+        if (e && e.status === 401) {
           toast.error(e.data.message);
           return;
         }

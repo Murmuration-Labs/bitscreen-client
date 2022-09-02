@@ -139,10 +139,7 @@ export default function Settings(props) {
   };
 
   const hasUnfilledInfo = () => {
-    if (
-      (configInfo.share || configInfo.import) &&
-      (!providerInfo.country || !providerInfo.minerId)
-    ) {
+    if ((configInfo.share || configInfo.import) && !providerInfo.country) {
       return true;
     }
 
@@ -165,7 +162,7 @@ export default function Settings(props) {
       config &&
       ((!config.import && configInfo.import) ||
         (!config.share && configInfo.share)) &&
-      (!providerInfo.country || !providerInfo.minerId)
+      !providerInfo.country
     ) {
       toast.error(
         'Please select a country from the list in order to enable importing or sharing lists!'
@@ -229,7 +226,7 @@ export default function Settings(props) {
       await ApiService.updateProvider(provider);
       AuthService.updateAccount({ ...providerInfo });
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -244,7 +241,7 @@ export default function Settings(props) {
     try {
       await ApiService.setProviderConfig(config);
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -295,7 +292,7 @@ export default function Settings(props) {
         setProviderInfo(provider);
         setProvider(provider);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -360,7 +357,7 @@ export default function Settings(props) {
                       try {
                         await ApiService.exportAccount();
                       } catch (e: any) {
-                        if (e.status === 401 && props.config) {
+                        if (e && e.status === 401 && props.config) {
                           toast.error(e.data.message);
                           return;
                         }
@@ -673,7 +670,7 @@ export default function Settings(props) {
                         try {
                           await ApiService.downloadCidList();
                         } catch (e: any) {
-                          if (e.status === 401 && props.config) {
+                          if (e && e.status === 401 && props.config) {
                             toast.error(e.data.message);
                             return;
                           }
