@@ -345,7 +345,7 @@ const FilterPage = (props): JSX.Element => {
           setFilterEnabled(fl.enabled);
         },
         (e) => {
-          if (e.status === 401 && props.config) {
+          if (e && e.status === 401 && props.config) {
             toast.error(e.data.message);
             return;
           }
@@ -402,7 +402,7 @@ const FilterPage = (props): JSX.Element => {
         filterList.enabled
       );
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -430,7 +430,7 @@ const FilterPage = (props): JSX.Element => {
               setLoaded(false);
             })
             .catch((e) => {
-              if (e.status === 401 && props.config) {
+              if (e && e.status === 401 && props.config) {
                 toast.error(e.data.message);
                 return;
               }
@@ -440,7 +440,7 @@ const FilterPage = (props): JSX.Element => {
             });
         })
         .catch((e) => {
-          if (e.status === 401 && props.config) {
+          if (e && e.status === 401 && props.config) {
             toast.error(e.data.message);
             return;
           }
@@ -457,7 +457,7 @@ const FilterPage = (props): JSX.Element => {
           setLoaded(false);
         })
         .catch((e) => {
-          if (e.status === 401 && props.config) {
+          if (e && e.status === 401 && props.config) {
             toast.error(e.data.message);
             return;
           }
@@ -489,7 +489,7 @@ const FilterPage = (props): JSX.Element => {
         }
       })
       .catch((e) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -621,7 +621,7 @@ const FilterPage = (props): JSX.Element => {
     try {
       data = await ApiService.getFilters(0, 100, 'asc', 'name', '');
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -687,7 +687,7 @@ const FilterPage = (props): JSX.Element => {
         history.push('/filters');
       },
       (e) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }

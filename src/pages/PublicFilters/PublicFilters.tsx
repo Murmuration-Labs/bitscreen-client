@@ -89,7 +89,7 @@ export default function PublicFilters(props) {
           setDataCount(response.count);
         },
         (e) => {
-          if (e.status === 401 && props.config) {
+          if (e && e.status === 401 && props.config) {
             toast.error(e.data.message);
             return;
           }

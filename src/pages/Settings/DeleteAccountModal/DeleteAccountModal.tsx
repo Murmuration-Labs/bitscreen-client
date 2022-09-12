@@ -21,8 +21,8 @@ const DeleteAccountModal = ({
   show,
   handleClose,
 }: DeleteAccountModalProps): JSX.Element => {
-  const [confirmText, setConfirmText] = useState<string>('');
   const [account, setAccount] = useState<Account | null>(getAccount());
+  const [confirmText, setConfirmText] = useState<string>('');
   const [toComplete, setToComplete] = useState<string>('');
   const [hasUsedFilters, setHasUsedFilters] = useState<boolean>(false);
 
@@ -46,7 +46,7 @@ const DeleteAccountModal = ({
           setHasUsedFilters(false);
         },
         (e) => {
-          if (e.status === 401) {
+          if (e && e.status === 401) {
             toast.error(e.data.message);
             return;
           }
@@ -69,7 +69,7 @@ const DeleteAccountModal = ({
           handleClose(response.success);
         },
         (e) => {
-          if (e.status === 401) {
+          if (e && e.status === 401) {
             toast.error(e.data.message);
             return;
           }
@@ -106,6 +106,7 @@ const DeleteAccountModal = ({
                 <FormControl
                   type="text"
                   placeholder="Enter the last 4 characters of your wallet"
+                  value={confirmText}
                   onChange={(ev) => setConfirmText(ev.target.value)}
                 />
               </InputGroup>

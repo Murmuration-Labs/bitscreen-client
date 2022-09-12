@@ -192,7 +192,7 @@ function App(): JSX.Element {
     try {
       configObject = await ApiService.getProviderConfig();
     } catch (e: any) {
-      if (e.status === 404) {
+      if (e && e.status === 404) {
         try {
           configObject = await ApiService.setProviderConfig({
             bitscreen: false,
@@ -251,7 +251,7 @@ function App(): JSX.Element {
           checkWallet(config, account.walletAddress);
         },
         (err: any) => {
-          if (err.status === 401) {
+          if (err && err.status === 401) {
             toast.error(err.data.message);
           }
           logout();

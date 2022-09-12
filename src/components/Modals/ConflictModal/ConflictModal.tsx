@@ -17,7 +17,7 @@ const resolveConflict = async (conflicts: Conflict[]) => {
       conflicts.map((conflict) => ApiService.deleteCidById(conflict.id))
     );
   } catch (e: any) {
-    if (e.status === 401) {
+    if (e && e.status === 401) {
       toast.error(e.data.message);
       return;
     }

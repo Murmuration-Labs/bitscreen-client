@@ -308,7 +308,7 @@ function Filters(props): JSX.Element {
         setLoaded(true);
       },
       (e) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -320,7 +320,7 @@ function Filters(props): JSX.Element {
     try {
       await ApiService.deleteFilter(filter);
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -333,7 +333,7 @@ function Filters(props): JSX.Element {
     try {
       await ApiService.updateFilter([filterList], false);
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -377,7 +377,7 @@ function Filters(props): JSX.Element {
       try {
         await ApiService.updateFilter(fls, false);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -392,7 +392,7 @@ function Filters(props): JSX.Element {
       try {
         await ApiService.updateFilter(fls, false);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -405,7 +405,7 @@ function Filters(props): JSX.Element {
       try {
         await ApiService.updateFilter([fl], false);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -419,7 +419,7 @@ function Filters(props): JSX.Element {
       try {
         await ApiService.updateEnabledForSharedFilters(ids, true);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -429,7 +429,7 @@ function Filters(props): JSX.Element {
       try {
         await ApiService.updateEnabledForSharedFilters(ids, false);
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -441,7 +441,7 @@ function Filters(props): JSX.Element {
           !selectedFilterList.enabled
         );
       } catch (e: any) {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -832,7 +832,7 @@ function Filters(props): JSX.Element {
         });
       })
       .catch((e) => {
-        if (e.status === 401 && props.config) {
+        if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
           return;
         }
@@ -861,7 +861,7 @@ function Filters(props): JSX.Element {
         false
       );
     } catch (e: any) {
-      if (e.status === 401 && props.config) {
+      if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
         return;
       }
@@ -952,7 +952,7 @@ function Filters(props): JSX.Element {
                       try {
                         ApiService.downloadCidList();
                       } catch (e: any) {
-                        if (e.status === 401 && props.config) {
+                        if (e && e.status === 401 && props.config) {
                           toast.error(e.data.message);
                           return;
                         }
