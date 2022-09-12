@@ -73,8 +73,6 @@
     "@types/validator": "^13.1.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
     "prettier": "^2.7.1"
   },
   "proxy": "http://localhost:3030",
@@ -87,8 +85,7 @@
     "server": "ts-node -O '{\"module\": \"commonjs\"}' server.ts",
     "lint": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx .",
     "lint-fix": "node_modules/.bin/eslint --ignore-path .gitignore --ext .js --ext .ts --ext .tsx . --fix",
-    "format": "prettier --write 'src/**/*.{ts,tsx,html,css}'",
-    "postinstall": "husky install"
+    "format": "prettier --write 'src/**/*.{ts,tsx,html,css}'"
   },
   "jest": {
     "transformIgnorePatterns": [
@@ -112,18 +109,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "lint-staged": {
-    "src/**/*.{html,ts,tsx,css}": [
-      "prettier --write"
-    ],
-    "src/**/*.{ts, tsx}": [
-      "eslint --fix"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   }
 }

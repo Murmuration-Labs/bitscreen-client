@@ -207,6 +207,7 @@ function App(): JSX.Element {
 
     if (!provider.consentDate) {
       provider.consentDate = new Date().toISOString();
+      delete provider.nonceMessage;
       await ApiService.updateProvider(provider);
     }
     setConfig(configObject);
