@@ -1,5 +1,4 @@
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import MenuButton from '@material-ui/icons/MoreVert';
 import {
   faExternalLinkAlt,
   faFolderPlus,
@@ -8,8 +7,13 @@ import {
   faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconButton, MenuItem } from '@material-ui/core';
+import MenuButton from '@material-ui/icons/MoreVert';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import ConfirmModal from 'components/Modals/ConfirmModal/ConfirmModal';
+import PageTitle from 'components/Utils/PageTitle';
 import _ from 'lodash';
+import { CID } from 'multiformats';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   Badge,
@@ -22,18 +26,18 @@ import {
   Row,
   Tooltip,
 } from 'react-bootstrap';
-import DropdownMenu from '../DropdownMenu/DropdownMenu';
 import { Prompt } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import ConfirmModal from 'components/Modals/ConfirmModal/ConfirmModal';
-import { serverUri } from '../../../config';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import FilterService from 'services/FilterService';
+import LoggerService from 'services/LoggerService';
+import ConflictModal from '../../../components/Modals/ConflictModal/ConflictModal';
 import AddCidBatchModal from '../AddCidBatchModal/AddCidBatchModal';
 import AddCidModal from '../AddCidModal/AddCidModal';
 import CidsTable from '../CidsTable/CidsTable';
+import DropdownMenu from '../DropdownMenu/DropdownMenu';
 import '../Filters.css';
 import {
   CidItem,
@@ -47,12 +51,6 @@ import {
 import MoveCIDModal from '../MoveCIDModal/MoveCIDModal';
 import ToggleEnabledFilterModal from '../ToggleEnabledFilterModal/ToggleEnabledFilterModal';
 import { isDisabledGlobally, isOrphan, isShared } from '../utils';
-import { IconButton, MenuItem } from '@material-ui/core';
-import ConflictModal from '../../../components/Modals/ConflictModal/ConflictModal';
-import LoggerService from 'services/LoggerService';
-import { CID } from 'multiformats';
-import { useTitle } from 'react-use';
-import PageTitle from 'components/Utils/PageTitle';
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -79,7 +77,13 @@ const FilterPage = (props): JSX.Element => {
     share: false,
   });
 
-  const [showConflict, setShowConflict] = useState<boolean>(false);
+  const [showConflict, setShowConflict] = useState<{
+    single: boolean;
+    multiple: boolean;
+  }>({
+    single: false,
+    multiple: false,
+  });
   const [conflict, setConflict] = useState<Conflict[]>([]);
   const [totalConflicts, setTotalConflicts] = useState<Conflict[]>([]);
   const [conflictsChanged, setConflictsChanged] = useState<boolean>(false);
@@ -98,7 +102,10 @@ const FilterPage = (props): JSX.Element => {
 
   const showConflictsModal = () => {
     setConflict(totalConflicts);
-    setShowConflict(true);
+    setShowConflict({
+      single: false,
+      multiple: true,
+    });
   };
 
   useEffect(() => LoggerService.info('Loading Filter Details page.'), []);
@@ -1345,6 +1352,7 @@ const FilterPage = (props): JSX.Element => {
                         }
                         onDeleteClick={(index) => removeCid(index)}
                         setConflict={setConflict}
+                        totalConflicts={totalConflicts}
                         setShowConflict={setShowConflict}
                         addConflicts={addConflicts}
                         removeConflict={removeConflict}
@@ -1398,9 +1406,9 @@ const FilterPage = (props): JSX.Element => {
             show={showMoveModal}
           />
           <ConflictModal
-            show={showConflict}
+            showConflict={showConflict}
             conflicts={conflict}
-            handleClose={setShowConflict}
+            setShowConflict={setShowConflict}
             removeConflict={removeConflict}
           />
           {addCidBatchModal && (

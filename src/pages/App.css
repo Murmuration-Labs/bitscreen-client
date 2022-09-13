@@ -37,3 +37,12 @@ a {
   color: grey;
   margin-left: 12px;
 }
+
+.app-primary-button {
+  background-color: #003bdd !important;
+  border-radius: 5px !important;
+}
+
+.no-text-transform {
+  text-transform: initial !important;
+}

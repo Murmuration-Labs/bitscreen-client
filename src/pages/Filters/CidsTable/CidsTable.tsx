@@ -22,7 +22,11 @@ export interface CidsTableProps {
   onMoveClick: (index: number) => void;
   onDeleteClick: (index: number) => void;
   setConflict: (conflicts: Conflict[]) => void;
-  setShowConflict: (show: boolean) => void;
+  totalConflicts: Conflict[];
+  setShowConflict: (showConflict: {
+    single: boolean;
+    multiple: boolean;
+  }) => void;
   addConflicts: (conflicts: Conflict[]) => void;
   removeConflict: (conflict: string) => void;
   conflictsChanged: boolean;
@@ -39,7 +43,7 @@ const defaultHeadCells: HeadCell[] = [
   { pos: 0, id: 'cid', label: 'CID' },
   { pos: 1, id: 'refUrl', label: 'URL' },
   { pos: 2, id: 'created', label: 'Added' },
-  { pos: 3, id: 'local', label: 'Problem' },
+  { pos: 3, id: 'local', label: 'Local' },
   { pos: 999, id: 'actions', label: '', align: 'right' },
 ];
 
@@ -53,6 +57,7 @@ const CidsTable = ({
   onMoveClick,
   onDeleteClick,
   setConflict,
+  totalConflicts,
   setShowConflict,
   addConflicts,
   removeConflict,
@@ -61,10 +66,18 @@ const CidsTable = ({
   const [headCells, setHeadCells] = useState(defaultHeadCells);
 
   useEffect(() => {
-    const sorted = [...defaultHeadCells].sort((a, b) => a.pos - b.pos);
+    const headCells = [...defaultHeadCells];
+
+    headCells.find((e) => e.id === 'local')!.label = totalConflicts.length
+      ? 'Problem'
+      : 'Local';
+
+    console.log(totalConflicts);
+
+    const sorted = [...headCells].sort((a, b) => a.pos - b.pos);
 
     setHeadCells(sorted);
-  }, [filter.visibility]);
+  }, [filter.visibility, totalConflicts]);
 
   return (
     <TableContainer key={String(conflictsChanged)}>
