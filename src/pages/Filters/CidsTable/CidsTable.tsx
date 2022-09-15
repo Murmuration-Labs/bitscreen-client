@@ -43,7 +43,7 @@ const defaultHeadCells: HeadCell[] = [
   { pos: 0, id: 'cid', label: 'CID' },
   { pos: 1, id: 'refUrl', label: 'URL' },
   { pos: 2, id: 'created', label: 'Added' },
-  { pos: 3, id: 'local', label: 'Local' },
+  { pos: 3, id: 'local', label: 'Problem' },
   { pos: 999, id: 'actions', label: '', align: 'right' },
 ];
 
@@ -68,11 +68,9 @@ const CidsTable = ({
   useEffect(() => {
     const headCells = [...defaultHeadCells];
 
-    headCells.find((e) => e.id === 'local')!.label = totalConflicts.length
-      ? 'Problem'
-      : 'Local';
-
-    console.log(totalConflicts);
+    // headCells.find((e) => e.id === 'local')!.label = totalConflicts.length
+    //   ? 'Problem'
+    //   : 'Local';
 
     const sorted = [...headCells].sort((a, b) => a.pos - b.pos);
 

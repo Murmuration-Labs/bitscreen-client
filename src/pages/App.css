@@ -43,6 +43,19 @@ a {
   border-radius: 5px !important;
 }
 
+.small-button {
+  height: 40px !important;
+  width: 48px !important;
+  min-width: 0px !important;
+  padding: 0px;
+}
+
 .no-text-transform {
   text-transform: initial !important;
+}
+
+.text-overflow {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }

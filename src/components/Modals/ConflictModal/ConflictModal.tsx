@@ -6,8 +6,7 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { Conflict, ConflictModalProps } from 'pages/Filters/Interfaces';
-import React, { useEffect, useState } from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import ApiService from 'services/ApiService';
 import LoggerService from 'services/LoggerService';
@@ -28,8 +27,9 @@ const resolveConflict = async (conflicts: Conflict[]) => {
 
 const useStyles = makeStyles(() => ({
   paperResolveOneConflict: { maxWidth: '400px', borderRadius: '16px' },
-  paperResolveMultipleConflict: { maxWidth: '480px', borderRadius: '16px' },
+  paperResolveMultipleConflict: { maxWidth: '600px', borderRadius: '16px' },
   root: { padding: '24px' },
+  rootContent: { padding: '24px 24px 0 24px !important' },
 }));
 
 const ConflictModal = ({
@@ -86,7 +86,7 @@ const ConflictModal = ({
         <DialogActions classes={{ root: classes.root }}>
           <Button
             aria-label="cancel"
-            className="app-primary-button text-white no-text-transform"
+            className="app-primary-button text-white no-text-transform small-button"
             color="primary"
             title="Cancel"
             onClick={() =>
@@ -101,7 +101,7 @@ const ConflictModal = ({
           <Button
             aria-label="add-cid"
             color="primary"
-            className="app-primary-button text-white no-text-transform"
+            className="app-primary-button text-white no-text-transform small-button"
             onClick={() => {
               resolveConflict(conflicts).then(() => {
                 conflicts.forEach((conflict) => {
@@ -119,7 +119,7 @@ const ConflictModal = ({
         </DialogActions>
       </Dialog>
       <Dialog
-        classes={{ paper: classes.paperResolveOneConflict }}
+        classes={{ paper: classes.paperResolveMultipleConflict }}
         open={showConflict.multiple}
         onClose={() =>
           setShowConflict({
@@ -128,49 +128,39 @@ const ConflictModal = ({
           })
         }
       >
-        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
+        <DialogContent
+          classes={{ root: classes.rootContent }}
+          style={{ display: 'flex', flexDirection: 'column', width: '600px' }}
+        >
           <p className="conflict-modal-text">
-            The following CID(s) in this list are in conflict with a local
-            filter and cannot be saved.
+            The following CID(s) in this list are in conflict with one or more
+            local filter lists and cannot be saved.
           </p>
-          <ListGroup>
-            {conflicts.map((conflict) => {
-              return (
-                <ListGroup.Item
-                  as="li"
-                  className="d-flex justify-content-between align-items-start"
-                  key={conflict.id}
-                >
+          <div className="text-overflow content">
+            {conflicts
+              .filter(
+                (e, index) =>
+                  conflicts.findIndex((el) => el.cid === e.cid) === index
+              )
+              .map((conflict) => {
+                return (
                   <div className="cid-conflict-url">
                     <div className="cid-conflict-title">{conflict.cid}</div>
-                    {conflict.refUrl}
+                    {conflict.refUrl || 'URL N/A'}
                   </div>
-                </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
-          <p className="conflict-modal-text">
+                );
+              })}
+          </div>
+          <div className="conflict-modal-text">
             Do you want to remove them from the local lists?
-          </p>
+          </div>
         </DialogContent>
         <DialogActions classes={{ root: classes.root }}>
-          <Button
-            aria-label="add-cid"
-            color="primary"
-            onClick={() => {
-              resolveConflict(conflicts);
-              setShowConflict({
-                single: false,
-                multiple: false,
-              });
-            }}
-          >
-            Yes
-          </Button>
           <Button
             aria-label="cancel"
             color="primary"
             title="Cancel"
+            className="app-primary-button text-white no-text-transform small-button"
             onClick={() =>
               setShowConflict({
                 single: false,
@@ -179,6 +169,24 @@ const ConflictModal = ({
             }
           >
             No
+          </Button>
+          <Button
+            aria-label="add-cid"
+            color="primary"
+            className="app-primary-button text-white no-text-transform small-button"
+            onClick={() => {
+              resolveConflict(conflicts).then(() => {
+                conflicts.forEach((conflict) => {
+                  removeConflict(conflict.cid);
+                });
+                setShowConflict({
+                  single: false,
+                  multiple: false,
+                });
+              });
+            }}
+          >
+            Yes
           </Button>
         </DialogActions>
       </Dialog>
