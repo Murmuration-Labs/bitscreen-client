@@ -28,3 +28,27 @@ export const remoteMarketplaceUri = (): string => {
       return 'https://bxn.mml.keyko.rocks';
   }
 };
+
+export const rodeoUri = (): string => {
+  const environment = process.env.NODE_ENV;
+  switch (environment) {
+    case 'development':
+      return 'http://localhost:14000';
+    case 'production':
+      return 'https://black-darkness-2139.on.fleek.co/';
+    default:
+      return 'https://black-darkness-2139.on.fleek.co/';
+  }
+};
+
+export const lookingGlassUri = (): string => {
+  const environment = process.env.NODE_ENV;
+  switch (environment) {
+    case 'development':
+      return 'http://localhost:15000';
+    case 'production':
+      return 'https://quiet-scene-5898.on.fleek.co';
+    default:
+      return 'https://quiet-scene-5898.on.fleek.co';
+  }
+};
