@@ -47,8 +47,8 @@ export const lookingGlassUri = (): string => {
     case 'development':
       return 'http://localhost:15000';
     case 'production':
-      return 'https://quiet-scene-5898.on.fleek.co';
+      return 'https://bxn.mml-client.keyko.rocks/';
     default:
-      return 'https://quiet-scene-5898.on.fleek.co';
+      return 'https://bxn.mml-client.keyko.rocks/';
   }
 };
