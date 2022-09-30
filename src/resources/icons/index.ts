@@ -6,6 +6,7 @@ import metamaskIcon from './metamask.png';
 import activeIcon from './active.svg';
 import inactiveIcon from './inactive.svg';
 import infoIcon from './info.svg';
+import googleIcon from './google.png';
 
 export {
   deleteIcon,
@@ -15,4 +16,5 @@ export {
   activeIcon,
   inactiveIcon,
   infoIcon,
+  googleIcon,
 };

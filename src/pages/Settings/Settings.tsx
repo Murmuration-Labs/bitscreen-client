@@ -1,9 +1,12 @@
 import { Switch, withStyles } from '@material-ui/core';
+import detectEthereumProvider from '@metamask/detect-provider';
+import { bitscreenGoogleClientId } from 'config';
 import _ from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { Button, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
+import { useGoogleLogin } from 'react-google-login';
 import { Prompt } from 'react-router';
 import countryList from 'react-select-country-list';
 import { toast } from 'react-toastify';
@@ -12,8 +15,9 @@ import { activeIcon, inactiveIcon, infoIcon } from 'resources/icons';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
-import { Account } from 'types/interfaces';
+import { Account, LoginType } from 'types/interfaces';
 import validator from 'validator';
+import Web3 from 'web3';
 import { Config } from '../Filters/Interfaces';
 import DeleteAccountModal from './DeleteAccountModal/DeleteAccountModal';
 import QuickstartGuide from './QuickstartGuide/QuickstartGuide';
@@ -64,6 +68,7 @@ const providerInitialState = {
   nonce: '',
   guideShown: false,
   walletAddress: '',
+  loginEmail: '',
 };
 
 const configInitialState = {
@@ -74,7 +79,7 @@ const configInitialState = {
 
 export default function Settings(props) {
   useTitle('Settings - BitScreen');
-  const { config, setProvider, setConfig } = props;
+  const { config, setProvider, setConfig, appLogout, googleLogout } = props;
 
   const [providerInfo, setProviderInfo] =
     useState<Account>(providerInitialState);
@@ -93,6 +98,121 @@ export default function Settings(props) {
   const countryNames = countries.data.map((e) => e.label);
   const countryValues = countries.data.map((e) => e.value);
 
+  // const linkGoogleAccountToWallet = () => {};
+
+  const linkWalletToGoogleAccount = async (tokenId: string) => {
+    try {
+      await ApiService.linkWalletToGoogleAccount(tokenId);
+      toast.success(
+        'Provider successfully linked to specified Google Account.'
+      );
+    } catch (e: any) {
+      if (e && e.data) {
+        return toast.error(e.data.message || e.data.error);
+      } else {
+        return toast.error(
+          'Could not link the account at the moment. Please try again later!'
+        );
+      }
+    }
+  };
+
+  const onGoogleLoginFailure = () => {
+    return toast.error(
+      'Could not authenticate you at the moment using Google authentication system. Please try again later!'
+    );
+  };
+
+  const onGoogleLoginSuccess = async (res: any) => {
+    await linkWalletToGoogleAccount(res.tokenId);
+  };
+
+  const { signIn: googleLogin } = useGoogleLogin({
+    clientId: bitscreenGoogleClientId,
+    onFailure: onGoogleLoginFailure,
+    onSuccess: onGoogleLoginSuccess,
+  });
+
+  const linkGoogleToWalletAccount = async () => {
+    const walletProvider: any = await detectEthereumProvider({
+      mustBeMetaMask: true,
+    });
+
+    if (!walletProvider) {
+      return toast.error(
+        'In order to use the BitScreen client you need to install the metamask extension on your browser. You can get it from here: https://metamask.io'
+      );
+    }
+
+    const web3 = new Web3(walletProvider);
+
+    const chainId = await web3.eth.getChainId();
+    if (chainId !== 1) {
+      try {
+        await walletProvider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x1' }],
+        });
+        return;
+      } catch (e: any) {
+        return toast.error(
+          `Please switch to Mainnet in order to use the Bitscreen client.`
+        );
+      }
+    }
+
+    let wallets;
+    try {
+      wallets = await web3.eth.requestAccounts();
+    } catch (e) {
+      LoggerService.error(e);
+      return toast.error(
+        'You must connect with metamask in order to use the Bitscreen client.'
+      );
+    }
+
+    const wallet = wallets[0].toLowerCase();
+
+    let walletAddress: string;
+    let nonceMessage: string;
+
+    try {
+      ({ walletAddress, nonceMessage } =
+        await ApiService.generateNonceForSignature(wallet));
+    } catch (e: any) {
+      if (e && e.data) {
+        return toast.error(e.data.message || e.data.error);
+      } else {
+        return toast.error(
+          'Could not generate nonce for Metamask signature. Please try again later!'
+        );
+      }
+    }
+
+    const signature = await web3.eth.personal.sign(
+      nonceMessage,
+      walletAddress,
+      ''
+    );
+
+    try {
+      const provider = await ApiService.linkProviderToWallet(wallet, signature);
+      AuthService.updateAccount(provider);
+      setProviderInfo(provider);
+      return toast.success(
+        'Provider account successfully linked to wallet address!'
+      );
+    } catch (e: any) {
+      if (e && e.data) {
+        return toast.error(e.data.message || e.data.error);
+      } else {
+        return toast.error(
+          'Could not link the account at the moment. Please try again later!'
+        );
+      }
+    }
+  };
+
   useEffect(() => {
     LoggerService.info('Loading Settings page.');
   }, []);
@@ -108,7 +228,7 @@ export default function Settings(props) {
   useEffect(() => {
     const { provider } = props;
 
-    if (provider && provider.walletAddress) {
+    if (provider && (provider.walletAddress || provider.loginEmail)) {
       setProviderInfo({ ...provider });
 
       if (provider.country) {
@@ -260,12 +380,6 @@ export default function Settings(props) {
     setIsDisabledWhileApiCall(false);
   };
 
-  const logout = () => {
-    AuthService.removeAccount();
-    setProvider(null);
-    setConfig(null);
-  };
-
   const handleDeleteClose = (result: boolean) => {
     setShowDeleteModal(false);
     LoggerService.info('Hiding Delete account modal.');
@@ -328,27 +442,68 @@ export default function Settings(props) {
               aria-describedby="wallet-status-slice"
               className="section-slice"
             >
-              <div className="slice-title-row t-lp">Wallet connected</div>
-              <div className="slice-info address-info t-lp">
-                Address: {providerInfo.walletAddress}
-              </div>
+              {AuthService.getLoginType() === LoginType.Email &&
+                providerInfo.loginEmail && (
+                  <>
+                    <div className="slice-title-row t-lp">
+                      Google account connected
+                    </div>
+                    <div className="slice-info address-info t-lp">
+                      Login email: {providerInfo.loginEmail}
+                    </div>
+                  </>
+                )}
+              {AuthService.getLoginType() === LoginType.Wallet &&
+                providerInfo.walletAddress && (
+                  <>
+                    <div className="slice-title-row t-lp">Wallet connected</div>
+                    <div className="slice-info address-info t-lp">
+                      Address: {providerInfo.walletAddress}
+                    </div>
+                  </>
+                )}
             </div>
             <div
               aria-describedby="wallet-status-actions"
               className="wallet-status-actions d-flex justify-content-between align-items-center"
             >
-              <div className="logout-button">
-                <Button
-                  onClick={() => {
-                    logout();
-                  }}
-                  variant="primary"
-                  className="button-style blue-button"
-                  type="button"
-                  disabled={isDisabledWhileApiCall}
-                >
-                  Logout
-                </Button>
+              <div className="d-flex">
+                <div className="logout-button mr-3">
+                  <Button
+                    onClick={() => {
+                      AuthService.getLoginType() === LoginType.Wallet
+                        ? appLogout()
+                        : googleLogout();
+                    }}
+                    variant="primary"
+                    className="button-style blue-button"
+                    type="button"
+                    disabled={isDisabledWhileApiCall}
+                  >
+                    Logout
+                  </Button>
+                </div>
+                {(!providerInfo.loginEmail ||
+                  !providerInfo.walletAddressHashed) && (
+                  <div className="Link account button">
+                    <Button
+                      onClick={() => {
+                        AuthService.getLoginType() === LoginType.Email
+                          ? linkGoogleToWalletAccount()
+                          : googleLogin();
+                      }}
+                      variant="primary"
+                      className="button-style blue-button"
+                      type="button"
+                      disabled={isDisabledWhileApiCall}
+                    >
+                      Link account to{' '}
+                      {AuthService.getLoginType() === LoginType.Email
+                        ? 'wallet'
+                        : 'Google email'}
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="export-delete d-flex">
                 <div className="export mr-12px">

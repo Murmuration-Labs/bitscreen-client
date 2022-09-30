@@ -218,7 +218,7 @@ const ApiService = {
 
   getProvider: async (wallet: string): Promise<Account | null> => {
     const response = await axios.get<Account | null>(
-      `${serverUri()}/provider/${wallet}`
+      `${serverUri()}/provider/wallet/${wallet}`
     );
 
     if (!response.data) {
@@ -230,9 +230,22 @@ const ApiService = {
     };
   },
 
+  getProviderByEmail: async (tokenId: string): Promise<Account | null> => {
+    const response = await axios.get<Account | null>(
+      `${serverUri()}/provider/email/${tokenId}`
+    );
+
+    if (!response.data) {
+      return null;
+    }
+    return {
+      ...response.data,
+    };
+  },
+
   authenticateProvider: async (walletAddress, signature): Promise<Account> => {
     const response = await axios.post<Account>(
-      `${serverUri()}/provider/auth/${walletAddress}`,
+      `${serverUri()}/provider/auth/wallet/${walletAddress}`,
       {
         signature,
       }
@@ -240,10 +253,27 @@ const ApiService = {
     return response.data;
   },
 
+  authenticateProviderByEmail: async (tokenId: string): Promise<Account> => {
+    const response = await axios.post<Account>(
+      `${serverUri()}/provider/auth/email`,
+      {
+        tokenId,
+      }
+    );
+    return response.data;
+  },
+
   createProvider: async (wallet: string): Promise<Account> => {
     const response = await axios.post(
-      `${serverUri()}/provider/${wallet.toLowerCase()}`
+      `${serverUri()}/provider/wallet/${wallet.toLowerCase()}`
     );
+    return response.data;
+  },
+
+  createProviderByEmail: async (tokenId: string): Promise<Account> => {
+    const response = await axios.post(`${serverUri()}/provider/email`, {
+      tokenId,
+    });
     return response.data;
   },
 
@@ -371,6 +401,41 @@ const ApiService = {
     axios.get(`${serverUri()}/provider/export`).then((response) => {
       fileDownload(response.data, 'bitscreen_export.tar');
     });
+  },
+
+  linkWalletToGoogleAccount: async (tokenId: string): Promise<any> => {
+    const response = await axios.post(
+      `${serverUri()}/provider/link-google/${tokenId}`
+    );
+
+    return response.data;
+  },
+
+  generateNonceForSignature: async (
+    wallet: string
+  ): Promise<{
+    nonceMessage: string;
+    walletAddress: string;
+  }> => {
+    const response = await axios.post(
+      `${serverUri()}/provider/generate-nonce/${wallet}`
+    );
+
+    return response.data;
+  },
+
+  linkProviderToWallet: async (
+    wallet: string,
+    signature: string
+  ): Promise<Account> => {
+    const response = await axios.post<Account>(
+      `${serverUri()}/provider/link-wallet/${wallet}`,
+      {
+        signature,
+      }
+    );
+
+    return response.data;
   },
 };
 

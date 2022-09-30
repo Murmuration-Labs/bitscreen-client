@@ -10,17 +10,21 @@
   font-size: inherit;
 }
 
-.wallet-row {
-  cursor: pointer;
-}
-
-.wallet-table {
+.option-card {
   border: 1px solid;
   border-color: rgba(209, 213, 219);
   border-radius: 0.5rem;
   width: 450px;
 }
 
-.wallet-name {
+.login-card-text {
   font-weight: 800;
+}
+
+.icon-container {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

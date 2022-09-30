@@ -19,7 +19,7 @@ import AuthProvider from 'providers/AuthProvider';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
-import { Account } from 'types/interfaces';
+import { Account, LoginType } from 'types/interfaces';
 import './App.css';
 import Dashboard from './Dashboard/Dashboard';
 import FilterPage from './Filters/FilterPage/FilterPage';
@@ -29,6 +29,10 @@ import Login from './Login/Login';
 import PublicFilterDetailsPage from './PublicFilters/PublicFilterDetails/PublicFilterDetails';
 import PublicFilters from './PublicFilters/PublicFilters';
 import Settings from './Settings/Settings';
+import { gapi } from 'gapi-script';
+import 'resources/styles/helper.css';
+import { useGoogleLogout } from 'react-google-login';
+import { bitscreenGoogleClientId } from 'config';
 
 interface MatchParams {
   id: string;
@@ -74,14 +78,133 @@ function App(): JSX.Element {
   );
   const [previousPath, setPreviousPath] = useState<string>('');
   const [showConsent, setShowConsent] = useState<boolean>(false);
-  const [consent, setConsent] = useState<boolean>(false);
+  const [authSettings, setAuthSettings] = useState<{
+    consent: boolean;
+    loginType: LoginType | null;
+    emailTokenId: string;
+  }>({
+    consent: false,
+    loginType: null,
+    emailTokenId: '',
+  });
 
   const history = useHistory();
 
-  const logout = () => {
+  const appLogout = () => {
     setProvider(null);
     setConfig(null);
     AuthService.removeAccount();
+    toast.success('You have been logged out successfully!');
+  };
+
+  const onGoogleLogoutSuccess = () => {
+    appLogout();
+  };
+
+  const onGoogleLogoutFailure = () => {
+    return toast.error(
+      'Could not deauthenticate you at the moment using the Google authentication system. Please try again later!'
+    );
+  };
+
+  const { signOut: googleLogout } = useGoogleLogout({
+    clientId: bitscreenGoogleClientId,
+    onFailure: onGoogleLogoutFailure,
+    onLogoutSuccess: onGoogleLogoutSuccess,
+  });
+
+  const authenticateProviderByEmail = async (tokenId?: string) => {
+    let account: Account;
+    try {
+      account = await ApiService.authenticateProviderByEmail(
+        tokenId || authSettings.emailTokenId
+      );
+    } catch (e) {
+      LoggerService.error(e);
+      AuthService.removeAccount();
+      return toast.error(
+        'Could not authenticate you at the moment. Please try again later!'
+      );
+    }
+
+    const currentAccount = AuthService.getAccount();
+
+    if (currentAccount?.loginEmail !== account.loginEmail) {
+      AuthService.removeAccount();
+      AuthService.createAccount(account, LoginType.Email);
+    }
+
+    let configObject;
+    try {
+      configObject = await ApiService.getProviderConfig();
+    } catch (e: any) {
+      if (e && e.status === 404) {
+        try {
+          configObject = await ApiService.setProviderConfig({
+            bitscreen: false,
+            import: false,
+            share: false,
+          });
+        } catch (e: any) {
+          LoggerService.error(e);
+        }
+      }
+    }
+
+    setConfig(configObject);
+    setProvider(account);
+    setWallet(account.walletAddress);
+    setAuthSettings({
+      consent: false,
+      loginType: null,
+      emailTokenId: '',
+    });
+
+    if (previousPath) {
+      history.push(previousPath);
+      setPreviousPath('');
+    }
+
+    toast.success('Successfully logged in!');
+  };
+
+  const loginWithGoogle = async (tokenId: string) => {
+    let provider: Account | null;
+    try {
+      provider = await ApiService.getProviderByEmail(tokenId);
+    } catch (e) {
+      LoggerService.error(e);
+      AuthService.removeAccount();
+      return toast.error(
+        'Could not get provider information from the server. Please try again later!'
+      );
+    }
+
+    if (!provider) {
+      setAuthSettings({
+        consent: false,
+        loginType: LoginType.Email,
+        emailTokenId: tokenId,
+      });
+      setShowConsent(true);
+      return;
+    }
+
+    await authenticateProviderByEmail(tokenId);
+  };
+
+  const createProviderByEmail = async () => {
+    try {
+      await ApiService.createProviderByEmail(authSettings.emailTokenId);
+
+      await authenticateProviderByEmail();
+    } catch (e) {
+      LoggerService.error(e);
+      AuthService.removeAccount();
+      return toast.error(
+        'Could not create an account at the moment. Please try again later!'
+      );
+    }
   };
 
   const connectMetamask = async () => {
@@ -138,7 +261,12 @@ function App(): JSX.Element {
       );
     }
     if (!provider) {
-      if (!consent) {
+      if (!authSettings.consent) {
+        setAuthSettings({
+          consent: false,
+          loginType: LoginType.Wallet,
+          emailTokenId: '',
+        });
         setShowConsent(true);
         return;
       }
@@ -153,7 +281,12 @@ function App(): JSX.Element {
       }
     }
 
-    if (!provider.consentDate && !consent) {
+    if (!provider.consentDate && !authSettings.consent) {
+      setAuthSettings({
+        consent: false,
+        loginType: LoginType.Wallet,
+        emailTokenId: '',
+      });
       setShowConsent(true);
       return;
     }
@@ -185,7 +318,7 @@ function App(): JSX.Element {
     const currentAccount = AuthService.getAccount();
     if (currentAccount?.walletAddress !== wallet) {
       AuthService.removeAccount();
-      AuthService.createAccount(account);
+      AuthService.createAccount(account, LoginType.Wallet);
     }
 
     let configObject;
@@ -213,7 +346,11 @@ function App(): JSX.Element {
     setConfig(configObject);
     setProvider(account);
     setWallet(account.walletAddress);
-    setConsent(false);
+    setAuthSettings({
+      consent: false,
+      loginType: null,
+      emailTokenId: '',
+    });
 
     if (previousPath) {
       history.push(previousPath);
@@ -222,42 +359,55 @@ function App(): JSX.Element {
   };
 
   useEffect(() => {
-    if (consent) {
-      connectMetamask();
-    }
-  }, [consent]);
+    const initClient = () => {
+      gapi.client.init({
+        clientId: bitscreenGoogleClientId,
+        scope: '',
+      });
+    };
+    gapi.load('client:auth2', initClient);
+  }, []);
 
   useEffect(() => {
-    const account = AuthService.getAccount();
-    // use only if WE WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
-    const checkWallet = async (config, walletAddress) => {
-      const walletProvider: any = await detectEthereumProvider({
-        mustBeMetaMask: true,
-      });
+    if (authSettings.consent) {
+      if (authSettings.loginType === LoginType.Wallet) connectMetamask();
+      else createProviderByEmail();
+    }
+  }, [authSettings.consent]);
 
-      const web3 = new Web3(walletProvider);
+  useEffect(() => {
+    if (AuthService.getLoginType() === LoginType.Wallet) {
+      const account = AuthService.getAccount();
+      // use only if WE WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
+      const checkWallet = async (config, walletAddress) => {
+        const walletProvider: any = await detectEthereumProvider({
+          mustBeMetaMask: true,
+        });
 
-      const wallets = await web3.eth.getAccounts();
-      if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
-        setConfig(config);
-      } else {
-        logout();
-      }
-    };
-    if (account) {
-      ApiService.getProviderConfig().then(
-        (config) => {
+        const web3 = new Web3(walletProvider);
+
+        const wallets = await web3.eth.getAccounts();
+        if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
           setConfig(config);
-          checkWallet(config, account.walletAddress);
-        },
-        (err: any) => {
-          if (err && err.status === 401) {
-            toast.error(err.data.message);
-          }
-          logout();
-          return;
+        } else {
+          appLogout();
         }
-      );
+      };
+      if (account) {
+        ApiService.getProviderConfig().then(
+          (config) => {
+            setConfig(config);
+            checkWallet(config, account.walletAddress);
+          },
+          (err: any) => {
+            if (err && err.status === 401) {
+              toast.error(err.data.message);
+            }
+            appLogout();
+            return;
+          }
+        );
+      }
     }
 
     const unlisten = history.listen((location) => {
@@ -275,7 +425,7 @@ function App(): JSX.Element {
         ) {
           setPreviousPath(location.pathname);
           toast.error('Your token has expired. Please login again!');
-          return logout();
+          return appLogout();
         }
       }
     });
@@ -294,6 +444,8 @@ function App(): JSX.Element {
         provider={provider}
         setProvider={setProvider}
         setConfig={setConfig}
+        appLogout={appLogout}
+        googleLogout={googleLogout}
       />
       <Container fluid={true}>
         <Row className="fill-height">
@@ -316,6 +468,7 @@ function App(): JSX.Element {
                     if (tokenExpired) {
                       return (
                         <Login
+                          loginWithGoogle={loginWithGoogle}
                           connectMetamask={connectMetamask}
                           setConfig={setConfig}
                           config={config}
@@ -336,6 +489,7 @@ function App(): JSX.Element {
                   } else {
                     return (
                       <Login
+                        loginWithGoogle={loginWithGoogle}
                         connectMetamask={connectMetamask}
                         setConfig={setConfig}
                         config={config}
@@ -356,6 +510,8 @@ function App(): JSX.Element {
                 additionalProps={{
                   setProvider: setProvider,
                   setConfig: setConfig,
+                  googleLogout: googleLogout,
+                  appLogout: appLogout,
                 }}
               />
               <PrivateRoute
@@ -414,7 +570,9 @@ function App(): JSX.Element {
         </Row>
         <ConsentModal
           show={showConsent}
-          callback={(consent: boolean) => setConsent(consent)}
+          callback={(consent: boolean) =>
+            setAuthSettings({ ...authSettings, consent })
+          }
           closeCallback={() => setShowConsent(false)}
         />
         <ToastContainer position="bottom-left" />
