@@ -9,7 +9,6 @@ export const createAccount = (account: Account, loginType?: LoginType) => {
   const updatedAccount = { ...account };
   LoggerService.info('Logging in.');
   localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
-  console.log('qzzzzzzzzzz', loginType);
   if (loginType || loginType === 0) {
     localStorage.setItem(BITSCREEN_LOGIN_TYPE, JSON.stringify(loginType));
   }
