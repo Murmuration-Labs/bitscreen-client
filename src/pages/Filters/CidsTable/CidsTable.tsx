@@ -68,10 +68,6 @@ const CidsTable = ({
   useEffect(() => {
     const headCells = [...defaultHeadCells];
 
-    // headCells.find((e) => e.id === 'local')!.label = totalConflicts.length
-    //   ? 'Problem'
-    //   : 'Local';
-
     const sorted = [...headCells].sort((a, b) => a.pos - b.pos);
 
     setHeadCells(sorted);
