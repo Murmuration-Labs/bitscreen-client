@@ -52,3 +52,5 @@ export const lookingGlassUri = (): string => {
       return 'https://bxn.mml-client.keyko.rocks/';
   }
 };
+export const bitscreenGoogleClientId =
+  '553067164447-7j2nls5qnt7pc1d2cti1vbfd33gjengl.apps.googleusercontent.com';

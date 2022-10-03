@@ -16,6 +16,7 @@ export interface Provider {
 
 export interface Account extends Provider {
   walletAddress?: string;
+  loginEmail?: string;
   accessToken?: string;
 }
 
@@ -23,4 +24,9 @@ export interface DealFromApi {
   unique_blocked: string;
   total_blocked: string;
   key: string;
+}
+
+export enum LoginType {
+  Wallet,
+  Email,
 }

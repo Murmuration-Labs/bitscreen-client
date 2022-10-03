@@ -1,13 +1,17 @@
 import _ from 'lodash';
-import { Account } from 'types/interfaces';
+import { Account, LoginType } from 'types/interfaces';
 import LoggerService from './LoggerService';
 
 const AUTH_KEY = 'BITSCREEN__IDENTITY__INFO';
+const BITSCREEN_LOGIN_TYPE = 'BITSCREEN__LOGIN__TYPE';
 
-export const createAccount = (account: Account) => {
+export const createAccount = (account: Account, loginType?: LoginType) => {
   const updatedAccount = { ...account };
   LoggerService.info('Logging in.');
   localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
+  if (loginType || loginType === 0) {
+    localStorage.setItem(BITSCREEN_LOGIN_TYPE, JSON.stringify(loginType));
+  }
 };
 
 export const getAccount = (): Account | null => {
@@ -41,6 +45,7 @@ export const updateAccount = (account: Account): void => {
 export const removeAccount = (): void => {
   LoggerService.info('Logging out.');
   localStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem(BITSCREEN_LOGIN_TYPE);
 };
 
 export const getProviderId = (): number => {
@@ -52,4 +57,27 @@ export const getProviderId = (): number => {
   }
 
   return providerId;
+};
+
+export const setLoginType = (loginType: LoginType) => {
+  localStorage.setItem(BITSCREEN_LOGIN_TYPE, JSON.stringify(loginType));
+};
+
+export const removeLoginType = (): void => {
+  localStorage.removeItem(BITSCREEN_LOGIN_TYPE);
+};
+
+export const getLoginType = (): LoginType | null => {
+  const loginTypeStringified = localStorage.getItem(BITSCREEN_LOGIN_TYPE);
+
+  if (!loginTypeStringified) {
+    return null;
+  }
+
+  const loginType: LoginType = JSON.parse(loginTypeStringified);
+  if (!loginType && loginType !== 0) {
+    return null;
+  }
+
+  return loginType;
 };

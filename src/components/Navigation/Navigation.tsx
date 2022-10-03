@@ -16,9 +16,10 @@ import { NavLink } from 'react-router-dom';
 import * as AuthService from 'services/AuthService';
 import './Navigation.css';
 import Bitscreenlogo from './bitscreen-logo.png';
+import { LoginType } from 'types/interfaces';
 
 function Navigation(props): JSX.Element {
-  const { provider, setProvider, setConfig } = props;
+  const { provider, appLogout, googleLogout } = props;
   const shortenAddress = (address: string): string => {
     return address.length > 8
       ? address.substr(0, 4) + '...' + address.substr(-4)
@@ -99,15 +100,17 @@ function Navigation(props): JSX.Element {
                 title={
                   <span>
                     <FontAwesomeIcon size="sm" icon={faUser} />{' '}
-                    {shortenAddress(provider.walletAddress ?? '')}
+                    {shortenAddress(
+                      provider.walletAddress || provider.loginEmail || ''
+                    )}
                   </span>
                 }
               >
                 <NavDropdown.Item
                   onClick={() => {
-                    setProvider(null);
-                    setConfig(null);
-                    AuthService.removeAccount();
+                    AuthService.getLoginType() === LoginType.Wallet
+                      ? appLogout()
+                      : googleLogout();
                   }}
                 >
                   Log out?

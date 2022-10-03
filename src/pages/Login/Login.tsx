@@ -1,11 +1,15 @@
+import { bitscreenGoogleClientId } from 'config';
 import React, { useEffect } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
-import { metamaskIcon } from 'resources/icons/index';
+import { useGoogleLogin } from 'react-google-login';
+import { toast } from 'react-toastify';
+import { googleIcon, metamaskIcon } from 'resources/icons/index';
 import LoggerService from 'services/LoggerService';
 import './Login.css';
 
 export default function Login(props) {
-  const { connectMetamask, previousPath, setPreviousPath } = props;
+  const { connectMetamask, previousPath, setPreviousPath, loginWithGoogle } =
+    props;
 
   useEffect(() => LoggerService.info('Loading Login page.'), []);
 
@@ -21,6 +25,22 @@ export default function Login(props) {
     }
   }, [previousPath]);
 
+  const onGoogleLoginFailure = () => {
+    return toast.error(
+      'Could not authenticate you at the moment using Google authentication system. Please try again later!'
+    );
+  };
+
+  const onGoogleLoginSuccess = async (res: any) => {
+    await loginWithGoogle(res.tokenId);
+  };
+
+  const { signIn: googleLogin } = useGoogleLogin({
+    clientId: bitscreenGoogleClientId,
+    onFailure: onGoogleLoginFailure,
+    onSuccess: onGoogleLoginSuccess,
+  });
+
   return (
     <>
       <Row
@@ -35,7 +55,7 @@ export default function Login(props) {
             <Row>
               <Col>
                 <Form.Label className="h4">
-                  <strong>Connect your wallet</strong>
+                  <strong>Welcome to BitScreen</strong>
                 </Form.Label>
               </Col>
             </Row>
@@ -44,30 +64,40 @@ export default function Login(props) {
             <Row>
               <Col>
                 <p className="login-subtitle">
-                  Connect with one of our available wallets to use BitScreen
+                  Sign in with your Google account or your Metamask wallet
                 </p>
               </Col>
             </Row>
           </div>
           <div className="ml-3">
-            <Row>
-              <Col>
-                <div className="wallet-table">
-                  <div
-                    id="metamask-row"
-                    onClick={connectMetamask}
-                    className="d-flex justify-content-between align-items-center wallet-row w-100 p-3"
-                  >
-                    <div className="d-flex align-items-center">
-                      <div className="wallet-avatar mr-2">
-                        <img width={35} src={metamaskIcon}></img>
-                      </div>
-                      <div className="wallet-name">MetaMask</div>
-                    </div>
+            <div className="option-card mb-4">
+              <div
+                id="metamask-row"
+                onClick={connectMetamask}
+                className="d-flex justify-content-between align-items-center c-pointer no-text-select w-100 p-3"
+              >
+                <div className="d-flex align-items-center">
+                  <div className="icon-container mr-3">
+                    <img width={35} src={metamaskIcon}></img>
                   </div>
+                  <div className="login-card-text">Sign in with Metamask</div>
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
+            <div className="option-card">
+              <div
+                id="google-row"
+                onClick={googleLogin}
+                className="d-flex justify-content-between align-items-center c-pointer no-text-select w-100 p-3"
+              >
+                <div className="d-flex align-items-center">
+                  <div className="icon-container mr-3">
+                    <img width={30} src={googleIcon}></img>
+                  </div>
+                  <div className="login-card-text">Sign in with Google</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="mt-4 ml-3">
             <Row>
