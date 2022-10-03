@@ -27,7 +27,10 @@ export interface CidsRowProps {
   onMoveClick: () => void;
   onDeleteClick: () => void;
   setConflict: (conflicts: Conflict[]) => void;
-  setShowConflict: (show: boolean) => void;
+  setShowConflict: (showConflict: {
+    single: boolean;
+    multiple: boolean;
+  }) => void;
   addConflicts: (conflicts: Conflict[]) => void;
   removeConflict: (conflict: string) => void;
 }
@@ -148,7 +151,10 @@ const CidsRow = ({
 
   const handleConflict = (conflicts: Conflict[]) => {
     setConflict(conflicts);
-    setShowConflict(true);
+    setShowConflict({
+      single: true,
+      multiple: false,
+    });
   };
 
   return (

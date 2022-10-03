@@ -113,7 +113,7 @@ export default function Settings(props) {
 
       if (provider.country) {
         setCountryInputValue([
-          countries.data.find((e) => e.value === provider.country)?.label || '',
+          countries.data.find((e) => e.label === provider.country)?.label || '',
         ]);
       }
 
@@ -213,12 +213,12 @@ export default function Settings(props) {
     }
 
     setIsDisabledWhileApiCall(true);
-
+    const country = countryList()
+      .getData()
+      .find((el) => el.label === providerInfo.country)?.value;
     const provider = {
       ...providerInfo,
-      country: countryList()
-        .getData()
-        .find((el) => el.label === providerInfo.country)?.value,
+      country,
     };
     const config = { ...configInfo };
 

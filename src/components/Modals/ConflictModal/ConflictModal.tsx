@@ -3,10 +3,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  makeStyles,
 } from '@material-ui/core';
 import { Conflict, ConflictModalProps } from 'pages/Filters/Interfaces';
-import React, { useEffect, useState } from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import ApiService from 'services/ApiService';
 import LoggerService from 'services/LoggerService';
@@ -25,19 +25,27 @@ const resolveConflict = async (conflicts: Conflict[]) => {
   return;
 };
 
+const useStyles = makeStyles(() => ({
+  paperResolveOneConflict: { maxWidth: '400px', borderRadius: '16px' },
+  paperResolveMultipleConflict: { maxWidth: '600px', borderRadius: '16px' },
+  root: { padding: '24px' },
+  rootContent: { padding: '24px 24px 0 24px !important' },
+}));
+
 const ConflictModal = ({
-  show,
+  showConflict,
   conflicts,
-  handleClose,
+  setShowConflict,
   removeConflict,
 }: ConflictModalProps): JSX.Element => {
+  const classes = useStyles();
   const [multiple, setMultiple] = useState<boolean>(false);
 
   useEffect(() => {
-    if (show) {
+    if (showConflict) {
       LoggerService.info('Show Conflict modal');
     }
-  }, [show]);
+  }, [showConflict]);
 
   useEffect(() => {
     const cidsFound: string[] = [];
@@ -51,6 +59,7 @@ const ConflictModal = ({
     }
 
     LoggerService.debug(cidsFound);
+
     if (cidsFound.length > 1) {
       setMultiple(true);
     } else {
@@ -60,96 +69,124 @@ const ConflictModal = ({
 
   return (
     <>
-      <Dialog open={show && !multiple} onClose={() => handleClose(false)}>
+      <Dialog
+        classes={{ paper: classes.paperResolveOneConflict }}
+        open={showConflict.single}
+        onClose={() =>
+          setShowConflict({
+            single: false,
+            multiple: false,
+          })
+        }
+      >
         <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
-          This CID appears on {conflicts.length} local filter list/s. Do you
-          want to remove it there?
-          <ListGroup>
-            {conflicts.map((conflict) => {
-              return (
-                <ListGroup.Item
-                  as="li"
-                  className="d-flex justify-content-between align-items-start"
-                  key={conflict.id}
-                >
-                  <div className="cid-conflict-url">
-                    <div className="cid-conflict-title">{conflict.cid}</div>
-                    {conflict.refUrl}
-                  </div>
-                </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
+          This CID appears on one or more local filter lists. Do you want to
+          remove it there?
         </DialogContent>
-        <DialogActions>
+        <DialogActions classes={{ root: classes.root }}>
+          <Button
+            aria-label="cancel"
+            className="app-primary-button text-white no-text-transform small-button"
+            color="primary"
+            title="Cancel"
+            onClick={() =>
+              setShowConflict({
+                single: false,
+                multiple: false,
+              })
+            }
+          >
+            No
+          </Button>
           <Button
             aria-label="add-cid"
             color="primary"
+            className="app-primary-button text-white no-text-transform small-button"
             onClick={() => {
               resolveConflict(conflicts).then(() => {
                 conflicts.forEach((conflict) => {
                   removeConflict(conflict.cid);
                 });
-                handleClose(false);
+                setShowConflict({
+                  single: false,
+                  multiple: false,
+                });
               });
             }}
           >
             Yes
           </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        classes={{ paper: classes.paperResolveMultipleConflict }}
+        open={showConflict.multiple}
+        onClose={() =>
+          setShowConflict({
+            single: false,
+            multiple: false,
+          })
+        }
+      >
+        <DialogContent
+          classes={{ root: classes.rootContent }}
+          style={{ display: 'flex', flexDirection: 'column', width: '600px' }}
+        >
+          <p className="conflict-modal-text">
+            The following CID(s) in this list are in conflict with one or more
+            local filter lists and cannot be saved.
+          </p>
+          <div className="text-overflow content">
+            {conflicts
+              .filter(
+                (e, index) =>
+                  conflicts.findIndex((el) => el.cid === e.cid) === index
+              )
+              .map((conflict) => {
+                return (
+                  <div className="cid-conflict-url">
+                    <div className="cid-conflict-title">{conflict.cid}</div>
+                    {conflict.refUrl || 'URL N/A'}
+                  </div>
+                );
+              })}
+          </div>
+          <div className="conflict-modal-text">
+            Do you want to remove them from the local lists?
+          </div>
+        </DialogContent>
+        <DialogActions classes={{ root: classes.root }}>
           <Button
             aria-label="cancel"
             color="primary"
             title="Cancel"
-            onClick={() => handleClose(false)}
+            className="app-primary-button text-white no-text-transform small-button"
+            onClick={() =>
+              setShowConflict({
+                single: false,
+                multiple: false,
+              })
+            }
           >
             No
           </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={show && multiple} onClose={() => handleClose(false)}>
-        <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
-          <p className="conflict-modal-text">
-            The following CID(s) in this list are in conflict with a local
-            filter and cannot be saved.
-          </p>
-          <ListGroup>
-            {conflicts.map((conflict) => {
-              return (
-                <ListGroup.Item
-                  as="li"
-                  className="d-flex justify-content-between align-items-start"
-                  key={conflict.id}
-                >
-                  <div className="cid-conflict-url">
-                    <div className="cid-conflict-title">{conflict.cid}</div>
-                    {conflict.refUrl}
-                  </div>
-                </ListGroup.Item>
-              );
-            })}
-          </ListGroup>
-          <p className="conflict-modal-text">
-            Do you want to remove them from the local lists?
-          </p>
-        </DialogContent>
-        <DialogActions>
           <Button
             aria-label="add-cid"
             color="primary"
+            className="app-primary-button text-white no-text-transform small-button"
             onClick={() => {
-              resolveConflict(conflicts);
-              handleClose(false);
+              resolveConflict(conflicts).then(() => {
+                conflicts.forEach((conflict) => {
+                  removeConflict(conflict.cid);
+                });
+                setShowConflict({
+                  single: false,
+                  multiple: false,
+                });
+              });
             }}
           >
             Yes
-          </Button>
-          <Button
-            aria-label="cancel"
-            color="primary"
-            title="Cancel"
-            onClick={() => handleClose(false)}
-          >
-            No
           </Button>
         </DialogActions>
       </Dialog>

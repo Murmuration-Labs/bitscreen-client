@@ -10,6 +10,7 @@ import { Button } from 'react-bootstrap';
 import '../Filters.css';
 import { AddCidBatchModalProps } from '../Interfaces';
 import LoggerService from 'services/LoggerService';
+import './AddCidBatchModal.css';
 
 export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
   const [cidsInput, setCidsInput] = useState<string>('');
@@ -60,11 +61,11 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
               id="cid"
               label="CIDs"
               placeholder="CID_1,CID_2,CID_3"
-              rows={2}
               multiline
               maxRows={6}
               fullWidth
               value={cidsInput}
+              className="add-batch-cid-input"
               onChange={(e) => {
                 setCidsInput(e.target.value);
               }}

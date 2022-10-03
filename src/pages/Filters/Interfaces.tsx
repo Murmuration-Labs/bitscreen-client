@@ -224,8 +224,14 @@ export interface Conflict {
 }
 
 export interface ConflictModalProps {
-  show: boolean;
+  showConflict: {
+    single: boolean;
+    multiple: boolean;
+  };
   conflicts: Conflict[];
-  handleClose: (show: boolean) => void;
+  setShowConflict: (showConflict: {
+    single: boolean;
+    multiple: boolean;
+  }) => void;
   removeConflict: (cid: string) => void;
 }
