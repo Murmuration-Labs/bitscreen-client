@@ -1,0 +1,14 @@
+{
+    "name": "bitscreen-client",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^14"
+    },
+    "dependencies": {
+        "@pulumi/aws": "^5.0.0",
+        "@pulumi/awsx": "^0.40.0",
+        "@pulumi/pulumi": "^3.0.0",
+        "file-type": "^18.0.0",
+        "mrmime": "^1.0.1"
+    }
+}
