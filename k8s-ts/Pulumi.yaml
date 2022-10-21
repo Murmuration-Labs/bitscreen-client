@@ -1,0 +1,3 @@
+name: k8s-ts
+description: A minimal Kubernetes TypeScript Pulumi program
+runtime: nodejs
