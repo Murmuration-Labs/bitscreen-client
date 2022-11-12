@@ -286,9 +286,7 @@ const ApiService = {
   },
 
   deleteProvider: async (account: Account): Promise<{ success: boolean }> => {
-    const response = await axios.delete(
-      `${serverUri()}/provider/${account.walletAddress}`
-    );
+    const response = await axios.delete(`${serverUri()}/provider`);
 
     return response.data;
   },

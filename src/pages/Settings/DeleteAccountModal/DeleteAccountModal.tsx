@@ -61,7 +61,7 @@ const DeleteAccountModal = ({
   }, [account]);
 
   const confirmDelete = () => {
-    if (confirmText === account?.walletAddress?.slice(-4)) {
+    if (!account || !account.walletAddress || confirmText === account?.walletAddress?.slice(-4)) {
       toast.success('Account deletion initiated.');
       ApiService.deleteProvider(account).then(
         (response) => {
@@ -99,21 +99,25 @@ const DeleteAccountModal = ({
                   accounts.
                 </Alert>
               )}
-              <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>{toComplete}</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl
-                  type="text"
-                  placeholder="Enter the last 4 characters of your wallet"
-                  value={confirmText}
-                  onChange={(ev) => setConfirmText(ev.target.value)}
-                />
-              </InputGroup>
-              <Form.Text className="text-muted">
-                To confirm that you want to delete this account, please input
-                the last 4 characters of your wallet address.
-              </Form.Text>
+              {account && account.walletAddress && (
+                <InputGroup className="mb-2">
+                  <InputGroup.Prepend>
+                    <InputGroup.Text>{toComplete}</InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <FormControl
+                    type="text"
+                    placeholder="Enter the last 4 characters of your wallet"
+                    value={confirmText}
+                    onChange={(ev) => setConfirmText(ev.target.value)}
+                  />
+                </InputGroup>
+              )}
+              {account && account.walletAddress && (
+                <Form.Text className="text-muted">
+                  To confirm that you want to delete this account, please input
+                  the last 4 characters of your wallet address.
+                </Form.Text>
+              )}
             </Form.Row>
           </Form>
         </DialogContent>
@@ -130,6 +134,8 @@ const DeleteAccountModal = ({
             variant="danger"
             onClick={confirmDelete}
             disabled={
+              !!account &&
+              !!account.walletAddress &&
               confirmText.toLowerCase() !== account?.walletAddress?.slice(-4)
             }
           >
