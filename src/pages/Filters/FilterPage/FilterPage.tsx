@@ -441,7 +441,6 @@ const FilterPage = (props): JSX.Element => {
                 toast.error(e.data.message);
                 return;
               }
-              toast.error('Error: ' + e.message);
               setLoaded(false);
               LoggerService.error(e);
             });
@@ -451,7 +450,6 @@ const FilterPage = (props): JSX.Element => {
             toast.error(e.data.message);
             return;
           }
-          toast.error('Error: ' + e.message);
           setLoaded(false);
           LoggerService.error(e);
         });
@@ -1371,6 +1369,15 @@ const FilterPage = (props): JSX.Element => {
               open={!!editingCidType}
               edit={editingCidType === 'EDIT'}
               handleClose={(cid, idx) => {
+                if (
+                  cid &&
+                  filterList.cids.map((e) => e.cid).includes(cid.cid)
+                ) {
+                  toast.error(
+                    'The same CID cannot be added to a filter list more than once.'
+                  );
+                  return;
+                }
                 setEditingCid(null);
                 setEditingCidType(null);
                 setEditingCidIndex(-1);
@@ -1414,10 +1421,20 @@ const FilterPage = (props): JSX.Element => {
           {addCidBatchModal && (
             <AddCidBatchModal
               closeCallback={async (data) => {
-                setAddCidBatchModal(false);
                 if (!data || !data.result || !data.result.length) {
-                  return;
+                  return setAddCidBatchModal(false);
                 }
+                for (let i = 0; i < data?.result.length; i++) {
+                  if (
+                    filterList.cids.map((e) => e.cid).includes(data?.result[i])
+                  ) {
+                    toast.error(
+                      'The same CID cannot be added to a filter list more than once.'
+                    );
+                    return;
+                  }
+                }
+                setAddCidBatchModal(false);
 
                 onNewCidsBatch(data.result, data.refUrl);
               }}

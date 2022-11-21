@@ -1,10 +1,11 @@
-import { Dialog, IconButton, MenuItem } from '@material-ui/core';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IconButton, MenuItem } from '@material-ui/core';
+import MenuButton from '@material-ui/icons/MoreVert';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, shallow } from 'enzyme';
 import React from 'react';
-import AddCidModal from '../AddCidModal/AddCidModal';
-import MenuButton from '@material-ui/icons/MoreVert';
-import DropdownMenu from './DropdownMenu';
 import {
   Button,
   Form,
@@ -12,9 +13,7 @@ import {
   OverlayTrigger,
   Tooltip,
 } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import DropdownMenu from './DropdownMenu';
 configure({ adapter: new Adapter() });
 
 const mockEnqueue = jest.fn();

@@ -70,6 +70,7 @@ import MenuButton from '@material-ui/icons/MoreVert';
 import DropdownMenu from './DropdownMenu/DropdownMenu';
 import { toast } from 'react-toastify';
 import { useTitle } from 'react-use';
+import { useDebounce } from 'usehooks-ts';
 
 interface MyFiltersTableData {
   name: string;
@@ -328,18 +329,35 @@ function Filters(props): JSX.Element {
     setNeedsRefresh(true);
   };
 
-  const toggleFilterEnabled = async (filterList: FilterList): Promise<void> => {
-    filterList.enabled = !filterList.enabled;
-    try {
-      await ApiService.updateFilter([filterList], false);
-    } catch (e: any) {
-      if (e && e.status === 401 && props.config) {
-        toast.error(e.data.message);
-        return;
+  const [changeStatusForFilterList, setChangeStatusForFilterList] = useState<{
+    filterList: FilterList;
+    active: boolean;
+  }>();
+
+  const debouncedChangeStatusForFilterList = useDebounce(
+    changeStatusForFilterList,
+    500
+  );
+
+  useEffect(() => {
+    if (!debouncedChangeStatusForFilterList) return;
+
+    const toggleFilterEnabled = async (
+      filterList: FilterList
+    ): Promise<void> => {
+      try {
+        await ApiService.updateFilter([filterList], false);
+      } catch (e: any) {
+        if (e && e.status === 401 && props.config) {
+          toast.error(e.data.message);
+          return;
+        }
       }
-    }
-    setNeedsRefresh(true);
-  };
+      setNeedsRefresh(true);
+    };
+
+    toggleFilterEnabled(debouncedChangeStatusForFilterList.filterList);
+  }, [debouncedChangeStatusForFilterList]);
 
   const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -695,7 +713,11 @@ function Filters(props): JSX.Element {
                             !isOrphan(row) &&
                             !isDisabledGlobally(row)
                           ) {
-                            toggleFilterEnabled(row);
+                            row.enabled = !row.enabled;
+                            setChangeStatusForFilterList({
+                              active: !changeStatusForFilterList?.active,
+                              filterList: row,
+                            });
                           }
                         }}
                       >

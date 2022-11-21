@@ -36,7 +36,6 @@ export const AddCidBatchModal = (props: AddCidBatchModalProps): JSX.Element => {
         .map((element: string) => {
           return element.trim();
         });
-      setCidsInput('');
     }
     props.closeCallback({ result, refUrl });
     setRefUrl('');

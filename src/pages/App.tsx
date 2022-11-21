@@ -150,7 +150,6 @@ function App(): JSX.Element {
         }
       }
     }
-
     setConfig(configObject);
     setProvider(account);
     setWallet(account.walletAddress);
@@ -376,38 +375,40 @@ function App(): JSX.Element {
   }, [authSettings.consent]);
 
   useEffect(() => {
-    if (AuthService.getLoginType() === LoginType.Wallet) {
-      const account = AuthService.getAccount();
-      // use only if WE WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
-      const checkWallet = async (config, walletAddress) => {
-        const walletProvider: any = await detectEthereumProvider({
-          mustBeMetaMask: true,
-        });
+    const checkWallet = async (config, walletAddress) => {
+      const walletProvider: any = await detectEthereumProvider({
+        mustBeMetaMask: true,
+      });
 
-        const web3 = new Web3(walletProvider);
+      const web3 = new Web3(walletProvider);
 
-        const wallets = await web3.eth.getAccounts();
-        if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
-          setConfig(config);
-        } else {
-          appLogout();
-        }
-      };
-      if (account) {
-        ApiService.getProviderConfig().then(
-          (config) => {
-            setConfig(config);
-            checkWallet(config, account.walletAddress);
-          },
-          (err: any) => {
-            if (err && err.status === 401) {
-              toast.error(err.data.message);
-            }
-            appLogout();
-            return;
-          }
-        );
+      const wallets = await web3.eth.getAccounts();
+      if (wallets[0] && wallets[0].toLowerCase() === walletAddress) {
+        setConfig(config);
+      } else {
+        appLogout();
       }
+    };
+
+    const account = AuthService.getAccount();
+    // use only if WE WANT TO REMOVE account on lock & refresh / on disconnect when not on the website and entering the website
+
+    if (account) {
+      ApiService.getProviderConfig().then(
+        (config) => {
+          setConfig(config);
+          if (AuthService.getLoginType() === LoginType.Wallet) {
+            checkWallet(config, account.walletAddress);
+          }
+        },
+        (err: any) => {
+          if (err && err.status === 401) {
+            toast.error(err.data.message);
+          }
+          appLogout();
+          return;
+        }
+      );
     }
 
     const unlisten = history.listen((location) => {
