@@ -8,9 +8,9 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Button, Form, FormControl, InputGroup } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ApiService from 'services/ApiService';
-import { getAccount } from 'services/AuthService';
+import { getAccount, getLoginType } from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
-import { Account } from 'types/interfaces';
+import { Account, LoginType } from 'types/interfaces';
 
 interface DeleteAccountModalProps {
   show: boolean;
@@ -21,10 +21,11 @@ const DeleteAccountModal = ({
   show,
   handleClose,
 }: DeleteAccountModalProps): JSX.Element => {
-  const [account, setAccount] = useState<Account | null>(getAccount());
+  const account = getAccount() as Account;
   const [confirmText, setConfirmText] = useState<string>('');
   const [toComplete, setToComplete] = useState<string>('');
   const [hasUsedFilters, setHasUsedFilters] = useState<boolean>(false);
+  const loginType = getLoginType();
 
   useEffect(() => {
     if (show) {
@@ -61,7 +62,11 @@ const DeleteAccountModal = ({
   }, [account]);
 
   const confirmDelete = () => {
-    if (!account || !account.walletAddress || confirmText === account?.walletAddress?.slice(-4)) {
+    if (
+      loginType === LoginType.Email ||
+      (loginType === LoginType.Wallet &&
+        confirmText === account?.walletAddress?.slice(-4))
+    ) {
       toast.success('Account deletion initiated.');
       ApiService.deleteProvider(account).then(
         (response) => {
@@ -99,7 +104,7 @@ const DeleteAccountModal = ({
                   accounts.
                 </Alert>
               )}
-              {account && account.walletAddress && (
+              {account && loginType === LoginType.Wallet && (
                 <InputGroup className="mb-2">
                   <InputGroup.Prepend>
                     <InputGroup.Text>{toComplete}</InputGroup.Text>
@@ -112,7 +117,7 @@ const DeleteAccountModal = ({
                   />
                 </InputGroup>
               )}
-              {account && account.walletAddress && (
+              {account && loginType === LoginType.Wallet && (
                 <Form.Text className="text-muted">
                   To confirm that you want to delete this account, please input
                   the last 4 characters of your wallet address.

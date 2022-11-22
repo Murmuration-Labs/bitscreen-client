@@ -96,10 +96,6 @@ export default function Settings(props) {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const countries = countryList();
   const countryNames = countries.data.map((e) => e.label);
-  const countryValues = countries.data.map((e) => e.value);
-
-  // const linkGoogleAccountToWallet = () => {};
-
   const linkWalletToGoogleAccount = async (tokenId: string) => {
     try {
       await ApiService.linkWalletToGoogleAccount(tokenId);
@@ -233,7 +229,7 @@ export default function Settings(props) {
 
       if (provider.country) {
         setCountryInputValue([
-          countries.data.find((e) => e.label === provider.country)?.label || '',
+          countries.data.find((e) => e.value === provider.country)?.label || '',
         ]);
       }
 
@@ -841,8 +837,8 @@ export default function Settings(props) {
                 </div>
               </div>
             )}
-
-            {configInfo.bitscreen && (
+            {(configInfo.bitscreen ||
+              (config.bitscreen && !configInfo.bitscreen)) && (
               <div
                 aria-describedby="form-actions-slice"
                 className="section-slice d-flex"

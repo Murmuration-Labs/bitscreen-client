@@ -54,3 +54,6 @@ export const lookingGlassUri = (): string => {
 };
 export const bitscreenGoogleClientId =
   '553067164447-7j2nls5qnt7pc1d2cti1vbfd33gjengl.apps.googleusercontent.com';
+
+// change this to use the logger service tsx
+export const shouldShowLoggerService = true;
