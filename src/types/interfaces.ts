@@ -14,6 +14,20 @@ export interface Provider {
   minerId?: string;
 }
 
+export interface BasicAuthInfo {
+  consentDate: string;
+}
+
+export interface BasicAuthInfoEmail extends BasicAuthInfo {
+  loginEmail: string;
+}
+
+export interface BasicAuthInfoWallet extends BasicAuthInfo {
+  nonceMessage: string;
+  nonce: string;
+  walletAddress: string;
+}
+
 export interface Account extends Provider {
   walletAddress?: string;
   loginEmail?: string;

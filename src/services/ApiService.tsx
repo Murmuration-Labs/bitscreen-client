@@ -10,7 +10,13 @@ import {
   ProviderFilter,
 } from 'pages/Filters/Interfaces';
 import { isImported } from 'pages/Filters/utils';
-import { Account, DealFromApi, LoginType } from 'types/interfaces';
+import {
+  Account,
+  BasicAuthInfoEmail,
+  BasicAuthInfoWallet,
+  DealFromApi,
+  LoginType,
+} from 'types/interfaces';
 import { remoteMarketplaceUri, serverUri } from '../config';
 
 // For authentication purposes we will use axios.createInstance
@@ -219,27 +225,38 @@ const ApiService = {
   getAuthInfo: async (
     loginType: LoginType,
     walletOrToken: string
-  ): Promise<Account | null> => {
+  ): Promise<BasicAuthInfoEmail | BasicAuthInfoWallet | null> => {
+    console.log(loginType);
     const correspondingUri =
       loginType === LoginType.Wallet
         ? `${serverUri()}/provider/auth_info`
         : `${serverUri()}/provider/auth_info/email`;
 
-    const response = await axios.get<Account | null>(
-      `${correspondingUri}/${walletOrToken}`
-    );
+    const response = await axios.get<
+      BasicAuthInfoEmail | BasicAuthInfoWallet | null
+    >(`${correspondingUri}/${walletOrToken}`);
 
     if (!response.data) {
       return null;
     }
 
-    return {
-      ...response.data,
-      walletAddress: loginType === LoginType.Wallet ? walletOrToken : undefined,
-    };
+    const authInfo =
+      loginType === LoginType.Wallet
+        ? {
+            ...response.data,
+            walletAddress: walletOrToken,
+          }
+        : {
+            ...response.data,
+          };
+    console.log(authInfo);
+    return authInfo;
   },
 
-  authenticateProvider: async (walletAddress, signature): Promise<Account> => {
+  authenticateProvider: async (
+    walletAddress: string,
+    signature: string
+  ): Promise<Account> => {
     const response = await axios.post<Account>(
       `${serverUri()}/provider/auth/wallet/${walletAddress}`,
       {
