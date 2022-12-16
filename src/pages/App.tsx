@@ -170,7 +170,7 @@ function App(): JSX.Element {
   const loginWithGoogle = async (tokenId: string) => {
     let provider: Account | null;
     try {
-      provider = await ApiService.getProviderByEmail(tokenId);
+      provider = await ApiService.getAuthInfo(LoginType.Email, tokenId);
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
@@ -251,7 +251,7 @@ function App(): JSX.Element {
     let signature;
 
     try {
-      provider = await ApiService.getProvider(wallet);
+      provider = await ApiService.getAuthInfo(LoginType.Wallet, wallet);
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
