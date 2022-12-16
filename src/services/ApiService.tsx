@@ -249,7 +249,6 @@ const ApiService = {
         : {
             ...response.data,
           };
-    console.log(authInfo);
     return authInfo;
   },
 
