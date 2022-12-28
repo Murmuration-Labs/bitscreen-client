@@ -447,6 +447,14 @@ const ApiService = {
 
     return response.data;
   },
+
+  unlinkFromSecondLoginType: async (): Promise<Account> => {
+    const response = await axios.post<Account>(
+      `${serverUri()}/provider/unlink-second-login-type/`
+    );
+
+    return response.data;
+  },
 };
 
 export default ApiService;
