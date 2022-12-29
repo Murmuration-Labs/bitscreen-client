@@ -96,6 +96,7 @@ export default function Settings(props) {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const countries = countryList();
   const countryNames = countries.data.map((e) => e.label);
+
   const linkWalletToGoogleAccount = async (tokenId: string) => {
     try {
       const updatedProvider = await ApiService.linkWalletToGoogleAccount(
@@ -226,7 +227,6 @@ export default function Settings(props) {
     try {
       const updatedProvider = await ApiService.unlinkFromSecondLoginType();
       updatedProvider.accessToken = AuthService.getAccount()?.accessToken;
-      console.log('r', AuthService.getAccount()?.accessToken);
       if (AuthService.getLoginType() === LoginType.Wallet) {
         updatedProvider.walletAddress = providerInfo.walletAddress;
         updatedProvider.walletAddressHashed = providerInfo.walletAddressHashed;
@@ -267,7 +267,9 @@ export default function Settings(props) {
     const { provider } = props;
 
     if (provider && (provider.walletAddress || provider.loginEmail)) {
-      setProviderInfo({ ...provider });
+      setProviderInfo({
+        ...provider,
+      });
 
       if (provider.country) {
         setCountryInputValue([
@@ -371,18 +373,17 @@ export default function Settings(props) {
     }
 
     setIsDisabledWhileApiCall(true);
-    const country = countryList()
-      .getData()
-      .find((el) => el.label === providerInfo.country)?.value;
     const provider = {
       ...providerInfo,
-      country,
     };
     const config = { ...configInfo };
 
     try {
-      await ApiService.updateProvider(provider);
-      AuthService.updateAccount({ ...providerInfo });
+      const updatedProvider = await ApiService.updateProvider(provider);
+      AuthService.updateAccount({
+        ...updatedProvider,
+        accessToken: AuthService.getAccount()?.accessToken,
+      });
     } catch (e: any) {
       if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
@@ -691,7 +692,10 @@ export default function Settings(props) {
                             setCountryInputValue(country);
                             setProviderInfo({
                               ...providerInfo,
-                              country: country[0] || '',
+                              country:
+                                countryList().data.find(
+                                  (e) => e.label === country[0]
+                                )?.value || '',
                             });
                           }}
                           selected={countryInputValue}
