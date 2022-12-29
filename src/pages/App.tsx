@@ -19,7 +19,12 @@ import AuthProvider from 'providers/AuthProvider';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
-import { Account, LoginType } from 'types/interfaces';
+import {
+  Account,
+  BasicAuthInfoEmail,
+  BasicAuthInfoWallet,
+  LoginType,
+} from 'types/interfaces';
 import './App.css';
 import Dashboard from './Dashboard/Dashboard';
 import FilterPage from './Filters/FilterPage/FilterPage';
@@ -168,9 +173,12 @@ function App(): JSX.Element {
   };
 
   const loginWithGoogle = async (tokenId: string) => {
-    let provider: Account | null;
+    let provider: BasicAuthInfoEmail | null;
     try {
-      provider = await ApiService.getProviderByEmail(tokenId);
+      provider = (await ApiService.getAuthInfo(
+        LoginType.Email,
+        tokenId
+      )) as BasicAuthInfoEmail | null;
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
@@ -179,7 +187,7 @@ function App(): JSX.Element {
       );
     }
 
-    if (!provider) {
+    if (!provider?.consentDate) {
       setAuthSettings({
         consent: false,
         loginType: LoginType.Email,
@@ -246,12 +254,16 @@ function App(): JSX.Element {
 
     const wallet = wallets[0].toLowerCase();
 
-    let provider;
+    let basicAuthInfo: BasicAuthInfoWallet | null;
+    let provider: Account;
     let account: Account;
     let signature;
 
     try {
-      provider = await ApiService.getProvider(wallet);
+      basicAuthInfo = (await ApiService.getAuthInfo(
+        LoginType.Wallet,
+        wallet
+      )) as BasicAuthInfoWallet | null;
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
@@ -259,7 +271,7 @@ function App(): JSX.Element {
         'Could not get provider information from the server. Please try again later!'
       );
     }
-    if (!provider) {
+    if (!basicAuthInfo) {
       if (!authSettings.consent) {
         setAuthSettings({
           consent: false,
@@ -271,6 +283,10 @@ function App(): JSX.Element {
       }
       try {
         provider = await ApiService.createProvider(wallet);
+        basicAuthInfo = (await ApiService.getAuthInfo(
+          LoginType.Wallet,
+          wallet
+        )) as BasicAuthInfoWallet;
       } catch (e) {
         LoggerService.error(e);
         AuthService.removeAccount();
@@ -280,7 +296,7 @@ function App(): JSX.Element {
       }
     }
 
-    if (!provider.consentDate && !authSettings.consent) {
+    if (!basicAuthInfo.consentDate && !authSettings.consent) {
       setAuthSettings({
         consent: false,
         loginType: LoginType.Wallet,
@@ -291,8 +307,8 @@ function App(): JSX.Element {
     }
     try {
       signature = await web3.eth.personal.sign(
-        provider.nonceMessage,
-        provider.walletAddress,
+        basicAuthInfo.nonceMessage,
+        basicAuthInfo.walletAddress,
         ''
       );
       if (AuthService.getAccount()) return;
@@ -337,10 +353,10 @@ function App(): JSX.Element {
       }
     }
 
-    if (!provider.consentDate) {
-      provider.consentDate = new Date().toISOString();
-      delete provider.nonceMessage;
-      await ApiService.updateProvider(provider);
+    if (!basicAuthInfo.consentDate) {
+      const auxAccount = { ...account };
+      auxAccount.consentDate = new Date().toISOString();
+      await ApiService.updateProvider(auxAccount);
     }
     setConfig(configObject);
     setProvider(account);
