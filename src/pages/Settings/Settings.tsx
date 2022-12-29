@@ -98,7 +98,16 @@ export default function Settings(props) {
   const countryNames = countries.data.map((e) => e.label);
   const linkWalletToGoogleAccount = async (tokenId: string) => {
     try {
-      await ApiService.linkWalletToGoogleAccount(tokenId);
+      const updatedProvider = await ApiService.linkWalletToGoogleAccount(
+        tokenId
+      );
+      updatedProvider.accessToken = AuthService.getAccount()?.accessToken;
+      const providerWithWalletAddress = {
+        ...updatedProvider,
+        walletAddress: providerInfo.walletAddress,
+      };
+      AuthService.updateAccount(providerWithWalletAddress);
+      setProviderInfo(providerWithWalletAddress);
       toast.success(
         'Provider successfully linked to specified Google Account.'
       );
@@ -192,9 +201,13 @@ export default function Settings(props) {
     );
 
     try {
-      const provider = await ApiService.linkProviderToWallet(wallet, signature);
-      AuthService.updateAccount(provider);
-      setProviderInfo(provider);
+      const updatedProvider = await ApiService.linkProviderToWallet(
+        wallet,
+        signature
+      );
+      updatedProvider.accessToken = AuthService.getAccount()?.accessToken;
+      AuthService.updateAccount(updatedProvider);
+      setProviderInfo(updatedProvider);
       return toast.success(
         'Provider account successfully linked to wallet address!'
       );
@@ -204,6 +217,35 @@ export default function Settings(props) {
       } else {
         return toast.error(
           'Could not link the account at the moment. Please try again later!'
+        );
+      }
+    }
+  };
+
+  const unlinkFromSecondLoginType = async () => {
+    try {
+      const updatedProvider = await ApiService.unlinkFromSecondLoginType();
+      updatedProvider.accessToken = AuthService.getAccount()?.accessToken;
+      console.log('r', AuthService.getAccount()?.accessToken);
+      if (AuthService.getLoginType() === LoginType.Wallet) {
+        updatedProvider.walletAddress = providerInfo.walletAddress;
+        updatedProvider.walletAddressHashed = providerInfo.walletAddressHashed;
+      }
+      AuthService.updateAccount(updatedProvider);
+      setProviderInfo(updatedProvider);
+      return toast.success(
+        `Successfully unlinked account from ${
+          AuthService.getLoginType() === LoginType.Email
+            ? 'wallet'
+            : 'Google email'
+        }!`
+      );
+    } catch (e: any) {
+      if (e && e.data) {
+        return toast.error(e.data.message || e.data.error);
+      } else {
+        return toast.error(
+          'Could unlink the account at the moment. Please try again later!'
         );
       }
     }
@@ -438,26 +480,24 @@ export default function Settings(props) {
               aria-describedby="wallet-status-slice"
               className="section-slice"
             >
-              {AuthService.getLoginType() === LoginType.Email &&
-                providerInfo.loginEmail && (
-                  <>
-                    <div className="slice-title-row t-lp">
-                      Google account connected
-                    </div>
-                    <div className="slice-info address-info t-lp">
-                      Login email: {providerInfo.loginEmail}
-                    </div>
-                  </>
-                )}
-              {AuthService.getLoginType() === LoginType.Wallet &&
-                providerInfo.walletAddress && (
-                  <>
-                    <div className="slice-title-row t-lp">Wallet connected</div>
-                    <div className="slice-info address-info t-lp">
-                      Address: {providerInfo.walletAddress}
-                    </div>
-                  </>
-                )}
+              {providerInfo.loginEmail && (
+                <>
+                  <div className="slice-title-row t-lp">
+                    Google account connected
+                  </div>
+                  <div className="slice-info address-info t-lp">
+                    Login email: {providerInfo.loginEmail}
+                  </div>
+                </>
+              )}
+              {providerInfo.walletAddress && (
+                <>
+                  <div className="slice-title-row t-lp">Wallet connected</div>
+                  <div className="slice-info address-info t-lp">
+                    Address: {providerInfo.walletAddress}
+                  </div>
+                </>
+              )}
             </div>
             <div
               aria-describedby="wallet-status-actions"
@@ -497,6 +537,28 @@ export default function Settings(props) {
                       {AuthService.getLoginType() === LoginType.Email
                         ? 'wallet'
                         : 'Google email'}
+                    </Button>
+                  </div>
+                )}
+                {((AuthService.getLoginType() === LoginType.Wallet &&
+                  providerInfo.loginEmail) ||
+                  (AuthService.getLoginType() === LoginType.Email &&
+                    providerInfo.walletAddressHashed)) && (
+                  <div className="Link account button">
+                    <Button
+                      onClick={() => {
+                        unlinkFromSecondLoginType();
+                      }}
+                      variant="primary"
+                      className="button-style blue-button"
+                      type="button"
+                      disabled={isDisabledWhileApiCall}
+                    >
+                      Disconnect{' '}
+                      {AuthService.getLoginType() === LoginType.Email
+                        ? 'wallet'
+                        : 'Google'}{' '}
+                      account
                     </Button>
                   </div>
                 )}
