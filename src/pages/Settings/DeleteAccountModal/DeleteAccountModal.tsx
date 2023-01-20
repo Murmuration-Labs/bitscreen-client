@@ -3,6 +3,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  makeStyles,
 } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { Alert, Button, Form, FormControl, InputGroup } from 'react-bootstrap';
@@ -17,10 +18,15 @@ interface DeleteAccountModalProps {
   handleClose: (result: boolean) => void;
 }
 
+const useStyles = makeStyles(() => ({
+  paper: { maxWidth: '850px' },
+}));
+
 const DeleteAccountModal = ({
   show,
   handleClose,
 }: DeleteAccountModalProps): JSX.Element => {
+  const classes = useStyles();
   const account = getAccount() as Account;
   const [confirmText, setConfirmText] = useState<string>('');
   const [toComplete, setToComplete] = useState<string>('');
@@ -57,8 +63,8 @@ const DeleteAccountModal = ({
   }, [show]);
 
   useEffect(() => {
-    const cutAddress = account?.walletAddress?.slice(2, -4) || '';
-    setToComplete(cutAddress + '...');
+    if (!account?.walletAddress) return;
+    setToComplete(account?.walletAddress);
   }, [account]);
 
   const confirmDelete = () => {
@@ -87,7 +93,11 @@ const DeleteAccountModal = ({
 
   return (
     <>
-      <Dialog open={show} maxWidth="sm" onClose={() => handleClose(false)}>
+      <Dialog
+        classes={{ paper: classes.paper }}
+        open={show}
+        onClose={() => handleClose(false)}
+      >
         <DialogTitle>Delete account</DialogTitle>
         <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
           <Form>
@@ -107,7 +117,9 @@ const DeleteAccountModal = ({
               {account && loginType === LoginType.Wallet && (
                 <InputGroup className="mb-2">
                   <InputGroup.Prepend>
-                    <InputGroup.Text>{toComplete}</InputGroup.Text>
+                    <InputGroup.Text className="w-100">
+                      {toComplete}
+                    </InputGroup.Text>
                   </InputGroup.Prepend>
                   <FormControl
                     type="text"
