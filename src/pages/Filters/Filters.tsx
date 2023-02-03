@@ -61,6 +61,7 @@ import {
   isDisabledGlobally,
   isEnabled,
   isImported,
+  isImportEnabled,
   isOrphan,
   isShared,
   itemsToPages,
@@ -71,6 +72,7 @@ import DropdownMenu from './DropdownMenu/DropdownMenu';
 import { toast } from 'react-toastify';
 import { useTitle } from 'react-use';
 import { useDebounce } from 'usehooks-ts';
+import { AccountType } from 'types/interfaces';
 
 interface MyFiltersTableData {
   name: string;
@@ -892,12 +894,6 @@ function Filters(props): JSX.Element {
     setNeedsRefresh(true);
   };
 
-  const isImportEnabled = (): boolean => {
-    return (
-      configuration.bitscreen && configuration.import && !!account?.country
-    );
-  };
-
   return (
     <div>
       {loaded ? (
@@ -925,15 +921,16 @@ function Filters(props): JSX.Element {
                 </div>
                 <span className="page-subtitle">
                   Filter lists running on my node
-                  {!isImportEnabled() && (
-                    <p className="text-dim" style={{ marginRight: 4 }}>
-                      To activate importing, go to{' '}
-                      <a style={{ fontSize: 12 }} href="/settings">
-                        Settings
-                      </a>{' '}
-                      and add country data.
-                    </p>
-                  )}
+                  {!isImportEnabled(configuration, account) &&
+                    account?.accountType === AccountType.NodeOperator && (
+                      <p className="text-dim" style={{ marginRight: 4 }}>
+                        To activate importing, go to{' '}
+                        <a style={{ fontSize: 12 }} href="/settings">
+                          Settings
+                        </a>{' '}
+                        and add country data.
+                      </p>
+                    )}
                 </span>
               </div>
               <div
@@ -954,7 +951,7 @@ function Filters(props): JSX.Element {
                 <Button
                   variant="outline-primary"
                   style={{ marginRight: 4 }}
-                  disabled={!isImportEnabled()}
+                  disabled={!isImportEnabled(configuration, account)}
                   onClick={() => {
                     setShowImportFilter(true);
                   }}
@@ -984,6 +981,7 @@ function Filters(props): JSX.Element {
                     <Button
                       variant="outline-primary"
                       className="double-space-left import-btn"
+                      disabled={account?.accountType === AccountType.Assessor}
                     >
                       Download CID List
                     </Button>

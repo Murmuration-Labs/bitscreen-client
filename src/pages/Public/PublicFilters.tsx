@@ -20,7 +20,7 @@ import * as AuthService from '../../services/AuthService';
 import EnhancedTableHead from '../Filters/EnhancedTableHead/EnhancedTableHead';
 import { ImportFilterModal } from '../../components/Modals/ImportFilterModal/ImportFilterModal';
 import { Config, FilterList, Order } from '../Filters/Interfaces';
-import { formatDate, itemsToPages } from '../Filters/utils';
+import { formatDate, isImportEnabled, itemsToPages } from '../Filters/utils';
 import { Data, HeadCell } from './Interfaces';
 import './PublicFilters.css';
 import LoggerService from '../../services/LoggerService';
@@ -28,6 +28,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/ClearRounded';
 import { toast } from 'react-toastify';
 import { useTitle } from 'react-use';
+import { AccountType } from 'types/interfaces';
 
 const headCells: HeadCell<Data>[] = [
   { id: 'name', numeric: false, label: 'Filter Name', sortable: true },
@@ -135,15 +136,6 @@ export default function PublicFilters(props) {
     Math.min(rowsPerPage, publicFiltersData.length - page * rowsPerPage);
   const providerId = AuthService.getProviderId();
 
-  const isImportEnabled = (): boolean => {
-    return (
-      configuration &&
-      configuration.bitscreen &&
-      configuration.import &&
-      !!account?.country
-    );
-  };
-
   const LongText = ({ content, limit }) => {
     if (content.length <= limit) {
       return <div>{content}</div>;
@@ -183,15 +175,16 @@ export default function PublicFilters(props) {
           </div>
           <div className="page-subtitle">
             Directory of public filter lists
-            {!isImportEnabled() && (
-              <p className="text-dim" style={{ marginRight: 4 }}>
-                To activate importing, go to{' '}
-                <a style={{ fontSize: 12 }} href="/settings">
-                  Settings
-                </a>{' '}
-                and add country data.
-              </p>
-            )}
+            {!isImportEnabled(configuration, account) &&
+              account?.accountType === AccountType.NodeOperator && (
+                <p className="text-dim" style={{ marginRight: 4 }}>
+                  To activate importing, go to{' '}
+                  <a style={{ fontSize: 12 }} href="/settings">
+                    Settings
+                  </a>{' '}
+                  and add country data.
+                </p>
+              )}
           </div>
         </div>
       </div>
@@ -306,7 +299,7 @@ export default function PublicFilters(props) {
                           backgroundColor: 'blue',
                           width: 100,
                         }}
-                        disabled={!isImportEnabled()}
+                        disabled={!isImportEnabled(configuration, account)}
                         onClick={() => {
                           setToBeImportedFilter(row as any);
                         }}

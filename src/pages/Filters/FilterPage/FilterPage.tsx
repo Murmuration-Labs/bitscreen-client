@@ -462,6 +462,7 @@ const FilterPage = (props): JSX.Element => {
           setLoaded(false);
         })
         .catch((e) => {
+          console.log('a');
           if (e && e.status === 401 && props.config) {
             toast.error(e.data.message);
             return;

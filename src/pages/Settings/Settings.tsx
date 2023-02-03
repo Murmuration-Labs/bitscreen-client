@@ -1,6 +1,6 @@
 import { Switch, withStyles } from '@material-ui/core';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { bitscreenGoogleClientId } from 'config';
+import { bitscreenGoogleClientId, lookingGlassUri } from 'config';
 import _ from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
@@ -15,12 +15,13 @@ import { activeIcon, inactiveIcon, infoIcon } from 'resources/icons';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
-import { Account, LoginType } from 'types/interfaces';
+import { Account, AccountType, LoginType } from 'types/interfaces';
 import validator from 'validator';
 import Web3 from 'web3';
 import { Config } from '../Filters/Interfaces';
 import DeleteAccountModal from './DeleteAccountModal/DeleteAccountModal';
 import QuickstartGuide from './QuickstartGuide/QuickstartGuide';
+import SelectAccountType from './SelectAccountModal/SelectAccountType';
 import './Settings.css';
 
 const HtmlSwitchComponent = withStyles((theme) => ({
@@ -88,6 +89,7 @@ export default function Settings(props) {
   const [isDisabledWhileApiCall, setIsDisabledWhileApiCall] =
     useState<boolean>(false);
 
+  const [showSelectAccount, setShowSelectAccount] = useState<boolean>(false);
   const [showQuickstartGuide, setShowQuickstartGuide] =
     useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
@@ -96,6 +98,12 @@ export default function Settings(props) {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const countries = countryList();
   const countryNames = countries.data.map((e) => e.label);
+
+  const logout = () => {
+    AuthService.getLoginType() === LoginType.Wallet
+      ? appLogout()
+      : googleLogout();
+  };
 
   const linkWalletToGoogleAccount = async (tokenId: string) => {
     try {
@@ -108,7 +116,10 @@ export default function Settings(props) {
         walletAddress: providerInfo.walletAddress,
       };
       AuthService.updateAccount(providerWithWalletAddress);
-      setProviderInfo(providerWithWalletAddress);
+      setProviderInfo({
+        ...providerWithWalletAddress,
+        assessorId: providerInfo.assessorId,
+      });
       toast.success(
         'Provider successfully linked to specified Google Account.'
       );
@@ -208,7 +219,10 @@ export default function Settings(props) {
       );
       updatedProvider.accessToken = AuthService.getAccount()?.accessToken;
       AuthService.updateAccount(updatedProvider);
-      setProviderInfo(updatedProvider);
+      setProviderInfo({
+        ...updatedProvider,
+        assessorId: providerInfo.assessorId,
+      });
       return toast.success(
         'Provider account successfully linked to wallet address!'
       );
@@ -232,7 +246,10 @@ export default function Settings(props) {
         updatedProvider.walletAddressHashed = providerInfo.walletAddressHashed;
       }
       AuthService.updateAccount(updatedProvider);
-      setProviderInfo(updatedProvider);
+      setProviderInfo({
+        ...updatedProvider,
+        assessorId: providerInfo.assessorId,
+      });
       return toast.success(
         `Successfully unlinked account from ${
           AuthService.getLoginType() === LoginType.Email
@@ -283,7 +300,8 @@ export default function Settings(props) {
         setLastUpdated('N/A');
       }
 
-      if (!provider.guideShown) setShowQuickstartGuide(true);
+      if (!provider.accountType) return setShowSelectAccount(true);
+      if (!provider.guideShown) return setShowQuickstartGuide(true);
     }
   }, [props.provider]);
 
@@ -299,19 +317,32 @@ export default function Settings(props) {
   };
 
   const hasUnfilledInfo = () => {
-    if ((configInfo.share || configInfo.import) && !providerInfo.country) {
-      return true;
-    }
-
     if (
-      configInfo.share &&
-      (!providerInfo.businessName ||
-        !providerInfo.address ||
-        !providerInfo.contactPerson ||
+      providerInfo.accountType === AccountType.Assessor &&
+      (!providerInfo.contactPerson ||
+        !providerInfo.businessName ||
+        !providerInfo.website ||
         !providerInfo.email ||
-        !providerInfo.website)
-    ) {
+        !providerInfo.address ||
+        !providerInfo.country)
+    )
       return true;
+
+    if (providerInfo.accountType === AccountType.NodeOperator) {
+      if (
+        configInfo.import &&
+        (!providerInfo.email || !providerInfo.country || !providerInfo.minerId)
+      )
+        return true;
+
+      if (
+        configInfo.share &&
+        (!providerInfo.contactPerson ||
+          !providerInfo.businessName ||
+          !providerInfo.businessName ||
+          !providerInfo.address)
+      )
+        return true;
     }
   };
 
@@ -319,49 +350,63 @@ export default function Settings(props) {
     const { config } = props;
 
     if (
-      config &&
-      ((!config.import && configInfo.import) ||
-        (!config.share && configInfo.share)) &&
-      !providerInfo.country
-    ) {
-      toast.error(
-        'Please select a country from the list in order to enable importing or sharing lists!'
-      );
-      return false;
-    }
-
-    if (
-      config &&
-      !config.share &&
-      configInfo.share &&
-      (!providerInfo.businessName ||
-        !providerInfo.address ||
-        !providerInfo.contactPerson ||
+      providerInfo.accountType === AccountType.Assessor &&
+      (!providerInfo.contactPerson ||
+        !providerInfo.businessName ||
+        !providerInfo.website ||
         !providerInfo.email ||
-        !providerInfo.website)
-    ) {
-      toast.error(
-        'Please fill the entire form in order to enable sharing lists!'
-      );
-      return false;
-    }
+        !providerInfo.address ||
+        !providerInfo.country)
+    )
+      return true;
 
-    if (
-      configInfo.share &&
-      providerInfo.website &&
-      !validator.isURL(providerInfo.website)
-    ) {
-      toast.error('Website is not a valid URL!');
-      return false;
-    }
+    if (providerInfo.accountType === AccountType.NodeOperator) {
+      if (
+        (!providerInfo.country ||
+          !providerInfo.minerId ||
+          !providerInfo.email) &&
+        config &&
+        !config.import &&
+        configInfo.import
+      ) {
+        toast.error(
+          'Please fill the entire form in order to enable importing lists!'
+        );
+        return false;
+      }
 
-    if (
-      configInfo.share &&
-      providerInfo.email &&
-      !validator.isEmail(providerInfo.email)
-    ) {
-      toast.error('Email is not valid!');
-      return false;
+      if (
+        (!providerInfo.contactPerson ||
+          !providerInfo.businessName ||
+          !providerInfo.address ||
+          !providerInfo.website) &&
+        config &&
+        !config.share &&
+        configInfo.share
+      ) {
+        toast.error(
+          'Please fill the entire form in order to enable sharing lists!'
+        );
+        return false;
+      }
+
+      if (
+        configInfo.share &&
+        providerInfo.website &&
+        !validator.isURL(providerInfo.website)
+      ) {
+        toast.error('Website is not a valid URL!');
+        return false;
+      }
+
+      if (
+        configInfo.share &&
+        providerInfo.email &&
+        !validator.isEmail(providerInfo.email)
+      ) {
+        toast.error('Email is not valid!');
+        return false;
+      }
     }
 
     return true;
@@ -373,81 +418,99 @@ export default function Settings(props) {
     }
 
     setIsDisabledWhileApiCall(true);
-    const provider = {
-      ...providerInfo,
+    const providerDataToUpdate = {
+      address: providerInfo.address,
+      contactPerson: providerInfo.contactPerson,
+      website: providerInfo.website,
+      email: providerInfo.email,
+      country: providerInfo.country,
+      minerId: providerInfo.minerId,
+      businessName: providerInfo.businessName,
     };
-    const config = { ...configInfo };
-
     try {
-      const updatedProvider = await ApiService.updateProvider(provider);
-      AuthService.updateAccount({
-        ...updatedProvider,
-        accessToken: AuthService.getAccount()?.accessToken,
+      await ApiService.updateProvider({
+        provider: providerDataToUpdate,
+        config: {
+          bitscreen: configInfo.bitscreen,
+          share: configInfo.share,
+          import: configInfo.import,
+        },
       });
+      AuthService.patchAccount(providerDataToUpdate);
+      toast.success('Successfully updated provider information!');
     } catch (e: any) {
       if (e && e.status === 401 && props.config) {
         toast.error(e.data.message);
-        return;
+        return logout();
+      }
+      toast.error(e.data.message);
+      LoggerService.error(e);
+    } finally {
+      setIsDisabledWhileApiCall(false);
+    }
+  };
+
+  const handleDeleteClose = (shouldDelete: boolean) => {
+    setShowDeleteModal(false);
+    LoggerService.info('Hiding Delete account modal.');
+
+    if (shouldDelete) {
+      setProvider(null);
+      setConfig(null);
+      AuthService.removeAccount();
+      return logout();
+    }
+  };
+
+  const handleSelectAccountClose = async (accountType: AccountType) => {
+    setShowSelectAccount(false);
+
+    try {
+      await ApiService.selectAccountType(accountType);
+      const provider = { ...providerInfo, accountType };
+      AuthService.patchAccount({
+        accountType,
+      });
+      setProviderInfo(provider);
+      setProvider(provider);
+      setShowQuickstartGuide(true);
+    } catch (e: any) {
+      if (e && e.status === 401 && props.config) {
+        toast.error(e.data.message);
+        return logout();
       }
       toast.error(
         "Couldn't update the provider information. Please try again later!"
       );
       LoggerService.error(e);
+    } finally {
       setIsDisabledWhileApiCall(false);
-      return;
-    }
-
-    try {
-      await ApiService.setProviderConfig(config);
-    } catch (e: any) {
-      if (e && e.status === 401 && props.config) {
-        toast.error(e.data.message);
-        return;
-      }
-      toast.error(
-        "Couldn't update the provider configuration. Please try again later!"
-      );
-      LoggerService.error(e);
-      setIsDisabledWhileApiCall(false);
-      return;
-    }
-
-    setConfig(config);
-    setProvider(provider);
-
-    toast.success('Successfully updated provider information!');
-    setIsDisabledWhileApiCall(false);
-  };
-
-  const handleDeleteClose = (result: boolean) => {
-    setShowDeleteModal(false);
-    LoggerService.info('Hiding Delete account modal.');
-
-    if (result) {
-      setProvider(null);
-      setConfig(null);
-      AuthService.removeAccount();
     }
   };
 
   const handleQuickstartGuideClose = async () => {
     setShowQuickstartGuide(false);
 
-    const provider = { ...providerInfo };
-    if (!provider.guideShown) {
-      provider.guideShown = true;
-
+    if (!providerInfo.guideShown) {
       setIsDisabledWhileApiCall(true);
 
       try {
-        await ApiService.updateProvider(provider);
-        AuthService.updateAccount(provider);
-        setProviderInfo(provider);
-        setProvider(provider);
+        await ApiService.markQuickstartShown();
+        AuthService.patchAccount({
+          guideShown: true,
+        });
+        setProviderInfo({
+          ...providerInfo,
+          guideShown: true,
+        });
+        setProvider({
+          ...providerInfo,
+          guideShown: true,
+        });
       } catch (e: any) {
         if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
-          return;
+          return logout();
         }
         toast.error(
           "Couldn't update the provider information. Please try again later!"
@@ -459,9 +522,38 @@ export default function Settings(props) {
     }
   };
 
+  const switchAccountType = async () => {
+    setIsDisabledWhileApiCall(true);
+    try {
+      const newAccountType =
+        providerInfo.accountType === AccountType.NodeOperator
+          ? AccountType.Assessor
+          : AccountType.NodeOperator;
+      await ApiService.selectAccountType(newAccountType);
+      toast.success('Account type successfully switched!');
+      AuthService.patchAccount({
+        accountType: newAccountType,
+      });
+      setProvider({
+        ...providerInfo,
+        accountType: newAccountType,
+      });
+      setProviderInfo({
+        ...providerInfo,
+        accountType: newAccountType,
+      });
+    } catch (e) {
+      return toast.error('Please try again later!');
+    } finally {
+      setIsDisabledWhileApiCall(false);
+    }
+  };
+
   const clearForm = () => {
     setProviderInfo({
       ...providerInitialState,
+      accountType: providerInfo.accountType,
+      assessorId: providerInfo.assessorId,
       country: providerInfo.country,
       lastUpdate: providerInfo.lastUpdate,
     });
@@ -500,6 +592,26 @@ export default function Settings(props) {
                 </>
               )}
             </div>
+            <div className="section-slice">
+              <div className="slice-title-row t-lp">Account type</div>
+              {providerInfo.accountType && (
+                <div className="slice-info address-info t-lp">
+                  <span className="mr-2">
+                    {providerInfo.accountType === AccountType.NodeOperator
+                      ? 'Node operator'
+                      : 'Assessor'}
+                  </span>
+                  (
+                  <span onClick={switchAccountType} className="link">
+                    Switch to{' '}
+                    {providerInfo.accountType === AccountType.NodeOperator
+                      ? 'Assessor only'
+                      : 'Node operator'}
+                  </span>
+                  )
+                </div>
+              )}
+            </div>
             <div
               aria-describedby="wallet-status-actions"
               className="wallet-status-actions d-flex justify-content-between align-items-center"
@@ -507,11 +619,7 @@ export default function Settings(props) {
               <div className="d-flex">
                 <div className="logout-button mr-3">
                   <Button
-                    onClick={() => {
-                      AuthService.getLoginType() === LoginType.Wallet
-                        ? appLogout()
-                        : googleLogout();
-                    }}
+                    onClick={logout}
                     variant="primary"
                     className="button-style blue-button"
                     type="button"
@@ -625,104 +733,56 @@ export default function Settings(props) {
               </div>
             </div>
 
-            {configInfo.bitscreen && (
-              <div
-                aria-describedby="activate-importing-slice"
-                className="section-slice pb-16px"
-              >
-                <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
-                  <span>Activate Importing lists</span>
-                  <HtmlSwitchComponent
-                    color="primary"
-                    checked={configInfo.import}
-                    onChange={() =>
-                      setConfigInfo({
-                        ...configInfo,
-                        import: !configInfo.import,
-                      })
-                    }
-                    name="filter-lists"
-                  />
-                </div>
-                <div className="slice-description t-ls">
-                  Use filter lists by third parties to prevent deals in Lotus.
-                  (Requires{' '}
-                  <span
-                    onClick={() =>
-                      window.open(
-                        'https://github.com/Murmuration-Labs/bitscreen',
-                        '_blank'
-                      )
-                    }
-                    className="external-link"
-                  >
-                    Lotus Plugin
-                  </span>{' '}
-                  &{' '}
-                  <span
-                    onClick={() =>
-                      window.open(
-                        'https://pypi.org/project/bitscreen-updater/',
-                        '_blank'
-                      )
-                    }
-                    className="external-link"
-                  >
-                    Updater
-                  </span>
-                  )
-                </div>
-                {(configInfo.import || configInfo.share) && (
-                  <div
-                    aria-describedby="import-toggled-area"
-                    className="d-flex flex-column"
-                  >
-                    <div className="slice-guide t-ls">
-                      Please add country data (required for both importing and
-                      sharing).
-                    </div>
-                    <div className="slice-input">
-                      <div className="input-label">Country</div>
-                      <div className="input-field">
-                        <Typeahead
-                          id="country"
-                          options={countryNames}
-                          placeholder="Country"
-                          onChange={(country) => {
-                            setCountryInputValue(country);
-                            setProviderInfo({
-                              ...providerInfo,
-                              country:
-                                countryList().data.find(
-                                  (e) => e.label === country[0]
-                                )?.value || '',
-                            });
-                          }}
-                          selected={countryInputValue}
-                        ></Typeahead>
-                      </div>
-                    </div>
-                    <div className="slice-input">
-                      <div className="input-label">Miner ID</div>
-                      <div className="input-field">
-                        <Form.Control
-                          role="miner-id"
-                          placeholder="Miner ID"
-                          type="text"
-                          value={providerInfo.minerId || ''}
-                          onChange={(e) => {
-                            setProviderInfo({
-                              ...providerInfo,
-                              minerId: e.target.value,
-                            });
-                          }}
-                        />
-                      </div>
-                    </div>
+            {configInfo.bitscreen &&
+              providerInfo.accountType === AccountType.NodeOperator && (
+                <div
+                  aria-describedby="activate-importing-slice"
+                  className="section-slice pb-16px"
+                >
+                  <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
+                    <span>Activate Importing lists</span>
+                    <HtmlSwitchComponent
+                      color="primary"
+                      checked={configInfo.import}
+                      onChange={() =>
+                        setConfigInfo({
+                          ...configInfo,
+                          import: !configInfo.import,
+                        })
+                      }
+                      name="filter-lists"
+                    />
                   </div>
-                )}
-              </div>
-            )}
+                  <div className="slice-description t-ls">
+                    Use filter lists by third parties to prevent deals in Lotus.
+                    (Requires{' '}
+                    <span
+                      onClick={() =>
+                        window.open(
+                          'https://github.com/Murmuration-Labs/bitscreen',
+                          '_blank'
+                        )
+                      }
+                      className="link"
+                    >
+                      Lotus Plugin
+                    </span>{' '}
+                    &{' '}
+                    <span
+                      onClick={() =>
+                        window.open(
+                          'https://pypi.org/project/bitscreen-updater/',
+                          '_blank'
+                        )
+                      }
+                      className="link"
+                    >
+                      Updater
+                    </span>
+                    )
+                  </div>
+                </div>
+              )}
 
             {configInfo.bitscreen && (
               <div
@@ -752,7 +812,7 @@ export default function Settings(props) {
                         '_blank'
                       )
                     }
-                    className="external-link"
+                    className="link"
                   >
                     Lotus Plugin
                   </span>{' '}
@@ -764,22 +824,50 @@ export default function Settings(props) {
                         '_blank'
                       )
                     }
-                    className="external-link"
+                    className="link"
                   >
                     Updater
                   </span>
                   )
                 </div>
-                {configInfo.share && (
-                  <div
-                    aria-describedby="share-toggled-area"
-                    className="d-flex flex-column"
-                  >
-                    <div className="slice-guide t-ls">
-                      Please add list provider information (required for sharing
-                      and made public in Directory).
-                    </div>
-                    <div className="slice-input">
+              </div>
+            )}
+            {(providerInfo.accountType === AccountType.Assessor ||
+              (providerInfo.accountType == AccountType.NodeOperator &&
+                configInfo.bitscreen)) && (
+              <div className="section-slice pb-16px">
+                <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
+                  <span>Required contact info</span>
+                </div>
+                <div className="slice-description t-ls">
+                  Contact information is required for assessors, and will be
+                  made public via your assessor profile page in the Looking
+                  Glass transparency hub.
+                </div>
+                <div
+                  aria-describedby="share-toggled-area"
+                  className="d-flex flex-column"
+                >
+                  {(providerInfo.accountType === AccountType.Assessor ||
+                    configInfo.share) && (
+                    <>
+                      <div className="slice-input">
+                        <div className="input-label">Contact person</div>
+                        <div className="input-field">
+                          <Form.Control
+                            role="contact-person"
+                            placeholder="Contact person"
+                            type="text"
+                            value={providerInfo.contactPerson || ''}
+                            onChange={(e) => {
+                              setProviderInfo({
+                                ...providerInfo,
+                                contactPerson: e.target.value,
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
                       <div className="input-label">Business Name</div>
                       <div className="input-field">
                         <Form.Control
@@ -795,24 +883,28 @@ export default function Settings(props) {
                           }}
                         />
                       </div>
-                    </div>
-                    <div className="slice-input">
-                      <div className="input-label">Website</div>
-                      <div className="input-field">
-                        <Form.Control
-                          role="website"
-                          placeholder="Website"
-                          type="text"
-                          value={providerInfo.website || ''}
-                          onChange={(e) => {
-                            setProviderInfo({
-                              ...providerInfo,
-                              website: e.target.value,
-                            });
-                          }}
-                        />
+
+                      <div className="slice-input">
+                        <div className="input-label">Website</div>
+                        <div className="input-field">
+                          <Form.Control
+                            role="website"
+                            placeholder="Website"
+                            type="text"
+                            value={providerInfo.website || ''}
+                            onChange={(e) => {
+                              setProviderInfo({
+                                ...providerInfo,
+                                website: e.target.value,
+                              });
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    </>
+                  )}
+                  {(providerInfo.accountType === AccountType.Assessor ||
+                    configInfo.import) && (
                     <div className="slice-input">
                       <div className="input-label">Email</div>
                       <div className="input-field">
@@ -830,23 +922,10 @@ export default function Settings(props) {
                         />
                       </div>
                     </div>
-                    <div className="slice-input">
-                      <div className="input-label">Contact person</div>
-                      <div className="input-field">
-                        <Form.Control
-                          role="contact-person"
-                          placeholder="Contact person"
-                          type="text"
-                          value={providerInfo.contactPerson || ''}
-                          onChange={(e) => {
-                            setProviderInfo({
-                              ...providerInfo,
-                              contactPerson: e.target.value,
-                            });
-                          }}
-                        />
-                      </div>
-                    </div>
+                  )}
+
+                  {(providerInfo.accountType === AccountType.Assessor ||
+                    configInfo.share) && (
                     <div className="slice-input">
                       <div className="input-label">Address</div>
                       <div className="input-field">
@@ -864,65 +943,111 @@ export default function Settings(props) {
                         />
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {(providerInfo.accountType === AccountType.Assessor ||
+                    configInfo.import) && (
+                    <div className="slice-input">
+                      <div className="input-label">Country</div>
+                      <div className="input-field">
+                        <Typeahead
+                          id="country"
+                          options={countryNames}
+                          placeholder="Country"
+                          onChange={(country) => {
+                            setCountryInputValue(country);
+                            setProviderInfo({
+                              ...providerInfo,
+                              country:
+                                countryList().data.find(
+                                  (e) => e.label === country[0]
+                                )?.value || '',
+                            });
+                          }}
+                          selected={countryInputValue}
+                        ></Typeahead>
+                      </div>
+                    </div>
+                  )}
+                  {providerInfo.accountType === AccountType.NodeOperator &&
+                    configInfo.import && (
+                      <div className="slice-input">
+                        <div className="input-label">Miner ID</div>
+                        <div className="input-field">
+                          <Form.Control
+                            role="miner-id"
+                            placeholder="Miner ID"
+                            type="text"
+                            value={providerInfo.minerId || ''}
+                            onChange={(e) => {
+                              setProviderInfo({
+                                ...providerInfo,
+                                minerId: e.target.value,
+                              });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                </div>
               </div>
             )}
 
-            {configInfo.bitscreen && (
-              <div
-                aria-describedby="download-cids-slice"
-                className="section-slice download-cids d-flex justify-content-between"
-              >
-                <div className="section-left-side">
-                  <div className="slice-title-row t-lp">Download CID list</div>
-                  <div className="slice-description t-ls">
-                    Download CIDs from lists you own to run in Local CID List.
+            {configInfo.bitscreen &&
+              providerInfo.accountType === AccountType.NodeOperator && (
+                <div
+                  aria-describedby="download-cids-slice"
+                  className="section-slice download-cids d-flex justify-content-between"
+                >
+                  <div className="section-left-side">
+                    <div className="slice-title-row t-lp">
+                      Download CID list
+                    </div>
+                    <div className="slice-description t-ls">
+                      Download CIDs from lists you own to run in Local CID List.
+                    </div>
                   </div>
-                </div>
-                <div className="section-right-side">
-                  <div className="download-button">
-                    <Button
-                      onClick={async () => {
-                        try {
-                          await ApiService.downloadCidList();
-                        } catch (e: any) {
-                          if (e && e.status === 401 && props.config) {
-                            toast.error(e.data.message);
-                            return;
+                  <div className="section-right-side">
+                    <div className="download-button">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            await ApiService.downloadCidList();
+                          } catch (e: any) {
+                            if (e && e.status === 401 && props.config) {
+                              toast.error(e.data.message);
+                              return;
+                            }
                           }
-                        }
-                      }}
-                      variant="primary"
-                      className="button-style blue-button"
-                      type="button"
-                    >
-                      Download
-                    </Button>
+                        }}
+                        variant="primary"
+                        className="button-style blue-button"
+                        type="button"
+                      >
+                        Download
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {(configInfo.bitscreen ||
+              )}
+            {(providerInfo.accountType === AccountType.Assessor ||
+              configInfo.bitscreen ||
               (config.bitscreen && !configInfo.bitscreen)) && (
               <div
                 aria-describedby="form-actions-slice"
                 className="section-slice d-flex"
               >
-                {configInfo.share && (
-                  <div className="clear-button mr-12px">
-                    <Button
-                      onClick={() => {
-                        clearForm();
-                      }}
-                      variant="primary"
-                      className="button-style grey-button"
-                      type="button"
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                )}
+                <div className="clear-button mr-12px">
+                  <Button
+                    onClick={() => {
+                      clearForm();
+                    }}
+                    variant="primary"
+                    className="button-style grey-button"
+                    type="button"
+                  >
+                    Clear
+                  </Button>
+                </div>
                 <div className="save-button">
                   <Button
                     onClick={() => {
@@ -955,26 +1080,30 @@ export default function Settings(props) {
                   )}
                 </div>
               </div>
-              <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
-                <span>Download CID list</span>
-                <div className="check-icon">
-                  {config && config.bitscreen ? (
-                    <img width={16} src={activeIcon}></img>
-                  ) : (
-                    <img width={16} src={inactiveIcon}></img>
-                  )}
-                </div>
-              </div>
-              <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
-                <span>Import lists</span>
-                <div className="check-icon">
-                  {config && config.bitscreen && config.import ? (
-                    <img width={16} src={activeIcon}></img>
-                  ) : (
-                    <img width={16} src={inactiveIcon}></img>
-                  )}
-                </div>
-              </div>
+              {providerInfo.accountType === AccountType.NodeOperator && (
+                <>
+                  <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
+                    <span>Download CID list</span>
+                    <div className="check-icon">
+                      {config && config.bitscreen ? (
+                        <img width={16} src={activeIcon}></img>
+                      ) : (
+                        <img width={16} src={inactiveIcon}></img>
+                      )}
+                    </div>
+                  </div>
+                  <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
+                    <span>Import lists</span>
+                    <div className="check-icon">
+                      {config && config.bitscreen && config.import ? (
+                        <img width={16} src={activeIcon}></img>
+                      ) : (
+                        <img width={16} src={inactiveIcon}></img>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
                 <span>Share lists</span>
                 <div className="check-icon">
@@ -986,27 +1115,65 @@ export default function Settings(props) {
                 </div>
               </div>
             </div>
-            <div
-              aria-describedby="list-updater-slice"
-              className="section-slice list-updater"
-            >
-              <div className="slice-title-row d-flex align-items-center t-lp">
-                <span className="mr-2">List Updater</span>
-                <OverlayTrigger
-                  placement="right"
-                  delay={{ show: 150, hide: 300 }}
-                  overlay={
-                    <Tooltip id="help-tooltip">
-                      Checks list manager for CIDs requested by BitScreen plugin
-                    </Tooltip>
-                  }
-                >
-                  <img width={16} src={infoIcon}></img>
-                </OverlayTrigger>
+            {providerInfo.accountType === AccountType.NodeOperator && (
+              <div
+                aria-describedby="list-updater-slice"
+                className="section-slice list-updater"
+              >
+                <div className="slice-title-row d-flex align-items-center t-lp">
+                  <span className="mr-2">List Updater</span>
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 150, hide: 300 }}
+                    overlay={
+                      <Tooltip id="help-tooltip">
+                        Checks list manager for CIDs requested by BitScreen
+                        plugin
+                      </Tooltip>
+                    }
+                  >
+                    <img width={16} src={infoIcon}></img>
+                  </OverlayTrigger>
+                </div>
+                <div className="slice-info t-lp d-flex justify-content-between align-items-center">
+                  <span>Last connected: {lastUpdated}</span>
+                </div>
               </div>
-              <div className="slice-info t-lp d-flex justify-content-between align-items-center">
-                <span>Last connected: {lastUpdated}</span>
+            )}
+          </div>
+          <div className="section connections">
+            <div className="section-title">App connections</div>
+            <div aria-describedby="tools-slice" className="section-slice tools">
+              <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
+                <span>Rodeo</span>
+                <div className="check-icon">
+                  {providerInfo.assessorId ? (
+                    <img width={16} src={activeIcon}></img>
+                  ) : (
+                    <img width={16} src={inactiveIcon}></img>
+                  )}
+                </div>
               </div>
+              {providerInfo.assessorId && (
+                <>
+                  <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
+                    <span>Looking Glass</span>
+                    <div
+                      className="app-connections-connect-button c-pointer no-text-select fs-14 lh-20 fw-500"
+                      onClick={() =>
+                        window.open(
+                          `${lookingGlassUri()}/assessors/${
+                            providerInfo.assessorId
+                          }`,
+                          '_blank'
+                        )
+                      }
+                    >
+                      Launch
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
           <div className="section help">
@@ -1035,7 +1202,8 @@ export default function Settings(props) {
             </div>
           </div>
         </div>
-        {config && config.bitscreen && (
+        {(providerInfo.accountType === AccountType.Assessor ||
+          (config && config.bitscreen)) && (
           <Prompt
             when={hasUnsavedChanges() || hasUnfilledInfo()}
             message={(location, action) => {
@@ -1073,7 +1241,13 @@ export default function Settings(props) {
         show={showDeleteModal}
         handleClose={handleDeleteClose}
       />
+      <SelectAccountType
+        show={showSelectAccount}
+        handleClose={handleSelectAccountClose}
+        logout={logout}
+      />
       <QuickstartGuide
+        accountType={providerInfo.accountType!}
         show={showQuickstartGuide}
         handleClose={handleQuickstartGuideClose}
       />

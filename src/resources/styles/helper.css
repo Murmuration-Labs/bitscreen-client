@@ -8,3 +8,23 @@
   -webkit-user-select: none !important;
   -ms-user-select: none !important;
 }
+
+.light-grey-background {
+  background-color: #6c757d;
+}
+
+.primary-background {
+  background-color: #003bdd;
+}
+
+body {
+  font-family: 'Inter' !important;
+}
+
+.font-italic {
+  font-style: italic;
+}
+
+.flex-2 {
+  flex: 2 !important;
+}
