@@ -17,9 +17,10 @@
   font-size: 14px;
 }
 
-.external-link {
+.external-link, .external-link:hover {
   cursor: pointer;
   text-decoration-line: underline;
+  font-weight: 400;
   color: #0d6efd;
 }
 
@@ -186,7 +187,7 @@
 .blue-button:active {
   background-color: #003bdd !important;
   border-color: #003bdd !important;
-  color: white !;
+  color: white;
 }
 
 .red-button,

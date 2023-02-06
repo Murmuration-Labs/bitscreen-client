@@ -74,6 +74,7 @@ const providerInitialState = {
 const configInitialState = {
   bitscreen: false,
   import: false,
+  safer: false,
   share: false,
 };
 
@@ -639,6 +640,7 @@ export default function Settings(props) {
                       setConfigInfo({
                         ...configInfo,
                         import: !configInfo.import,
+                        safer: configInfo.import ? false : configInfo.safer,
                       })
                     }
                     name="filter-lists"
@@ -721,6 +723,42 @@ export default function Settings(props) {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {configInfo.bitscreen && (
+              <div
+                aria-describedby="enable-safer-slice"
+                className="section-slice pb-16px"
+              >
+                <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
+                  <span>Enable enhanced filtering</span>
+                  <HtmlSwitchComponent
+                    color="primary"
+                    checked={configInfo.import && configInfo.safer}
+                    disabled={!configInfo.import}
+                    onChange={() =>
+                      setConfigInfo({
+                        ...configInfo,
+                        safer: !configInfo.safer,
+                      })
+                    }
+                    name="filter-lists"
+                  />
+                </div>
+                <div className="slice-description t-ls">
+                  Use&nbsp;
+                  <a
+                    className="external-link"
+                    href="https://safer.io"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Safer’s CSAM filter
+                  </a>
+                  &nbsp;to prevent storage & retrieval deals on your node
+                  (Requires importing)
+                </div>
               </div>
             )}
 
@@ -904,7 +942,7 @@ export default function Settings(props) {
               </div>
             )}
             {(configInfo.bitscreen ||
-              (config.bitscreen && !configInfo.bitscreen)) && (
+              (config?.bitscreen && !configInfo.bitscreen)) && (
               <div
                 aria-describedby="form-actions-slice"
                 className="section-slice d-flex"
