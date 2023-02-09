@@ -60,6 +60,8 @@
     "web3": "^1.5.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.4.2",
+    "@commitlint/config-conventional": "^17.4.2",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/jest": "^26.0.15",
@@ -76,6 +78,7 @@
     "@types/validator": "^13.1.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
     "prettier": "^2.7.1"
   },
   "proxy": "http://localhost:3030",
