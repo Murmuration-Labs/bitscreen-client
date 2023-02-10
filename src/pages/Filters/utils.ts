@@ -1,5 +1,6 @@
-import { FilterList } from './Interfaces';
+import { Config, FilterList } from './Interfaces';
 import * as AuthService from 'services/AuthService';
+import { Account, AccountType } from 'types/interfaces';
 
 export const isOrphan = (f: FilterList) =>
   f.provider_Filters &&
@@ -16,6 +17,18 @@ export const isDisabledGlobally = (f: FilterList) =>
   !isOrphan(f) &&
   isImported(f) &&
   f.provider_Filters?.every((pf) => pf.active == false);
+export const isImportEnabled = (
+  config: Config,
+  account: Account | null
+): boolean => {
+  return (
+    !!account &&
+    account?.accountType === AccountType.NodeOperator &&
+    config.bitscreen &&
+    config.import &&
+    !!account?.country
+  );
+};
 
 export const formatDate = (date: string | undefined): string => {
   if (date) {

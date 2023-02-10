@@ -3,6 +3,11 @@
   src: url(../../resources/fonts/Inter.ttf);
 }
 
+@font-face {
+  font-family: 'Inter Medium';
+  src: url(../../resources/fonts/Inter.ttf);
+}
+
 .settings-page-container {
   font-family: 'Inter';
 }
@@ -17,7 +22,7 @@
   font-size: 14px;
 }
 
-.external-link, .external-link:hover {
+.link {
   cursor: pointer;
   text-decoration-line: underline;
   font-weight: 400;
@@ -209,14 +214,16 @@
 }
 
 .status,
-.help {
+.help,
+.connections {
   padding: 24px;
   background-color: #faf9f9;
   border: 1px solid #dfe1e6;
   border-radius: 16px;
 }
 
-.status {
+.status,
+.connections {
   margin-bottom: 20px;
 }
 

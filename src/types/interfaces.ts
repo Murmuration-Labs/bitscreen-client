@@ -32,6 +32,8 @@ export interface Account extends Provider {
   walletAddress?: string;
   loginEmail?: string;
   accessToken?: string;
+  accountType?: AccountType;
+  assessorId?: number | string;
 }
 
 export interface DealFromApi {
@@ -43,4 +45,9 @@ export interface DealFromApi {
 export enum LoginType {
   Wallet,
   Email,
+}
+
+export enum AccountType {
+  NodeOperator = 1,
+  Assessor = 2,
 }

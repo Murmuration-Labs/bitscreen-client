@@ -12,6 +12,7 @@ import {
 import { isImported } from 'pages/Filters/utils';
 import {
   Account,
+  AccountType,
   BasicAuthInfoEmail,
   BasicAuthInfoWallet,
   DealFromApi,
@@ -289,12 +290,29 @@ const ApiService = {
     return response.data;
   },
 
-  updateProvider: async (account: Account): Promise<Account> => {
-    const response = await axios.put(`${serverUri()}/provider`, account);
-    return {
-      ...account,
-      ...response.data,
-    };
+  updateProvider: async (data: {
+    provider: Partial<Account>;
+    config: Config;
+  }): Promise<Account> => {
+    const response = await axios.patch(`${serverUri()}/provider`, data);
+    return response.data;
+  },
+
+  markQuickstartShown: async (): Promise<void> => {
+    const response = await axios.post(`${serverUri()}/provider/quickstart`);
+    return response.data;
+  },
+
+  markConsentDate: async (): Promise<string> => {
+    const response = await axios.post(`${serverUri()}/provider/consent`);
+    return response.data;
+  },
+
+  selectAccountType: async (accountType: AccountType): Promise<string> => {
+    const response = await axios.post(`${serverUri()}/provider/account-type`, {
+      accountType,
+    });
+    return response.data;
   },
 
   deleteProvider: async (account: Account): Promise<{ success: boolean }> => {

@@ -28,7 +28,9 @@ const DeleteAccountModal = ({
 }: DeleteAccountModalProps): JSX.Element => {
   const classes = useStyles();
   const account = getAccount() as Account;
-  const [confirmText, setConfirmText] = useState<string>('');
+  const [confirmText, setConfirmText] = useState<string>(
+    account.walletAddress!.substring(account.walletAddress!.length - 4)
+  );
   const [toComplete, setToComplete] = useState<string>('');
   const [hasUsedFilters, setHasUsedFilters] = useState<boolean>(false);
   const loginType = getLoginType();
