@@ -33,7 +33,7 @@ Call in the root of your project `yarn start`
 
 The app will be available, by default, at [`http://localhost:3000`](http://localhost:3000) or on your local network at `http://your_ip:3000`
 
-The app is also deployed at [https://bxn.mml-client.keyko.rocks/](https://bxn.mml-client.keyko.rocks/) and updates on `master` branch changes.
+The app is also deployed at [https://app.bitscreen.co/](https://app.bitscreen.co/) and updates on `master` branch changes.
 
 ## Remote server
 
