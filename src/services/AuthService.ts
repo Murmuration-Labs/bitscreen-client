@@ -40,7 +40,6 @@ export const updateAccount = (account: Account): void => {
 };
 
 export const patchAccount = (data: Partial<Account>): void => {
-  console.log('q', data);
   LoggerService.info('Updating account.');
   const currentAccount = getAccount();
   const updatedAccount = {
