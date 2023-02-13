@@ -13,7 +13,7 @@ import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
 import { Config, FilterList, Visibility } from '../../Filters/Interfaces';
-import { formatDate } from '../../Filters/utils';
+import { formatDate, isImportEnabled } from '../../Filters/utils';
 import './PublicFilterDetails.css';
 
 const PublicFilterDetailsPage = (props) => {
@@ -93,15 +93,6 @@ const PublicFilterDetailsPage = (props) => {
   useEffect(() => {
     setConfiguration(props.config);
   }, [props.config]);
-
-  const isImportEnabled = (): boolean => {
-    return (
-      configuration &&
-      configuration.bitscreen &&
-      configuration.import &&
-      !!account?.country
-    );
-  };
 
   useEffect(() => {
     setShowImportFilter(!!toBeImportedFilter);
@@ -242,7 +233,7 @@ const PublicFilterDetailsPage = (props) => {
               ) : filterProviderId != providerId ? (
                 <Button
                   className="head-button"
-                  disabled={!isImportEnabled()}
+                  disabled={!isImportEnabled(configuration, account)}
                   onClick={() => {
                     setToBeImportedFilter({
                       shareId: filterShareId,

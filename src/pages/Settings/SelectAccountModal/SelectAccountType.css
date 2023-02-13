@@ -1,0 +1,67 @@
+h2 {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  color: rgba(0, 0, 0, 0.92);
+}
+
+h3 {
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 28px;
+  color: rgba(0, 0, 0, 0.92);
+}
+
+a {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #003bdd;
+}
+
+.quick-link {
+  color: #0d6efd;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-type-container {
+  padding: 16px;
+  border-top: 1px solid lightgrey;
+  border-bottom: 1px solid lightgrey;
+  height: 100%;
+  width: 100%;
+}
+
+.account-type-box {
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.selected-account-type {
+  border: 2px solid #0d6efd;
+  background-color: #cfe2ff;
+}
+
+.MuiDialogTitle-root {
+  font-weight: 500 !important;
+  font-size: 20px !important;
+}
+
+.account-type-actions-container {
+  height: 64px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px;
+}
+
+.account-type-actions {
+  line-height: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+}

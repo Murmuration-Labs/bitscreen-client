@@ -349,15 +349,19 @@ function App(): JSX.Element {
             share: false,
           });
         } catch (e: any) {
-          LoggerService.error(e);
+          return LoggerService.error(e);
         }
       }
     }
 
     if (!basicAuthInfo.consentDate) {
-      const auxAccount = { ...account };
-      auxAccount.consentDate = new Date().toISOString();
-      await ApiService.updateProvider(auxAccount);
+      try {
+        const auxAccount = { ...account };
+        const consentDate = await ApiService.markConsentDate();
+        auxAccount.consentDate = consentDate;
+      } catch (e) {
+        return LoggerService.error(e);
+      }
     }
     setConfig(configObject);
     setProvider(account);

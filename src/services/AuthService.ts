@@ -31,9 +31,21 @@ export const getAccount = (): Account | null => {
 export const updateAccount = (account: Account): void => {
   LoggerService.info('Changing account.');
   const updatedAccount = { ...account };
-  account.walletAddress = updatedAccount.walletAddress
-    ? updatedAccount.walletAddress.toLowerCase()
-    : updatedAccount.walletAddress;
+
+  if (_.isEqual(updatedAccount, getAccount())) {
+    return;
+  }
+
+  localStorage.setItem(AUTH_KEY, JSON.stringify(updatedAccount));
+};
+
+export const patchAccount = (data: Partial<Account>): void => {
+  LoggerService.info('Updating account.');
+  const currentAccount = getAccount();
+  const updatedAccount = {
+    ...currentAccount,
+    ...data,
+  };
 
   if (_.isEqual(updatedAccount, getAccount())) {
     return;

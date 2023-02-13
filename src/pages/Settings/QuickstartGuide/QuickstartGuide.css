@@ -24,3 +24,19 @@ a {
   text-decoration: none;
   cursor: pointer;
 }
+
+.MuiDialogTitle-root {
+  font-weight: 500 !important;
+  font-size: 20px !important;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 20px;
+  padding: 4px 24px;
+  font-family: 'Inter Medium' !important;
+  box-shadow: inset 0px -1px 0px #ced4da;
+}
