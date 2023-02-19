@@ -144,210 +144,214 @@ export default function PublicFilters(props) {
 
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          verticalAlign: 'top',
-          paddingBottom: 0,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flex: 1,
-            alignItems: 'center',
-            marginBottom: '1rem',
-          }}
-        >
+      {props.config && configuration && (
+        <>
           <div
             style={{
-              fontSize: 32,
-              fontWeight: 600,
-              lineHeight: '40px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              verticalAlign: 'top',
+              paddingBottom: 0,
             }}
           >
-            Directory
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flex: 1,
+                alignItems: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 32,
+                  fontWeight: 600,
+                  lineHeight: '40px',
+                }}
+              >
+                Directory
+              </div>
+              <div className="page-subtitle">
+                Directory of public filter lists
+                {!isImportEnabled(configuration, account) &&
+                  account?.accountType === AccountType.NodeOperator && (
+                    <p className="text-dim" style={{ marginRight: 4 }}>
+                      To activate importing, go to{' '}
+                      <a style={{ fontSize: 12 }} href="/settings">
+                        Settings
+                      </a>{' '}
+                      and add country data.
+                    </p>
+                  )}
+              </div>
+            </div>
           </div>
-          <div className="page-subtitle">
-            Directory of public filter lists
-            {!isImportEnabled(configuration, account) &&
-              account?.accountType === AccountType.NodeOperator && (
-                <p className="text-dim" style={{ marginRight: 4 }}>
-                  To activate importing, go to{' '}
-                  <a style={{ fontSize: 12 }} href="/settings">
-                    Settings
-                  </a>{' '}
-                  and add country data.
-                </p>
-              )}
-          </div>
-        </div>
-      </div>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          flex: 1,
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <TextField
-          style={{ width: 480, marginRight: 12 }}
-          type="text"
-          placeholder="Search"
-          variant="outlined"
-          value={searchedValue}
-          onChange={handlerInputChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                {searchedValue && (
-                  <IconButton
-                    onClick={() => {
-                      setSearchedValue('');
-                    }}
-                    color="default"
-                  >
-                    <ClearIcon />
-                  </IconButton>
-                )}
-              </InputAdornment>
-            ),
-          }}
-          FormHelperTextProps={{ style: { fontSize: 12 } }}
-        />
-        {searchedValue.length > 0 && (
-          <span
+          <div
             style={{
-              marginRight: 4,
-              verticalAlign: 'middle',
-              alignSelf: 'center',
+              display: 'flex',
+              flexDirection: 'row',
+              flex: 1,
+              alignItems: 'center',
+              marginBottom: 16,
             }}
           >
-            {dataCount ? dataCount : '0'} result
-            {dataCount && dataCount === 1 ? '' : 's'} found
-          </span>
-        )}
-      </div>
-      <TableContainer>
-        <Table aria-label="enhanced table">
-          <EnhancedTableHead
-            headCells={headCells}
-            order={order}
-            orderBy={orderBy}
-            mySort={mySort}
-            mySortBy={mySortBy}
-            onRequestSort={handleRequestSort}
-            rowCount={dataCount}
-          />
-          <TableBody>
-            {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
-            {publicFiltersData.map((row, index) => {
-              return (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Link
-                      to={`/directory/details/${row.shareId}`}
-                      style={{ fontSize: 14, color: 'blue' }}
-                    >
-                      {row.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{row.cids}</TableCell>
-                  <TableCell>{row.subs - 1}</TableCell>
-                  <TableCell>{row.providerName}</TableCell>
-                  <TableCell>{row.providerCountry}</TableCell>
-                  <TableCell>
-                    <LongText content={row.description} limit={20} />
-                  </TableCell>
-                  <TableCell>{formatDate(row.updated)}</TableCell>
-                  <TableCell className="actions-column">
-                    {row.isImported ? (
-                      <Button
-                        style={{
-                          marginLeft: -5,
-                          color: 'blue',
-                          backgroundColor: 'white',
-                          borderColor: 'blue',
-                          width: 100,
-                        }}
+            <TextField
+              style={{ width: 480, marginRight: 12 }}
+              type="text"
+              placeholder="Search"
+              variant="outlined"
+              value={searchedValue}
+              onChange={handlerInputChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {searchedValue && (
+                      <IconButton
                         onClick={() => {
-                          history.push(`/filters/edit/${row.shareId}`);
+                          setSearchedValue('');
                         }}
-                        variant="outline-dark"
+                        color="default"
                       >
-                        Imported
-                      </Button>
-                    ) : row.providerId != providerId ? (
-                      <Button
-                        style={{
-                          marginLeft: -5,
-                          color: 'white',
-                          backgroundColor: 'blue',
-                          width: 100,
-                        }}
-                        disabled={!isImportEnabled(configuration, account)}
-                        onClick={() => {
-                          setToBeImportedFilter(row as any);
-                        }}
-                        variant="outline-primary"
-                      >
-                        Import
-                      </Button>
-                    ) : (
-                      <Button
-                        style={{ marginLeft: -5, width: 100 }}
-                        onClick={() => {
-                          history.push(`/filters/edit/${row.shareId}`);
-                        }}
-                        variant="outline-dark"
-                      >
-                        Edit
-                      </Button>
+                        <ClearIcon />
+                      </IconButton>
                     )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-            {emptyRows === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} />
-              </TableRow>
+                  </InputAdornment>
+                ),
+              }}
+              FormHelperTextProps={{ style: { fontSize: 12 } }}
+            />
+            {searchedValue.length > 0 && (
+              <span
+                style={{
+                  marginRight: 4,
+                  verticalAlign: 'middle',
+                  alignSelf: 'center',
+                }}
+              >
+                {dataCount ? dataCount : '0'} result
+                {dataCount && dataCount === 1 ? '' : 's'} found
+              </span>
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 50]}
-        component="div"
-        count={dataCount}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelDisplayedRows={itemsToPages(rowsPerPage)}
-      />
-      {toBeImportedFilter && (
-        <ImportFilterModal
-          closeCallback={async (_needsRefresh = false): Promise<void> => {
-            setPrefetch('');
-            setToBeImportedFilter(null);
-            setNeedsRefresh(_needsRefresh);
-          }}
-          filter={toBeImportedFilter}
-          show={showImportFilter}
-          prefetch={prefetch}
-        />
+          </div>
+          <TableContainer>
+            <Table aria-label="enhanced table">
+              <EnhancedTableHead
+                headCells={headCells}
+                order={order}
+                orderBy={orderBy}
+                mySort={mySort}
+                mySortBy={mySortBy}
+                onRequestSort={handleRequestSort}
+                rowCount={dataCount}
+              />
+              <TableBody>
+                {/* {stableSort(publicFiltersData, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) */}
+                {publicFiltersData.map((row, index) => {
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Link
+                          to={`/directory/details/${row.shareId}`}
+                          style={{ fontSize: 14, color: 'blue' }}
+                        >
+                          {row.name}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{row.cids}</TableCell>
+                      <TableCell>{row.subs - 1}</TableCell>
+                      <TableCell>{row.providerName}</TableCell>
+                      <TableCell>{row.providerCountry}</TableCell>
+                      <TableCell>
+                        <LongText content={row.description} limit={20} />
+                      </TableCell>
+                      <TableCell>{formatDate(row.updated)}</TableCell>
+                      <TableCell className="actions-column">
+                        {row.isImported ? (
+                          <Button
+                            style={{
+                              marginLeft: -5,
+                              color: 'blue',
+                              backgroundColor: 'white',
+                              borderColor: 'blue',
+                              width: 100,
+                            }}
+                            onClick={() => {
+                              history.push(`/filters/edit/${row.shareId}`);
+                            }}
+                            variant="outline-dark"
+                          >
+                            Imported
+                          </Button>
+                        ) : row.providerId != providerId ? (
+                          <Button
+                            style={{
+                              marginLeft: -5,
+                              color: 'white',
+                              backgroundColor: 'blue',
+                              width: 100,
+                            }}
+                            disabled={!isImportEnabled(configuration, account)}
+                            onClick={() => {
+                              setToBeImportedFilter(row as any);
+                            }}
+                            variant="outline-primary"
+                          >
+                            Import
+                          </Button>
+                        ) : (
+                          <Button
+                            style={{ marginLeft: -5, width: 100 }}
+                            onClick={() => {
+                              history.push(`/filters/edit/${row.shareId}`);
+                            }}
+                            variant="outline-dark"
+                          >
+                            Edit
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {emptyRows === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={dataCount}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelDisplayedRows={itemsToPages(rowsPerPage)}
+          />
+          {toBeImportedFilter && (
+            <ImportFilterModal
+              closeCallback={async (_needsRefresh = false): Promise<void> => {
+                setPrefetch('');
+                setToBeImportedFilter(null);
+                setNeedsRefresh(_needsRefresh);
+              }}
+              filter={toBeImportedFilter}
+              show={showImportFilter}
+              prefetch={prefetch}
+            />
+          )}
+        </>
       )}
     </>
   );

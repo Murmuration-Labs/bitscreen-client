@@ -464,8 +464,6 @@ function App(): JSX.Element {
     >
       <Navigation
         provider={provider}
-        setProvider={setProvider}
-        setConfig={setConfig}
         appLogout={appLogout}
         googleLogout={googleLogout}
       />
