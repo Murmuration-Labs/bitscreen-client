@@ -1059,43 +1059,40 @@ export default function Settings(props) {
               </div>
             )}
 
-            {configInfo.bitscreen &&
-              providerInfo.accountType === AccountType.NodeOperator && (
-                <div
-                  aria-describedby="download-cids-slice"
-                  className="section-slice download-cids d-flex justify-content-between"
-                >
-                  <div className="section-left-side">
-                    <div className="slice-title-row t-lp">
-                      Download CID list
-                    </div>
-                    <div className="slice-description t-ls">
-                      Download CIDs from lists you own to run in Local CID List.
-                    </div>
-                  </div>
-                  <div className="section-right-side">
-                    <div className="download-button">
-                      <Button
-                        onClick={async () => {
-                          try {
-                            await ApiService.downloadCidList();
-                          } catch (e: any) {
-                            if (e && e.status === 401 && props.config) {
-                              toast.error(e.data.message);
-                              return;
-                            }
-                          }
-                        }}
-                        variant="primary"
-                        className="button-style blue-button"
-                        type="button"
-                      >
-                        Download
-                      </Button>
-                    </div>
+            {providerInfo.accountType === AccountType.NodeOperator && (
+              <div
+                aria-describedby="download-cids-slice"
+                className="section-slice download-cids d-flex justify-content-between"
+              >
+                <div className="section-left-side">
+                  <div className="slice-title-row t-lp">Download CID list</div>
+                  <div className="slice-description t-ls">
+                    Download CIDs from lists you own to run in Local CID List.
                   </div>
                 </div>
-              )}
+                <div className="section-right-side">
+                  <div className="download-button">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await ApiService.downloadCidList();
+                        } catch (e: any) {
+                          if (e && e.status === 401 && props.config) {
+                            toast.error(e.data.message);
+                            return;
+                          }
+                        }
+                      }}
+                      variant="primary"
+                      className="button-style blue-button"
+                      type="button"
+                    >
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             {(providerInfo.accountType === AccountType.Assessor ||
               configInfo.bitscreen ||
               (config?.bitscreen && !configInfo.bitscreen)) && (
