@@ -76,7 +76,6 @@ const FilterPage = (props): JSX.Element => {
     import: false,
     share: false,
   });
-
   const [showConflict, setShowConflict] = useState<{
     single: boolean;
     multiple: boolean;
@@ -402,74 +401,43 @@ const FilterPage = (props): JSX.Element => {
 
   const [deleteCidItems, setDeleteCidItems] = useState<CidItem[]>([]);
 
-  const updateGlobalFilterEnabled = (): void => {
-    try {
-      ApiService.updateEnabledForSharedFilters(
-        [filterList.id],
-        filterList.enabled
-      );
-    } catch (e: any) {
-      if (e && e.status === 401 && props.config) {
-        toast.error(e.data.message);
-        return;
-      }
-    }
-  };
-
-  const save = (): void => {
+  const save = async () => {
     const fl: FilterList = { ...filterList, notes: filterNotes };
     if (isEdit) {
-      setLoaded(true);
       const filtersToUpdate = [fl];
       if (moveToFilterList) {
         filtersToUpdate.push(moveToFilterList);
       }
-      ApiService.updateFilter(filtersToUpdate)
-        .then(() => {
-          ApiService.deleteCid(deleteCidItems)
-            .then(() => {
-              if (deferGlobalFilterEnabled) {
-                updateGlobalFilterEnabled();
-              }
-              setFilterListChanged(false); // To prevent unsaved data prompt.
-              history.push(`/filters`);
-              toast.success('Filter list updated successfully');
-              setLoaded(false);
-            })
-            .catch((e) => {
-              if (e && e.status === 401 && props.config) {
-                toast.error(e.data.message);
-                return;
-              }
-              setLoaded(false);
-              LoggerService.error(e);
-            });
-        })
-        .catch((e) => {
-          if (e && e.status === 401 && props.config) {
-            toast.error(e.data.message);
-            return;
-          }
-          setLoaded(false);
+      try {
+        await ApiService.updateFilter(filtersToUpdate);
+        await ApiService.deleteCid(deleteCidItems);
+        if (deferGlobalFilterEnabled) {
+          await ApiService.updateEnabledForSharedFilters(
+            [filterList.id],
+            filterList.enabled
+          );
+        }
+        setFilterListChanged(false); // To prevent unsaved data prompt.
+        history.push(`/filters`);
+        toast.success('Filter list updated successfully');
+      } catch (e: any) {
+        if (e && e.data && e.data.message && props.config) {
+          toast.error(e.data.message);
           LoggerService.error(e);
-        });
+        }
+      }
     } else {
-      ApiService.addFilter(fl)
-        .then(() => {
-          setFilterListChanged(false); // To prevent unsaved data prompt.
-          history.push(`/filters`);
-          toast.success('Filter list created successfully');
-          setLoaded(false);
-        })
-        .catch((e) => {
-          if (e && e.status === 401 && props.config) {
-            toast.error(e.data.message);
-            return;
-          }
-          toast.error('Error: ' + e.message);
-          setLoaded(false);
+      try {
+        await ApiService.addFilter(fl);
+        setFilterListChanged(false); // To prevent unsaved data prompt.
+        history.push(`/filters`);
+        toast.success('Filter list created successfully');
+      } catch (e: any) {
+        if (e && e.data && e.data.message && props.config) {
+          toast.error(e.data.message);
           LoggerService.error(e);
-        });
+        }
+      }
     }
   };
 

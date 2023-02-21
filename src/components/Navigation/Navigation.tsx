@@ -16,9 +16,13 @@ import { NavLink } from 'react-router-dom';
 import * as AuthService from 'services/AuthService';
 import './Navigation.css';
 import Bitscreenlogo from './bitscreen-logo.png';
-import { LoginType } from 'types/interfaces';
+import { Account, AccountType, LoginType } from 'types/interfaces';
 
-function Navigation(props): JSX.Element {
+function Navigation(props: {
+  provider: Account | null;
+  appLogout: () => void;
+  googleLogout: () => void;
+}): JSX.Element {
   const { provider, appLogout, googleLogout } = props;
   const shortenAddress = (address: string): string => {
     return address.length > 8
@@ -56,7 +60,7 @@ function Navigation(props): JSX.Element {
               My Filters
             </NavLink>
           )}
-          {provider && (
+          {provider && provider.accountType !== AccountType.Assessor && (
             <NavLink
               className="nav-link"
               activeClassName={'is-active'}
