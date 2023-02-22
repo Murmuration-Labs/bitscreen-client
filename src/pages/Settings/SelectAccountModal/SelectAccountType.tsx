@@ -1,24 +1,15 @@
-import DeleteAccountModal from '../DeleteAccountModal/DeleteAccountModal';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Icon,
-  IconButton,
-  Link,
-  List,
-  ListItem,
   makeStyles,
   Typography,
 } from '@material-ui/core';
-import React, { useState } from 'react';
-import { CloseButton } from 'react-bootstrap';
-import { Close } from '@material-ui/icons';
+import { useState } from 'react';
 
-import './SelectAccountType.css';
-import { AccountType } from 'types/interfaces';
 import { toast } from 'react-toastify';
-import { rodeoUri } from 'config';
+import { AccountType } from 'types/interfaces';
+import './SelectAccountType.css';
 
 interface SelectAccountTypeProps {
   show: boolean;

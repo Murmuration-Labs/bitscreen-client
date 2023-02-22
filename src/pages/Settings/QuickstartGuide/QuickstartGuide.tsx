@@ -1,22 +1,15 @@
-import DeleteAccountModal from '../DeleteAccountModal/DeleteAccountModal';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Icon,
   IconButton,
   Link,
-  List,
-  ListItem,
   makeStyles,
-  Typography,
 } from '@material-ui/core';
-import React from 'react';
-import { CloseButton } from 'react-bootstrap';
 import { Close } from '@material-ui/icons';
 
-import './QuickstartGuide.css';
 import { AccountType } from 'types/interfaces';
+import './QuickstartGuide.css';
 
 interface QuickstartGuideProps {
   show: boolean;

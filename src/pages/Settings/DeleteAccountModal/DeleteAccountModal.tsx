@@ -5,7 +5,7 @@ import {
   DialogTitle,
   makeStyles,
 } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Button, Form, FormControl, InputGroup } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ApiService from 'services/ApiService';
@@ -29,7 +29,9 @@ const DeleteAccountModal = ({
   const classes = useStyles();
   const account = getAccount() as Account;
   const [confirmText, setConfirmText] = useState<string>(
-    account.walletAddress!.substring(account.walletAddress!.length - 4)
+    getLoginType() === LoginType.Wallet
+      ? account.walletAddress!.substring(account.walletAddress!.length - 4)
+      : ''
   );
   const [toComplete, setToComplete] = useState<string>('');
   const [hasUsedFilters, setHasUsedFilters] = useState<boolean>(false);
