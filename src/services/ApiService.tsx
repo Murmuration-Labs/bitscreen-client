@@ -227,7 +227,6 @@ const ApiService = {
     loginType: LoginType,
     walletOrToken: string
   ): Promise<BasicAuthInfoEmail | BasicAuthInfoWallet | null> => {
-    console.log(loginType);
     const correspondingUri =
       loginType === LoginType.Wallet
         ? `${serverUri()}/provider/auth_info`
