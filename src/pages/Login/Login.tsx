@@ -5,6 +5,7 @@ import { useGoogleLogin } from 'react-google-login';
 import { toast } from 'react-toastify';
 import { googleIcon, metamaskIcon } from 'resources/icons/index';
 import LoggerService from 'services/LoggerService';
+import { gapi } from 'gapi-script';
 import './Login.css';
 
 export default function Login(props) {
@@ -40,6 +41,22 @@ export default function Login(props) {
     onFailure: onGoogleLoginFailure,
     onSuccess: onGoogleLoginSuccess,
   });
+
+  const startGoogleLogin = async () => {
+    const initClient = () => {
+      if (!gapi || !gapi.client) {
+        toast.error('Could not reach Google API, please try again later!');
+      } else {
+        gapi.client.init({
+          clientId: bitscreenGoogleClientId,
+          scope: '',
+        });
+        googleLogin();
+      }
+    };
+
+    gapi.load('client:auth2', initClient);
+  };
 
   return (
     <>
@@ -87,7 +104,7 @@ export default function Login(props) {
             <div className="option-card">
               <div
                 id="google-row"
-                onClick={googleLogin}
+                onClick={startGoogleLogin}
                 className="d-flex justify-content-between align-items-center c-pointer no-text-select w-100 p-3"
               >
                 <div className="d-flex align-items-center">

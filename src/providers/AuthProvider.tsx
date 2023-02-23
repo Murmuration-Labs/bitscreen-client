@@ -4,9 +4,18 @@ import Web3 from 'web3';
 import * as AuthService from 'services/AuthService';
 import { toast } from 'react-toastify';
 import LoggerService from 'services/LoggerService';
+import { Account } from 'types/interfaces';
+import { Config } from 'pages/Filters/Interfaces';
 
-const AuthProvider = (props: any) => {
-  const { setProvider, setConfig, currentWallet } = props;
+interface AuthProviderProps {
+  appLogout: () => void;
+  setProvider: React.Dispatch<React.SetStateAction<Account | null>>;
+  setConfig: React.Dispatch<React.SetStateAction<Config | null | undefined>>;
+  children: JSX.Element[];
+}
+
+const AuthProvider = (props: AuthProviderProps) => {
+  const { setProvider, setConfig, appLogout } = props;
   useEffect(() => {
     detectEthereumProvider({
       mustBeMetaMask: true,
@@ -19,21 +28,14 @@ const AuthProvider = (props: any) => {
         }
         walletProvider.on('chainChanged', () => {
           LoggerService.debug('Chain change detected.');
-          AuthService.removeAccount();
-          setProvider(null);
-          setConfig(null);
-          window.location.reload();
+          appLogout();
         });
 
         walletProvider.on('accountsChanged', (wallets: Array<string>) => {
           LoggerService.debug('Account change detected.');
-          if (
-            !wallets.length ||
-            (currentWallet && currentWallet !== wallets[0])
-          ) {
-            AuthService.removeAccount();
-            setProvider(null);
-            setConfig(null);
+          const userWallet = AuthService.getAccount()?.walletAddress;
+          if (!wallets.length || (userWallet && userWallet !== wallets[0])) {
+            appLogout();
           }
         });
 
@@ -42,10 +44,8 @@ const AuthProvider = (props: any) => {
         const chainId = await web3.eth.getChainId();
 
         if (1 !== chainId) {
-          AuthService.removeAccount();
-          setProvider(null);
-          setConfig(null);
           LoggerService.debug('Chain ID: ' + chainId);
+          appLogout();
         }
       })
       .catch((error) => {

@@ -379,16 +379,6 @@ function App(): JSX.Element {
   };
 
   useEffect(() => {
-    const initClient = () => {
-      gapi.client.init({
-        clientId: bitscreenGoogleClientId,
-        scope: '',
-      });
-    };
-    gapi.load('client:auth2', initClient);
-  }, []);
-
-  useEffect(() => {
     if (authSettings.consent) {
       if (authSettings.loginType === LoginType.Wallet) connectMetamask();
       else createProviderByEmail();
@@ -458,9 +448,9 @@ function App(): JSX.Element {
 
   return (
     <AuthProvider
+      appLogout={appLogout}
       setProvider={setProvider}
       setConfig={setConfig}
-      currentWallet={wallet}
     >
       <Navigation
         provider={provider}
