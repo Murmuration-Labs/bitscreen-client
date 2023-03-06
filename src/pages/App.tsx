@@ -74,9 +74,6 @@ const PrivateRoute = ({
 };
 
 function App(): JSX.Element {
-  const [wallet, setWallet] = useState<string | undefined>(
-    AuthService.getAccount()?.walletAddress
-  );
   const [config, setConfig] = useState<Config | null>();
   const [provider, setProvider] = useState<Account | null>(
     AuthService.getAccount()
@@ -157,7 +154,6 @@ function App(): JSX.Element {
     }
     setConfig(configObject);
     setProvider(account);
-    setWallet(account.walletAddress);
     setAuthSettings({
       consent: false,
       loginType: null,
@@ -365,7 +361,6 @@ function App(): JSX.Element {
     }
     setConfig(configObject);
     setProvider(account);
-    setWallet(account.walletAddress);
     setAuthSettings({
       consent: false,
       loginType: null,
@@ -447,11 +442,7 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <AuthProvider
-      appLogout={appLogout}
-      setProvider={setProvider}
-      setConfig={setConfig}
-    >
+    <AuthProvider appLogout={appLogout}>
       <Navigation
         provider={provider}
         appLogout={appLogout}

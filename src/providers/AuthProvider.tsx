@@ -9,13 +9,11 @@ import { Config } from 'pages/Filters/Interfaces';
 
 interface AuthProviderProps {
   appLogout: () => void;
-  setProvider: React.Dispatch<React.SetStateAction<Account | null>>;
-  setConfig: React.Dispatch<React.SetStateAction<Config | null | undefined>>;
   children: JSX.Element[];
 }
 
 const AuthProvider = (props: AuthProviderProps) => {
-  const { setProvider, setConfig, appLogout } = props;
+  const { appLogout } = props;
   useEffect(() => {
     detectEthereumProvider({
       mustBeMetaMask: true,
@@ -32,6 +30,7 @@ const AuthProvider = (props: AuthProviderProps) => {
         });
 
         walletProvider.on('accountsChanged', (wallets: Array<string>) => {
+          console.log(wallets[0]);
           LoggerService.debug('Account change detected.');
           const userWallet = AuthService.getAccount()?.walletAddress;
           if (!wallets.length || (userWallet && userWallet !== wallets[0])) {

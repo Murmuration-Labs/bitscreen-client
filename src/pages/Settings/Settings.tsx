@@ -1,9 +1,10 @@
 import { Switch, withStyles } from '@material-ui/core';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { bitscreenGoogleClientId, lookingGlassUri } from 'config';
+import { getAddressHash } from 'library/helpers/helpers.functions';
 import _ from 'lodash';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { useGoogleLogin } from 'react-google-login';
@@ -97,6 +98,13 @@ export default function Settings(props) {
 
   const [countryInputValue, setCountryInputValue] = useState<Array<string>>([]);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [displayedWalletAddress, setDisplayedWalletAddress] = useState<{
+    canDisplay: boolean;
+    walletAddress: string;
+  }>({
+    canDisplay: false,
+    walletAddress: '',
+  });
   const countries = countryList();
   const countryNames = countries.data.map((e) => e.label);
 
@@ -268,6 +276,30 @@ export default function Settings(props) {
       }
     }
   };
+
+  useEffect(() => {
+    const currentAccount = AuthService.getAccount();
+    if (!currentAccount) return logout();
+
+    if (AuthService.getLoginType() === LoginType.Wallet) {
+      setDisplayedWalletAddress({
+        canDisplay: true,
+        walletAddress: currentAccount.walletAddress!,
+      });
+    } else if (providerInfo.walletAddressHashed) {
+      detectEthereumProvider({
+        mustBeMetaMask: true,
+      }).then((walletProvider: any) => {
+        const currentlySelectedAddress = walletProvider.selectedAddress;
+        setDisplayedWalletAddress({
+          canDisplay:
+            getAddressHash(currentlySelectedAddress) ===
+            providerInfo.walletAddressHashed,
+          walletAddress: currentlySelectedAddress,
+        });
+      });
+    }
+  }, []);
 
   useEffect(() => {
     LoggerService.info('Loading Settings page.');
@@ -591,11 +623,14 @@ export default function Settings(props) {
                   </div>
                 </>
               )}
-              {providerInfo.walletAddress && (
+              {providerInfo.walletAddressHashed && (
                 <>
                   <div className="slice-title-row t-lp">Wallet connected</div>
                   <div className="slice-info address-info t-lp">
-                    Address: {providerInfo.walletAddress}
+                    Address:{' '}
+                    {displayedWalletAddress.canDisplay
+                      ? displayedWalletAddress.walletAddress
+                      : '[Metamask account not active]'}
                   </div>
                 </>
               )}
