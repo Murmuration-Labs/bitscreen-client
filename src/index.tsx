@@ -1,23 +1,19 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import reportWebVitals from './reportWebVitals';
-import App from './pages/App';
-import { SnackbarProvider } from 'notistack';
 import { Router } from 'react-router-dom';
 import history from './appHistory';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { bitscreenGoogleClientId } from 'config';
+import App from './pages/App';
+import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={bitscreenGoogleClientId}>
-      <SnackbarProvider maxSnack={3}>
-        <Router history={history}>
-          <App />
-        </Router>
-      </SnackbarProvider>
-    </GoogleOAuthProvider>
+    <SnackbarProvider maxSnack={3}>
+      <Router history={history}>
+        <App />
+      </Router>
+    </SnackbarProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -36,7 +36,8 @@ import Login from './Login/Login';
 import PublicFilterDetailsPage from './PublicFilters/PublicFilterDetails/PublicFilterDetails';
 import PublicFilters from './PublicFilters/PublicFilters';
 import Settings from './Settings/Settings';
-
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { bitscreenGoogleClientId } from 'config';
 interface MatchParams {
   id: string;
 }
@@ -425,27 +426,49 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <AuthProvider appLogout={appLogout}>
-      <Navigation provider={provider} appLogout={appLogout} />
-      <Container fluid={true}>
-        <Row className="fill-height">
-          <Col className={'stage'}>
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/login" />
-              </Route>
-              <Route
-                path="/login"
-                exact
-                render={(props) => {
-                  if (!AuthService.getAccount() && props.location.state) {
-                    const { tokenExpired, currentPath } = props.location
-                      .state as {
-                      tokenExpired: boolean;
-                      currentPath: string;
-                    };
+    <GoogleOAuthProvider clientId={bitscreenGoogleClientId}>
+      <AuthProvider appLogout={appLogout}>
+        <Navigation provider={provider} appLogout={appLogout} />
+        <Container fluid={true}>
+          <Row className="fill-height">
+            <Col className={'stage'}>
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/login" />
+                </Route>
+                <Route
+                  path="/login"
+                  exact
+                  render={(props) => {
+                    if (!AuthService.getAccount() && props.location.state) {
+                      const { tokenExpired, currentPath } = props.location
+                        .state as {
+                        tokenExpired: boolean;
+                        currentPath: string;
+                      };
 
-                    if (tokenExpired) {
+                      if (tokenExpired) {
+                        return (
+                          <Login
+                            loginWithGoogle={loginWithGoogle}
+                            connectMetamask={connectMetamask}
+                            setConfig={setConfig}
+                            config={config}
+                            setProvider={setProvider}
+                            provider={provider}
+                            setPreviousPath={setPreviousPath}
+                            previousPath={currentPath}
+                            {...props}
+                          />
+                        );
+                      }
+                    }
+
+                    if (provider && !provider.guideShown) {
+                      return <Redirect to="/settings" />;
+                    } else if (provider && provider.guideShown) {
+                      return <Redirect to="/dashboard" />;
+                    } else {
                       return (
                         <Login
                           loginWithGoogle={loginWithGoogle}
@@ -454,109 +477,89 @@ function App(): JSX.Element {
                           config={config}
                           setProvider={setProvider}
                           provider={provider}
-                          setPreviousPath={setPreviousPath}
-                          previousPath={currentPath}
                           {...props}
                         />
                       );
                     }
-                  }
-
-                  if (provider && !provider.guideShown) {
-                    return <Redirect to="/settings" />;
-                  } else if (provider && provider.guideShown) {
-                    return <Redirect to="/dashboard" />;
-                  } else {
-                    return (
-                      <Login
-                        loginWithGoogle={loginWithGoogle}
-                        connectMetamask={connectMetamask}
-                        setConfig={setConfig}
-                        config={config}
-                        setProvider={setProvider}
-                        provider={provider}
-                        {...props}
-                      />
-                    );
-                  }
-                }}
-              />
-              <PrivateRoute
-                path="/settings"
-                exact
-                comp={Settings}
-                provider={provider}
-                config={config}
-                additionalProps={{
-                  setProvider: setProvider,
-                  setConfig: setConfig,
-                  appLogout: appLogout,
-                }}
-              />
-              <PrivateRoute
-                path="/dashboard"
-                exact
-                comp={Dashboard}
-                provider={provider}
-                config={config}
-                additionalProps={{}}
-              />
-              <PrivateRoute
-                path="/filters"
-                exact
-                comp={Filters}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/edit/:shareId?"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/new"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory"
-                exact
-                comp={PublicFilters}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory/details/:shareId?"
-                exact
-                comp={PublicFilterDetailsPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <Route exact path="*">
-                <Redirect to="/login" />
-              </Route>
-            </Switch>
-          </Col>
-        </Row>
-        <ConsentModal
-          show={showConsent}
-          callback={(consent: boolean) =>
-            setAuthSettings({ ...authSettings, consent })
-          }
-          closeCallback={() => setShowConsent(false)}
-        />
-        <ToastContainer position="bottom-left" />
-      </Container>
-    </AuthProvider>
+                  }}
+                />
+                <PrivateRoute
+                  path="/settings"
+                  exact
+                  comp={Settings}
+                  provider={provider}
+                  config={config}
+                  additionalProps={{
+                    setProvider: setProvider,
+                    setConfig: setConfig,
+                    appLogout: appLogout,
+                  }}
+                />
+                <PrivateRoute
+                  path="/dashboard"
+                  exact
+                  comp={Dashboard}
+                  provider={provider}
+                  config={config}
+                  additionalProps={{}}
+                />
+                <PrivateRoute
+                  path="/filters"
+                  exact
+                  comp={Filters}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/edit/:shareId?"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/new"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory"
+                  exact
+                  comp={PublicFilters}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory/details/:shareId?"
+                  exact
+                  comp={PublicFilterDetailsPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <Route exact path="*">
+                  <Redirect to="/login" />
+                </Route>
+              </Switch>
+            </Col>
+          </Row>
+          <ConsentModal
+            show={showConsent}
+            callback={(consent: boolean) =>
+              setAuthSettings({ ...authSettings, consent })
+            }
+            closeCallback={() => setShowConsent(false)}
+          />
+          <ToastContainer position="bottom-left" />
+        </Container>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 
