@@ -134,6 +134,8 @@ export default function PublicFilters(props) {
   const providerId = AuthService.getProviderId();
 
   const LongText = ({ content, limit }) => {
+    if (!content) return <></>;
+
     if (content.length <= limit) {
       return <div>{content}</div>;
     }
