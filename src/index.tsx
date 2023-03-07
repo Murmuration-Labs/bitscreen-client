@@ -6,14 +6,18 @@ import App from './pages/App';
 import { SnackbarProvider } from 'notistack';
 import { Router } from 'react-router-dom';
 import history from './appHistory';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { bitscreenGoogleClientId } from 'config';
 
 ReactDOM.render(
   <React.StrictMode>
-    <SnackbarProvider maxSnack={3}>
-      <Router history={history}>
-        <App />
-      </Router>
-    </SnackbarProvider>
+    <GoogleOAuthProvider clientId={bitscreenGoogleClientId}>
+      <SnackbarProvider maxSnack={3}>
+        <Router history={history}>
+          <App />
+        </Router>
+      </SnackbarProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

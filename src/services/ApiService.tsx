@@ -234,7 +234,13 @@ const ApiService = {
 
     const response = await axios.get<
       BasicAuthInfoEmail | BasicAuthInfoWallet | null
-    >(`${correspondingUri}/${walletOrToken}`);
+    >(
+      `${correspondingUri}/${
+        loginType === LoginType.Wallet
+          ? walletOrToken
+          : walletOrToken.replace('/', '%2F').replace(',', '%2C')
+      }`
+    );
 
     if (!response.data) {
       return null;
@@ -430,9 +436,11 @@ const ApiService = {
     });
   },
 
-  linkWalletToGoogleAccount: async (tokenId: string): Promise<any> => {
+  linkWalletToGoogleAccount: async (tokenId: string): Promise<Account> => {
     const response = await axios.post(
-      `${serverUri()}/provider/link-google/${tokenId}`
+      `${serverUri()}/provider/link-google/${tokenId
+        .replace('/', '%2F')
+        .replace(',', '%2C')}`
     );
 
     return response.data;
