@@ -20,6 +20,7 @@ export interface BasicAuthInfo {
 
 export interface BasicAuthInfoEmail extends BasicAuthInfo {
   loginEmail: string;
+  rodeoConsentDate: Date;
 }
 
 export interface BasicAuthInfoWallet extends BasicAuthInfo {

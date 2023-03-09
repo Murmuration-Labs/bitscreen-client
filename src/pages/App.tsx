@@ -81,10 +81,12 @@ function App(): JSX.Element {
   const [showConsent, setShowConsent] = useState<boolean>(false);
   const [authSettings, setAuthSettings] = useState<{
     consent: boolean;
+    rodeoConsent: boolean;
     loginType: LoginType | null;
     emailTokenId: string;
   }>({
     consent: false,
+    rodeoConsent: false,
     loginType: null,
     emailTokenId: '',
   });
@@ -140,6 +142,7 @@ function App(): JSX.Element {
     setProvider(account);
     setAuthSettings({
       consent: false,
+      rodeoConsent: false,
       loginType: null,
       emailTokenId: '',
     });
@@ -170,6 +173,7 @@ function App(): JSX.Element {
     if (!provider?.consentDate) {
       setAuthSettings({
         consent: false,
+        rodeoConsent: !!provider?.rodeoConsentDate || false,
         loginType: LoginType.Email,
         emailTokenId: tokenId,
       });
@@ -180,9 +184,13 @@ function App(): JSX.Element {
     await authenticateProviderByEmail(tokenId);
   };
 
-  const createProviderByEmail = async () => {
+  const initialProviderFlow = async (rodeoConsent: boolean) => {
     try {
-      await ApiService.createProviderByEmail(authSettings.emailTokenId);
+      if (!rodeoConsent) {
+        await ApiService.createProviderByEmail(authSettings.emailTokenId);
+      } else {
+        await ApiService.markConsentDate();
+      }
 
       await authenticateProviderByEmail();
     } catch (e) {
@@ -255,6 +263,7 @@ function App(): JSX.Element {
       if (!authSettings.consent) {
         setAuthSettings({
           consent: false,
+          rodeoConsent: false,
           loginType: LoginType.Wallet,
           emailTokenId: '',
         });
@@ -279,6 +288,7 @@ function App(): JSX.Element {
     if (!basicAuthInfo.consentDate && !authSettings.consent) {
       setAuthSettings({
         consent: false,
+        rodeoConsent: false,
         loginType: LoginType.Wallet,
         emailTokenId: '',
       });
@@ -347,6 +357,7 @@ function App(): JSX.Element {
     setProvider(account);
     setAuthSettings({
       consent: false,
+      rodeoConsent: false,
       loginType: null,
       emailTokenId: '',
     });
@@ -360,7 +371,7 @@ function App(): JSX.Element {
   useEffect(() => {
     if (authSettings.consent) {
       if (authSettings.loginType === LoginType.Wallet) connectMetamask();
-      else createProviderByEmail();
+      else initialProviderFlow(authSettings.rodeoConsent);
     }
   }, [authSettings.consent]);
 
