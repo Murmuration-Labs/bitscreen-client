@@ -1,6 +1,10 @@
 import detectEthereumProvider from '@metamask/detect-provider';
+import { googleLogout } from '@react-oauth/google';
+import ConsentModal from 'components/Modals/ConsentModal/ConsentModal';
+import Navigation from 'components/Navigation/Navigation';
 import * as jwt from 'jsonwebtoken';
-import React, { useEffect, useState } from 'react';
+import AuthProvider from 'providers/AuthProvider';
+import { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import {
@@ -10,12 +14,9 @@ import {
   Switch,
   useHistory,
 } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Web3 from 'web3';
-import ConsentModal from 'components/Modals/ConsentModal/ConsentModal';
-import Navigation from 'components/Navigation/Navigation';
-import AuthProvider from 'providers/AuthProvider';
+import 'resources/styles/helper.css';
 import ApiService from 'services/ApiService';
 import * as AuthService from 'services/AuthService';
 import LoggerService from 'services/LoggerService';
@@ -25,6 +26,7 @@ import {
   BasicAuthInfoWallet,
   LoginType,
 } from 'types/interfaces';
+import Web3 from 'web3';
 import './App.css';
 import Dashboard from './Dashboard/Dashboard';
 import FilterPage from './Filters/FilterPage/FilterPage';
@@ -34,11 +36,8 @@ import Login from './Login/Login';
 import PublicFilterDetailsPage from './PublicFilters/PublicFilterDetails/PublicFilterDetails';
 import PublicFilters from './PublicFilters/PublicFilters';
 import Settings from './Settings/Settings';
-import { gapi } from 'gapi-script';
-import 'resources/styles/helper.css';
-import { useGoogleLogout } from 'react-google-login';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { bitscreenGoogleClientId } from 'config';
-
 interface MatchParams {
   id: string;
 }
@@ -92,28 +91,13 @@ function App(): JSX.Element {
 
   const history = useHistory();
 
-  const appLogout = () => {
+  const appLogout = (isGoogle?: boolean) => {
+    if (isGoogle) googleLogout();
     setProvider(null);
     setConfig(null);
     AuthService.removeAccount();
     toast.success('You have been logged out successfully!');
   };
-
-  const onGoogleLogoutSuccess = () => {
-    appLogout();
-  };
-
-  const onGoogleLogoutFailure = () => {
-    return toast.error(
-      'Could not deauthenticate you at the moment using the Google authentication system. Please try again later!'
-    );
-  };
-
-  const { signOut: googleLogout } = useGoogleLogout({
-    clientId: bitscreenGoogleClientId,
-    onFailure: onGoogleLogoutFailure,
-    onLogoutSuccess: onGoogleLogoutSuccess,
-  });
 
   const authenticateProviderByEmail = async (tokenId?: string) => {
     let account: Account;
@@ -442,31 +426,49 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <AuthProvider appLogout={appLogout}>
-      <Navigation
-        provider={provider}
-        appLogout={appLogout}
-        googleLogout={googleLogout}
-      />
-      <Container fluid={true}>
-        <Row className="fill-height">
-          <Col className={'stage'}>
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/login" />
-              </Route>
-              <Route
-                path="/login"
-                exact
-                render={(props) => {
-                  if (!AuthService.getAccount() && props.location.state) {
-                    const { tokenExpired, currentPath } = props.location
-                      .state as {
-                      tokenExpired: boolean;
-                      currentPath: string;
-                    };
+    <GoogleOAuthProvider clientId={bitscreenGoogleClientId}>
+      <AuthProvider appLogout={appLogout}>
+        <Navigation provider={provider} appLogout={appLogout} />
+        <Container fluid={true}>
+          <Row className="fill-height">
+            <Col className={'stage'}>
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/login" />
+                </Route>
+                <Route
+                  path="/login"
+                  exact
+                  render={(props) => {
+                    if (!AuthService.getAccount() && props.location.state) {
+                      const { tokenExpired, currentPath } = props.location
+                        .state as {
+                        tokenExpired: boolean;
+                        currentPath: string;
+                      };
 
-                    if (tokenExpired) {
+                      if (tokenExpired) {
+                        return (
+                          <Login
+                            loginWithGoogle={loginWithGoogle}
+                            connectMetamask={connectMetamask}
+                            setConfig={setConfig}
+                            config={config}
+                            setProvider={setProvider}
+                            provider={provider}
+                            setPreviousPath={setPreviousPath}
+                            previousPath={currentPath}
+                            {...props}
+                          />
+                        );
+                      }
+                    }
+
+                    if (provider && !provider.guideShown) {
+                      return <Redirect to="/settings" />;
+                    } else if (provider && provider.guideShown) {
+                      return <Redirect to="/dashboard" />;
+                    } else {
                       return (
                         <Login
                           loginWithGoogle={loginWithGoogle}
@@ -475,110 +477,89 @@ function App(): JSX.Element {
                           config={config}
                           setProvider={setProvider}
                           provider={provider}
-                          setPreviousPath={setPreviousPath}
-                          previousPath={currentPath}
                           {...props}
                         />
                       );
                     }
-                  }
-
-                  if (provider && !provider.guideShown) {
-                    return <Redirect to="/settings" />;
-                  } else if (provider && provider.guideShown) {
-                    return <Redirect to="/dashboard" />;
-                  } else {
-                    return (
-                      <Login
-                        loginWithGoogle={loginWithGoogle}
-                        connectMetamask={connectMetamask}
-                        setConfig={setConfig}
-                        config={config}
-                        setProvider={setProvider}
-                        provider={provider}
-                        {...props}
-                      />
-                    );
-                  }
-                }}
-              />
-              <PrivateRoute
-                path="/settings"
-                exact
-                comp={Settings}
-                provider={provider}
-                config={config}
-                additionalProps={{
-                  setProvider: setProvider,
-                  setConfig: setConfig,
-                  googleLogout: googleLogout,
-                  appLogout: appLogout,
-                }}
-              />
-              <PrivateRoute
-                path="/dashboard"
-                exact
-                comp={Dashboard}
-                provider={provider}
-                config={config}
-                additionalProps={{}}
-              />
-              <PrivateRoute
-                path="/filters"
-                exact
-                comp={Filters}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/edit/:shareId?"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/filters/new"
-                exact
-                comp={FilterPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory"
-                exact
-                comp={PublicFilters}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <PrivateRoute
-                path="/directory/details/:shareId?"
-                exact
-                comp={PublicFilterDetailsPage}
-                provider={provider}
-                additionalProps={{}}
-                config={config}
-              />
-              <Route exact path="*">
-                <Redirect to="/login" />
-              </Route>
-            </Switch>
-          </Col>
-        </Row>
-        <ConsentModal
-          show={showConsent}
-          callback={(consent: boolean) =>
-            setAuthSettings({ ...authSettings, consent })
-          }
-          closeCallback={() => setShowConsent(false)}
-        />
-        <ToastContainer position="bottom-left" />
-      </Container>
-    </AuthProvider>
+                  }}
+                />
+                <PrivateRoute
+                  path="/settings"
+                  exact
+                  comp={Settings}
+                  provider={provider}
+                  config={config}
+                  additionalProps={{
+                    setProvider: setProvider,
+                    setConfig: setConfig,
+                    appLogout: appLogout,
+                  }}
+                />
+                <PrivateRoute
+                  path="/dashboard"
+                  exact
+                  comp={Dashboard}
+                  provider={provider}
+                  config={config}
+                  additionalProps={{}}
+                />
+                <PrivateRoute
+                  path="/filters"
+                  exact
+                  comp={Filters}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/edit/:shareId?"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/filters/new"
+                  exact
+                  comp={FilterPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory"
+                  exact
+                  comp={PublicFilters}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <PrivateRoute
+                  path="/directory/details/:shareId?"
+                  exact
+                  comp={PublicFilterDetailsPage}
+                  provider={provider}
+                  additionalProps={{}}
+                  config={config}
+                />
+                <Route exact path="*">
+                  <Redirect to="/login" />
+                </Route>
+              </Switch>
+            </Col>
+          </Row>
+          <ConsentModal
+            show={showConsent}
+            callback={(consent: boolean) =>
+              setAuthSettings({ ...authSettings, consent })
+            }
+            closeCallback={() => setShowConsent(false)}
+          />
+          <ToastContainer position="bottom-left" />
+        </Container>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 

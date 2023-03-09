@@ -1,13 +1,12 @@
 import { Switch, withStyles } from '@material-ui/core';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { bitscreenGoogleClientId, lookingGlassUri } from 'config';
-import { getAddressHash } from 'library/helpers/helpers.functions';
+import { useGoogleLogin } from '@react-oauth/google';
+import { lookingGlassUri } from 'config';
 import _ from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { Button, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import { useGoogleLogin } from 'react-google-login';
 import { Prompt } from 'react-router';
 import countryList from 'react-select-country-list';
 import { toast } from 'react-toastify';
@@ -24,6 +23,7 @@ import DeleteAccountModal from './DeleteAccountModal/DeleteAccountModal';
 import QuickstartGuide from './QuickstartGuide/QuickstartGuide';
 import SelectAccountType from './SelectAccountModal/SelectAccountType';
 import './Settings.css';
+import { getAddressHash } from 'library/helpers/helpers.functions';
 
 const HtmlSwitchComponent = withStyles((theme) => ({
   root: {
@@ -111,7 +111,7 @@ export default function Settings(props) {
   const logout = () => {
     AuthService.getLoginType() === LoginType.Wallet
       ? appLogout()
-      : googleLogout();
+      : appLogout(true);
   };
 
   const linkWalletToGoogleAccount = async (tokenId: string) => {
@@ -128,6 +128,7 @@ export default function Settings(props) {
       setProviderInfo({
         ...providerWithWalletAddress,
         assessorId: providerInfo.assessorId,
+        loginEmail: updatedProvider.loginEmail,
       });
       toast.success(
         'Provider successfully linked to specified Google Account.'
@@ -149,14 +150,14 @@ export default function Settings(props) {
     );
   };
 
-  const onGoogleLoginSuccess = async (res: any) => {
-    await linkWalletToGoogleAccount(res.tokenId);
+  const onGoogleLoginSuccess = async (tokenResponse: any) => {
+    await linkWalletToGoogleAccount(tokenResponse.access_token);
   };
 
-  const { signIn: googleLogin } = useGoogleLogin({
-    clientId: bitscreenGoogleClientId,
-    onFailure: onGoogleLoginFailure,
+  const googleLogin = useGoogleLogin({
     onSuccess: onGoogleLoginSuccess,
+    onError: onGoogleLoginFailure,
+    flow: 'implicit',
   });
 
   const linkGoogleToWalletAccount = async () => {

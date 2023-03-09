@@ -1,11 +1,9 @@
-import { bitscreenGoogleClientId } from 'config';
-import React, { useEffect } from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useEffect } from 'react';
 import { Col, Form, Row } from 'react-bootstrap';
-import { useGoogleLogin } from 'react-google-login';
 import { toast } from 'react-toastify';
 import { googleIcon, metamaskIcon } from 'resources/icons/index';
 import LoggerService from 'services/LoggerService';
-import { gapi } from 'gapi-script';
 import './Login.css';
 
 export default function Login(props) {
@@ -32,31 +30,15 @@ export default function Login(props) {
     );
   };
 
-  const onGoogleLoginSuccess = async (res: any) => {
-    await loginWithGoogle(res.tokenId);
+  const onGoogleLoginSuccess = async (tokenResponse: any) => {
+    await loginWithGoogle(tokenResponse.access_token);
   };
 
-  const { signIn: googleLogin } = useGoogleLogin({
-    clientId: bitscreenGoogleClientId,
-    onFailure: onGoogleLoginFailure,
+  const googleLogin = useGoogleLogin({
     onSuccess: onGoogleLoginSuccess,
+    onError: onGoogleLoginFailure,
+    flow: 'implicit',
   });
-
-  const startGoogleLogin = async () => {
-    const initClient = () => {
-      if (!gapi || !gapi.client) {
-        toast.error('Could not reach Google API, please try again later!');
-      } else {
-        gapi.client.init({
-          clientId: bitscreenGoogleClientId,
-          scope: '',
-        });
-        googleLogin();
-      }
-    };
-
-    gapi.load('client:auth2', initClient);
-  };
 
   return (
     <>
@@ -104,7 +86,7 @@ export default function Login(props) {
             <div className="option-card">
               <div
                 id="google-row"
-                onClick={startGoogleLogin}
+                onClick={() => googleLogin()}
                 className="d-flex justify-content-between align-items-center c-pointer no-text-select w-100 p-3"
               >
                 <div className="d-flex align-items-center">

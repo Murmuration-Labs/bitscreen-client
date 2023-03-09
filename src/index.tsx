@@ -1,11 +1,11 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { SnackbarProvider } from 'notistack';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import reportWebVitals from './reportWebVitals';
-import App from './pages/App';
-import { SnackbarProvider } from 'notistack';
 import { Router } from 'react-router-dom';
 import history from './appHistory';
+import App from './pages/App';
+import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>

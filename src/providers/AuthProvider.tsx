@@ -38,7 +38,6 @@ const AuthProvider = (props: AuthProviderProps) => {
           }
         });
 
-        // dispatch(setProviderAvailable(true));
         const web3 = new Web3(walletProvider);
         const chainId = await web3.eth.getChainId();
 

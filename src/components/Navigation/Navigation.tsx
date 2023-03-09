@@ -20,10 +20,9 @@ import { Account, AccountType, LoginType } from 'types/interfaces';
 
 function Navigation(props: {
   provider: Account | null;
-  appLogout: () => void;
-  googleLogout: () => void;
+  appLogout: (isGoogle?: boolean) => void;
 }): JSX.Element {
-  const { provider, appLogout, googleLogout } = props;
+  const { provider, appLogout } = props;
   const shortenAddress = (address: string): string => {
     return address.length > 8
       ? address.substr(0, 4) + '...' + address.substr(-4)
@@ -114,7 +113,7 @@ function Navigation(props: {
                   onClick={() => {
                     AuthService.getLoginType() === LoginType.Wallet
                       ? appLogout()
-                      : googleLogout();
+                      : appLogout(true);
                   }}
                 >
                   Log out?
