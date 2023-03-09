@@ -188,11 +188,12 @@ function App(): JSX.Element {
     try {
       if (!rodeoConsent) {
         await ApiService.createProviderByEmail(authSettings.emailTokenId);
-      } else {
-        await ApiService.markConsentDate();
       }
 
       await authenticateProviderByEmail();
+      if (rodeoConsent) {
+        await ApiService.markConsentDate();
+      }
     } catch (e) {
       LoggerService.error(e);
       AuthService.removeAccount();
