@@ -686,10 +686,11 @@ export default function Settings(props) {
                       type="button"
                       disabled={isDisabledWhileApiCall}
                     >
-                      Link account to{' '}
+                      Link{' '}
                       {AuthService.getLoginType() === LoginType.Email
                         ? 'wallet'
-                        : 'Google email'}
+                        : 'Google'}{' '}
+                      account
                     </Button>
                   </div>
                 )}
