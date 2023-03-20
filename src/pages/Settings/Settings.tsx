@@ -831,41 +831,43 @@ export default function Settings(props) {
                 </div>
               )}
 
-            {configInfo.bitscreen && (
-              <div
-                aria-describedby="enable-safer-slice"
-                className="section-slice pb-16px"
-              >
-                <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
-                  <span>Enable enhanced filtering</span>
-                  <HtmlSwitchComponent
-                    color="primary"
-                    checked={configInfo.import && configInfo.safer}
-                    disabled={!configInfo.import}
-                    onChange={() =>
-                      setConfigInfo({
-                        ...configInfo,
-                        safer: !configInfo.safer,
-                      })
-                    }
-                    name="filter-lists"
-                  />
+            {configInfo.bitscreen &&
+              providerInfo &&
+              providerInfo.accountType === AccountType.NodeOperator && (
+                <div
+                  aria-describedby="enable-safer-slice"
+                  className="section-slice pb-16px"
+                >
+                  <div className="slice-title-row t-lp d-flex justify-content-between align-items-center">
+                    <span>Enable enhanced filtering</span>
+                    <HtmlSwitchComponent
+                      color="primary"
+                      checked={configInfo.import && configInfo.safer}
+                      disabled={!configInfo.import}
+                      onChange={() =>
+                        setConfigInfo({
+                          ...configInfo,
+                          safer: !configInfo.safer,
+                        })
+                      }
+                      name="filter-lists"
+                    />
+                  </div>
+                  <div className="slice-description t-ls">
+                    Use&nbsp;
+                    <a
+                      className="external-link"
+                      href="https://safer.io"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Safer’s CSAM filter
+                    </a>
+                    &nbsp;to prevent storage & retrieval deals on your node
+                    (Requires importing)
+                  </div>
                 </div>
-                <div className="slice-description t-ls">
-                  Use&nbsp;
-                  <a
-                    className="external-link"
-                    href="https://safer.io"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    Safer’s CSAM filter
-                  </a>
-                  &nbsp;to prevent storage & retrieval deals on your node
-                  (Requires importing)
-                </div>
-              </div>
-            )}
+              )}
 
             {configInfo.bitscreen && (
               <div
