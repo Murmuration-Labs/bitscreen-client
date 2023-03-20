@@ -661,7 +661,7 @@ export default function Settings(props) {
               className="wallet-status-actions d-flex justify-content-between align-items-center"
             >
               <div className="d-flex">
-                <div className="logout-button mr-3">
+                <div className="logout-button mr-12px">
                   <Button
                     onClick={logout}
                     variant="primary"
@@ -686,10 +686,11 @@ export default function Settings(props) {
                       type="button"
                       disabled={isDisabledWhileApiCall}
                     >
-                      Link account to{' '}
+                      Link{' '}
                       {AuthService.getLoginType() === LoginType.Email
                         ? 'wallet'
-                        : 'Google email'}
+                        : 'Google'}{' '}
+                      account
                     </Button>
                   </div>
                 )}
