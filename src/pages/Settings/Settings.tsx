@@ -425,6 +425,13 @@ export default function Settings(props) {
         return false;
       }
 
+      if (configInfo.safer && !configInfo.import) {
+        toast.error(
+          'You must enable importing in order to enable the enhanced filtering!'
+        );
+        return false;
+      }
+
       if (
         configInfo.share &&
         (!providerInfo.contactPerson ||
@@ -464,6 +471,7 @@ export default function Settings(props) {
           bitscreen: configInfo.bitscreen,
           share: configInfo.share,
           import: configInfo.import,
+          safer: !!configInfo.safer,
         },
       });
       setConfig(configInfo);
@@ -893,31 +901,37 @@ export default function Settings(props) {
                   />
                 </div>
                 <div className="slice-description t-ls">
-                  Share your filter lists with other Bitscreen users. (Requires{' '}
-                  <span
-                    onClick={() =>
-                      window.open(
-                        'https://github.com/Murmuration-Labs/bitscreen',
-                        '_blank'
-                      )
-                    }
-                    className="link"
-                  >
-                    Lotus Plugin
-                  </span>{' '}
-                  &{' '}
-                  <span
-                    onClick={() =>
-                      window.open(
-                        'https://pypi.org/project/bitscreen-updater/',
-                        '_blank'
-                      )
-                    }
-                    className="link"
-                  >
-                    Updater
-                  </span>
-                  )
+                  Share your filter lists with other Bitscreen users.{' '}
+                  {providerInfo &&
+                    providerInfo.accountType === AccountType.NodeOperator && (
+                      <>
+                        (Requires{' '}
+                        <span
+                          onClick={() =>
+                            window.open(
+                              'https://github.com/Murmuration-Labs/bitscreen',
+                              '_blank'
+                            )
+                          }
+                          className="link"
+                        >
+                          Lotus Plugin
+                        </span>{' '}
+                        &{' '}
+                        <span
+                          onClick={() =>
+                            window.open(
+                              'https://pypi.org/project/bitscreen-updater/',
+                              '_blank'
+                            )
+                          }
+                          className="link"
+                        >
+                          Updater
+                        </span>
+                        )
+                      </>
+                    )}
                 </div>
               </div>
             )}
