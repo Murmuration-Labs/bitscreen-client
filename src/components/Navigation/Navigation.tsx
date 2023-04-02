@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import {
   Col,
+  Dropdown,
   NavDropdown,
   OverlayTrigger,
   Row,
@@ -17,6 +18,8 @@ import * as AuthService from 'services/AuthService';
 import './Navigation.css';
 import Bitscreenlogo from './bitscreen-logo.png';
 import { Account, AccountType, LoginType } from 'types/interfaces';
+import { lookingGlassUri, rodeoUri } from 'config';
+import * as icons from 'resources/icons';
 
 function Navigation(props: {
   provider: Account | null;
@@ -70,6 +73,30 @@ function Navigation(props: {
           )}
           {provider && (
             <div className="nav-item-container">
+              <Dropdown className="top-bar-menu-dropdown mr-4">
+                <Dropdown.Toggle className="top-bar-menu-dropdown-button d-flex align-items-center justify-content-center c-pointer no-text-select">
+                  <img
+                    alt="menu-icon"
+                    className="c-pointer"
+                    src={icons.menu}
+                  ></img>
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    disabled={true}
+                    className="top-bar-menu-dropdown-title-item fs-10 lh-12"
+                    eventKey="1"
+                  >
+                    APP SWITCHER
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => window.open(rodeoUri())}>
+                    Rodeo
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => window.open(lookingGlassUri())}>
+                    Looking Glass
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
               <OverlayTrigger
                 placement="bottom"
                 delay={{ show: 150, hide: 300 }}

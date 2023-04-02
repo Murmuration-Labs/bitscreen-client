@@ -42,7 +42,6 @@
   align-items: center;
   justify-content: center;
   height: 48px;
-  width: 50px;
   line-height: 24px;
 }
 
@@ -96,4 +95,26 @@
   padding-bottom: 4px;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+.user-pill:active,
+.user-pill:focus,
+.user-pill:hover,
+.user-pill.dropdown-toggle,
+.top-bar-menu-dropdown-button:active,
+.top-bar-menu-dropdown-button:hover,
+.top-bar-menu-dropdown-button:focus,
+.top-bar-menu-dropdown-button.dropdown-toggle {
+  background-color: transparent !important;
+  border: transparent;
+  padding: 0;
+}
+
+.top-bar-menu-dropdown-button {
+  background: transparent;
+  border-color: transparent;
+}
+
+.top-bar-menu-dropdown-title-item {
+  color: #212529 !important;
 }
