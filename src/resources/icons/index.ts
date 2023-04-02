@@ -7,6 +7,7 @@ import activeIcon from './active.svg';
 import inactiveIcon from './inactive.svg';
 import infoIcon from './info.svg';
 import googleIcon from './google.png';
+import menu from './menu.svg';
 
 export {
   deleteIcon,
@@ -17,4 +18,5 @@ export {
   inactiveIcon,
   infoIcon,
   googleIcon,
+  menu,
 };
