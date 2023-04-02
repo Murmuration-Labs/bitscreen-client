@@ -104,7 +104,6 @@ const CidsRow = ({
 
   useEffect(() => {
     if (filter.visibility === Visibility.Exception) {
-      console.log('paternite');
       ApiService.getCidConflict(cid.cid, filter.id, true)
         .then((conflicts) => {
           setLocalConflicts(conflicts);
@@ -120,7 +119,6 @@ const CidsRow = ({
         .finally(() => setExceptionLoading(false));
       return;
     } else {
-      console.log('maternite');
       ApiService.getCidConflict(cid.cid, filter.id, false)
         .then((conflicts) => {
           setLocalConflicts(conflicts);
