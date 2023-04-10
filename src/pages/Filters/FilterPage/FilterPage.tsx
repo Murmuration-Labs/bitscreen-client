@@ -410,7 +410,9 @@ const FilterPage = (props): JSX.Element => {
       }
       try {
         await ApiService.updateFilter(filtersToUpdate);
-        await ApiService.deleteCid(deleteCidItems);
+        if (deleteCidItems.length) {
+          await ApiService.removeCidsFromFilter(deleteCidItems, filterList.id);
+        }
         if (deferGlobalFilterEnabled) {
           await ApiService.updateEnabledForSharedFilters(
             [filterList.id],
