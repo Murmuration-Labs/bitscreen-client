@@ -336,7 +336,6 @@ function App(): JSX.Element {
           configObject = await ApiService.setProviderConfig({
             bitscreen: false,
             import: false,
-            safer: false,
             share: false,
           });
         } catch (e: any) {

@@ -80,13 +80,6 @@ const ApiService = {
     const response = await axios.post(`${serverUri()}/filter`, filterList);
     const filterId = response.data.id;
 
-    const providerFilter: ProviderFilter = {
-      filterId,
-      notes: filterList.notes,
-      active: filterList.enabled,
-    };
-    await axios.post(`${serverUri()}/provider-filter`, providerFilter);
-
     return filterId;
   },
 
@@ -325,14 +318,6 @@ const ApiService = {
     const response = await axios.delete(`${serverUri()}/provider`);
 
     return response.data;
-  },
-
-  getOverrideCids: async (filterList: FilterList): Promise<string[]> => {
-    const response = await axios.post(
-      `${serverUri()}/cids/exception/${filterList.id}`,
-      filterList.cids
-    );
-    return response.data as string[];
   },
 
   getAllFilters: async (
