@@ -175,23 +175,13 @@ const ApiService = {
     return response.data;
   },
 
-  deleteCid: async (_cid: CidItem | CidItem[]) => {
+  removeCidsFromFilter: async (_cid: CidItem | CidItem[], filterId: number) => {
     const array = _cid as CidItem[];
 
-    if (array && array.length) {
-      return await Promise.all(
-        array
-          .filter(({ id }) => id)
-          .map(({ id }) => axios.delete(`${serverUri()}/cid/${id}`))
-      );
-    }
-
-    const cid = _cid as CidItem;
-    if (!cid || !cid.id) {
-      return;
-    }
-
-    return axios.delete(`${serverUri()}/cid/${cid.id}`);
+    axios.post(`${serverUri()}/filter/remove-cids-from-filter`, {
+      cids: array.map((e) => e.id),
+      filterId,
+    });
   },
 
   deleteCidById: async (id: number) => {
