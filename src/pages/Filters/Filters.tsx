@@ -22,7 +22,6 @@ import {
 import ClearIcon from '@material-ui/icons/ClearRounded';
 import SearchIcon from '@material-ui/icons/Search';
 import _ from 'lodash';
-import debounce from 'lodash.debounce';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import {
@@ -73,6 +72,7 @@ import { toast } from 'react-toastify';
 import { useTitle } from 'react-use';
 import { useDebounce } from 'usehooks-ts';
 import { AccountType } from 'types/interfaces';
+import { debounceTime } from '../../config';
 
 interface MyFiltersTableData {
   name: string;
@@ -134,7 +134,7 @@ function Filters(props): JSX.Element {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] =
     React.useState<keyof MyFiltersTableData>('name');
-  const [needsRefresh, setNeedsRefresh] = useState(false);
+  const [needsRefresh, setNeedsRefresh] = useState(true);
   // ----------------------- SORTING -----------------------
   const [hoveredFilterId, setHoveredFilterId] = useState(-1);
 
@@ -176,6 +176,7 @@ function Filters(props): JSX.Element {
   const [selectedConditional, setSelectedConditional] =
     useState<BulkSelectedType>(BulkSelectedType.None);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const debouncedSearchTerm = useDebounce(searchTerm, debounceTime);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [showConfirmRemoveBulkAction, setShowConfirmRemoveBulkAction] =
     useState(false);
@@ -198,6 +199,10 @@ function Filters(props): JSX.Element {
   useEffect(() => {
     LoggerService.info('Loading Filters List page.');
   }, []);
+
+  useEffect(() => {
+    setNeedsRefresh(true);
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     setConfiguration({ ...props.config });
@@ -298,26 +303,30 @@ function Filters(props): JSX.Element {
   };
 
   useEffect(() => {
-    setNeedsRefresh(false);
+    if (!needsRefresh) return;
 
-    ApiService.getFilters(page, rowsPerPage, mySortBy, mySort, searchTerm).then(
-      (data) => {
-        const filterLists: FilterList[] = data.filters;
+    ApiService.getFilters(page, rowsPerPage, mySortBy, mySort, searchTerm)
+      .then(
+        (data) => {
+          const filterLists: FilterList[] = data.filters;
 
-        setFilterLists(filterLists);
-        setDataCount(data.count);
-        setSelectedConditional(BulkSelectedType.None);
+          setFilterLists(filterLists);
+          setDataCount(data.count);
+          setSelectedConditional(BulkSelectedType.None);
 
-        setLoaded(true);
-      },
-      (e) => {
-        if (e && e.status === 401 && props.config) {
-          toast.error(e.data.message);
-          return;
+          setLoaded(true);
+        },
+        (e) => {
+          if (e && e.status === 401 && props.config) {
+            toast.error(e.data.message);
+            return;
+          }
         }
-      }
-    );
-  }, [rowsPerPage, page, mySortBy, mySort, searchTerm, needsRefresh]);
+      )
+      .finally(() => {
+        setNeedsRefresh(false);
+      });
+  }, [rowsPerPage, page, mySortBy, mySort, debouncedSearchTerm, needsRefresh]);
 
   const deleteFilter = async (filter: FilterList) => {
     try {
@@ -484,8 +493,6 @@ function Filters(props): JSX.Element {
     setShowConfirmDelete(true);
     setDeletedFilterList(filterList);
   };
-
-  const debounceSearchFilters = debounce(() => setNeedsRefresh(true), 300);
 
   const searchFilters = (event): void => {
     setSearchTerm(event.target.value);
@@ -775,10 +782,6 @@ function Filters(props): JSX.Element {
       </div>
     );
   };
-
-  useEffect(() => {
-    debounceSearchFilters();
-  }, [searchTerm]);
 
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
 

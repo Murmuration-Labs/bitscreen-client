@@ -4,6 +4,8 @@ import HttpService from './services/HttpService';
 
 HttpService.setupInterceptors();
 
+export const debounceTime = 600;
+
 const environment = process.env.NODE_ENV;
 
 export const serverUri = (): string => {

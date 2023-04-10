@@ -26,6 +26,8 @@ import { formatDate, isImportEnabled, itemsToPages } from '../Filters/utils';
 import { Data, HeadCell } from './Interfaces';
 import './PublicFilters.css';
 import { AccountType } from 'types/interfaces';
+import { debounceTime } from '../../config';
+import { useDebounce } from 'usehooks-ts';
 
 const headCells: HeadCell<Data>[] = [
   { id: 'name', numeric: false, label: 'Filter Name', sortable: true },
@@ -49,7 +51,8 @@ export default function PublicFilters(props) {
   const [mySort, setMySort] = React.useState('asc');
   const [mySortBy, setMySortBy] = React.useState('name');
   const [dataCount, setDataCount] = React.useState<number>(0);
-  const [searchedValue, setSearchedValue] = React.useState('');
+  const [searchTerm, setSearchedValue] = React.useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, debounceTime);
   const [showImportFilter, setShowImportFilter] = useState<boolean>(false);
   const [prefetch, setPrefetch] = useState<string>('');
   const [toBeImportedFilter, setToBeImportedFilter] =
@@ -76,30 +79,25 @@ export default function PublicFilters(props) {
   }, [prefetch, toBeImportedFilter]);
 
   useEffect(() => {
-    setNeedsRefresh(false);
-    const getAllData = async () => {
-      ApiService.getAllFilters(
-        page,
-        rowsPerPage,
-        mySortBy,
-        mySort,
-        searchedValue
-      ).then(
-        (response) => {
-          setPublicFiltersData(response.data as Data[]);
-          setDataCount(response.count);
-        },
-        (e) => {
-          if (e && e.status === 401 && props.config) {
-            toast.error(e.data.message);
-            return;
-          }
-        }
-      );
-    };
+    setNeedsRefresh(true);
+  }, [debouncedSearchTerm]);
 
-    getAllData();
-  }, [rowsPerPage, page, mySortBy, mySort, searchedValue, needsRefresh]);
+  useEffect(() => {
+    if (!needsRefresh) return;
+
+    ApiService.getAllFilters(page, rowsPerPage, mySortBy, mySort, searchTerm)
+      .then((response) => {
+        setPublicFiltersData(response.data as Data[]);
+        setDataCount(response.count);
+      })
+      .catch((e) => {
+        if (e && e.status === 401 && props.config) {
+          toast.error(e.data.message);
+          return;
+        }
+      })
+      .finally(() => setNeedsRefresh(false));
+  }, [rowsPerPage, page, mySortBy, mySort, searchTerm, needsRefresh]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -204,7 +202,7 @@ export default function PublicFilters(props) {
               type="text"
               placeholder="Search"
               variant="outlined"
-              value={searchedValue}
+              value={searchTerm}
               onChange={handlerInputChange}
               InputProps={{
                 startAdornment: (
@@ -214,7 +212,7 @@ export default function PublicFilters(props) {
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    {searchedValue && (
+                    {searchTerm && (
                       <IconButton
                         onClick={() => {
                           setSearchedValue('');
@@ -229,7 +227,7 @@ export default function PublicFilters(props) {
               }}
               FormHelperTextProps={{ style: { fontSize: 12 } }}
             />
-            {searchedValue.length > 0 && (
+            {searchTerm.length > 0 && (
               <span
                 style={{
                   marginRight: 4,
