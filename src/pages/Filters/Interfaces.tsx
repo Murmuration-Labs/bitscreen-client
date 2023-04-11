@@ -221,7 +221,7 @@ export interface Conflict {
   id: number;
   cid: string;
   refUrl: string;
-  filter: { id; name; shareId };
+  filters: { id; name; shareId }[];
 }
 
 export interface ConflictModalProps {
