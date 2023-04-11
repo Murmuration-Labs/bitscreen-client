@@ -115,7 +115,7 @@ const PublicFilterDetailsPage = (props) => {
           },
           numberOfCids: {
             columnName: 'Number of CIDs:',
-            columnValue: data.filter.cids.length,
+            columnValue: data.cidsCount,
           },
           businessName: {
             columnName: 'Provider business name:',
