@@ -51,6 +51,7 @@
   border-top-right-radius: 24px;
   align-self: flex-end;
   height: 54px;
+  width: 50px;
 }
 
 .nav-link:hover {

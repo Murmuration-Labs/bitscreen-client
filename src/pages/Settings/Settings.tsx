@@ -1275,19 +1275,15 @@ export default function Settings(props) {
                 <>
                   <div className="slice-info pb-8px t-lp d-flex justify-content-between align-items-center">
                     <span>Looking Glass</span>
-                    <div
-                      className="app-connections-connect-button c-pointer no-text-select fs-14 lh-20 fw-500"
-                      onClick={() =>
-                        window.open(
-                          `${lookingGlassUri()}/assessors/${
-                            providerInfo.assessorId
-                          }`,
-                          '_blank'
-                        )
-                      }
+                    <a
+                      className="app-connections-connect-button c-pointer no-text-select fs-14 lh-20 fw-500 external-link text-underline"
+                      target="_blank"
+                      href={`${lookingGlassUri()}/assessors/${
+                        providerInfo.assessorId
+                      }`}
                     >
                       Launch
-                    </div>
+                    </a>
                   </div>
                 </>
               )}
