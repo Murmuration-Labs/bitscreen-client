@@ -6,9 +6,8 @@ HttpService.setupInterceptors();
 
 export const debounceTime = 600;
 
-const environment = process.env.NODE_ENV;
-
 export const serverUri = (): string => {
+  const environment = process.env.NODE_ENV;
   switch (environment) {
     case 'development':
       return process.env.REACT_APP_HOST || 'http://localhost:3030';
@@ -20,6 +19,8 @@ export const serverUri = (): string => {
 };
 
 export const remoteMarketplaceUri = (): string => {
+  const environment = process.env.NODE_ENV;
+
   switch (environment) {
     case 'development':
       return process.env.REACT_APP_HOST || 'http://localhost:3030';
