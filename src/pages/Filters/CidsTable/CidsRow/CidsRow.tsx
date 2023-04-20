@@ -177,7 +177,7 @@ const CidsRow = ({
         scope="row"
         aria-label="CID Name Cell"
       >
-        {cid.cid.length > 10 ? (
+        {cid.cid && cid.cid.length > 10 ? (
           <Tooltip title={cid.cid}>
             <a
               className="table-row-cell-text"
@@ -213,7 +213,7 @@ const CidsRow = ({
               }}
             >{`${cid.cid.slice(0, 10)}...`}</a>
           </Tooltip>
-        ) : (
+        ) : cid.cid ? (
           <a
             className="table-row-cell-text"
             style={{ fontSize: '1rem', cursor: 'pointer' }}
@@ -232,6 +232,8 @@ const CidsRow = ({
           >
             {cid.cid}
           </a>
+        ) : (
+          'Non-hashed CID missing'
         )}
         {!isValid && (
           <Badge style={{ marginLeft: 10 }} variant="danger">
