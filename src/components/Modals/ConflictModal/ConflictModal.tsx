@@ -12,9 +12,25 @@ import ApiService from 'services/ApiService';
 import LoggerService from 'services/LoggerService';
 
 const resolveConflict = async (conflicts: Conflict[]) => {
+  const filtersCidsPairs: {
+    [key: number]: number[];
+  } = {};
+
+  for (const conflict of conflicts) {
+    const filters = conflict.filters;
+    for (const filter of filters) {
+      filtersCidsPairs[`${filter['id']}`] = [];
+      filtersCidsPairs[`${filter['id']}`].push(conflict.id);
+    }
+  }
+
   try {
     await Promise.all(
-      conflicts.map((conflict) => ApiService.deleteCidById(conflict.id))
+      Object.keys(filtersCidsPairs).map((filterId) =>
+        ApiService.removeConflictedCids(filtersCidsPairs[`${filterId}`], [
+          parseInt(filterId),
+        ])
+      )
     );
   } catch (e: any) {
     if (e && e.status === 401) {

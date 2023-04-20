@@ -83,7 +83,7 @@ const FilterPage = (props): JSX.Element => {
     single: false,
     multiple: false,
   });
-  const [conflict, setConflict] = useState<Conflict[]>([]);
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const [totalConflicts, setTotalConflicts] = useState<Conflict[]>([]);
   const [conflictsChanged, setConflictsChanged] = useState<boolean>(false);
   const [cidsValid, setCidsValid] = useState<boolean>(true);
@@ -100,7 +100,7 @@ const FilterPage = (props): JSX.Element => {
   };
 
   const showConflictsModal = () => {
-    setConflict(totalConflicts);
+    setConflicts(totalConflicts);
     setShowConflict({
       single: false,
       multiple: true,
@@ -1289,7 +1289,7 @@ const FilterPage = (props): JSX.Element => {
                           prepareCidMoveModal([cids[index]])
                         }
                         onDeleteClick={(index) => removeCid(index)}
-                        setConflict={setConflict}
+                        setConflict={setConflicts}
                         totalConflicts={totalConflicts}
                         setShowConflict={setShowConflict}
                         addConflicts={addConflicts}
@@ -1354,7 +1354,7 @@ const FilterPage = (props): JSX.Element => {
           />
           <ConflictModal
             showConflict={showConflict}
-            conflicts={conflict}
+            conflicts={conflicts}
             setShowConflict={setShowConflict}
             removeConflict={removeConflict}
           />

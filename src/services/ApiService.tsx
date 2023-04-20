@@ -76,11 +76,10 @@ const ApiService = {
     return response.data;
   },
 
-  addFilter: async (filterList: FilterList): Promise<number> => {
+  addFilter: async (filterList: FilterList) => {
     const response = await axios.post(`${serverUri()}/filter`, filterList);
-    const filterId = response.data.id;
 
-    return filterId;
+    return response.data;
   },
 
   addProviderFilter: async (providerFilter: ProviderFilter): Promise<void> => {
@@ -178,14 +177,26 @@ const ApiService = {
   removeCidsFromFilter: async (_cid: CidItem | CidItem[], filterId: number) => {
     const array = _cid as CidItem[];
 
-    axios.post(`${serverUri()}/filter/remove-cids-from-filter`, {
-      cids: array.map((e) => e.id),
-      filterId,
-    });
+    const response = await axios.post(
+      `${serverUri()}/filter/remove-cids-from-filter`,
+      {
+        cids: array.map((e) => e.id),
+        filterId,
+      }
+    );
+
+    return response.data;
   },
 
   deleteCidById: async (id: number) => {
     return axios.delete(`${serverUri()}/cid/${id}`);
+  },
+
+  removeConflictedCids: async (cids: number[], filters: number[]) => {
+    return axios.post(`${serverUri()}/filter/remove-conflicted-cids`, {
+      cids,
+      filters,
+    });
   },
 
   fetchRemoteFilter: async (filterUri: string): Promise<FilterList> => {
