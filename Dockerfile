@@ -1,4 +1,5 @@
-FROM node:16-alpine
+FROM node:16-alpine AS build
+
 RUN apk add --no-cache --update \
   make \
   g++ \
@@ -6,10 +7,26 @@ RUN apk add --no-cache --update \
   bash \
   curl
 
-WORKDIR /client
-COPY . .
-RUN yarn install
+WORKDIR /bitscreen-build
+
+COPY package*.json yarn.lock /bitscreen-build/
+
+RUN yarn
+
+COPY . /bitscreen-build
+
+RUN yarn build
+
+
+FROM node:16-alpine AS deploy
+
 # Expose listen port
 EXPOSE 3000
 
-ENTRYPOINT ["yarn", "start-prod"]
+WORKDIR /static
+
+COPY --from=build /bitscreen-build/build ./build
+
+RUN yarn global add npm serve
+
+ENTRYPOINT ["serve", "-s", "build"]
