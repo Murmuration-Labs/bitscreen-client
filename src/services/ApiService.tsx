@@ -19,7 +19,6 @@ import {
   LoginType,
 } from 'types/interfaces';
 import { remoteMarketplaceUri, serverUri } from '../config';
-import { getOs } from 'library/helpers/helpers.functions';
 
 // For authentication purposes we will use axios.createInstance
 // Right now we use straight-forward axios
@@ -418,16 +417,17 @@ const ApiService = {
     fileDownload(JSON.stringify(response.data), 'cid_file.json');
   },
 
-  exportAccount: async (): Promise<any> => {
-    const os = getOs();
-    const response = await axios.get(`${serverUri()}/provider/export/${os}`);
+  exportAccount: async (): Promise<{
+    accountData: { [key: string]: any };
+    privateLists?: { [key: string]: any };
+    sharedLists?: { [key: string]: any };
+    publicLists?: { [key: string]: any };
+    exceptionLists?: { [key: string]: any };
+    importedLists?: { [key: string]: any };
+  }> => {
+    const response = await axios.get(`${serverUri()}/provider/export`);
 
-    fileDownload(
-      response.data,
-      ['win', 'mac'].includes(os)
-        ? 'bitscreen_export.zip'
-        : 'bitscreen_export.tar'
-    );
+    return response.data;
   },
 
   linkWalletToGoogleAccount: async (tokenId: string): Promise<Account> => {

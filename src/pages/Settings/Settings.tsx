@@ -2,6 +2,9 @@ import { Switch, withStyles } from '@material-ui/core';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useGoogleLogin } from '@react-oauth/google';
 import { lookingGlassUri } from 'config';
+import FileSaver from 'file-saver';
+import JSZip from 'jszip';
+import { getAddressHash } from 'library/helpers/helpers.functions';
 import _ from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -23,7 +26,6 @@ import DeleteAccountModal from './DeleteAccountModal/DeleteAccountModal';
 import QuickstartGuide from './QuickstartGuide/QuickstartGuide';
 import SelectAccountType from './SelectAccountModal/SelectAccountType';
 import './Settings.css';
-import { getAddressHash } from 'library/helpers/helpers.functions';
 
 const HtmlSwitchComponent = withStyles((theme) => ({
   root: {
@@ -608,6 +610,49 @@ export default function Settings(props) {
     });
   };
 
+  const exportAccountData = async () => {
+    try {
+      const response = await ApiService.exportAccount();
+      const zip = new JSZip();
+      zip.file('account_data.json', JSON.stringify(response.accountData));
+      for (const key in response) {
+        switch (key) {
+          case 'privateLists':
+          case 'sharedLists':
+          case 'publicLists':
+          case 'exceptionLists':
+          case 'importedLists':
+            if (
+              response[key] &&
+              _.isPlainObject(response[key]) &&
+              Object.keys(response[key]!).length
+            ) {
+              const folderName = key.split('L');
+              for (const listShareId in response[key]) {
+                zip.file(
+                  `${folderName[0] + '_l' + folderName[1]}/${listShareId}`,
+                  JSON.stringify(response[key]![listShareId])
+                );
+              }
+            }
+            break;
+
+          default:
+            continue;
+        }
+      }
+
+      zip.generateAsync({ type: 'blob' }).then(function (content) {
+        FileSaver.saveAs(content, 'bitscreen_export.zip');
+      });
+    } catch (e: any) {
+      if (e && e.status === 401 && props.config) {
+        toast.error(e.data.message);
+        return;
+      }
+    }
+  };
+
   return (
     <div className="settings-page-container">
       <div className="page-title">Settings</div>
@@ -728,16 +773,7 @@ export default function Settings(props) {
               <div className="export-delete d-flex">
                 <div className="export mr-12px">
                   <Button
-                    onClick={async () => {
-                      try {
-                        await ApiService.exportAccount();
-                      } catch (e: any) {
-                        if (e && e.status === 401 && props.config) {
-                          toast.error(e.data.message);
-                          return;
-                        }
-                      }
-                    }}
+                    onClick={exportAccountData}
                     variant="primary"
                     className="button-style blue-button"
                     type="button"
