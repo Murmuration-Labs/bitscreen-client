@@ -188,6 +188,7 @@ export interface FilterList {
   notes?: string;
   created?: string;
   updated?: string;
+  networks: Array<NetworkType>;
 }
 
 export interface ProviderFilter {
@@ -235,4 +236,9 @@ export interface ConflictModalProps {
     multiple: boolean;
   }) => void;
   removeConflict: (cid: string) => void;
+}
+
+export enum NetworkType {
+  IPFS = 'IPFS',
+  Filecoin = 'Filecoin',
 }

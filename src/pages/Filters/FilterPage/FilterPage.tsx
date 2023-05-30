@@ -7,7 +7,16 @@ import {
   faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconButton, MenuItem } from '@material-ui/core';
+import {
+  Checkbox,
+  FormControl,
+  IconButton,
+  Input,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
 import MenuButton from '@material-ui/icons/MoreVert';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import ConfirmModal from 'components/Modals/ConfirmModal/ConfirmModal';
@@ -45,12 +54,24 @@ import {
   Conflict,
   EnabledOption,
   FilterList,
+  NetworkType,
   ViewTypes,
   Visibility,
 } from '../Interfaces';
 import MoveCIDModal from '../MoveCIDModal/MoveCIDModal';
 import ToggleEnabledFilterModal from '../ToggleEnabledFilterModal/ToggleEnabledFilterModal';
 import { isDisabledGlobally, isOrphan, isShared } from '../utils';
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 const FilterPage = (props): JSX.Element => {
   const [cids, setCids] = useState<CidItem[]>([]);
@@ -161,40 +182,13 @@ const FilterPage = (props): JSX.Element => {
     toast.success(successMessage ?? 'The link was copied succesfully');
   };
 
-  const visibilityHelpText = (): string => {
-    let text = '';
-
-    switch (filterList.visibility) {
-      case Visibility.Private:
-        text = 'Private lists are only visible to you.';
-        break;
-      case Visibility.Public:
-        text = 'Public lists are visible to all users via the directory.';
-        break;
-      case Visibility.Shared:
-        text =
-          'Shared lists are only visible to other users if they have the URL or ID. Please save the filter to generate the shareable URL.';
-        break;
-      case Visibility.Exception:
-        text =
-          'Exception lists prevent CIDs from imported lists from being filtered. Cannot be shared.';
-        break;
-    }
-
-    if (text) {
-      return `(${text})`;
-    }
-
-    return '';
-  };
-
   const visibilityGenerateLink = (): JSX.Element => {
     let generatedLink = '';
 
     if (
       [Visibility.Public, Visibility.Shared].includes(filterList.visibility)
     ) {
-      generatedLink = `${window.location.protocol}//${window.location.host}/directory/details/${filterList.shareId}`;
+      generatedLink = `${window.location.protocol}/${window.location.host}/directory/details/${filterList.shareId}`;
     } else {
       return <></>;
     }
@@ -715,6 +709,29 @@ const FilterPage = (props): JSX.Element => {
     }
   };
 
+  const visibilityHelpText = () => {
+    let text = '';
+
+    switch (filterList.visibility) {
+      case Visibility.Private:
+        text = 'Private lists are only visible to you.';
+        break;
+      case Visibility.Public:
+        text = 'Public lists are visible to all users via the directory.';
+        break;
+      case Visibility.Shared:
+        text =
+          'Shared lists are only visible to other users if they have the URL or ID. Please save the filter to generate the shareable URL.';
+        break;
+      case Visibility.Exception:
+        text =
+          'Exception lists prevent CIDs from imported lists from being filtered. Cannot be shared.';
+        break;
+    }
+
+    return <Tooltip id="button-tooltip">{text}</Tooltip>;
+  };
+
   const renderToggleButtonGroup = () => {
     return (
       <>
@@ -991,18 +1008,11 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  const renderCancelButton = (): JSX.Element => {
-    return (
-      <Col>
-        <Button
-          variant="secondary"
-          style={{ marginBottom: 5, marginLeft: 5 }}
-          onClick={cancel}
-        >
-          Cancel
-        </Button>
-      </Col>
-    );
+  const handleNetworkTypeChange = (e) => {
+    setFilterList((fl) => ({
+      ...fl,
+      networks: e.target.value,
+    }));
   };
 
   return (
@@ -1170,80 +1180,140 @@ const FilterPage = (props): JSX.Element => {
                         </Dropdown.Item>
                       </DropdownButton>
                       {(isOwner || !isImported) && (
-                        <div className="sharing-section">
-                          <div className="filter-page-input-label mr-2">
-                            Type:
+                        <div className="sharing-section d-flex justify-content-between">
+                          <div className="d-flex align-items-center">
+                            <div className="filter-page-input-label mr-2">
+                              Type:
+                            </div>
+                            <DropdownButton
+                              variant="outline-secondary"
+                              menuAlign="left"
+                              className={`sharing-button ${getVisibilityButtonClass()}`}
+                              title={Visibility[filterList.visibility]}
+                            >
+                              {isShareEnabled() && (
+                                <Dropdown.Item
+                                  onClick={() =>
+                                    changeVisibility(Visibility.Public)
+                                  }
+                                >
+                                  <Button
+                                    className="sharing-button-public"
+                                    variant="outline-secondary"
+                                  >
+                                    Public
+                                  </Button>
+                                </Dropdown.Item>
+                              )}
+                              {isShareEnabled() && (
+                                <Dropdown.Item
+                                  onClick={() =>
+                                    changeVisibility(Visibility.Shared)
+                                  }
+                                >
+                                  <Button
+                                    className="sharing-button-shared"
+                                    variant="outline-secondary"
+                                  >
+                                    Shared
+                                  </Button>
+                                </Dropdown.Item>
+                              )}
+                              <Dropdown.Item
+                                onClick={() =>
+                                  changeVisibility(Visibility.Private)
+                                }
+                              >
+                                <Button
+                                  className="sharing-button-private"
+                                  variant="outline-secondary"
+                                >
+                                  Private
+                                </Button>
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                onClick={() =>
+                                  changeVisibility(Visibility.Exception)
+                                }
+                              >
+                                <Button
+                                  className="sharing-button-exception"
+                                  variant="outline-secondary"
+                                >
+                                  Exception
+                                </Button>
+                              </Dropdown.Item>
+                            </DropdownButton>
+                            <OverlayTrigger
+                              placement="top"
+                              delay={{ show: 150, hide: 300 }}
+                              overlay={visibilityHelpText()}
+                            >
+                              <FontAwesomeIcon
+                                icon={faQuestionCircle as IconProp}
+                                color="#7393B3"
+                                style={{
+                                  marginRight: 4,
+                                }}
+                              />
+                            </OverlayTrigger>
+                            <FormControl
+                              style={{
+                                margin: '8px',
+                                minWidth: '150px',
+                              }}
+                            >
+                              <Select
+                                multiple
+                                displayEmpty
+                                value={filterList.networks}
+                                onChange={handleNetworkTypeChange}
+                                input={<Input />}
+                                renderValue={(selected: any) => {
+                                  if (selected.length === 0) {
+                                    return (
+                                      <em
+                                        style={{ color: 'darkgrey' }}
+                                        className="ml-2"
+                                      >
+                                        Networks
+                                      </em>
+                                    );
+                                  }
+
+                                  return (
+                                    <div className="ml-2">
+                                      {selected.join(', ')}
+                                    </div>
+                                  );
+                                }}
+                                MenuProps={MenuProps}
+                              >
+                                <MenuItem disabled value="">
+                                  <em>Networks</em>
+                                </MenuItem>
+                                {console.log(filterList.networks)}
+                                {Object.keys(NetworkType).map((name) => (
+                                  <MenuItem key={name} value={name}>
+                                    <Checkbox
+                                      checked={
+                                        filterList.networks.indexOf(
+                                          name as NetworkType
+                                        ) > -1
+                                      }
+                                    />
+                                    <ListItemText primary={name} />
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+
+                            {filterList.shareId && visibilityGenerateLink()}
                           </div>
-                          <DropdownButton
-                            variant="outline-secondary"
-                            menuAlign="left"
-                            className={`sharing-button ${getVisibilityButtonClass()}`}
-                            title={Visibility[filterList.visibility]}
-                          >
-                            {isShareEnabled() && (
-                              <Dropdown.Item
-                                onClick={() =>
-                                  changeVisibility(Visibility.Public)
-                                }
-                              >
-                                <Button
-                                  className="sharing-button-public"
-                                  variant="outline-secondary"
-                                >
-                                  Public
-                                </Button>
-                              </Dropdown.Item>
-                            )}
-                            {isShareEnabled() && (
-                              <Dropdown.Item
-                                onClick={() =>
-                                  changeVisibility(Visibility.Shared)
-                                }
-                              >
-                                <Button
-                                  className="sharing-button-shared"
-                                  variant="outline-secondary"
-                                >
-                                  Shared
-                                </Button>
-                              </Dropdown.Item>
-                            )}
-                            <Dropdown.Item
-                              onClick={() =>
-                                changeVisibility(Visibility.Private)
-                              }
-                            >
-                              <Button
-                                className="sharing-button-private"
-                                variant="outline-secondary"
-                              >
-                                Private
-                              </Button>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                              onClick={() =>
-                                changeVisibility(Visibility.Exception)
-                              }
-                            >
-                              <Button
-                                className="sharing-button-exception"
-                                variant="outline-secondary"
-                              >
-                                Exception
-                              </Button>
-                            </Dropdown.Item>
-                          </DropdownButton>
-                          {filterList.shareId && visibilityGenerateLink()}
-                          <span
-                            style={{
-                              color: 'grey',
-                              fontSize: 12,
-                              flex: 1,
-                            }}
-                          >
-                            {visibilityHelpText()}
-                          </span>
-                          {renderToggleButtonGroup()}
+
+                          <div className="d-flex align-items-center">
+                            {renderToggleButtonGroup()}
+                          </div>
                         </div>
                       )}
                     </div>

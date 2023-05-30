@@ -233,6 +233,7 @@ function App(): JSX.Element {
 
     let wallets;
     try {
+      console.log('ajung?');
       wallets = await web3.eth.requestAccounts();
     } catch (e) {
       LoggerService.error(e);

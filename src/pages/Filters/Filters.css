@@ -125,9 +125,11 @@
 }
 
 .add-cid-button,
-.bulk-actions-button,
-.sharing-button {
+.bulk-actions-button {
   margin-right: 16px;
+}
+.sharing-button {
+  margin-right: 4px;
 }
 
 .add-cid-button .dropdown-toggle,
