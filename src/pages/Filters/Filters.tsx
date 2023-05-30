@@ -357,7 +357,7 @@ function Filters(props): JSX.Element {
       filterList: FilterList
     ): Promise<void> => {
       try {
-        await ApiService.updateFilter([filterList], false);
+        await ApiService.updateFilter([filterList]);
       } catch (e: any) {
         if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
@@ -404,7 +404,7 @@ function Filters(props): JSX.Element {
         };
       });
       try {
-        await ApiService.updateFilter(fls, false);
+        await ApiService.updateFilter(fls);
       } catch (e: any) {
         if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
@@ -419,7 +419,7 @@ function Filters(props): JSX.Element {
         };
       });
       try {
-        await ApiService.updateFilter(fls, false);
+        await ApiService.updateFilter(fls);
       } catch (e: any) {
         if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
@@ -432,7 +432,7 @@ function Filters(props): JSX.Element {
         enabled: !selectedFilterList.enabled,
       };
       try {
-        await ApiService.updateFilter([fl], false);
+        await ApiService.updateFilter([fl]);
       } catch (e: any) {
         if (e && e.status === 401 && props.config) {
           toast.error(e.data.message);
@@ -884,8 +884,7 @@ function Filters(props): JSX.Element {
             ...x,
             enabled,
           })
-        ),
-        false
+        )
       );
     } catch (e: any) {
       if (e && e.status === 401 && props.config) {

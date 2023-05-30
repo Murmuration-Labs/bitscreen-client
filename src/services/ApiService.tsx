@@ -85,10 +85,7 @@ const ApiService = {
     await axios.post(`${serverUri()}/provider-filter`, providerFilter);
   },
 
-  updateFilter: async (
-    filters: FilterList[],
-    saveCids = true
-  ): Promise<FilterList[]> => {
+  updateFilter: async (filters: FilterList[]): Promise<FilterList[]> => {
     const importedFilters: FilterList[] = [];
     const regularFilters: FilterList[] = [];
 
@@ -135,10 +132,6 @@ const ApiService = {
         return response;
       })
     );
-
-    if (saveCids) {
-      await Promise.all(regularFilters.flatMap((f) => cidsRequests(f)));
-    }
 
     return responses.map(({ data }) => data);
   },
