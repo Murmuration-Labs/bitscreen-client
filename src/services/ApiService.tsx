@@ -85,55 +85,34 @@ const ApiService = {
     await axios.post(`${serverUri()}/provider-filter`, providerFilter);
   },
 
-  updateFilter: async (filters: FilterList[]): Promise<FilterList[]> => {
-    const importedFilters: FilterList[] = [];
-    const regularFilters: FilterList[] = [];
+  updateFilter: async (filters: FilterList[]) => {
+    for (let i = 0; i < filters.length; i++) {
+      const currentFilter = filters[i];
+      if (!isImported(currentFilter)) {
+        const providerFilter: ProviderFilter = {
+          notes: currentFilter.notes,
+          active: currentFilter.enabled,
+        };
+        await axios.put(
+          `${serverUri()}/provider-filter/${currentFilter.id}`,
+          providerFilter
+        );
 
-    filters.forEach((filter) => {
-      // check for both undefined and null
-      if (!isImported(filter)) {
-        regularFilters.push(filter);
+        await axios.put<FilterList>(
+          `${serverUri()}/filter/${currentFilter.id}`,
+          currentFilter
+        );
       } else {
-        importedFilters.push(filter);
+        const providerFilter: ProviderFilter = {
+          notes: currentFilter.notes,
+          active: currentFilter.enabled,
+        };
+        await axios.put(
+          `${serverUri()}/provider-filter/${currentFilter.id}`,
+          providerFilter
+        );
       }
-    });
-
-    await Promise.all(
-      importedFilters.map((filter) => {
-        const providerFilter: ProviderFilter = {
-          notes: filter.notes,
-          active: filter.enabled,
-        };
-        const response = axios.put(
-          `${serverUri()}/provider-filter/${filter.id}`,
-          providerFilter
-        );
-
-        return response;
-      })
-    );
-
-    const responses = await Promise.all(
-      regularFilters.map((filter) => {
-        const providerFilter: ProviderFilter = {
-          notes: filter.notes,
-          active: filter.enabled,
-        };
-        axios.put(
-          `${serverUri()}/provider-filter/${filter.id}`,
-          providerFilter
-        );
-
-        const response = axios.put<FilterList>(
-          `${serverUri()}/filter/${filter.id}`,
-          filter
-        );
-
-        return response;
-      })
-    );
-
-    return responses.map(({ data }) => data);
+    }
   },
 
   updateEnabledForSharedFilters: async (
