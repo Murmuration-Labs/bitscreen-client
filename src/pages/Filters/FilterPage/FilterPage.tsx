@@ -1292,7 +1292,6 @@ const FilterPage = (props): JSX.Element => {
                                 <MenuItem disabled value="">
                                   <em>Networks</em>
                                 </MenuItem>
-                                {console.log(filterList.networks)}
                                 {Object.keys(NetworkType).map((name) => (
                                   <MenuItem key={name} value={name}>
                                     <Checkbox

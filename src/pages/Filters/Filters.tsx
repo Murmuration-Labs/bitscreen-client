@@ -1208,7 +1208,7 @@ function Filters(props): JSX.Element {
             <a style={{ fontSize: 16 }} href="/settings">
               Settings
             </a>{' '}
-            and add a wallet.
+            and enable all BitScreen lists.
           </div>
         )
       ) : null}
