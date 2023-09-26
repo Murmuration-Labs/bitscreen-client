@@ -50,6 +50,7 @@ import {
   Config,
   EnabledOption,
   FilterList,
+  NetworkType,
   Order,
   Visibility,
   VisibilityString,
@@ -73,10 +74,12 @@ import { useTitle } from 'react-use';
 import { useDebounce } from 'usehooks-ts';
 import { AccountType } from 'types/interfaces';
 import { debounceTime } from '../../config';
+import { NetworkChips } from 'components/Utils/NetworkChips';
 
 interface MyFiltersTableData {
   name: string;
   scope: string;
+  networks: string;
   subs: string;
   cids: string;
   enabled: string;
@@ -86,6 +89,7 @@ interface MyFiltersTableData {
 const headCells: HeadCell<MyFiltersTableData>[] = [
   { id: 'name', label: 'Filter name', numeric: false, sortable: true },
   { id: 'scope', label: 'Scope', numeric: false },
+  { id: 'networks', label: 'Networks', numeric: false, sortable: false },
   { id: 'subs', label: '# of Subs', numeric: true, sortable: true },
   { id: 'cids', label: '# of Cids', numeric: true, sortable: true },
   {
@@ -683,6 +687,14 @@ function Filters(props): JSX.Element {
                       style={{ verticalAlign: 'middle' }}
                     >
                       <CIDFilterScope {...row} />
+                    </TableCell>
+                    <TableCell
+                      className="table-row-cell-text"
+                      style={{ verticalAlign: 'middle' }}
+                    >
+                      <div className="d-flex" style={{ gap: '8px' }}>
+                        <NetworkChips networks={row.networks} />
+                      </div>
                     </TableCell>
                     <TableCell
                       className="table-row-cell-text"
