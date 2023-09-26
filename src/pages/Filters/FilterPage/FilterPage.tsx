@@ -1183,6 +1183,58 @@ const FilterPage = (props): JSX.Element => {
                         <div className="sharing-section d-flex justify-content-between">
                           <div className="d-flex align-items-center">
                             <div className="filter-page-input-label mr-2">
+                              Networks:
+                            </div>
+                            <FormControl
+                              style={{
+                                margin: '8px',
+                                minWidth: '150px',
+                              }}
+                            >
+                              <Select
+                                multiple
+                                displayEmpty
+                                value={filterList.networks}
+                                onChange={handleNetworkTypeChange}
+                                input={<Input />}
+                                renderValue={(selected: any) => {
+                                  if (selected.length === 0) {
+                                    return (
+                                      <em
+                                        style={{ color: 'darkgrey' }}
+                                        className="ml-2"
+                                      >
+                                        Networks
+                                      </em>
+                                    );
+                                  }
+
+                                  return (
+                                    <div className="ml-2">
+                                      {selected.join(', ')}
+                                    </div>
+                                  );
+                                }}
+                                MenuProps={MenuProps}
+                              >
+                                <MenuItem disabled value="">
+                                  <em>Networks</em>
+                                </MenuItem>
+                                {Object.keys(NetworkType).map((name) => (
+                                  <MenuItem key={name} value={name}>
+                                    <Checkbox
+                                      checked={
+                                        filterList.networks.indexOf(
+                                          name as NetworkType
+                                        ) > -1
+                                      }
+                                    />
+                                    <ListItemText primary={name} />
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                            <div className="filter-page-input-label mr-2">
                               Type:
                             </div>
                             <DropdownButton
@@ -1257,55 +1309,6 @@ const FilterPage = (props): JSX.Element => {
                                 }}
                               />
                             </OverlayTrigger>
-                            <FormControl
-                              style={{
-                                margin: '8px',
-                                minWidth: '150px',
-                              }}
-                            >
-                              <Select
-                                multiple
-                                displayEmpty
-                                value={filterList.networks}
-                                onChange={handleNetworkTypeChange}
-                                input={<Input />}
-                                renderValue={(selected: any) => {
-                                  if (selected.length === 0) {
-                                    return (
-                                      <em
-                                        style={{ color: 'darkgrey' }}
-                                        className="ml-2"
-                                      >
-                                        Networks
-                                      </em>
-                                    );
-                                  }
-
-                                  return (
-                                    <div className="ml-2">
-                                      {selected.join(', ')}
-                                    </div>
-                                  );
-                                }}
-                                MenuProps={MenuProps}
-                              >
-                                <MenuItem disabled value="">
-                                  <em>Networks</em>
-                                </MenuItem>
-                                {Object.keys(NetworkType).map((name) => (
-                                  <MenuItem key={name} value={name}>
-                                    <Checkbox
-                                      checked={
-                                        filterList.networks.indexOf(
-                                          name as NetworkType
-                                        ) > -1
-                                      }
-                                    />
-                                    <ListItemText primary={name} />
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
 
                             {filterList.shareId && visibilityGenerateLink()}
                           </div>
