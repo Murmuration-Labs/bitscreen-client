@@ -61,6 +61,7 @@ import {
 import MoveCIDModal from '../MoveCIDModal/MoveCIDModal';
 import ToggleEnabledFilterModal from '../ToggleEnabledFilterModal/ToggleEnabledFilterModal';
 import { isDisabledGlobally, isOrphan, isShared } from '../utils';
+import { abbreviateNetwork } from 'library/helpers/helpers.functions';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -74,6 +75,7 @@ const MenuProps = {
 };
 
 const FilterPage = (props): JSX.Element => {
+  const [networkDropdownOpen, setNetworkDropdownOpen] = useState(false);
   const [cids, setCids] = useState<CidItem[]>([]);
   const [checkedCids, setCheckedCids] = useState<CidItem[]>([]);
   const [isBulkActionAllowed, setIsBulkActionAllowed] = useState(false);
@@ -634,6 +636,10 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
+  useEffect(() => {
+    console.log(filterList.networks);
+  }, [filterList.networks]);
+
   const toggleFilterEnabled = () => {
     saveFilter({ ...filterList, enabled: !filterList.enabled });
   };
@@ -1008,11 +1014,20 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  const handleNetworkTypeChange = (e) => {
-    setFilterList((fl) => ({
-      ...fl,
-      networks: e.target.value,
-    }));
+  const handleNetworkTypeChange = (networkType: NetworkType) => {
+    setFilterList((fl) => {
+      const currentNetworkListCopy = fl.networks.slice();
+      const networkTypeIndex = currentNetworkListCopy.findIndex(
+        (e) => e === networkType
+      );
+      if (networkTypeIndex !== -1)
+        currentNetworkListCopy.splice(networkTypeIndex, 1);
+      else currentNetworkListCopy.push(networkType);
+      return {
+        ...fl,
+        networks: currentNetworkListCopy,
+      };
+    });
   };
 
   return (
@@ -1182,58 +1197,103 @@ const FilterPage = (props): JSX.Element => {
                       {(isOwner || !isImported) && (
                         <div className="sharing-section d-flex justify-content-between">
                           <div className="d-flex align-items-center">
-                            <div className="filter-page-input-label mr-2">
-                              Networks:
-                            </div>
-                            <FormControl
+                            <div
                               style={{
-                                margin: '8px',
-                                minWidth: '150px',
+                                position: 'relative',
                               }}
                             >
-                              <Select
-                                multiple
-                                displayEmpty
-                                value={filterList.networks}
-                                onChange={handleNetworkTypeChange}
-                                input={<Input />}
-                                renderValue={(selected: any) => {
-                                  if (selected.length === 0) {
-                                    return (
-                                      <em
-                                        style={{ color: 'darkgrey' }}
-                                        className="ml-2"
-                                      >
-                                        Networks
-                                      </em>
-                                    );
-                                  }
-
-                                  return (
-                                    <div className="ml-2">
-                                      {selected.join(', ')}
-                                    </div>
-                                  );
+                              <div
+                                onClick={(e) =>
+                                  setNetworkDropdownOpen((prev) => !prev)
+                                }
+                                className="networks-button mr-2 no-text-select"
+                                style={{
+                                  cursor: 'pointer',
+                                  height: '40px',
+                                  width: '120px',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  fontSize: '14px',
+                                  padding: '0.375rem 0.75rem',
+                                  border: '1px solid #6c757da6',
+                                  borderRadius: '0.25rem',
+                                  color: filterList.networks.length
+                                    ? '#7A869A'
+                                    : '#6c757da6',
                                 }}
-                                MenuProps={MenuProps}
                               >
-                                <MenuItem disabled value="">
-                                  <em>Networks</em>
-                                </MenuItem>
-                                {Object.keys(NetworkType).map((name) => (
-                                  <MenuItem key={name} value={name}>
+                                {filterList.networks.length
+                                  ? `${filterList.networks
+                                      .sort()
+                                      .map((e, index) => {
+                                        return index === 0
+                                          ? abbreviateNetwork(e)
+                                          : ' ' + abbreviateNetwork(e);
+                                      })}`
+                                  : 'Networks'}
+                              </div>
+                              <div
+                                className="no-text-select"
+                                style={{
+                                  position: 'absolute',
+                                  bottom: `-${
+                                    Object.keys(NetworkType).length * 20 +
+                                    (Object.keys(NetworkType).length - 1) * 12 +
+                                    24
+                                  }px`,
+                                  left: '-2px',
+                                  padding: '10px 0',
+                                  display: networkDropdownOpen
+                                    ? 'flex'
+                                    : 'none',
+                                  flexDirection: 'column',
+                                  gap: '12px',
+                                  minWidth: '160px',
+                                  border: '1px solid rgba(0,0,0,.15)',
+                                  zIndex: 99,
+                                  borderRadius: '0.25rem',
+                                  backgroundColor: 'white',
+                                }}
+                              >
+                                {Object.keys(NetworkType).map((networkType) => (
+                                  <div
+                                    onClick={() =>
+                                      handleNetworkTypeChange(
+                                        NetworkType[networkType]
+                                      )
+                                    }
+                                    style={{
+                                      height: '20px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      cursor: 'pointer',
+                                    }}
+                                  >
                                     <Checkbox
+                                      color="primary"
                                       checked={
-                                        filterList.networks.indexOf(
-                                          name as NetworkType
-                                        ) > -1
+                                        filterList.networks.findIndex(
+                                          (filterListNetworkType) =>
+                                            filterListNetworkType ===
+                                            networkType
+                                        ) !== -1
                                       }
+                                      // checked={network}
                                     />
-                                    <ListItemText primary={name} />
-                                  </MenuItem>
+                                    <span
+                                      style={{
+                                        fontWeight: 400,
+                                        fontSize: '14px',
+                                        lineHeight: '20px',
+                                      }}
+                                    >
+                                      {networkType}
+                                    </span>
+                                  </div>
                                 ))}
-                              </Select>
-                            </FormControl>
+                              </div>
+                            </div>
                             <div className="filter-page-input-label mr-2">
                               Type:
                             </div>
