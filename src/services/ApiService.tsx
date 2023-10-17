@@ -348,7 +348,6 @@ const ApiService = {
     );
 
     const data: Array<DealFromApi> = response.data;
-    console.log(data);
     const parsedData: ChartDataEntry[] = Object.values(data).map((e) => ({
       unique_count: e.unique_blocked ? parseInt(e.unique_blocked) : 0,
       total_count: e.total_blocked ? parseInt(e.total_blocked) : 0,

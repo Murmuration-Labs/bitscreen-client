@@ -636,10 +636,6 @@ const FilterPage = (props): JSX.Element => {
     );
   };
 
-  useEffect(() => {
-    console.log(filterList.networks);
-  }, [filterList.networks]);
-
   const toggleFilterEnabled = () => {
     saveFilter({ ...filterList, enabled: !filterList.enabled });
   };
