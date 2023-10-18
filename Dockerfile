@@ -18,7 +18,7 @@ COPY . /bitscreen-build
 RUN yarn build
 
 
-FROM node:16-alpine AS deploy
+FROM node:18-alpine AS deploy
 
 # Expose listen port
 EXPOSE 3000
