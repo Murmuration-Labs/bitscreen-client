@@ -53,6 +53,7 @@ const ApiService = {
   getFilters: async (
     page: number,
     perPage: number,
+    network: string,
     mySortBy?: string,
     mySort?: string,
     q?: string
@@ -62,6 +63,7 @@ const ApiService = {
         page,
         perPage,
         q,
+        network,
         sort: mySortBy
           ? {
               [mySortBy]: mySort,

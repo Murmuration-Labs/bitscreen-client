@@ -153,6 +153,7 @@ function Filters(props): JSX.Element {
     setMySortBy(property);
     setOrderBy(property);
   };
+  const [network, setNetwork] = useState<NetworkType | 'All'>('All');
 
   const [enabledFilters, setEnabledFilters] = useState<FilterList[]>([]);
   const [disabledFilters, setDisabledFilters] = useState<FilterList[]>([]);
@@ -206,7 +207,7 @@ function Filters(props): JSX.Element {
 
   useEffect(() => {
     setNeedsRefresh(true);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, network]);
 
   useEffect(() => {
     setConfiguration({ ...props.config });
@@ -309,7 +310,14 @@ function Filters(props): JSX.Element {
   useEffect(() => {
     if (!needsRefresh) return;
 
-    ApiService.getFilters(page, rowsPerPage, mySortBy, mySort, searchTerm)
+    ApiService.getFilters(
+      page,
+      rowsPerPage,
+      network === 'All' ? '' : network,
+      mySortBy,
+      mySort,
+      searchTerm
+    )
       .then(
         (data) => {
           const filterLists: FilterList[] = data.filters;
@@ -330,7 +338,15 @@ function Filters(props): JSX.Element {
       .finally(() => {
         setNeedsRefresh(false);
       });
-  }, [rowsPerPage, page, mySortBy, mySort, debouncedSearchTerm, needsRefresh]);
+  }, [
+    rowsPerPage,
+    page,
+    mySortBy,
+    mySort,
+    debouncedSearchTerm,
+    network,
+    needsRefresh,
+  ]);
 
   const deleteFilter = async (filter: FilterList) => {
     try {
@@ -1057,6 +1073,28 @@ function Filters(props): JSX.Element {
                 ) : (
                   <></>
                 )}
+              </div>
+              <div style={{ marginRight: 12 }}>
+                <span className="mr-2">Network</span>
+                <Select
+                  style={{ minWidth: 110 }}
+                  variant="outlined"
+                  onChange={(e) => {
+                    setNetwork(e.target.value as NetworkType | 'All');
+                  }}
+                  value={network}
+                >
+                  <MenuItem key={'all-network-types'} value={'All'}>
+                    All
+                  </MenuItem>
+                  {Object.keys(NetworkType)
+                    .filter((key) => isNaN(parseInt(key)))
+                    .map((key, idx) => (
+                      <MenuItem key={idx} value={key}>
+                        {key}
+                      </MenuItem>
+                    ))}
+                </Select>
               </div>
               <div style={{ marginRight: 12 }}>
                 <span className="mr-2">Select</span>
